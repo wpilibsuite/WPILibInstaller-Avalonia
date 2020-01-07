@@ -4,6 +4,8 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <AssemblyName>WPILibInstaller_Avalonia</AssemblyName>
     <RootNamespace>WPILibInstaller_Avalonia</RootNamespace>
+    <ApplicationIcon>wpilib-256.ico</ApplicationIcon>
+    <Win32Resource />
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="Models\" />
@@ -16,10 +18,15 @@
     <AvaloniaResource Include="Assets\**" />
   </ItemGroup>
   <ItemGroup>
+    <AvaloniaResource Remove="Views\ConfigurationPage.xaml" />
     <AvaloniaResource Remove="Views\StartPage.xaml" />
+    <AvaloniaResource Remove="Views\VSCodePage.xaml" />
   </ItemGroup>
   <ItemGroup>
+    <None Remove="Assets\wpilib-128.png" />
+    <None Remove="Views\ConfigurationPage.xaml" />
     <None Remove="Views\StartPage.xaml" />
+    <None Remove="Views\VSCodePage.xaml" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="0.9.0" />
@@ -27,7 +34,18 @@
     <PackageReference Include="Avalonia.ReactiveUI" Version="0.9.0" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Assets\wpilib-128.png" />
     <EmbeddedResource Include="Views\StartPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Views\VSCodePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Views\ConfigurationPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </EmbeddedResource>
   </ItemGroup>

@@ -9,7 +9,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
     {
         public IScreen HostScreen { get; }
 
-        public string UrlPathSegment { get; } = Guid.NewGuid().ToString().Substring(0, 5);
+        public string UrlPathSegment { get; } = "Start";
 
         public StartPageViewModel(IScreen screen) => HostScreen = screen;
     }

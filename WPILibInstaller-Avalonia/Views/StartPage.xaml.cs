@@ -11,7 +11,11 @@ namespace WPILibInstaller_Avalonia.Views
     {
         public StartPage()
         {
-            this.WhenActivated(disposables => { });
+            this.InitializeComponent();
+        }
+
+        private void InitializeComponent()
+        {
             AvaloniaXamlLoader.Load(this);
         }
     }

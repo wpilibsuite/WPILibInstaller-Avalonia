@@ -6,7 +6,9 @@
              x:Class="WPILibInstaller_Avalonia.Views.StartPage">
   <StackPanel HorizontalAlignment="Center"
               VerticalAlignment="Center">
-    <TextBlock Text="Welcome to the WPILib Installer!" />
-    <TextBlock Text="{Binding UrlPathSegment}" />
+    <Image Source="resm:WPILibInstaller_Avalonia.Assets.wpilib-128.png?assembly=WPILibInstaller_Avalonia"/>
+    <TextBlock Text="Welcome to the WPILib Installer!"
+               HorizontalAlignment="Center"
+               VerticalAlignment="Center" />
   </StackPanel>
 </UserControl>

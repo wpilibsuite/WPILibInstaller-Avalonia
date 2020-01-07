@@ -6,12 +6,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="400"
         x:Class="WPILibInstaller_Avalonia.Views.MainWindow"
-        Icon="/Assets/avalonia-logo.ico"
-        Title="WPILibInstaller_Avalonia" Width="600" Height="400">
-
-    <Design.DataContext>
-        <vm:MainWindowViewModel/>
-    </Design.DataContext>
+        Icon="/Assets/wpilib-256.ico"
+        Title="WPILib Installer" Width="600" Height="400">
 
   <Grid>
     <Grid.RowDefinitions>
@@ -19,13 +15,16 @@
       <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
     <rxui:RoutedViewHost Grid.Row="0" Router="{Binding Router}">
-      <rxui:RoutedViewHost.DefaultContent>
-        <TextBlock Text="Default content"
+      <!--<rxui:RoutedViewHost.DefaultContent>
+        <StackPanel>
+        <Image Source="/Assets/wpilib-128.png"/>
+        <TextBlock Text="Welcome to the WPILib Installer!"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center" />
-      </rxui:RoutedViewHost.DefaultContent>
+        </StackPanel>
+      </rxui:RoutedViewHost.DefaultContent>-->
     </rxui:RoutedViewHost>
-    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="15">
+    <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="15">
       <StackPanel.Styles>
         <Style Selector="StackPanel > :is(Control)">
           <Setter Property="Margin" Value="2"/>
@@ -34,9 +33,8 @@
           <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
       </StackPanel.Styles>
-      <Button Content="Go next" Command="{Binding GoNext}" />
-      <Button Content="Go back" Command="{Binding GoBack}" />
-      <TextBlock Text="{Binding Router.NavigationStack.Count}" />
+      <Button Content="Continue" Command="{Binding GoNext}" />
+      <Button Content="Back" Command="{Binding GoBack}" />
     </StackPanel>
   </Grid>
 
