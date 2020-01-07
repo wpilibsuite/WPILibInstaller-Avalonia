@@ -10,5 +10,11 @@
     <TextBlock Text="Welcome to the WPILib Installer!"
                HorizontalAlignment="Center"
                VerticalAlignment="Center" />
+    <TextBlock Text="The Installer Support Files were not found. Please click the button to select them."
+               IsVisible="{Binding HasSupportFiles}"/>
+    <Button Content="Select Support Files" 
+            Command="{Binding SelectSupportFiles}"
+            IsVisible="{Binding HasSupportFiles}"/>
+    
   </StackPanel>
 </UserControl>

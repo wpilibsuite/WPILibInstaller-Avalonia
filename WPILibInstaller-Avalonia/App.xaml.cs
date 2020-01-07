@@ -22,7 +22,7 @@ namespace WPILibInstaller_Avalonia
                 {
                     DataContext = new MainWindowViewModel(),
                 };
-                (desktop.MainWindow.DataContext as MainWindowViewModel).MainWindow = (desktop.MainWindow as MainWindow);
+                (desktop.MainWindow.DataContext as MainWindowViewModel)!.MainWindow = (desktop.MainWindow as MainWindow)!;
             }
 
             base.OnFrameworkInitializationCompleted();
