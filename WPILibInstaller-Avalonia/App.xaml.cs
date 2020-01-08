@@ -17,12 +17,10 @@ namespace WPILibInstaller_Avalonia
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                
-                desktop.MainWindow = new MainWindow
-                {
-                    DataContext = new MainWindowViewModel(),
-                };
-                (desktop.MainWindow.DataContext as MainWindowViewModel)!.MainWindow = (desktop.MainWindow as MainWindow)!;
+
+                var mainWindow = new MainWindow();
+                mainWindow.DataContext = new MainWindowViewModel(mainWindow);
+                desktop.MainWindow = mainWindow;
             }
 
             base.OnFrameworkInitializationCompleted();

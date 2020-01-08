@@ -1,13 +1,18 @@
-﻿using ReactiveUI;
+﻿using Avalonia.Controls;
+using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using WPILibInstaller_Avalonia.Models;
 using WPILibInstaller_Avalonia.Utils;
+using WPILibInstaller_Avalonia.Views;
+using static WPILibInstaller_Avalonia.Models.VsCodeModel;
 
 namespace WPILibInstaller_Avalonia.ViewModels
 {
@@ -15,7 +20,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
     {
         public IScreen HostScreen => mainPage;
 
-        private MainWindowViewModel mainPage;
+        private readonly MainWindowViewModel mainPage;
 
         public string UrlPathSegment { get; } = "vscode";
 
@@ -103,23 +108,90 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         private double progressBar4 = 0;
 
-        public VSCodeModel Model { get; }
+        public VsCodeModel Model { get; }
 
-        public VSCodePageViewModel(MainWindowViewModel screen, VSCodeModel model)
+        private readonly MainWindow mainWindow;
+
+        public VSCodePageViewModel(MainWindowViewModel screen, MainWindow mainWindow, VsCodeModel model)
             : base("Next", "Back")
         {
             mainPage = screen;
+            this.mainWindow = mainWindow;
             Model = model;
         }
 
         public async Task SelectVsCode()
         {
-            
+            OpenFileDialog openDialog = new OpenFileDialog();
+            var files = await openDialog.ShowAsync(mainWindow);
+            if (files.Length != 1) return;
+            FileStream fs = new FileStream(files[0], FileMode.Open);
+            using ZipArchive archive = new ZipArchive(fs);
+            var currentPlatform = PlatformUtils.CurrentPlatform;
+            var entry = archive.GetEntry(Model.Platforms[currentPlatform].NameInZip);
+            MemoryStream ms = new MemoryStream(100000000);
+            await entry.Open().CopyToAsync(ms);
+            Model.ToExtractZipStream = ms;
+            forwardVisible = true;
+            DownloadSingleEnabled = false;
+            DownloadAllEnabled = false;
+            SelectExistingEnabled = false;
+            DoneVisible = true;
+            mainPage.RefreshForwardBackProperties();
         }
 
-        public async Task DownloadVsCode()
+        public async void DownloadVsCode()
         {
+            var currentPlatform = PlatformUtils.CurrentPlatform;
 
+            DownloadSingleEnabled = false;
+            DownloadAllEnabled = false;
+            SelectExistingEnabled = false;
+
+
+            var win32 = DownloadToMemoryStream(Platform.Win32, Model.Platforms[Platform.Win32].DownloadUrl, CancellationToken.None, (d) => ProgressBar1 = d);
+            var win64 = DownloadToMemoryStream(Platform.Win64, Model.Platforms[Platform.Win64].DownloadUrl, CancellationToken.None, (d) => ProgressBar2 = d);
+            var linux64 = DownloadToMemoryStream(Platform.Linux64, Model.Platforms[Platform.Linux64].DownloadUrl, CancellationToken.None, (d) => ProgressBar3 = d);
+            var mac64 = DownloadToMemoryStream(Platform.Mac64, Model.Platforms[Platform.Mac64].DownloadUrl, CancellationToken.None, (d) => ProgressBar4 = d);
+
+            var results = await Task.WhenAll(win32, win64, linux64, mac64);
+
+            try
+            {
+                File.Delete("InstallerFiles.zip");
+            }
+            catch
+            {
+
+            }
+
+            using var archive = ZipFile.Open("InstallerFiles.zip", ZipArchiveMode.Create);
+
+            MemoryStream? ms = null;
+
+            foreach (var (stream, platform) in results)
+            {
+                using var toWriteStream = archive.CreateEntry(Model.Platforms[platform].NameInZip).Open();
+                await stream.CopyToAsync(toWriteStream);
+                if (platform == currentPlatform)
+                {
+                    ms = stream;
+                }
+            }
+
+            if (ms != null)
+            {
+                Model.ToExtractZipStream = ms;
+                forwardVisible = true;
+                DownloadSingleEnabled = false;
+                DownloadAllEnabled = false;
+                SelectExistingEnabled = false;
+                DoneVisible = true;
+                mainPage.RefreshForwardBackProperties();
+            }
+
+            
+            
         }
 
         public async Task DownloadSingleVSCode()
@@ -129,14 +201,10 @@ namespace WPILibInstaller_Avalonia.ViewModels
             DownloadSingleEnabled = false;
             DownloadAllEnabled = false;
             SelectExistingEnabled = false;
-            MemoryStream ms = new MemoryStream(100000000);
-            var successful = await DownloadForPlatform(url, ms, CancellationToken.None, (d) => 
+            var memStream = await DownloadToMemoryStream(currentPlatform, url, CancellationToken.None, (d) => ProgressBar1 = d);
+            if (memStream.stream != null)
             {
-                ProgressBar1 = d;
-            });
-            if (successful)
-            {
-                Model.ToExtractZipStream = ms;
+                Model.ToExtractZipStream = memStream.stream;
                 forwardVisible = true;
                 DownloadSingleEnabled = false;
                 DownloadAllEnabled = false;
@@ -151,6 +219,14 @@ namespace WPILibInstaller_Avalonia.ViewModels
                 SelectExistingEnabled = true;
                 ; // TODO Fail
             }
+        }
+
+        private async Task<(MemoryStream? stream, Platform platform)> DownloadToMemoryStream(Platform platform, string downloadUrl, CancellationToken token, Action<double> progressChanged)
+        {
+            MemoryStream ms = new MemoryStream(100000000);
+            var successful = await DownloadForPlatform(downloadUrl, ms, token, progressChanged);
+            if (successful) return (ms, platform);
+            return (null, platform);
         }
 
         private async Task<bool> DownloadForPlatform(string downloadUrl, Stream outputStream, CancellationToken token, Action<double> progressChanged)

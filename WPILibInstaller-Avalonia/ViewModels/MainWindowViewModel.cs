@@ -38,7 +38,8 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         public ReactiveCommand<Unit, Unit> GoBack => Router.NavigateBack;
 
-        public MainWindow? MainWindow { get; set; }
+        private readonly MainWindow mainWindow;
+        private readonly StartPageViewModel startPageViewModel;
 
         public void RefreshForwardBackProperties()
         {
@@ -48,8 +49,9 @@ namespace WPILibInstaller_Avalonia.ViewModels
             this.RaisePropertyChanged(nameof(BackVisible));
         }
 
-        public MainWindowViewModel()
+        public MainWindowViewModel(MainWindow mainWindow)
         {
+            this.mainWindow = mainWindow;
             GoNext = ReactiveCommand.CreateFromObservable(HandleStateChange);
 
             Router.NavigationChanged.Subscribe((o) =>
@@ -57,55 +59,15 @@ namespace WPILibInstaller_Avalonia.ViewModels
                 RefreshForwardBackProperties();
             });
 
-            var startvm = new StartPageViewModel(this);
-            viewModelStore.Add(typeof(StartPageViewModel), startvm);
+            startPageViewModel = new StartPageViewModel(this, mainWindow);
+            viewModelStore.Add(typeof(StartPageViewModel), startPageViewModel);
 
-            Router.NavigateAndReset.Execute(startvm);
+            Router.NavigateAndReset.Execute(startPageViewModel);
         }
 
         private readonly Dictionary<Type, IRoutableViewModel> viewModelStore = new Dictionary<Type, IRoutableViewModel>();
 
-        public VSCodeModel GetVSCodeModel()
-        {
-            VSCodeModel model = new VSCodeModel("1.41.1");
-            model.Platforms.Add(Utils.Platform.Win64, new VSCodeModel.PlatformData("https://vscode-update.azurewebsites.net/1.41.1/win32-x64-archive/stable", ""));
-            return model;
-        }
-
-        private ZipArchive filesArchive;
-        private VsCodeConfig vscodeConfig;
-        private UpgradeConfig upgradeConfig;
-        private ToolConfig toolConfig;
-        private JdkConfig jdkConfig;
-        private FullConfig fullConfig;
-
-        public async Task SelectSupportFiles()
-        {
-            OpenFileDialog openFileDialog = new OpenFileDialog
-            {
-                AllowMultiple = false,
-            };
-
-            var selectedFiles = await openFileDialog.ShowAsync(MainWindow!);
-            if (selectedFiles.Length != 1) return;
-            var file = selectedFiles[0];
-
-            var stream = new FileStream(file, FileMode.Open);
-            filesArchive = new ZipArchive(stream, ZipArchiveMode.Read);
-
-            var vscodeEntry = filesArchive.GetEntry("installUtils/vscodeConfig.json");
-
-            using (StreamReader reader = new StreamReader(vscodeEntry.Open()))
-            {
-                var vsConfigStr = await reader.ReadToEndAsync();
-                vscodeConfig = JsonConvert.DeserializeObject<VsCodeConfig>(vsConfigStr, new JsonSerializerSettings
-                {
-                    MissingMemberHandling = MissingMemberHandling.Error
-                });
-            }
-
-        }
-
+       
         private IObservable<IRoutableViewModel> HandleStateChange()
         {
             IRoutableViewModel? vm;
@@ -114,7 +76,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
                 case StartPageViewModel sp:
                     if (!viewModelStore.TryGetValue(typeof(VSCodePageViewModel), out vm))
                     {
-                        vm = new VSCodePageViewModel(this, GetVSCodeModel());
+                        vm = new VSCodePageViewModel(this, mainWindow, startPageViewModel.GetVsCodeModel());
                         viewModelStore.Add(typeof(VSCodePageViewModel), vm);
                     }
                     return Router.Navigate.Execute(vm);
@@ -140,7 +102,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
                     }
                     return Router.NavigateAndReset.Execute(vm);
                 case FinalPageViewModel fp:
-                    MainWindow!.Close();
+                    mainWindow.Close();
                     return Router.CurrentViewModel;
                 default:
                     throw new InvalidOperationException("Weird Page?");

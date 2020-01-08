@@ -7,7 +7,7 @@ using WPILibInstaller_Avalonia.Utils;
 
 namespace WPILibInstaller_Avalonia.Models
 {
-    public class VSCodeModel : IDisposable
+    public class VsCodeModel : IDisposable
     {
         public class PlatformData
         {
@@ -26,7 +26,7 @@ namespace WPILibInstaller_Avalonia.Models
 
         public Stream? ToExtractZipStream { get; set; }
 
-        public VSCodeModel(string vscodeVersion)
+        public VsCodeModel(string vscodeVersion)
         {
             VSCodeVersion = vscodeVersion;
         }

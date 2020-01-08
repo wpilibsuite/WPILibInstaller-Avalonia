@@ -11,11 +11,11 @@ namespace WPILibInstaller_Avalonia.ViewModels
         public IScreen HostScreen => mainPage;
 
         private readonly MainWindowViewModel mainPage;
+        private string text = "Starting";
+        private int progress = 0;
 
-        public int Progress { get; set; } = 0;
-
-        public string Text { get; set; } = "Starting";
-
+        public int Progress { get => progress; set => this.RaiseAndSetIfChanged(ref progress, value); }
+        public string Text { get => text; set => this.RaiseAndSetIfChanged(ref text, value); }
         public string UrlPathSegment { get; } = "Install";
 
         public InstallPageViewModel(MainWindowViewModel screen)
