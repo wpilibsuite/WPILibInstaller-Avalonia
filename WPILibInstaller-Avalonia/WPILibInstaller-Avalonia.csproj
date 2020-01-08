@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
+    
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <AssemblyName>WPILibInstaller_Avalonia</AssemblyName>
     <RootNamespace>WPILibInstaller_Avalonia</RootNamespace>
@@ -8,6 +9,10 @@
     <Win32Resource />
     <Nullable>enable</Nullable>
   </PropertyGroup>
+  <ItemGroup>
+    <TrimmerRootAssembly Include="System.Threading.Tasks" />
+    <TrimmerRootAssembly Include="System.IO.Compression.ZipFile" />
+  </ItemGroup>
   <ItemGroup>
     <Compile Update="**\*.xaml.cs">
       <DependentUpon>%(Filename)</DependentUpon>
