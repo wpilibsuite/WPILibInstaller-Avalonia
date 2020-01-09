@@ -4,5 +4,14 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="WPILibInstaller_Avalonia.Views.ConfigurationPage">
-    Welcome to Config Page!
+  <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+    <TextBlock Margin="0,0,0,25">Select the items you would like to install.</TextBlock>
+    <CheckBox IsEnabled="{Binding CanInstallVsCode, Mode=OneWay}" IsChecked="{Binding InstallVsCode}">Visual Studio Code</CheckBox>
+    <CheckBox IsChecked="{Binding Model.InstallCpp}">C++ Compiler</CheckBox>
+    <CheckBox IsChecked="{Binding Model.InstallGradle}">Gradle</CheckBox>
+    <CheckBox IsChecked="{Binding Model.InstallJDK}">Java JDK/JRE</CheckBox>
+    <CheckBox IsChecked="{Binding Model.InstallTools}">Tools and Utilities</CheckBox>
+    <CheckBox IsChecked="{Binding Model.InstallWPILibDeps}">WPILib Dependencies</CheckBox>
+    <CheckBox IsEnabled="{Binding CanInstallExtensions, Mode=OneWay}" IsChecked="{Binding InstallVsCodeExtensions}">Visual Studio Code Extensions</CheckBox>
+  </StackPanel>
 </UserControl>

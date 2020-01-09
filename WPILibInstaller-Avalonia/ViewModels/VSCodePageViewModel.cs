@@ -1,4 +1,5 @@
 ﻿using Avalonia.Controls;
+using MessageBox.Avalonia;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
@@ -17,7 +18,7 @@ using static WPILibInstaller_Avalonia.Models.VsCodeModel;
 
 namespace WPILibInstaller_Avalonia.ViewModels
 {
-    public class VSCodePageViewModel : PageViewModelBase
+    public class VSCodePageViewModel : PageViewModelBase, IVsCodeInstallLocationProvider
     {
 
         public override bool ForwardVisible => forwardVisible;
@@ -104,31 +105,68 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         private double progressBar4 = 0;
 
+        public string DoneText
+        {
+            get => doneText;
+            set => this.RaiseAndSetIfChanged(ref doneText, value);
+        }
+
+        private string doneText = "Done! Click Next To Continue";
+
         public VsCodeModel Model { get; }
+
+        public bool AlreadyInstalled { get; }
 
         private readonly IProgramWindow programWindow;
         private readonly IMainWindowViewModelRefresher refresher;
         private readonly IDependencyInjection di;
 
-        public VSCodePageViewModel(IScreen screen, IMainWindowViewModelRefresher mainRefresher, IProgramWindow programWindow, IVsCodeModelProvider modelProvider, IDependencyInjection di)
+        public VSCodePageViewModel(IScreen screen, IMainWindowViewModelRefresher mainRefresher, IProgramWindow programWindow, IConfigurationProvider modelProvider, IDependencyInjection di)
             : base("Next", "Back", "vscode", screen)
         {
             this.refresher = mainRefresher;
             this.programWindow = programWindow;
             Model = modelProvider.GetVsCodeModel();
             this.di = di;
+
+            // Check to see if VS Code is already installed
+            var rootPath = modelProvider.GetInstallDirectory();
+            var vscodePath = Path.Join(rootPath, "vscode");
+            if (Directory.Exists(vscodePath))
+            {
+                DoneText = "VS Code Already Installed. You can either download to reinstall, or click Next to skip";
+                DoneVisible = true;
+                forwardVisible = true;
+                refresher.RefreshForwardBackProperties();
+                AlreadyInstalled = true;
+            }
         }
 
         public async Task SelectVsCode()
         {
             var file = await programWindow.ShowFilePicker("Select VS Code");
-            FileStream fs = new FileStream(file, FileMode.Open);
-            using ZipArchive archive = new ZipArchive(fs);
-            var currentPlatform = PlatformUtils.CurrentPlatform;
-            var entry = archive.GetEntry(Model.Platforms[currentPlatform].NameInZip);
-            MemoryStream ms = new MemoryStream(100000000);
-            await entry.Open().CopyToAsync(ms);
-            Model.ToExtractZipStream = ms;
+            if (file == null)
+            {
+                // No need to error, user explicitly canceled.
+                return;
+            }
+            try 
+            {
+                FileStream fs = new FileStream(file, FileMode.Open);
+                using ZipArchive archive = new ZipArchive(fs);
+                var currentPlatform = PlatformUtils.CurrentPlatform;
+                var entry = archive.GetEntry(Model.Platforms[currentPlatform].NameInZip);
+                MemoryStream ms = new MemoryStream(100000000);
+                await entry.Open().CopyToAsync(ms);
+                Model.ToExtractZipStream = ms;
+            }
+            catch
+            {
+                await MessageBoxManager.GetMessageBoxStandardWindow("Error", 
+                    "Correct VS Code not found in archive", icon: MessageBox.Avalonia.Enums.Icon.None).ShowDialog(programWindow.Window);
+                return;
+            }
+            
             forwardVisible = true;
             DownloadSingleEnabled = false;
             DownloadAllEnabled = false;
@@ -144,7 +182,8 @@ namespace WPILibInstaller_Avalonia.ViewModels
             DownloadSingleEnabled = false;
             DownloadAllEnabled = false;
             SelectExistingEnabled = false;
-
+            forwardVisible = false;
+            refresher.RefreshForwardBackProperties();
 
             var win32 = DownloadToMemoryStream(Platform.Win32, Model.Platforms[Platform.Win32].DownloadUrl, CancellationToken.None, (d) => ProgressBar1 = d);
             var win64 = DownloadToMemoryStream(Platform.Win64, Model.Platforms[Platform.Win64].DownloadUrl, CancellationToken.None, (d) => ProgressBar2 = d);
@@ -198,6 +237,8 @@ namespace WPILibInstaller_Avalonia.ViewModels
             DownloadSingleEnabled = false;
             DownloadAllEnabled = false;
             SelectExistingEnabled = false;
+            forwardVisible = false;
+            refresher.RefreshForwardBackProperties();
             var (stream, platform) = await DownloadToMemoryStream(currentPlatform, url, CancellationToken.None, (d) => ProgressBar1 = d);
             if (stream != null)
             {
@@ -242,7 +283,9 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         public override IObservable<IRoutableViewModel> MoveNext()
         {
-            return MoveNext(di.Resolve<ConfigurationPageViewModel>());
+            var configPage = di.Resolve<ConfigurationPageViewModel>();
+            configPage.UpdateVsSettings();
+            return MoveNext(configPage);
         }
     }
 }

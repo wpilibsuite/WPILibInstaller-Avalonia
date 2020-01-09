@@ -5,8 +5,10 @@ using WPILibInstaller_Avalonia.Models;
 
 namespace WPILibInstaller_Avalonia.Interfaces
 {
-    public interface IVsCodeModelProvider
+    public interface IConfigurationProvider
     {
         VsCodeModel GetVsCodeModel();
+
+        string GetInstallDirectory();
     }
 }

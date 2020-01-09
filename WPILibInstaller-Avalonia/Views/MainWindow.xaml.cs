@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
+using MessageBox.Avalonia;
 using ReactiveUI;
 using System.Threading.Tasks;
 using WPILibInstaller_Avalonia.Interfaces;
@@ -13,6 +14,8 @@ namespace WPILibInstaller_Avalonia.Views
     public class MainWindow : ReactiveWindow<MainWindowViewModel>, IProgramWindow, IDependencyInjection
     {
         public IContainer Container { get; }
+
+        public Window Window => this;
 
         public MainWindow()
         {

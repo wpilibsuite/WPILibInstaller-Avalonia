@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Avalonia.Controls;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,5 +10,7 @@ namespace WPILibInstaller_Avalonia.Interfaces
     {
         Task<string?> ShowFilePicker(string title, string? defaultPath = null);
         void CloseProgram();
+
+        Window Window { get; }
     }
 }

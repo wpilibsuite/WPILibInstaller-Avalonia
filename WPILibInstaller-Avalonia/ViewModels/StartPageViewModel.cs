@@ -13,7 +13,7 @@ using WPILibInstaller_Avalonia.Views;
 
 namespace WPILibInstaller_Avalonia.ViewModels
 {
-    public class StartPageViewModel : PageViewModelBase, IVsCodeModelProvider
+    public class StartPageViewModel : PageViewModelBase, IConfigurationProvider
     {
 
         private readonly IProgramWindow programWindow;
@@ -125,6 +125,16 @@ namespace WPILibInstaller_Avalonia.ViewModels
             model.Platforms.Add(Utils.Platform.Linux64, new VsCodeModel.PlatformData(vscodeConfig.VsCodeLinuxUrl, vscodeConfig.VsCodeLinuxName));
             model.Platforms.Add(Utils.Platform.Mac64, new VsCodeModel.PlatformData(vscodeConfig.VsCodeMacUrl, vscodeConfig.VsCodeMacName));
             return model;
+        }
+
+        public string GetInstallDirectory()
+        {
+            var publicFolder = Environment.GetEnvironmentVariable("PUBLIC");
+            if (publicFolder == null)
+            {
+                publicFolder = "C:\\Users\\Public";
+            }
+            return Path.Combine(publicFolder, "wpilib", upgradeConfig.FrcYear);
         }
 
         public override IObservable<IRoutableViewModel> MoveNext()
