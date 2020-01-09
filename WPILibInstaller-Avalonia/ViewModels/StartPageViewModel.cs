@@ -7,24 +7,28 @@ using System.IO;
 using System.IO.Compression;
 using System.Text;
 using System.Threading.Tasks;
+using WPILibInstaller_Avalonia.Interfaces;
 using WPILibInstaller_Avalonia.Models;
 using WPILibInstaller_Avalonia.Views;
 
 namespace WPILibInstaller_Avalonia.ViewModels
 {
-    public class StartPageViewModel : PageViewModelBase, IRoutableViewModel
+    public class StartPageViewModel : PageViewModelBase, IVsCodeModelProvider
     {
-        public IScreen HostScreen { get; }
 
-        public string UrlPathSegment { get; } = "Start";
+        private readonly IProgramWindow programWindow;
+        private readonly IDependencyInjection di;
+        private readonly IMainWindowViewModelRefresher refresher;
 
-        private readonly MainWindow mainWindow;
+        public override bool ForwardVisible => forwardVisible;
+        private bool forwardVisible = false;
 
-        public StartPageViewModel(IScreen screen, MainWindow mainWindow)
-            : base("Start", "Back")
+        public StartPageViewModel(IScreen screen, IMainWindowViewModelRefresher mainRefresher, IProgramWindow mainWindow, IDependencyInjection di)
+            : base("Start", "Back", "Start", screen)
         {
-            this.mainWindow = mainWindow;
-            HostScreen = screen;
+            this.programWindow = mainWindow;
+            this.di = di;
+            refresher = mainRefresher;
         }
 
 
@@ -36,14 +40,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         public async Task SelectSupportFiles()
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog
-            {
-                AllowMultiple = false,
-            };
-
-            var selectedFiles = await openFileDialog.ShowAsync(mainWindow);
-            if (selectedFiles.Length != 1) return;
-            var file = selectedFiles[0];
+            var file = await programWindow.ShowFilePicker("Select Support File", Environment.GetFolderPath(Environment.SpecialFolder.Personal));
 
             filesArchive = ZipFile.OpenRead(file);
 
@@ -115,6 +112,9 @@ namespace WPILibInstaller_Avalonia.ViewModels
                     MissingMemberHandling = MissingMemberHandling.Error
                 }) ?? throw new InvalidOperationException("Not Valid");
             }
+
+            forwardVisible = true;
+            refresher.RefreshForwardBackProperties();
         }
 
         public VsCodeModel GetVsCodeModel()
@@ -125,6 +125,11 @@ namespace WPILibInstaller_Avalonia.ViewModels
             model.Platforms.Add(Utils.Platform.Linux64, new VsCodeModel.PlatformData(vscodeConfig.VsCodeLinuxUrl, vscodeConfig.VsCodeLinuxName));
             model.Platforms.Add(Utils.Platform.Mac64, new VsCodeModel.PlatformData(vscodeConfig.VsCodeMacUrl, vscodeConfig.VsCodeMacName));
             return model;
+        }
+
+        public override IObservable<IRoutableViewModel> MoveNext()
+        {
+            return MoveNext(di.Resolve<VSCodePageViewModel>());
         }
     }
 }

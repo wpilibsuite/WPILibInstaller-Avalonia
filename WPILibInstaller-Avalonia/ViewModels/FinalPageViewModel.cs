@@ -2,16 +2,24 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using WPILibInstaller_Avalonia.Interfaces;
 
 namespace WPILibInstaller_Avalonia.ViewModels
 {
-    public class FinalPageViewModel : PageViewModelBase, IRoutableViewModel
+    public class FinalPageViewModel : PageViewModelBase
     {
-        public IScreen HostScreen { get; }
+        private readonly IProgramWindow progWindow;
 
-        public string UrlPathSegment { get; } = "Finish";
+        public FinalPageViewModel(IScreen screen, IProgramWindow progWindow)
+            : base("Finish", "", "finish", screen)
+        {
+            this.progWindow = progWindow;
+        }
 
-        public FinalPageViewModel(IScreen screen)
-            : base("Finish", "") => HostScreen = screen;
+        public override IObservable<IRoutableViewModel> MoveNext()
+        {
+            progWindow.CloseProgram();
+            return HostScreen.Router.CurrentViewModel;
+        }
     }
 }

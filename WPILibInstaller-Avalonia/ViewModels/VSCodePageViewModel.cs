@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using WPILibInstaller_Avalonia.Interfaces;
 using WPILibInstaller_Avalonia.Models;
 using WPILibInstaller_Avalonia.Utils;
 using WPILibInstaller_Avalonia.Views;
@@ -16,13 +17,8 @@ using static WPILibInstaller_Avalonia.Models.VsCodeModel;
 
 namespace WPILibInstaller_Avalonia.ViewModels
 {
-    public class VSCodePageViewModel : PageViewModelBase, IRoutableViewModel
+    public class VSCodePageViewModel : PageViewModelBase
     {
-        public IScreen HostScreen => mainPage;
-
-        private readonly MainWindowViewModel mainPage;
-
-        public string UrlPathSegment { get; } = "vscode";
 
         public override bool ForwardVisible => forwardVisible;
 
@@ -110,22 +106,23 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         public VsCodeModel Model { get; }
 
-        private readonly MainWindow mainWindow;
+        private readonly IProgramWindow programWindow;
+        private readonly IMainWindowViewModelRefresher refresher;
+        private readonly IDependencyInjection di;
 
-        public VSCodePageViewModel(MainWindowViewModel screen, MainWindow mainWindow, VsCodeModel model)
-            : base("Next", "Back")
+        public VSCodePageViewModel(IScreen screen, IMainWindowViewModelRefresher mainRefresher, IProgramWindow programWindow, IVsCodeModelProvider modelProvider, IDependencyInjection di)
+            : base("Next", "Back", "vscode", screen)
         {
-            mainPage = screen;
-            this.mainWindow = mainWindow;
-            Model = model;
+            this.refresher = mainRefresher;
+            this.programWindow = programWindow;
+            Model = modelProvider.GetVsCodeModel();
+            this.di = di;
         }
 
         public async Task SelectVsCode()
         {
-            OpenFileDialog openDialog = new OpenFileDialog();
-            var files = await openDialog.ShowAsync(mainWindow);
-            if (files.Length != 1) return;
-            FileStream fs = new FileStream(files[0], FileMode.Open);
+            var file = await programWindow.ShowFilePicker("Select VS Code");
+            FileStream fs = new FileStream(file, FileMode.Open);
             using ZipArchive archive = new ZipArchive(fs);
             var currentPlatform = PlatformUtils.CurrentPlatform;
             var entry = archive.GetEntry(Model.Platforms[currentPlatform].NameInZip);
@@ -137,7 +134,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
             DownloadAllEnabled = false;
             SelectExistingEnabled = false;
             DoneVisible = true;
-            mainPage.RefreshForwardBackProperties();
+            refresher.RefreshForwardBackProperties();
         }
 
         public async void DownloadVsCode()
@@ -187,7 +184,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
                 DownloadAllEnabled = false;
                 SelectExistingEnabled = false;
                 DoneVisible = true;
-                mainPage.RefreshForwardBackProperties();
+                refresher.RefreshForwardBackProperties();
             }
 
             
@@ -201,16 +198,16 @@ namespace WPILibInstaller_Avalonia.ViewModels
             DownloadSingleEnabled = false;
             DownloadAllEnabled = false;
             SelectExistingEnabled = false;
-            var memStream = await DownloadToMemoryStream(currentPlatform, url, CancellationToken.None, (d) => ProgressBar1 = d);
-            if (memStream.stream != null)
+            var (stream, platform) = await DownloadToMemoryStream(currentPlatform, url, CancellationToken.None, (d) => ProgressBar1 = d);
+            if (stream != null)
             {
-                Model.ToExtractZipStream = memStream.stream;
+                Model.ToExtractZipStream = stream;
                 forwardVisible = true;
                 DownloadSingleEnabled = false;
                 DownloadAllEnabled = false;
                 SelectExistingEnabled = false;
                 DoneVisible = true;
-                mainPage.RefreshForwardBackProperties();
+                refresher.RefreshForwardBackProperties();
             }
             else
             {
@@ -241,6 +238,11 @@ namespace WPILibInstaller_Avalonia.ViewModels
             };
 
             return await client.StartDownload(token);
+        }
+
+        public override IObservable<IRoutableViewModel> MoveNext()
+        {
+            return MoveNext(di.Resolve<ConfigurationPageViewModel>());
         }
     }
 }

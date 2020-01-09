@@ -1,6 +1,10 @@
-﻿using Avalonia;
+﻿using Autofac;
+using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using ReactiveUI;
+using Splat;
+using System.Reflection;
 using WPILibInstaller_Avalonia.ViewModels;
 using WPILibInstaller_Avalonia.Views;
 
@@ -10,6 +14,15 @@ namespace WPILibInstaller_Avalonia
     {
         public override void Initialize()
         {
+            // Register our view model locator
+            Locator.CurrentMutable.RegisterViewsForViewModels(Assembly.GetExecutingAssembly());
+
+
+            // Register our DI
+            ContainerBuilder builder = new ContainerBuilder();
+
+            builder.RegisterType<StartPageViewModel>();
+
             AvaloniaXamlLoader.Load(this);
         }
 
@@ -19,7 +32,6 @@ namespace WPILibInstaller_Avalonia
             {
 
                 var mainWindow = new MainWindow();
-                mainWindow.DataContext = new MainWindowViewModel(mainWindow);
                 desktop.MainWindow = mainWindow;
             }
 

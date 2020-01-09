@@ -20,7 +20,6 @@ namespace WPILibInstaller_Avalonia
         // Avalonia configuration, don't remove; also used by visual designer.
         public static AppBuilder BuildAvaloniaApp()
         {
-            Locator.CurrentMutable.RegisterViewsForViewModels(Assembly.GetExecutingAssembly());
             return AppBuilder.Configure<App>()
                 .UsePlatformDetect()
                 .LogToDebug()

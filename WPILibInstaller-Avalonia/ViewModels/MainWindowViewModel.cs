@@ -9,12 +9,13 @@ using System.IO.Compression;
 using System.Reactive;
 using System.Text;
 using System.Threading.Tasks;
+using WPILibInstaller_Avalonia.Interfaces;
 using WPILibInstaller_Avalonia.Models;
 using WPILibInstaller_Avalonia.Views;
 
 namespace WPILibInstaller_Avalonia.ViewModels
 {
-    public class MainWindowViewModel : ReactiveObject, IScreen
+    public class MainWindowViewModel : ReactiveObject, IScreen, IMainWindowViewModelRefresher
     {
         public RoutingState Router { get; } = new RoutingState();
 
@@ -38,9 +39,6 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         public ReactiveCommand<Unit, Unit> GoBack => Router.NavigateBack;
 
-        private readonly MainWindow mainWindow;
-        private readonly StartPageViewModel startPageViewModel;
-
         public void RefreshForwardBackProperties()
         {
             this.RaisePropertyChanged(nameof(ForwardName));
@@ -49,9 +47,10 @@ namespace WPILibInstaller_Avalonia.ViewModels
             this.RaisePropertyChanged(nameof(BackVisible));
         }
 
-        public MainWindowViewModel(MainWindow mainWindow)
+        private readonly IDependencyInjection di;
+
+        public MainWindowViewModel(IDependencyInjection di)
         {
-            this.mainWindow = mainWindow;
             GoNext = ReactiveCommand.CreateFromObservable(HandleStateChange);
 
             Router.NavigationChanged.Subscribe((o) =>
@@ -59,54 +58,18 @@ namespace WPILibInstaller_Avalonia.ViewModels
                 RefreshForwardBackProperties();
             });
 
-            startPageViewModel = new StartPageViewModel(this, mainWindow);
-            viewModelStore.Add(typeof(StartPageViewModel), startPageViewModel);
-
-            Router.NavigateAndReset.Execute(startPageViewModel);
+            this.di = di;
         }
 
-        private readonly Dictionary<Type, IRoutableViewModel> viewModelStore = new Dictionary<Type, IRoutableViewModel>();
-
+        public void Initialize()
+        {
+            Router.NavigateAndReset.Execute(di.Resolve<StartPageViewModel>());
+        }
        
         private IObservable<IRoutableViewModel> HandleStateChange()
         {
-            IRoutableViewModel? vm;
-            switch (Router.GetCurrentViewModel())
-            {
-                case StartPageViewModel sp:
-                    if (!viewModelStore.TryGetValue(typeof(VSCodePageViewModel), out vm))
-                    {
-                        vm = new VSCodePageViewModel(this, mainWindow, startPageViewModel.GetVsCodeModel());
-                        viewModelStore.Add(typeof(VSCodePageViewModel), vm);
-                    }
-                    return Router.Navigate.Execute(vm);
-                case VSCodePageViewModel vs:
-                    if (!viewModelStore.TryGetValue(typeof(ConfigurationPageViewModel), out vm))
-                    {
-                        vm = new ConfigurationPageViewModel(this);
-                        viewModelStore.Add(typeof(ConfigurationPageViewModel), vm);
-                    }
-                    return Router.Navigate.Execute(vm);
-                case ConfigurationPageViewModel cp:
-                    if (!viewModelStore.TryGetValue(typeof(InstallPageViewModel), out vm))
-                    {
-                        vm = new InstallPageViewModel(this);
-                        viewModelStore.Add(typeof(InstallPageViewModel), vm);
-                    }
-                    return Router.NavigateAndReset.Execute(vm);
-                case InstallPageViewModel cp:
-                    if (!viewModelStore.TryGetValue(typeof(FinalPageViewModel), out vm))
-                    {
-                        vm = new FinalPageViewModel(this);
-                        viewModelStore.Add(typeof(FinalPageViewModel), vm);
-                    }
-                    return Router.NavigateAndReset.Execute(vm);
-                case FinalPageViewModel fp:
-                    mainWindow.Close();
-                    return Router.CurrentViewModel;
-                default:
-                    throw new InvalidOperationException("Weird Page?");
-            }
+            var model = (PageViewModelBase)Router.GetCurrentViewModel();
+            return model.MoveNext();
         }
     }
 }

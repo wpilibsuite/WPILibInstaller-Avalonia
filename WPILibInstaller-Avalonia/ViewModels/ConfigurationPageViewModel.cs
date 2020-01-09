@@ -2,16 +2,23 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using WPILibInstaller_Avalonia.Interfaces;
 
 namespace WPILibInstaller_Avalonia.ViewModels
 {
-    public class ConfigurationPageViewModel : PageViewModelBase, IRoutableViewModel
+    public class ConfigurationPageViewModel : PageViewModelBase
     {
-        public IScreen HostScreen { get; }
+        private readonly IDependencyInjection di;
 
-        public string UrlPathSegment { get; } = "configuration";
+        public ConfigurationPageViewModel(IScreen screen, IDependencyInjection di)
+            : base("Install", "Back", "Configuration", screen)
+        {
+            this.di = di;
+        }
 
-        public ConfigurationPageViewModel(IScreen screen)
-            : base("Install", "Back") => HostScreen = screen;
+        public override IObservable<IRoutableViewModel> MoveNext()
+        {
+            return MoveNext(di.Resolve<InstallPageViewModel>());
+        }
     }
 }
