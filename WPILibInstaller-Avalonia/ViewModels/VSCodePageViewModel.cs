@@ -1,10 +1,11 @@
 ﻿using Avalonia.Controls;
 using MessageBox.Avalonia;
 using ReactiveUI;
+using SharpCompress.Archives.Zip;
+using SharpCompress.Readers;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -156,12 +157,13 @@ namespace WPILibInstaller_Avalonia.ViewModels
             try 
             {
                 FileStream fs = new FileStream(file, FileMode.Open);
-                using ZipArchive archive = new ZipArchive(fs);
+                using System.IO.Compression.ZipArchive archive = new System.IO.Compression.ZipArchive(fs);
                 var currentPlatform = PlatformUtils.CurrentPlatform;
                 var entry = archive.GetEntry(Model.Platforms[currentPlatform].NameInZip);
                 MemoryStream ms = new MemoryStream(100000000);
                 await entry.Open().CopyToAsync(ms);
-                Model.ToExtractZipStream = ms;
+
+                Model.ToExtractArchive = ZipArchive.Open(ms);
             }
             catch
             {
@@ -180,54 +182,54 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         public async void DownloadVsCode()
         {
-            var currentPlatform = PlatformUtils.CurrentPlatform;
+            //var currentPlatform = PlatformUtils.CurrentPlatform;
 
-            DownloadSingleEnabled = false;
-            DownloadAllEnabled = false;
-            SelectExistingEnabled = false;
-            forwardVisible = false;
-            refresher.RefreshForwardBackProperties();
+            //DownloadSingleEnabled = false;
+            //DownloadAllEnabled = false;
+            //SelectExistingEnabled = false;
+            //forwardVisible = false;
+            //refresher.RefreshForwardBackProperties();
 
-            var win32 = DownloadToMemoryStream(Platform.Win32, Model.Platforms[Platform.Win32].DownloadUrl, CancellationToken.None, (d) => ProgressBar1 = d);
-            var win64 = DownloadToMemoryStream(Platform.Win64, Model.Platforms[Platform.Win64].DownloadUrl, CancellationToken.None, (d) => ProgressBar2 = d);
-            var linux64 = DownloadToMemoryStream(Platform.Linux64, Model.Platforms[Platform.Linux64].DownloadUrl, CancellationToken.None, (d) => ProgressBar3 = d);
-            var mac64 = DownloadToMemoryStream(Platform.Mac64, Model.Platforms[Platform.Mac64].DownloadUrl, CancellationToken.None, (d) => ProgressBar4 = d);
+            //var win32 = DownloadToMemoryStream(Platform.Win32, Model.Platforms[Platform.Win32].DownloadUrl, CancellationToken.None, (d) => ProgressBar1 = d);
+            //var win64 = DownloadToMemoryStream(Platform.Win64, Model.Platforms[Platform.Win64].DownloadUrl, CancellationToken.None, (d) => ProgressBar2 = d);
+            //var linux64 = DownloadToMemoryStream(Platform.Linux64, Model.Platforms[Platform.Linux64].DownloadUrl, CancellationToken.None, (d) => ProgressBar3 = d);
+            //var mac64 = DownloadToMemoryStream(Platform.Mac64, Model.Platforms[Platform.Mac64].DownloadUrl, CancellationToken.None, (d) => ProgressBar4 = d);
 
-            var results = await Task.WhenAll(win32, win64, linux64, mac64);
+            //var results = await Task.WhenAll(win32, win64, linux64, mac64);
 
-            try
-            {
-                File.Delete("InstallerFiles.zip");
-            }
-            catch
-            {
+            //try
+            //{
+            //    File.Delete("InstallerFiles.zip");
+            //}
+            //catch
+            //{
 
-            }
+            //}
 
-            using var archive = ZipFile.Open("InstallerFiles.zip", ZipArchiveMode.Create);
+            //using var archive = ZipFile.Open("InstallerFiles.zip", ZipArchiveMode.Create);
 
-            MemoryStream? ms = null;
+            //MemoryStream? ms = null;
 
-            foreach (var (stream, platform) in results)
-            {
-                using var toWriteStream = archive.CreateEntry(Model.Platforms[platform].NameInZip).Open();
-                await stream.CopyToAsync(toWriteStream);
-                if (platform == currentPlatform)
-                {
-                    ms = stream;
-                }
-            }
+            //foreach (var (stream, platform) in results)
+            //{
+            //    using var toWriteStream = archive.CreateEntry(Model.Platforms[platform].NameInZip).Open();
+            //    await stream.CopyToAsync(toWriteStream);
+            //    if (platform == currentPlatform)
+            //    {
+            //        ms = stream;
+            //    }
+            //}
 
-            if (ms != null)
-            {
-                Model.ToExtractZipStream = ms;
-                forwardVisible = true;
-                DownloadSingleEnabled = false;
-                DownloadAllEnabled = false;
-                SelectExistingEnabled = false;
-                DoneVisible = true;
-                refresher.RefreshForwardBackProperties();
-            }
+            //if (ms != null)
+            //{
+            //    Model.ToExtractZipStream = ms;
+            //    forwardVisible = true;
+            //    DownloadSingleEnabled = false;
+            //    DownloadAllEnabled = false;
+            //    SelectExistingEnabled = false;
+            //    DoneVisible = true;
+            //    refresher.RefreshForwardBackProperties();
+            //}
 
             
             
@@ -245,7 +247,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
             var (stream, platform) = await DownloadToMemoryStream(currentPlatform, url, CancellationToken.None, (d) => ProgressBar1 = d);
             if (stream != null)
             {
-                Model.ToExtractZipStream = stream;
+                Model.ToExtractArchive = ZipArchive.Open(stream);
                 forwardVisible = true;
                 DownloadSingleEnabled = false;
                 DownloadAllEnabled = false;

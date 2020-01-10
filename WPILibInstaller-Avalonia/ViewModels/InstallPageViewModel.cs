@@ -1,4 +1,5 @@
 ﻿using ReactiveUI;
+using SharpCompress.Readers;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -50,13 +51,13 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
                 try
                 {
-                    await ExtractArchive(source.Token);
+                    //await ExtractArchive(source.Token);
                     if (source.IsCancellationRequested) break;
-                    await RunGradleSetup();
+                    //await RunGradleSetup();
                     if (source.IsCancellationRequested) break;
-                    await RunToolSetup();
+                    //await RunToolSetup();
                     if (source.IsCancellationRequested) break;
-                    await RunCppSetup();
+                    //await RunCppSetup();
                     if (source.IsCancellationRequested) break;
                     await RunVsCodeSetup(source.Token);
                     if (source.IsCancellationRequested) break;
@@ -228,38 +229,35 @@ namespace WPILibInstaller_Avalonia.ViewModels
             Text = "Installing Visual Studio Code";
             Progress = 0;
 
-            using ZipArchive zipArchive = new ZipArchive(vsInstallProvider.Model.ToExtractZipStream, ZipArchiveMode.Read);
+            var archive = vsInstallProvider.Model.ToExtractArchive!;
 
-            double totalCount = zipArchive.Entries.Count;
-            long currentCount = 0;
+            var extractor = archive.ExtractAllEntries();
 
-            string intoPath = configurationProvider.InstallDirectory;
+            double totalSize = archive.TotalUncompressSize;
+            long currentSize = 0;
 
-            foreach (var entry in zipArchive.Entries)
+
+            string intoPath = Path.Join(configurationProvider.InstallDirectory, "vscode");
+
+            while (extractor.MoveToNextEntry())
             {
                 if (token.IsCancellationRequested)
                 {
                     return;
                 }
-                double currentPercentage = (currentCount / totalCount) * 100;
-                currentCount++;
+                var entry = extractor.Entry;
+                currentSize += entry.Size;
+                if (entry.IsDirectory) continue;
+                Text = "Installing " + entry.Key;
 
-
-                var compressedLength = entry.CompressedLength;
-
-                if (entry.Name == "")
-                {
-                    continue;
-                }
-
+                double currentPercentage = (currentSize / totalSize) * 100;
                 if (currentPercentage > 100) currentPercentage = 100;
                 if (currentPercentage < 0) currentPercentage = 0;
                 Progress = (int)currentPercentage;
-                Text = "Installing " + entry.FullName;
 
-                var entryName = entry.FullName;
+                var entryName = entry.Key;
 
-                using var stream = entry.Open();
+                using var stream = extractor.OpenEntryStream();
                 string fullZipToPath = Path.Combine(intoPath, entryName);
                 string? directoryName = Path.GetDirectoryName(fullZipToPath);
                 if (directoryName?.Length > 0)

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using SharpCompress.Archives;
+using SharpCompress.Readers;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -24,7 +26,7 @@ namespace WPILibInstaller_Avalonia.Models
         public string VSCodeVersion { get; set; }
         public Dictionary<Platform, PlatformData> Platforms { get; } = new Dictionary<Platform, PlatformData>();
 
-        public Stream? ToExtractZipStream { get; set; }
+        public IArchive? ToExtractArchive { get; set; }
 
         public VsCodeModel(string vscodeVersion)
         {
@@ -33,7 +35,7 @@ namespace WPILibInstaller_Avalonia.Models
 
         public void Dispose()
         {
-            ToExtractZipStream?.Dispose();
+            ToExtractArchive?.Dispose();
         }
     }
 }
