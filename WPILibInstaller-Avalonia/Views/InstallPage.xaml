@@ -6,7 +6,7 @@
              x:Class="WPILibInstaller_Avalonia.Views.InstallPage">
   <DockPanel LastChildFill="True">
     <ProgressBar DockPanel.Dock="Top"  Margin="10,10,10,10" Value="{Binding Progress}"/>
-    <Button DockPanel.Dock="Bottom" Height="50" Margin="10,10,10,10" Content="Cancel Installation" Command="{Binding CancelInstall}"/>
-    <TextBlock  Margin="10,0,10,0" Text="{Binding Text}"/>
+    <Button DockPanel.Dock="Bottom" Margin="10,10,10,10" Content="Cancel Installation" Command="{Binding CancelInstall}"/>
+    <TextBlock Margin="10,0,10,0" Text="{Binding Text}"/>
   </DockPanel>
 </UserControl>
