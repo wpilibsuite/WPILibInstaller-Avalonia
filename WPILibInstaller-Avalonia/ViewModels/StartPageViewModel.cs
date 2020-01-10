@@ -117,29 +117,43 @@ namespace WPILibInstaller_Avalonia.ViewModels
             refresher.RefreshForwardBackProperties();
         }
 
-        public VsCodeModel GetVsCodeModel()
+        public VsCodeModel VsCodeModel
         {
-            VsCodeModel model = new VsCodeModel(vscodeConfig.VsCodeVersion);
-            model.Platforms.Add(Utils.Platform.Win32, new VsCodeModel.PlatformData(vscodeConfig.VsCode32Url, vscodeConfig.VsCode32Name));
-            model.Platforms.Add(Utils.Platform.Win64, new VsCodeModel.PlatformData(vscodeConfig.VsCode64Url, vscodeConfig.VsCode64Name));
-            model.Platforms.Add(Utils.Platform.Linux64, new VsCodeModel.PlatformData(vscodeConfig.VsCodeLinuxUrl, vscodeConfig.VsCodeLinuxName));
-            model.Platforms.Add(Utils.Platform.Mac64, new VsCodeModel.PlatformData(vscodeConfig.VsCodeMacUrl, vscodeConfig.VsCodeMacName));
-            return model;
+            get
+            {
+                VsCodeModel model = new VsCodeModel(vscodeConfig.VsCodeVersion);
+                model.Platforms.Add(Utils.Platform.Win32, new VsCodeModel.PlatformData(vscodeConfig.VsCode32Url, vscodeConfig.VsCode32Name));
+                model.Platforms.Add(Utils.Platform.Win64, new VsCodeModel.PlatformData(vscodeConfig.VsCode64Url, vscodeConfig.VsCode64Name));
+                model.Platforms.Add(Utils.Platform.Linux64, new VsCodeModel.PlatformData(vscodeConfig.VsCodeLinuxUrl, vscodeConfig.VsCodeLinuxName));
+                model.Platforms.Add(Utils.Platform.Mac64, new VsCodeModel.PlatformData(vscodeConfig.VsCodeMacUrl, vscodeConfig.VsCodeMacName));
+                return model;
+            }
         }
 
-        public string GetInstallDirectory()
+        public string InstallDirectory
         {
-            var publicFolder = Environment.GetEnvironmentVariable("PUBLIC");
-            if (publicFolder == null)
+            get
             {
-                publicFolder = "C:\\Users\\Public";
+                var publicFolder = Environment.GetEnvironmentVariable("PUBLIC");
+                if (publicFolder == null)
+                {
+                    publicFolder = "C:\\Users\\Public";
+                }
+                return Path.Combine(publicFolder, "wpilib", upgradeConfig.FrcYear);
             }
-            return Path.Combine(publicFolder, "wpilib", upgradeConfig.FrcYear);
         }
 
         public override IObservable<IRoutableViewModel> MoveNext()
         {
             return MoveNext(di.Resolve<VSCodePageViewModel>());
         }
+
+        public ZipArchive ZipArchive => filesArchive;
+
+        public UpgradeConfig UpgradeConfig => upgradeConfig;
+
+        public FullConfig FullConfig => fullConfig;
+
+        public JdkConfig JdkConfig => jdkConfig;
     }
 }

@@ -2,15 +2,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="400"
              x:Class="WPILibInstaller_Avalonia.Views.InstallPage">
-  <Grid>
-    <Grid.RowDefinitions>
-      <RowDefinition Height="1*"/>
-      <RowDefinition Height="4*"/>
-      <RowDefinition Height="5*"/>
-    </Grid.RowDefinitions>
-    <ProgressBar Grid.Row="0" Margin="10,10,10,10" Value="{Binding Progress}"/>
-    <TextBlock Grid.Row="1" Margin="10,0,10,0" Text="{Binding Text}"/>
-  </Grid>
+  <DockPanel LastChildFill="True">
+    <ProgressBar DockPanel.Dock="Top"  Margin="10,10,10,10" Value="{Binding Progress}"/>
+    <Button DockPanel.Dock="Bottom" Height="50" Margin="10,10,10,10" Content="Cancel Installation" Command="{Binding CancelInstall}"/>
+    <TextBlock  Margin="10,0,10,0" Text="{Binding Text}"/>
+  </DockPanel>
 </UserControl>

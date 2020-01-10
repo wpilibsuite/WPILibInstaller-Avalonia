@@ -23,6 +23,7 @@
     <AvaloniaResource Include="Assets\**" />
   </ItemGroup>
   <ItemGroup>
+    <AvaloniaResource Remove="Views\CanceledPage.xaml" />
     <AvaloniaResource Remove="Views\ConfigurationPage.xaml" />
     <AvaloniaResource Remove="Views\FinalPage.xaml" />
     <AvaloniaResource Remove="Views\InstallPage.xaml" />
@@ -31,6 +32,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="Assets\wpilib-128.png" />
+    <None Remove="Views\CanceledPage.xaml" />
     <None Remove="Views\ConfigurationPage.xaml" />
     <None Remove="Views\FinalPage.xaml" />
     <None Remove="Views\InstallPage.xaml" />
@@ -73,5 +75,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\.editorconfig" Link=".editorconfig" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Views\CanceledPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>

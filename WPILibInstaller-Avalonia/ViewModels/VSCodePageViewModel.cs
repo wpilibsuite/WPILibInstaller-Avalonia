@@ -126,11 +126,14 @@ namespace WPILibInstaller_Avalonia.ViewModels
         {
             this.refresher = mainRefresher;
             this.programWindow = programWindow;
-            Model = modelProvider.GetVsCodeModel();
+            Model = modelProvider.VsCodeModel;
             this.di = di;
 
+            forwardVisible = true;
+            refresher.RefreshForwardBackProperties();
+
             // Check to see if VS Code is already installed
-            var rootPath = modelProvider.GetInstallDirectory();
+            var rootPath = modelProvider.InstallDirectory;
             var vscodePath = Path.Join(rootPath, "vscode");
             if (Directory.Exists(vscodePath))
             {
