@@ -1,11 +1,13 @@
 ﻿using Avalonia.Controls;
 using Newtonsoft.Json;
 using ReactiveUI;
+using SharpCompress.Archives;
+using SharpCompress.Archives.Zip;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
-using System.Text;
+using System.IO.Compressionusing System.Text;
+using System.Linq;
 using System.Threading.Tasks;
 using WPILibInstaller_Avalonia.Interfaces;
 using WPILibInstaller_Avalonia.Models;
@@ -32,7 +34,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
         }
 
 
-        private ZipArchive filesArchive;
+        private IArchive filesArchive;
         private VsCodeConfig vscodeConfig;
         private UpgradeConfig upgradeConfig;
         private JdkConfig jdkConfig;
@@ -42,9 +44,15 @@ namespace WPILibInstaller_Avalonia.ViewModels
         {
             var file = await programWindow.ShowFilePicker("Select Support File", Environment.GetFolderPath(Environment.SpecialFolder.Personal));
 
-            filesArchive = ZipFile.OpenRead(file);
+            var archive = SharpCompress.Archives.Zip.ZipArchive.Open(file);
+            filesArchive = archive;
 
-            var entry = filesArchive.GetEntry("installUtils/vscodeConfig.json");
+            ZipArchiveEntry vsConfigEntry;
+
+            foreach (var entry in archive.Entries)
+            {
+                if (entry.Key == "installUtils/vs")
+            }
 
             using (StreamReader reader = new StreamReader(entry.Open()))
             {
