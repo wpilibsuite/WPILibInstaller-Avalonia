@@ -4,7 +4,9 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using ReactiveUI;
 using Splat;
+using System;
 using System.Reflection;
+using System.Threading.Tasks;
 using WPILibInstaller_Avalonia.ViewModels;
 using WPILibInstaller_Avalonia.Views;
 
@@ -16,12 +18,6 @@ namespace WPILibInstaller_Avalonia
         {
             // Register our view model locator
             Locator.CurrentMutable.RegisterViewsForViewModels(Assembly.GetExecutingAssembly());
-
-
-            // Register our DI
-            ContainerBuilder builder = new ContainerBuilder();
-
-            builder.RegisterType<StartPageViewModel>();
 
             AvaloniaXamlLoader.Load(this);
         }

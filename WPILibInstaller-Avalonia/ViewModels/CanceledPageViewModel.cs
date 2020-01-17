@@ -10,16 +10,16 @@ namespace WPILibInstaller_Avalonia.ViewModels
     {
         private readonly IProgramWindow progWindow;
 
-        public CanceledPageViewModel(IScreen screen, IProgramWindow progWindow)
-            : base("Finish", "", "canceled", screen)
+        public CanceledPageViewModel(IProgramWindow progWindow)
+            : base("Finish", "")
         {
             this.progWindow = progWindow;
         }
 
-        public override IObservable<IRoutableViewModel> MoveNext()
+        public override PageViewModelBase MoveNext()
         {
             progWindow.CloseProgram();
-            return HostScreen.Router.CurrentViewModel;
+            return this;
         }
     }
 }

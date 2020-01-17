@@ -5,11 +5,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Reactive;
 using System.Text;
 using System.Threading.Tasks;
 using WPILibInstaller_Avalonia.Interfaces;
 using WPILibInstaller_Avalonia.Models;
 using WPILibInstaller_Avalonia.Views;
+using static WPILibInstaller_Avalonia.Utils.ReactiveExtensions;
 
 namespace WPILibInstaller_Avalonia.ViewModels
 {
@@ -23,9 +25,14 @@ namespace WPILibInstaller_Avalonia.ViewModels
         public override bool ForwardVisible => forwardVisible;
         private bool forwardVisible = false;
 
-        public StartPageViewModel(IScreen screen, IMainWindowViewModelRefresher mainRefresher, IProgramWindow mainWindow, IDependencyInjection di)
-            : base("Start", "Back", "Start", screen)
+#pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
+        public StartPageViewModel(IMainWindowViewModelRefresher mainRefresher, IProgramWindow mainWindow, IDependencyInjection di)
+#pragma warning restore CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
+            : base("Start", "Back")
         {
+
+            SelectSupportFiles = CreateCatchableButton(SelectSupportFilesFunc);
+
             this.programWindow = mainWindow;
             this.di = di;
             refresher = mainRefresher;
@@ -38,7 +45,9 @@ namespace WPILibInstaller_Avalonia.ViewModels
         private JdkConfig jdkConfig;
         private FullConfig fullConfig;
 
-        public async Task SelectSupportFiles()
+        public ReactiveCommand<Unit, Unit> SelectSupportFiles { get; }
+
+        public async Task SelectSupportFilesFunc()
         {
             var file = await programWindow.ShowFilePicker("Select Support File", Environment.GetFolderPath(Environment.SpecialFolder.Personal));
 
@@ -143,9 +152,9 @@ namespace WPILibInstaller_Avalonia.ViewModels
             }
         }
 
-        public override IObservable<IRoutableViewModel> MoveNext()
+        public override PageViewModelBase MoveNext()
         {
-            return MoveNext(di.Resolve<VSCodePageViewModel>());
+            return di.Resolve<VSCodePageViewModel>();
         }
 
         public ZipArchive ZipArchive => filesArchive;

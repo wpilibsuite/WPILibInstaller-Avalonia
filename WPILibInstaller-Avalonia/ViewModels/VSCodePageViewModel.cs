@@ -122,8 +122,8 @@ namespace WPILibInstaller_Avalonia.ViewModels
         private readonly IMainWindowViewModelRefresher refresher;
         private readonly IDependencyInjection di;
 
-        public VSCodePageViewModel(IScreen screen, IMainWindowViewModelRefresher mainRefresher, IProgramWindow programWindow, IConfigurationProvider modelProvider, IDependencyInjection di)
-            : base("Next", "Back", "vscode", screen)
+        public VSCodePageViewModel(IMainWindowViewModelRefresher mainRefresher, IProgramWindow programWindow, IConfigurationProvider modelProvider, IDependencyInjection di)
+            : base("Next", "Back")
         {
             this.refresher = mainRefresher;
             this.programWindow = programWindow;
@@ -182,6 +182,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         public async void DownloadVsCode()
         {
+            await Task.Yield();
             //var currentPlatform = PlatformUtils.CurrentPlatform;
 
             //DownloadSingleEnabled = false;
@@ -286,11 +287,11 @@ namespace WPILibInstaller_Avalonia.ViewModels
             return await client.StartDownload(token);
         }
 
-        public override IObservable<IRoutableViewModel> MoveNext()
+        public override PageViewModelBase MoveNext()
         {
             var configPage = di.Resolve<ConfigurationPageViewModel>();
             configPage.UpdateVsSettings();
-            return MoveNext(configPage);
+            return configPage;
         }
     }
 }
