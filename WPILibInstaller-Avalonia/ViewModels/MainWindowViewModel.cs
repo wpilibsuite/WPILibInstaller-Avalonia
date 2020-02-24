@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Text;
 using System.Threading.Tasks;
 using WPILibInstaller_Avalonia.Interfaces;
@@ -15,17 +16,28 @@ using WPILibInstaller_Avalonia.Views;
 
 namespace WPILibInstaller_Avalonia.ViewModels
 {
-    public class MainWindowViewModel : ReactiveObject, IScreen, IMainWindowViewModelRefresher
+    public class MainWindowViewModel : ReactiveObject, IMainWindowViewModelRefresher
     {
-        public RoutingState Router { get; } = new RoutingState();
+        private PageViewModelBase currentPage;
+        public PageViewModelBase CurrentPage
+        {
+            get => currentPage;
+            set
+            {
+                pages.Push(value);
+                this.RaiseAndSetIfChanged(ref currentPage, value);
+            }
+        }
 
-        public string? ForwardName => (Router.GetCurrentViewModel() as PageViewModelBase)?.ForwardName;
+        private readonly Stack<PageViewModelBase> pages = new Stack<PageViewModelBase>();
 
-        public string? BackName => (Router.GetCurrentViewModel() as PageViewModelBase)?.BackName;
+        public string? ForwardName => CurrentPage?.ForwardName;
 
-        public bool ForwardVisible => (Router.GetCurrentViewModel() as PageViewModelBase)?.ForwardVisible ?? false;
+        public string? BackName => CurrentPage?.BackName;
 
-        public bool BackVisible => (Router.GetCurrentViewModel() as PageViewModelBase)?.BackVisible ?? false;
+        public bool ForwardVisible => CurrentPage?.ForwardVisible ?? false;
+
+        public bool BackVisible => CurrentPage?.BackVisible ?? false;
 
         public bool HasSupportFiles
         {
@@ -35,9 +47,16 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         private bool hasSupportFiles = false;
 
-        public ReactiveCommand<Unit, IRoutableViewModel> GoNext { get; }
+        public void GoNext()
+        {
+            HandleStateChange();
+        }
 
-        public ReactiveCommand<Unit, Unit> GoBack => Router.NavigateBack;
+        public void GoBack()
+        {
+            pages.Pop();
+            CurrentPage = pages.Pop();
+        }
 
         public void RefreshForwardBackProperties()
         {
@@ -49,27 +68,24 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         private readonly IDependencyInjection di;
 
+#pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
         public MainWindowViewModel(IDependencyInjection di)
+#pragma warning restore CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
         {
-            GoNext = ReactiveCommand.CreateFromObservable(HandleStateChange);
-
-            Router.NavigationChanged.Subscribe((o) =>
-            {
-                RefreshForwardBackProperties();
-            });
+            this.WhenAnyValue(x => x.CurrentPage)
+                .Subscribe(o => RefreshForwardBackProperties());
 
             this.di = di;
         }
 
         public void Initialize()
         {
-            Router.NavigateAndReset.Execute(di.Resolve<StartPageViewModel>());
+            CurrentPage = di.Resolve<StartPageViewModel>();
         }
        
-        private IObservable<IRoutableViewModel> HandleStateChange()
+        private void HandleStateChange()
         {
-            var model = (PageViewModelBase)Router.GetCurrentViewModel();
-            return model.MoveNext();
+            CurrentPage = CurrentPage.MoveNext();
         }
     }
 }

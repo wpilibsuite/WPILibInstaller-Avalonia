@@ -48,8 +48,8 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         private readonly IVsCodeInstallLocationProvider vsProvider;
 
-        public ConfigurationPageViewModel(IScreen screen, IDependencyInjection di, IVsCodeInstallLocationProvider vsInstallProvider)
-            : base("Install", "Back", "Configuration", screen)
+        public ConfigurationPageViewModel(IDependencyInjection di, IVsCodeInstallLocationProvider vsInstallProvider)
+            : base("Install", "Back")
         {
             this.di = di;
             this.vsProvider = vsInstallProvider;
@@ -67,9 +67,9 @@ namespace WPILibInstaller_Avalonia.ViewModels
             this.RaisePropertyChanged(nameof(InstallVsCodeExtensions));
         }
 
-        public override IObservable<IRoutableViewModel> MoveNext()
+        public override PageViewModelBase MoveNext()
         {
-            return MoveNext(di.Resolve<InstallPageViewModel>());
+            return di.Resolve<InstallPageViewModel>();
         }
     }
 }

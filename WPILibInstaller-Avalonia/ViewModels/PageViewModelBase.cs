@@ -1,10 +1,14 @@
-﻿using ReactiveUI;
+﻿using Avalonia.Controls;
+using ReactiveUI;
+using Splat;
 using System;
 
 namespace WPILibInstaller_Avalonia.ViewModels
 {
-    public abstract class PageViewModelBase : ReactiveObject, IRoutableViewModel
+    public abstract class PageViewModelBase : ReactiveObject
     {
+        public UserControl Control => (UserControl)Locator.Current.GetService(typeof(IViewFor<>).MakeGenericType(this.GetType()));
+
         public string ForwardName { get; }
 
         public string BackName { get; }
@@ -12,23 +16,12 @@ namespace WPILibInstaller_Avalonia.ViewModels
         public virtual bool ForwardVisible => !string.IsNullOrWhiteSpace(ForwardName);
         public bool BackVisible => !string.IsNullOrWhiteSpace(BackName);
 
-        public string UrlPathSegment { get; }
-
-        public IScreen HostScreen { get; }
-
-        protected PageViewModelBase(string forwardName, string backName, string urlPathSegment, IScreen screen)
+        protected PageViewModelBase(string forwardName, string backName)
         {
             ForwardName = forwardName;
             BackName = backName;
-            UrlPathSegment = urlPathSegment;
-            HostScreen = screen;
         }
 
-        public abstract IObservable<IRoutableViewModel> MoveNext();
-
-        public IObservable<IRoutableViewModel> MoveNext(IRoutableViewModel vm)
-        {
-            return HostScreen.Router.Navigate.Execute(vm);
-        }
+        public abstract PageViewModelBase MoveNext();
     }
 }

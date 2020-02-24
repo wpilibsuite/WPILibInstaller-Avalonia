@@ -25,8 +25,8 @@ namespace WPILibInstaller_Avalonia.ViewModels
         public int Progress { get => progress; set => this.RaiseAndSetIfChanged(ref progress, value); }
         public string Text { get => text; set => this.RaiseAndSetIfChanged(ref text, value); }
 
-        public InstallPageViewModel(IScreen screen, IDependencyInjection di, IToInstallProvider toInstallProvider, IConfigurationProvider configurationProvider, IVsCodeInstallLocationProvider vsInstallProvider)
-            : base("", "", "Starting", screen)
+        public InstallPageViewModel(IDependencyInjection di, IToInstallProvider toInstallProvider, IConfigurationProvider configurationProvider, IVsCodeInstallLocationProvider vsInstallProvider)
+            : base("", "")
         {
             this.di = di;
             this.toInstallProvider = toInstallProvider;
@@ -51,19 +51,21 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
                 try
                 {
-                    //await ExtractArchive(source.Token);
+                    await ExtractArchive(source.Token);
                     if (source.IsCancellationRequested) break;
-                    //await RunGradleSetup();
+                    await RunGradleSetup();
                     if (source.IsCancellationRequested) break;
-                    //await RunToolSetup();
+                    await RunToolSetup();
                     if (source.IsCancellationRequested) break;
-                    //await RunCppSetup();
+                    await RunCppSetup();
                     if (source.IsCancellationRequested) break;
                     await RunVsCodeSetup(source.Token);
                     if (source.IsCancellationRequested) break;
                     await RunVsCodeExtensionsSetup();
                 }
+#pragma warning disable CS0168 // Variable is declared but never used
                 catch (Exception e)
+#pragma warning restore CS0168 // Variable is declared but never used
                 {
                     ;
                 }
@@ -72,7 +74,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
             if (source.IsCancellationRequested)
             {
-                MoveNext(di.Resolve<CanceledPageViewModel>());
+                di.Resolve<CanceledPageViewModel>();
             }
             else
             {
@@ -80,9 +82,9 @@ namespace WPILibInstaller_Avalonia.ViewModels
             }
         }
 
-        public override IObservable<IRoutableViewModel> MoveNext()
+        public override PageViewModelBase MoveNext()
         {
-            return MoveNext(di.Resolve<FinalPageViewModel>());
+            return di.Resolve<FinalPageViewModel>();
         }
 
         private List<string> GetExtractionIgnoreDirectories()
@@ -211,6 +213,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
             Text = "Configuring C++";
             Progress = 50;
 
+            await Task.Yield();
         }
 
         private async Task RunToolSetup()
@@ -220,6 +223,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
             Text = "Configuring Tools";
             Progress = 50;
 
+            await Task.Yield();
         }
 
         private async Task RunVsCodeSetup(CancellationToken token)
@@ -281,6 +285,8 @@ namespace WPILibInstaller_Avalonia.ViewModels
         private async Task RunVsCodeExtensionsSetup()
         {
             if (!toInstallProvider.Model.InstallVsCodeExtensions) return;
+
+            await Task.Yield();
         }
 
     }

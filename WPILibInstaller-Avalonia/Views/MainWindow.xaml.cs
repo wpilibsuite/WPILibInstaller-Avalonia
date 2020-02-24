@@ -5,6 +5,8 @@ using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
 using MessageBox.Avalonia;
 using ReactiveUI;
+using Splat;
+using System;
 using System.Threading.Tasks;
 using WPILibInstaller_Avalonia.Interfaces;
 using WPILibInstaller_Avalonia.ViewModels;
@@ -19,10 +21,7 @@ namespace WPILibInstaller_Avalonia.Views
 
         public MainWindow()
         {
-            
-
             // Initialize our DI
-
             ContainerBuilder builder = new ContainerBuilder();
 
             builder.RegisterAssemblyTypes(typeof(MainWindow).Assembly).Where(x => x.Name.EndsWith("ViewModel")).SingleInstance().AsSelf().AsImplementedInterfaces();
@@ -50,7 +49,7 @@ namespace WPILibInstaller_Avalonia.Views
 
         public async Task<string?> ShowFilePicker(string title, string? initialiDirectory)
         {
-
+            throw new InvalidOperationException();
             OpenFileDialog dialog = new OpenFileDialog
             {
                 AllowMultiple = false,

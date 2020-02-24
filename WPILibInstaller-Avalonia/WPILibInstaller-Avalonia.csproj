@@ -75,9 +75,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\.editorconfig" Link=".editorconfig" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Views\CanceledPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </EmbeddedResource>
