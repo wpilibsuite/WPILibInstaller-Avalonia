@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO.Compression;
 using System.Text;
+using SharpCompress.Archives;
 using WPILibInstaller_Avalonia.Models;
 
 namespace WPILibInstaller_Avalonia.Interfaces
@@ -10,7 +11,7 @@ namespace WPILibInstaller_Avalonia.Interfaces
     {
         VsCodeModel VsCodeModel { get; }
 
-        ZipArchive ZipArchive { get; }
+        IArchive ZipArchive { get; }
 
         UpgradeConfig UpgradeConfig { get; }
         FullConfig FullConfig { get; }

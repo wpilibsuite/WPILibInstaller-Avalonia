@@ -107,67 +107,67 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
             var zipArchive = configurationProvider.ZipArchive;
 
-            double totalCount = zipArchive.Entries.Count;
+            double totalCount = zipArchive.TotalUncompressSize;
             long currentCount = 0;
 
             string intoPath = configurationProvider.InstallDirectory;
 
-            foreach (var entry in zipArchive.Entries)
-            {
-                if (token.IsCancellationRequested)
-                {
-                    return;
-                }
-                double currentPercentage = (currentCount / totalCount) * 100;
-                currentCount++;
+            //foreach (var entry in zipArchive.Entries)
+            //{
+            //    if (token.IsCancellationRequested)
+            //    {
+            //        return;
+            //    }
+            //    double currentPercentage = (currentCount / totalCount) * 100;
+            //    currentCount++;
 
 
-                var compressedLength = entry.CompressedLength;
+            //    var compressedLength = entry.CompressedLength;
 
-                if (entry.Name == "")
-                {
-                    continue;
-                }
+            //    if (entry.Name == "")
+            //    {
+            //        continue;
+            //    }
 
-                if (currentPercentage > 100) currentPercentage = 100;
-                if (currentPercentage < 0) currentPercentage = 0;
-                Progress = (int)currentPercentage;
-                Text = "Installing " + entry.FullName;
+            //    if (currentPercentage > 100) currentPercentage = 100;
+            //    if (currentPercentage < 0) currentPercentage = 0;
+            //    Progress = (int)currentPercentage;
+            //    Text = "Installing " + entry.FullName;
 
-                var entryName = entry.FullName;
-                bool skip = false;
-                foreach (var ignore in directoriesToIgnore)
-                {
-                    if (entryName.StartsWith(ignore))
-                    {
-                        skip = true;
-                        break;
-                    }
-                }
+            //    var entryName = entry.FullName;
+            //    bool skip = false;
+            //    foreach (var ignore in directoriesToIgnore)
+            //    {
+            //        if (entryName.StartsWith(ignore))
+            //        {
+            //            skip = true;
+            //            break;
+            //        }
+            //    }
 
-                if (skip)
-                {
-                    continue;
-                }
+            //    if (skip)
+            //    {
+            //        continue;
+            //    }
 
-                using var stream = entry.Open();
-                string fullZipToPath = Path.Combine(intoPath, entryName);
-                string? directoryName = Path.GetDirectoryName(fullZipToPath);
-                if (directoryName?.Length > 0)
-                {
-                    try
-                    {
-                        Directory.CreateDirectory(directoryName);
-                    }
-                    catch (IOException)
-                    {
+            //    using var stream = entry.Open();
+            //    string fullZipToPath = Path.Combine(intoPath, entryName);
+            //    string? directoryName = Path.GetDirectoryName(fullZipToPath);
+            //    if (directoryName?.Length > 0)
+            //    {
+            //        try
+            //        {
+            //            Directory.CreateDirectory(directoryName);
+            //        }
+            //        catch (IOException)
+            //        {
 
-                    }
-                }
+            //        }
+            //    }
 
-                using FileStream writer = File.Create(fullZipToPath);
-                await stream.CopyToAsync(writer);
-            }
+            //    using FileStream writer = File.Create(fullZipToPath);
+            //    await stream.CopyToAsync(writer);
+            //}
 
         }
 

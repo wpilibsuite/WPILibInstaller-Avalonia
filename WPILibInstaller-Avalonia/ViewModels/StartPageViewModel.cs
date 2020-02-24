@@ -1,6 +1,7 @@
 ﻿using Avalonia.Controls;
 using Newtonsoft.Json;
 using ReactiveUI;
+using SharpCompress.Archives;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -135,7 +136,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
         {
             var file = await programWindow.ShowFilePicker("Select Support File", Environment.GetFolderPath(Environment.SpecialFolder.Personal));
 
-            ZipArchive = ZipFile.OpenRead(file);
+            ZipArchive = SharpCompress.Archives.Zip.ZipArchive.Open(file);
 
             MissingSupportFiles = false;
             forwardVisible = !MissingEitherFile;
@@ -173,7 +174,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
             return di.Resolve<VSCodePageViewModel>();
         }
 
-        public ZipArchive ZipArchive { get; private set; }
+        public IArchive ZipArchive { get; private set; }
 
         public UpgradeConfig UpgradeConfig { get; private set; }
 
