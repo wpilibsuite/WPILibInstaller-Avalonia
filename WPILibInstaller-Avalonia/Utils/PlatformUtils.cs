@@ -49,7 +49,7 @@ namespace WPILibInstaller_Avalonia.Utils
                 if (currentArch == Architecture.X64)
                 {
                     CurrentPlatform = Platform.Win64;
-                } 
+                }
                 else
                 {
                     CurrentPlatform = Platform.Win32;
@@ -58,6 +58,6 @@ namespace WPILibInstaller_Avalonia.Utils
             }
         }
 
-        public static Platform CurrentPlatform { get; } 
+        public static Platform CurrentPlatform { get; }
     }
 }

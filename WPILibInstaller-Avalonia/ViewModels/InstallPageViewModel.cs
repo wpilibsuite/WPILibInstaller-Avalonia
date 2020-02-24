@@ -120,7 +120,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
                 }
                 double currentPercentage = (currentCount / totalCount) * 100;
                 currentCount++;
-                
+
 
                 var compressedLength = entry.CompressedLength;
 

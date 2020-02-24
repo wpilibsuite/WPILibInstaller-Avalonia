@@ -9,7 +9,7 @@ namespace WPILibInstaller_Avalonia.Interfaces
     {
         IContainer Container { get; }
 
-        public T Resolve<T>() where T: notnull
+        public T Resolve<T>() where T : notnull
         {
             return Container.Resolve<T>();
         }

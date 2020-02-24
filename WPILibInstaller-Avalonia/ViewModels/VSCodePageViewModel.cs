@@ -154,7 +154,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
                 // No need to error, user explicitly canceled.
                 return;
             }
-            try 
+            try
             {
                 FileStream fs = new FileStream(file, FileMode.Open);
                 using System.IO.Compression.ZipArchive archive = new System.IO.Compression.ZipArchive(fs);
@@ -167,11 +167,11 @@ namespace WPILibInstaller_Avalonia.ViewModels
             }
             catch
             {
-                await MessageBoxManager.GetMessageBoxStandardWindow("Error", 
+                await MessageBoxManager.GetMessageBoxStandardWindow("Error",
                     "Correct VS Code not found in archive", icon: MessageBox.Avalonia.Enums.Icon.None).ShowDialog(programWindow.Window);
                 return;
             }
-            
+
             forwardVisible = true;
             DownloadSingleEnabled = false;
             DownloadAllEnabled = false;
@@ -232,8 +232,8 @@ namespace WPILibInstaller_Avalonia.ViewModels
             //    refresher.RefreshForwardBackProperties();
             //}
 
-            
-            
+
+
         }
 
         public async Task DownloadSingleVSCode()

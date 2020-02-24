@@ -74,7 +74,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
         {
             CurrentPage = di.Resolve<StartPageViewModel>();
         }
-       
+
         private void HandleStateChange()
         {
             CurrentPage = CurrentPage.MoveNext();
