@@ -32,28 +32,55 @@ namespace WPILibInstaller_Avalonia.ViewModels
         {
 
             SelectSupportFiles = CreateCatchableButton(SelectSupportFilesFunc);
+            SelectResourceFiles = CreateCatchableButton(SelectResourceFilesFunc);
 
             this.programWindow = mainWindow;
             this.di = di;
             refresher = mainRefresher;
         }
 
+        public bool MissingSupportFiles
+        {
+            get => missingSupportFiles;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref missingSupportFiles, value);
+                this.RaisePropertyChanged(nameof(MissingEitherFile));
+            }
+        }
 
-        private ZipArchive filesArchive;
+        public bool MissingEitherFile => MissingSupportFiles || MissingResourceFiles;
+
+        private bool missingSupportFiles = false;
+
+        public bool MissingResourceFiles
+        {
+            get => missingResourceFiles;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref missingResourceFiles, value);
+                this.RaisePropertyChanged(nameof(MissingEitherFile));
+            }
+        }
+
+        private bool missingResourceFiles = true;
         private VsCodeConfig vscodeConfig;
-        private UpgradeConfig upgradeConfig;
-        private JdkConfig jdkConfig;
-        private FullConfig fullConfig;
 
         public ReactiveCommand<Unit, Unit> SelectSupportFiles { get; }
+        public ReactiveCommand<Unit, Unit> SelectResourceFiles { get; }
 
-        public async Task SelectSupportFilesFunc()
+        public async Task SelectResourceFilesFunc()
         {
-            var file = await programWindow.ShowFilePicker("Select Support File", Environment.GetFolderPath(Environment.SpecialFolder.Personal));
+            var file = await programWindow.ShowFilePicker("Select Resource File", Environment.GetFolderPath(Environment.SpecialFolder.Personal));
 
-            filesArchive = ZipFile.OpenRead(file);
+            if (file == null)
+            {
+                return;
+            }
 
-            var entry = filesArchive.GetEntry("installUtils/vscodeConfig.json");
+            var zipArchive = ZipFile.OpenRead(file);
+
+            var entry = zipArchive.GetEntry("vscodeConfig.json");
 
             using (StreamReader reader = new StreamReader(entry.Open()))
             {
@@ -64,65 +91,54 @@ namespace WPILibInstaller_Avalonia.ViewModels
                 }) ?? throw new InvalidOperationException("Not Valid");
             }
 
-            entry = filesArchive.GetEntry("installUtils/jdkConfig.json");
+            entry = zipArchive.GetEntry("jdkConfig.json");
 
             using (StreamReader reader = new StreamReader(entry.Open()))
             {
                 var configStr = await reader.ReadToEndAsync();
-                jdkConfig = JsonConvert.DeserializeObject<JdkConfig>(configStr, new JsonSerializerSettings
+                JdkConfig = JsonConvert.DeserializeObject<JdkConfig>(configStr, new JsonSerializerSettings
                 {
                     MissingMemberHandling = MissingMemberHandling.Error
                 }) ?? throw new InvalidOperationException("Not Valid");
             }
 
 
-            entry = filesArchive.GetEntry("installUtils/fullConfig.json");
+            entry = zipArchive.GetEntry("fullConfig.json");
 
             using (StreamReader reader = new StreamReader(entry.Open()))
             {
                 var configStr = await reader.ReadToEndAsync();
-                fullConfig = JsonConvert.DeserializeObject<FullConfig>(configStr, new JsonSerializerSettings
+                FullConfig = JsonConvert.DeserializeObject<FullConfig>(configStr, new JsonSerializerSettings
                 {
                     MissingMemberHandling = MissingMemberHandling.Error
                 }) ?? throw new InvalidOperationException("Not Valid");
             }
 
 
-            entry = filesArchive.GetEntry("installUtils/upgradeConfig.json");
+            entry = zipArchive.GetEntry("upgradeConfig.json");
 
             using (StreamReader reader = new StreamReader(entry.Open()))
             {
                 var configStr = await reader.ReadToEndAsync();
-                upgradeConfig = JsonConvert.DeserializeObject<UpgradeConfig>(configStr, new JsonSerializerSettings
+                UpgradeConfig = JsonConvert.DeserializeObject<UpgradeConfig>(configStr, new JsonSerializerSettings
                 {
                     MissingMemberHandling = MissingMemberHandling.Error
                 }) ?? throw new InvalidOperationException("Not Valid");
             }
 
+            MissingResourceFiles = false;
+            forwardVisible = !MissingEitherFile;
+            refresher.RefreshForwardBackProperties();
+        }
 
-            entry = filesArchive.GetEntry("installUtils/jdkConfig.json");
+        public async Task SelectSupportFilesFunc()
+        {
+            var file = await programWindow.ShowFilePicker("Select Support File", Environment.GetFolderPath(Environment.SpecialFolder.Personal));
 
-            using (StreamReader reader = new StreamReader(entry.Open()))
-            {
-                var configStr = await reader.ReadToEndAsync();
-                jdkConfig = JsonConvert.DeserializeObject<JdkConfig>(configStr, new JsonSerializerSettings
-                {
-                    MissingMemberHandling = MissingMemberHandling.Error
-                }) ?? throw new InvalidOperationException("Not Valid");
-            }
+            ZipArchive = ZipFile.OpenRead(file);
 
-            entry = filesArchive.GetEntry("installUtils/jdkConfig.json");
-
-            using (StreamReader reader = new StreamReader(entry.Open()))
-            {
-                var configStr = await reader.ReadToEndAsync();
-                jdkConfig = JsonConvert.DeserializeObject<JdkConfig>(configStr, new JsonSerializerSettings
-                {
-                    MissingMemberHandling = MissingMemberHandling.Error
-                }) ?? throw new InvalidOperationException("Not Valid");
-            }
-
-            forwardVisible = true;
+            MissingSupportFiles = false;
+            forwardVisible = !MissingEitherFile;
             refresher.RefreshForwardBackProperties();
         }
 
@@ -148,7 +164,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
                 {
                     publicFolder = "C:\\Users\\Public";
                 }
-                return Path.Combine(publicFolder, "wpilib", upgradeConfig.FrcYear);
+                return Path.Combine(publicFolder, "wpilib", UpgradeConfig.FrcYear);
             }
         }
 
@@ -157,12 +173,12 @@ namespace WPILibInstaller_Avalonia.ViewModels
             return di.Resolve<VSCodePageViewModel>();
         }
 
-        public ZipArchive ZipArchive => filesArchive;
+        public ZipArchive ZipArchive { get; private set; }
 
-        public UpgradeConfig UpgradeConfig => upgradeConfig;
+        public UpgradeConfig UpgradeConfig { get; private set; }
 
-        public FullConfig FullConfig => fullConfig;
+        public FullConfig FullConfig { get; private set; }
 
-        public JdkConfig JdkConfig => jdkConfig;
+        public JdkConfig JdkConfig { get; private set; }
     }
 }

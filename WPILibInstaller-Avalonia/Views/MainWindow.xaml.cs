@@ -49,7 +49,6 @@ namespace WPILibInstaller_Avalonia.Views
 
         public async Task<string?> ShowFilePicker(string title, string? initialiDirectory)
         {
-            throw new InvalidOperationException();
             OpenFileDialog dialog = new OpenFileDialog
             {
                 AllowMultiple = false,

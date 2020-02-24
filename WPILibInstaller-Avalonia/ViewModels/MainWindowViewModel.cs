@@ -39,14 +39,6 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         public bool BackVisible => CurrentPage?.BackVisible ?? false;
 
-        public bool HasSupportFiles
-        {
-            get => hasSupportFiles;
-            set => this.RaiseAndSetIfChanged(ref hasSupportFiles, value);
-        }
-
-        private bool hasSupportFiles = false;
-
         public void GoNext()
         {
             HandleStateChange();
