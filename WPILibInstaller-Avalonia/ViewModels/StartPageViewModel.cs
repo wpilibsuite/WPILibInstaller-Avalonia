@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using WPILibInstaller_Avalonia.Interfaces;
 using WPILibInstaller_Avalonia.Models;
+using WPILibInstaller_Avalonia.Utils;
 using WPILibInstaller_Avalonia.Views;
 using static WPILibInstaller_Avalonia.Utils.ReactiveExtensions;
 
