@@ -6,6 +6,7 @@ using SharpCompress.Readers;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -16,6 +17,8 @@ using WPILibInstaller_Avalonia.Models;
 using WPILibInstaller_Avalonia.Utils;
 using WPILibInstaller_Avalonia.Views;
 using static WPILibInstaller_Avalonia.Models.VsCodeModel;
+
+using SharpZip = SharpCompress.Archives.Zip.ZipArchive;
 
 namespace WPILibInstaller_Avalonia.ViewModels
 {
@@ -163,7 +166,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
                 MemoryStream ms = new MemoryStream(100000000);
                 await entry.Open().CopyToAsync(ms);
 
-                Model.ToExtractArchive = ZipArchive.Open(ms);
+                Model.ToExtractArchive = SharpZip.Open(ms);
             }
             catch
             {
@@ -172,6 +175,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
                 return;
             }
 
+            DoneText = "Valid VS Code Selected. Press Next to continue";
             forwardVisible = true;
             DownloadSingleEnabled = false;
             DownloadAllEnabled = false;
@@ -182,62 +186,70 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         public async void DownloadVsCode()
         {
-            await Task.Yield();
-            //var currentPlatform = PlatformUtils.CurrentPlatform;
+            var currentPlatform = PlatformUtils.CurrentPlatform;
 
-            //DownloadSingleEnabled = false;
-            //DownloadAllEnabled = false;
-            //SelectExistingEnabled = false;
-            //forwardVisible = false;
-            //refresher.RefreshForwardBackProperties();
+            DoneText = "Downloading VS Code for all platforms. Please wait.";
 
-            //var win32 = DownloadToMemoryStream(Platform.Win32, Model.Platforms[Platform.Win32].DownloadUrl, CancellationToken.None, (d) => ProgressBar1 = d);
-            //var win64 = DownloadToMemoryStream(Platform.Win64, Model.Platforms[Platform.Win64].DownloadUrl, CancellationToken.None, (d) => ProgressBar2 = d);
-            //var linux64 = DownloadToMemoryStream(Platform.Linux64, Model.Platforms[Platform.Linux64].DownloadUrl, CancellationToken.None, (d) => ProgressBar3 = d);
-            //var mac64 = DownloadToMemoryStream(Platform.Mac64, Model.Platforms[Platform.Mac64].DownloadUrl, CancellationToken.None, (d) => ProgressBar4 = d);
+            DownloadSingleEnabled = false;
+            DownloadAllEnabled = false;
+            SelectExistingEnabled = false;
+            forwardVisible = false;
+            refresher.RefreshForwardBackProperties();
 
-            //var results = await Task.WhenAll(win32, win64, linux64, mac64);
+            var win32 = DownloadToMemoryStream(Platform.Win32, Model.Platforms[Platform.Win32].DownloadUrl, CancellationToken.None, (d) => ProgressBar1 = d);
+            var win64 = DownloadToMemoryStream(Platform.Win64, Model.Platforms[Platform.Win64].DownloadUrl, CancellationToken.None, (d) => ProgressBar2 = d);
+            var linux64 = DownloadToMemoryStream(Platform.Linux64, Model.Platforms[Platform.Linux64].DownloadUrl, CancellationToken.None, (d) => ProgressBar3 = d);
+            var mac64 = DownloadToMemoryStream(Platform.Mac64, Model.Platforms[Platform.Mac64].DownloadUrl, CancellationToken.None, (d) => ProgressBar4 = d);
 
-            //try
-            //{
-            //    File.Delete("InstallerFiles.zip");
-            //}
-            //catch
-            //{
+            var results = await Task.WhenAll(win32, win64, linux64, mac64);
 
-            //}
+            string vscodeName = $"WPILib-VSCode-{Model.VSCodeVersion}.zip";
 
-            //using var archive = ZipFile.Open("InstallerFiles.zip", ZipArchiveMode.Create);
+            try
+            {
+                File.Delete(vscodeName);
+            }
+            catch
+            {
 
-            //MemoryStream? ms = null;
+            }
 
-            //foreach (var (stream, platform) in results)
-            //{
-            //    using var toWriteStream = archive.CreateEntry(Model.Platforms[platform].NameInZip).Open();
-            //    await stream.CopyToAsync(toWriteStream);
-            //    if (platform == currentPlatform)
-            //    {
-            //        ms = stream;
-            //    }
-            //}
+            using var archive = ZipFile.Open(vscodeName, ZipArchiveMode.Create);
 
-            //if (ms != null)
-            //{
-            //    Model.ToExtractZipStream = ms;
-            //    forwardVisible = true;
-            //    DownloadSingleEnabled = false;
-            //    DownloadAllEnabled = false;
-            //    SelectExistingEnabled = false;
-            //    DoneVisible = true;
-            //    refresher.RefreshForwardBackProperties();
-            //}
+            MemoryStream? ms = null;
+
+            DoneText = "Copying Archives. Please wait.";
 
 
+            foreach (var (stream, platform) in results)
+            {
+                var entry = archive.CreateEntry(Model.Platforms[platform].NameInZip);
+                using var toWriteStream = entry.Open();
+                stream.Seek(0, SeekOrigin.Begin);
+                await stream.CopyToAsync(toWriteStream);
+                if (platform == currentPlatform)
+                {
+                    ms = stream;
+                }
+            }
 
+            if (ms != null)
+            {
+                ms.Seek(0, SeekOrigin.Begin);
+                Model.ToExtractArchive = SharpZip.Open(ms);
+                DoneText = "Done Downloading. Press Next to continue";
+                forwardVisible = true;
+                DownloadSingleEnabled = false;
+                DownloadAllEnabled = false;
+                SelectExistingEnabled = false;
+                DoneVisible = true;
+                refresher.RefreshForwardBackProperties();
+            }
         }
 
         public async Task DownloadSingleVSCode()
         {
+            DoneText = "Downloading VS Code for current platform. Please wait.";
             var currentPlatform = PlatformUtils.CurrentPlatform;
             var url = Model.Platforms[currentPlatform].DownloadUrl;
             DownloadSingleEnabled = false;
@@ -248,7 +260,8 @@ namespace WPILibInstaller_Avalonia.ViewModels
             var (stream, platform) = await DownloadToMemoryStream(currentPlatform, url, CancellationToken.None, (d) => ProgressBar1 = d);
             if (stream != null)
             {
-                Model.ToExtractArchive = ZipArchive.Open(stream);
+                Model.ToExtractArchive = SharpZip.Open(stream);
+                DoneText = "Done Downloading. Press Next to continue";
                 forwardVisible = true;
                 DownloadSingleEnabled = false;
                 DownloadAllEnabled = false;

@@ -25,6 +25,8 @@ namespace WPILibInstaller_Avalonia.ViewModels
         public int Progress { get => progress; set => this.RaiseAndSetIfChanged(ref progress, value); }
         public string Text { get => text; set => this.RaiseAndSetIfChanged(ref text, value); }
 
+        public bool succeeded = false;
+
         public InstallPageViewModel(IDependencyInjection di, IToInstallProvider toInstallProvider, IConfigurationProvider configurationProvider, IVsCodeInstallLocationProvider vsInstallProvider)
             : base("", "")
         {
@@ -72,19 +74,30 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
             } while (false);
 
+            
+
             if (source.IsCancellationRequested)
             {
-                di.Resolve<CanceledPageViewModel>();
+                succeeded = false;
             }
             else
             {
-                MoveNext();
+                succeeded = true;
             }
+
+            di.Resolve<MainWindowViewModel>().GoNext();
         }
 
         public override PageViewModelBase MoveNext()
         {
-            return di.Resolve<FinalPageViewModel>();
+            if (succeeded)
+            {
+                return di.Resolve<FinalPageViewModel>();
+            }
+            else
+            {
+                return di.Resolve<CanceledPageViewModel>();
+            }
         }
 
         private List<string> GetExtractionIgnoreDirectories()
@@ -100,74 +113,128 @@ namespace WPILibInstaller_Avalonia.ViewModels
             return ignoreDirs;
         }
 
+        private async Task RunVsCodeSetup(CancellationToken token)
+        {
+            if (!toInstallProvider.Model.InstallVsCode) return;
+
+            Text = "Installing Visual Studio Code";
+            Progress = 0;
+
+            var archive = vsInstallProvider.Model.ToExtractArchive!;
+
+            var extractor = archive.ExtractAllEntries();
+
+            double totalSize = archive.TotalUncompressSize;
+            long currentSize = 0;
+
+
+            string intoPath = Path.Join(configurationProvider.InstallDirectory, "vscode");
+
+            while (extractor.MoveToNextEntry())
+            {
+                if (token.IsCancellationRequested)
+                {
+                    return;
+                }
+                var entry = extractor.Entry;
+                currentSize += entry.Size;
+                if (entry.IsDirectory) continue;
+                Text = "Installing " + entry.Key;
+
+                double currentPercentage = (currentSize / totalSize) * 100;
+                if (currentPercentage > 100) currentPercentage = 100;
+                if (currentPercentage < 0) currentPercentage = 0;
+                Progress = (int)currentPercentage;
+
+                var entryName = entry.Key;
+
+                using var stream = extractor.OpenEntryStream();
+                string fullZipToPath = Path.Combine(intoPath, entryName);
+                string? directoryName = Path.GetDirectoryName(fullZipToPath);
+                if (directoryName?.Length > 0)
+                {
+                    try
+                    {
+                        Directory.CreateDirectory(directoryName);
+                    }
+                    catch (IOException)
+                    {
+
+                    }
+                }
+
+                using FileStream writer = File.Create(fullZipToPath);
+                await stream.CopyToAsync(writer);
+            }
+
+        }
 
         private async Task ExtractArchive(CancellationToken token)
         {
             var directoriesToIgnore = GetExtractionIgnoreDirectories();
 
-            var zipArchive = configurationProvider.ZipArchive;
+            Progress = 0;
 
-            double totalCount = zipArchive.TotalUncompressSize;
-            long currentCount = 0;
+            var archive = configurationProvider.ZipArchive!;
+
+            var extractor = archive.ExtractAllEntries();
+
+            double totalSize = archive.TotalUncompressSize;
+            long currentSize = 0;
 
             string intoPath = configurationProvider.InstallDirectory;
 
-            //foreach (var entry in zipArchive.Entries)
-            //{
-            //    if (token.IsCancellationRequested)
-            //    {
-            //        return;
-            //    }
-            //    double currentPercentage = (currentCount / totalCount) * 100;
-            //    currentCount++;
+            while (extractor.MoveToNextEntry())
+            {
+                if (token.IsCancellationRequested)
+                {
+                    return;
+                }
+                var entry = extractor.Entry;
+                currentSize += entry.Size;
+                if (entry.IsDirectory) continue;
 
+                var entryName = entry.Key;
+                bool skip = false;
+                foreach (var ignore in directoriesToIgnore)
+                {
+                    if (entryName.StartsWith(ignore))
+                    {
+                        skip = true;
+                        break;
+                    }
+                }
 
-            //    var compressedLength = entry.CompressedLength;
+                if (skip)
+                {
+                    continue;
+                }
 
-            //    if (entry.Name == "")
-            //    {
-            //        continue;
-            //    }
+                Text = "Installing " + entry.Key;
 
-            //    if (currentPercentage > 100) currentPercentage = 100;
-            //    if (currentPercentage < 0) currentPercentage = 0;
-            //    Progress = (int)currentPercentage;
-            //    Text = "Installing " + entry.FullName;
+                double currentPercentage = (currentSize / totalSize) * 100;
+                if (currentPercentage > 100) currentPercentage = 100;
+                if (currentPercentage < 0) currentPercentage = 0;
+                Progress = (int)currentPercentage;
 
-            //    var entryName = entry.FullName;
-            //    bool skip = false;
-            //    foreach (var ignore in directoriesToIgnore)
-            //    {
-            //        if (entryName.StartsWith(ignore))
-            //        {
-            //            skip = true;
-            //            break;
-            //        }
-            //    }
+                using var stream = extractor.OpenEntryStream();
+                string fullZipToPath = Path.Combine(intoPath, entryName);
+                string? directoryName = Path.GetDirectoryName(fullZipToPath);
+                if (directoryName?.Length > 0)
+                {
+                    try
+                    {
+                        Directory.CreateDirectory(directoryName);
+                    }
+                    catch (IOException)
+                    {
 
-            //    if (skip)
-            //    {
-            //        continue;
-            //    }
+                    }
+                }
 
-            //    using var stream = entry.Open();
-            //    string fullZipToPath = Path.Combine(intoPath, entryName);
-            //    string? directoryName = Path.GetDirectoryName(fullZipToPath);
-            //    if (directoryName?.Length > 0)
-            //    {
-            //        try
-            //        {
-            //            Directory.CreateDirectory(directoryName);
-            //        }
-            //        catch (IOException)
-            //        {
-
-            //        }
-            //    }
-
-            //    using FileStream writer = File.Create(fullZipToPath);
-            //    await stream.CopyToAsync(writer);
-            //}
+                using FileStream writer = File.Create(fullZipToPath);
+                await stream.CopyToAsync(writer);
+            }
 
         }
 
@@ -226,61 +293,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
             await Task.Yield();
         }
 
-        private async Task RunVsCodeSetup(CancellationToken token)
-        {
-            if (!toInstallProvider.Model.InstallVsCode) return;
-
-            Text = "Installing Visual Studio Code";
-            Progress = 0;
-
-            var archive = vsInstallProvider.Model.ToExtractArchive!;
-
-            var extractor = archive.ExtractAllEntries();
-
-            double totalSize = archive.TotalUncompressSize;
-            long currentSize = 0;
-
-
-            string intoPath = Path.Join(configurationProvider.InstallDirectory, "vscode");
-
-            while (extractor.MoveToNextEntry())
-            {
-                if (token.IsCancellationRequested)
-                {
-                    return;
-                }
-                var entry = extractor.Entry;
-                currentSize += entry.Size;
-                if (entry.IsDirectory) continue;
-                Text = "Installing " + entry.Key;
-
-                double currentPercentage = (currentSize / totalSize) * 100;
-                if (currentPercentage > 100) currentPercentage = 100;
-                if (currentPercentage < 0) currentPercentage = 0;
-                Progress = (int)currentPercentage;
-
-                var entryName = entry.Key;
-
-                using var stream = extractor.OpenEntryStream();
-                string fullZipToPath = Path.Combine(intoPath, entryName);
-                string? directoryName = Path.GetDirectoryName(fullZipToPath);
-                if (directoryName?.Length > 0)
-                {
-                    try
-                    {
-                        Directory.CreateDirectory(directoryName);
-                    }
-                    catch (IOException)
-                    {
-
-                    }
-                }
-
-                using FileStream writer = File.Create(fullZipToPath);
-                await stream.CopyToAsync(writer);
-            }
-
-        }
+        
 
         private async Task RunVsCodeExtensionsSetup()
         {

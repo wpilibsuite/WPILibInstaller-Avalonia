@@ -30,7 +30,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
 #pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
         public StartPageViewModel(IMainWindowViewModelRefresher mainRefresher, IProgramWindow mainWindow, IDependencyInjection di)
 #pragma warning restore CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
-            : base("Start", "Back")
+            : base("Start", "")
         {
 
             SelectSupportFiles = CreateCatchableButton(SelectSupportFilesFunc);
@@ -53,7 +53,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         public bool MissingEitherFile => MissingSupportFiles || MissingResourceFiles;
 
-        private bool missingSupportFiles = false;
+        private bool missingSupportFiles = true;
 
         public bool MissingResourceFiles
         {
@@ -136,6 +136,11 @@ namespace WPILibInstaller_Avalonia.ViewModels
         public async Task SelectSupportFilesFunc()
         {
             var file = await programWindow.ShowFilePicker("Select Support File", Environment.GetFolderPath(Environment.SpecialFolder.Personal));
+
+            if (file == null)
+            {
+                return;
+            }
 
             ZipArchive = SharpCompress.Archives.Zip.ZipArchive.Open(file);
 
