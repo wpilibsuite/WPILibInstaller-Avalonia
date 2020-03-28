@@ -14,7 +14,7 @@ public:
 
 
   bool CreateShortcut(std::wstring path, std::wstring destination) const;
-  bool CreateFolder() const;
+  bool CreateFolder(std::wstring path) const;
 
   std::optional<std::wstring> GetLocalStartMenuFolder() const;
   std::optional<std::wstring> GetAllUsersStartMenuFolder() const;

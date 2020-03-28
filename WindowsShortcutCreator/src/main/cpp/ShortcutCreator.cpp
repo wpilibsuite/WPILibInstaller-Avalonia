@@ -66,6 +66,11 @@ std::optional<std::wstring> ShortcutCreator::GetPublicDesktopFolder() const {
   return nullptr;
 }
 
+bool ShortcutCreator::CreateFolder(std::wstring path) const {
+  auto ret = CreateDirectory(path.c_str(), NULL);
+  return ret == 0;
+}
+
 // bool ShortcutCreator::Create() const {
 //   HRESULT hres;
 //   com::ComPtr<IShellLink> shellLink;

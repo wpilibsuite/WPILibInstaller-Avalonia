@@ -3,6 +3,7 @@
  */
 
 #include <iostream>
+#include <fstream>
 #include <stdlib.h>
 
 #include "ShortcutCreator.h"
@@ -14,6 +15,11 @@
 #include "shlguid.h"
 #include "ComPtr.h"
 
+#include <nlohmann/json.hpp>
+
+// for convenience
+using json = nlohmann::json;
+
 #pragma comment(lib, "Ole32.lib")
 
 class CCoInitialize {
@@ -24,22 +30,42 @@ public:
  HRESULT m_hr;
 };
 
-int main () {
+
+struct ShortcutData {
+    bool isAdmin;
+    std::wstring wpilibFolder;
+};
+
+void from_json(const json& j, ShortcutData& s) {
+    j.at("IsAdmin").get_to(s.isAdmin);
+    j.at("WPILibFolder").get_to(s.wpilibFolder);
+}
+
+int main (int argc, char *argv[]) {
+    // Initialize COM
     CCoInitialize init;
 
     if(FAILED(init)) {
         return -1;
     }
 
+    // Initialize the shortcut creator
     ShortcutCreator shortcutCreator;
 
     if (FAILED(shortcutCreator)) {
         return -1;
     }
 
+    json j;
 
+    if (argc < 2) {
+        std::cin >> j;
+    } else {
+        std::ifstream i(argv[1]);
+        i >> j;
+    }
 
-
+    ShortcutData s = j.get<ShortcutData>();
 
     return 0;
 }
