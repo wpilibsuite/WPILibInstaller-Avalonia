@@ -13,5 +13,7 @@ namespace WPILibInstaller_Avalonia.Models
         public bool InstallTools { get; set; } = true;
         public bool InstallWPILibDeps { get; set; } = true;
         public bool InstallVsCodeExtensions { get; set; } = true;
+
+        public bool InstallAsAdmin { get; set; } = false;
     }
 }

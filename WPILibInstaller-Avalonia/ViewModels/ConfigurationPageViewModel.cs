@@ -26,6 +26,8 @@ namespace WPILibInstaller_Avalonia.ViewModels
             }
         }
 
+        public override bool ForwardVisible => false;
+
         public bool InstallVsCodeExtensions
         {
             get => Model.InstallVsCodeExtensions;
@@ -48,12 +50,32 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         private readonly IVsCodeInstallLocationProvider vsProvider;
 
+        private bool canRunAsAdmin = true;
+
+        public bool CanRunAsAdmin
+        {
+            get => canRunAsAdmin;
+            set => this.RaiseAndSetIfChanged(ref canRunAsAdmin, value);
+        }
+
         public ConfigurationPageViewModel(IDependencyInjection di, IVsCodeInstallLocationProvider vsInstallProvider)
             : base("Install", "Back")
         {
             this.di = di;
             this.vsProvider = vsInstallProvider;
             UpdateVsSettings();
+        }
+
+        public void InstallLocalUser()
+        {
+            Model.InstallAsAdmin = false;
+            di.Resolve<MainWindowViewModel>().GoNext();
+        }
+
+        public void InstallAdmin()
+        {
+            Model.InstallAsAdmin = true;
+            di.Resolve<MainWindowViewModel>().GoNext();
         }
 
         public void UpdateVsSettings()

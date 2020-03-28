@@ -13,5 +13,9 @@
     <CheckBox IsChecked="{Binding Model.InstallTools}">Tools and Utilities</CheckBox>
     <CheckBox IsChecked="{Binding Model.InstallWPILibDeps}">WPILib Dependencies</CheckBox>
     <CheckBox IsEnabled="{Binding CanInstallExtensions, Mode=OneWay}" IsChecked="{Binding InstallVsCodeExtensions}">Visual Studio Code Extensions</CheckBox>
+    <StackPanel>
+      <Button Command="{Binding InstallLocalUser}" Margin="0,10,0,10">Install for Local User</Button>
+      <Button IsVisible="{Binding CanRunAsAdmin}" Command="{Binding InstallAdmin}">Install as Admin</Button>
+    </StackPanel>
   </StackPanel>
 </UserControl>
