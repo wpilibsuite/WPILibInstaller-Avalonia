@@ -12,6 +12,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reactive;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using WPILibInstaller_Avalonia.Interfaces;
@@ -190,8 +191,13 @@ namespace WPILibInstaller_Avalonia.ViewModels
                 var publicFolder = Environment.GetEnvironmentVariable("PUBLIC");
                 if (publicFolder == null)
                 {
-                    publicFolder = "C:\\Users\\Public";
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
+                        publicFolder = "C:\\Users\\Public";
+                    } else {
+                        publicFolder = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+                    }
                 }
+                Console.WriteLine(publicFolder);
                 return Path.Combine(publicFolder, "wpilib", UpgradeConfig.FrcYear);
             }
         }

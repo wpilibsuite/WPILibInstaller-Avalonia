@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using SharpCompress.Archives;
+using SharpCompress.Archives.Zip;
 using SharpCompress.Archives.GZip;
 using SharpCompress.Readers;
 using SharpCompress.Readers.Tar;
@@ -15,7 +15,10 @@ namespace WPILibInstaller_Avalonia.Utils
     {
         public static IReader? OpenArchive(Stream stream)
         {
-            var archive = ArchiveFactory.Open(stream);
+            try {
+            IArchive archive = ZipArchive.Open(stream);
+            Console.WriteLine("Open Archive");
+            Console.WriteLine(archive.GetType());
             if (archive is ZipArchive)
             {
                 return archive.ExtractAllEntries();
@@ -28,6 +31,11 @@ namespace WPILibInstaller_Avalonia.Utils
             {
                 return null;
             }
+            } catch (Exception e) {
+                Console.WriteLine(e);
+                return null;
+            }
+            
         }
     }
 }

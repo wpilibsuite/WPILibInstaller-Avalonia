@@ -112,7 +112,10 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         public string DoneText
         {
-            get => doneText;
+            get {
+                Console.WriteLine("DoneText " + doneText);
+                return doneText;
+            }
             set => this.RaiseAndSetIfChanged(ref doneText, value);
         }
 
@@ -251,8 +254,10 @@ namespace WPILibInstaller_Avalonia.ViewModels
         public async Task DownloadSingleVSCode()
         {
             DoneText = "Downloading VS Code for current platform. Please wait.";
+            Console.WriteLine("Single Download");
             var currentPlatform = PlatformUtils.CurrentPlatform;
             var url = Model.Platforms[currentPlatform].DownloadUrl;
+            Console.WriteLine(url);
             DownloadSingleEnabled = false;
             DownloadAllEnabled = false;
             SelectExistingEnabled = false;
@@ -261,8 +266,10 @@ namespace WPILibInstaller_Avalonia.ViewModels
             var (stream, platform) = await DownloadToMemoryStream(currentPlatform, url, CancellationToken.None, (d) => ProgressBar1 = d);
             if (stream != null)
             {
+                Console.WriteLine("Trying to open archive");
                 Model.ToExtractArchive = OpenArchive(stream);
                 DoneText = "Done Downloading. Press Next to continue";
+                Console.WriteLine("Done");
                 forwardVisible = true;
                 DownloadSingleEnabled = false;
                 DownloadAllEnabled = false;
@@ -272,6 +279,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
             }
             else
             {
+                Console.WriteLine("Failed");
                 DownloadSingleEnabled = true;
                 DownloadAllEnabled = true;
                 SelectExistingEnabled = true;
