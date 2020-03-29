@@ -122,9 +122,9 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
             var archive = vsInstallProvider.Model.ToExtractArchive!;
 
-            var extractor = archive.ExtractAllEntries();
+            var extractor = archive;
 
-            double totalSize = archive.TotalUncompressSize;
+            double totalSize = 100;// archive.TotalUncompressSize;
             long currentSize = 0;
 
 
@@ -177,9 +177,9 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
             var archive = configurationProvider.ZipArchive!;
 
-            var extractor = archive.ExtractAllEntries();
+            var extractor = archive;
 
-            double totalSize = archive.TotalUncompressSize;
+            double totalSize = 100;// archive.TotalUncompressSize;
             long currentSize = 0;
 
             string intoPath = configurationProvider.InstallDirectory;

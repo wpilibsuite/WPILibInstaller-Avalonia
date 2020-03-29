@@ -2,10 +2,15 @@
 using Newtonsoft.Json;
 using ReactiveUI;
 using SharpCompress.Archives;
+using SharpCompress.Archives.GZip;
+using SharpCompress.Archives.Tar;
+using SharpCompress.Readers;
+using SharpCompress.Readers.Tar;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Reactive;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,6 +19,8 @@ using WPILibInstaller_Avalonia.Models;
 using WPILibInstaller_Avalonia.Utils;
 using WPILibInstaller_Avalonia.Views;
 using static WPILibInstaller_Avalonia.Utils.ReactiveExtensions;
+
+using SharpZip = SharpCompress.Archives.Zip.ZipArchive;
 
 namespace WPILibInstaller_Avalonia.ViewModels
 {
@@ -142,7 +149,21 @@ namespace WPILibInstaller_Avalonia.ViewModels
                 return;
             }
 
-            ZipArchive = SharpCompress.Archives.Zip.ZipArchive.Open(file);
+            //var tararch = TarArchive.Open(file);
+
+            //var tar2 = ArchiveFactory.Open(file);
+
+            var fileArchive = ArchiveFactory.Open(file);
+
+            if (fileArchive is ZipArchive)
+            {
+                ZipArchive = fileArchive.ExtractAllEntries();
+            }
+            else if (fileArchive is GZipArchive garchive)
+            {
+                var s = garchive.Entries.First().OpenEntryStream();
+                ZipArchive = TarReader.Open(s);
+            }
 
             MissingSupportFiles = false;
             forwardVisible = !MissingEitherFile;
@@ -180,7 +201,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
             return di.Resolve<VSCodePageViewModel>();
         }
 
-        public IArchive ZipArchive { get; private set; }
+        public IReader ZipArchive { get; private set; }
 
         public UpgradeConfig UpgradeConfig { get; private set; }
 

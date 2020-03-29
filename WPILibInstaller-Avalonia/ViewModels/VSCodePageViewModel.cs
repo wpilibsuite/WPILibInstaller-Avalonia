@@ -17,6 +17,7 @@ using WPILibInstaller_Avalonia.Models;
 using WPILibInstaller_Avalonia.Utils;
 using WPILibInstaller_Avalonia.Views;
 using static WPILibInstaller_Avalonia.Models.VsCodeModel;
+using static WPILibInstaller_Avalonia.Utils.ArchiveUtils;
 
 using SharpZip = SharpCompress.Archives.Zip.ZipArchive;
 
@@ -166,7 +167,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
                 MemoryStream ms = new MemoryStream(100000000);
                 await entry.Open().CopyToAsync(ms);
 
-                Model.ToExtractArchive = SharpZip.Open(ms);
+                Model.ToExtractArchive = OpenArchive(ms);
             }
             catch
             {
@@ -236,7 +237,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
             if (ms != null)
             {
                 ms.Seek(0, SeekOrigin.Begin);
-                Model.ToExtractArchive = SharpZip.Open(ms);
+                Model.ToExtractArchive = OpenArchive(ms);
                 DoneText = "Done Downloading. Press Next to continue";
                 forwardVisible = true;
                 DownloadSingleEnabled = false;
@@ -260,7 +261,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
             var (stream, platform) = await DownloadToMemoryStream(currentPlatform, url, CancellationToken.None, (d) => ProgressBar1 = d);
             if (stream != null)
             {
-                Model.ToExtractArchive = SharpZip.Open(stream);
+                Model.ToExtractArchive = OpenArchive(stream);
                 DoneText = "Done Downloading. Press Next to continue";
                 forwardVisible = true;
                 DownloadSingleEnabled = false;
