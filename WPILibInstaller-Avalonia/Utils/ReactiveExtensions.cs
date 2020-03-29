@@ -20,6 +20,7 @@ namespace WPILibInstaller_Avalonia.Utils
         {
             // Handle exception
             ;
+            Console.WriteLine(e);
         }
     }
 }
