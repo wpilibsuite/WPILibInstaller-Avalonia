@@ -124,7 +124,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
             var extractor = archive;
 
-            double totalSize = 100;// archive.TotalUncompressSize;
+            double totalSize = vsInstallProvider.Model.ToExtractArchiveLength;
             long currentSize = 0;
 
 
@@ -175,11 +175,11 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
             Progress = 0;
 
-            var archive = configurationProvider.ZipArchive!;
+            var archive = configurationProvider.ZipArchive;
 
             var extractor = archive;
 
-            double totalSize = 100;// archive.TotalUncompressSize;
+            double totalSize = configurationProvider.ZipArchiveLength;
             long currentSize = 0;
 
             string intoPath = configurationProvider.InstallDirectory;
@@ -236,6 +236,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
                 await stream.CopyToAsync(writer);
             }
 
+            ;
         }
 
         private Task RunGradleSetup()

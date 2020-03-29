@@ -141,6 +141,8 @@ namespace WPILibInstaller_Avalonia.ViewModels
             refresher.RefreshForwardBackProperties();
         }
 
+        public SharpZip localArchive;
+
         public async Task SelectSupportFilesFunc()
         {
             var file = await programWindow.ShowFilePicker("Select Support File", Environment.GetFolderPath(Environment.SpecialFolder.Personal));
@@ -150,21 +152,13 @@ namespace WPILibInstaller_Avalonia.ViewModels
                 return;
             }
 
-            //var tararch = TarArchive.Open(file);
+            //FileStream fileStream = File.OpenRead(file);
 
-            //var tar2 = ArchiveFactory.Open(file);
+            localArchive = SharpZip.Open(file);
+            ZipArchive = localArchive.ExtractAllEntries();
+            ZipArchiveLength = (int)localArchive.TotalUncompressSize;
 
-            var fileArchive = ArchiveFactory.Open(file);
-
-            if (fileArchive is ZipArchive)
-            {
-                ZipArchive = fileArchive.ExtractAllEntries();
-            }
-            else if (fileArchive is GZipArchive garchive)
-            {
-                var s = garchive.Entries.First().OpenEntryStream();
-                ZipArchive = TarReader.Open(s);
-            }
+            //(ZipArchive, ZipArchiveLength, localArchive) = ArchiveUtils.OpenArchive(fileStream);
 
             MissingSupportFiles = false;
             forwardVisible = !MissingEitherFile;
@@ -198,7 +192,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
                     }
                 }
                 Console.WriteLine(publicFolder);
-                return Path.Combine(publicFolder, "wpilib", UpgradeConfig.FrcYear);
+                return Path.Combine(publicFolder, "wpilibtest", UpgradeConfig.FrcYear);
             }
         }
 
@@ -214,5 +208,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
         public FullConfig FullConfig { get; private set; }
 
         public JdkConfig JdkConfig { get; private set; }
+
+        public int ZipArchiveLength { get; set; } = 1;
     }
 }

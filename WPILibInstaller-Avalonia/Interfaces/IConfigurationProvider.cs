@@ -13,6 +13,7 @@ namespace WPILibInstaller_Avalonia.Interfaces
         VsCodeModel VsCodeModel { get; }
 
         IReader ZipArchive { get; }
+        int ZipArchiveLength { get; }
 
         UpgradeConfig UpgradeConfig { get; }
         FullConfig FullConfig { get; }

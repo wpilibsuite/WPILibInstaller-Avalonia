@@ -27,6 +27,7 @@ namespace WPILibInstaller_Avalonia.Models
         public Dictionary<Platform, PlatformData> Platforms { get; } = new Dictionary<Platform, PlatformData>();
 
         public IReader? ToExtractArchive { get; set; }
+        public int ToExtractArchiveLength { get; set; } = 1;
 
         public VsCodeModel(string vscodeVersion)
         {

@@ -8,33 +8,33 @@ using SharpCompress.Archives.Zip;
 using SharpCompress.Archives.GZip;
 using SharpCompress.Readers;
 using SharpCompress.Readers.Tar;
-
+using System.Runtime.InteropServices;
 namespace WPILibInstaller_Avalonia.Utils
 {
     public static class ArchiveUtils
     {
-        public static IReader? OpenArchive(Stream stream)
+        public static (IReader reader, int size, IArchive archive) OpenArchive(Stream stream)
         {
-            try {
+            stream.Seek(0, SeekOrigin.Begin);
+
+            if (GZipArchive.IsGZipFile(stream))
+            {
+                // Seek to end, grab size
+                stream.Seek(-4, SeekOrigin.End);
+                Span<int> intSpan = stackalloc int[1];
+
+                stream.Read(MemoryMarshal.AsBytes(intSpan));
+
+                int uncompressedSize = intSpan[0];
+
+                stream.Seek(0, SeekOrigin.Begin);
+                var gzip = GZipArchive.Open(stream);
+                return (TarReader.Open(gzip.Entries.First().OpenEntryStream()), uncompressedSize, gzip);
+            }
+
+            stream.Seek(0, SeekOrigin.Begin);
             IArchive archive = ZipArchive.Open(stream);
-            Console.WriteLine("Open Archive");
-            Console.WriteLine(archive.GetType());
-            if (archive is ZipArchive)
-            {
-                return archive.ExtractAllEntries();
-            }
-            else if (archive is GZipArchive gza)
-            {
-                return TarReader.Open(gza.Entries.First().OpenEntryStream());
-            }
-            else
-            {
-                return null;
-            }
-            } catch (Exception e) {
-                Console.WriteLine(e);
-                return null;
-            }
+            return (archive.ExtractAllEntries(), (int)archive.TotalUncompressSize, archive);
             
         }
     }
