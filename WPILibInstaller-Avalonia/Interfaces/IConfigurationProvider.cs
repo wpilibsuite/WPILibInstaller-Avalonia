@@ -5,6 +5,7 @@ using System.Text;
 using SharpCompress.Archives;
 using SharpCompress.Readers;
 using WPILibInstaller_Avalonia.Models;
+using WPILibInstaller_Avalonia.Utils;
 
 namespace WPILibInstaller_Avalonia.Interfaces
 {
@@ -12,8 +13,7 @@ namespace WPILibInstaller_Avalonia.Interfaces
     {
         VsCodeModel VsCodeModel { get; }
 
-        IReader ZipArchive { get; }
-        int ZipArchiveLength { get; }
+        IArchiveExtractor ZipArchive { get; }
 
         UpgradeConfig UpgradeConfig { get; }
         FullConfig FullConfig { get; }

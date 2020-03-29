@@ -74,7 +74,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
             } while (false);
 
-            
+
 
             if (source.IsCancellationRequested)
             {
@@ -124,7 +124,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
             var extractor = archive;
 
-            double totalSize = vsInstallProvider.Model.ToExtractArchiveLength;
+            double totalSize = archive.TotalUncompressSize;
             long currentSize = 0;
 
 
@@ -136,17 +136,17 @@ namespace WPILibInstaller_Avalonia.ViewModels
                 {
                     return;
                 }
-                var entry = extractor.Entry;
-                currentSize += entry.Size;
-                if (entry.IsDirectory) continue;
-                Text = "Installing " + entry.Key;
+                currentSize += extractor.EntrySize;
+                if (extractor.EntryIsDirectory) continue;
+                var entryName = extractor.EntryKey;
+                Text = "Installing " + entryName;
 
                 double currentPercentage = (currentSize / totalSize) * 100;
                 if (currentPercentage > 100) currentPercentage = 100;
                 if (currentPercentage < 0) currentPercentage = 0;
                 Progress = (int)currentPercentage;
 
-                var entryName = entry.Key;
+
 
                 using var stream = extractor.OpenEntryStream();
                 string fullZipToPath = Path.Combine(intoPath, entryName);
@@ -179,7 +179,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
             var extractor = archive;
 
-            double totalSize = configurationProvider.ZipArchiveLength;
+            double totalSize = extractor.TotalUncompressSize;
             long currentSize = 0;
 
             string intoPath = configurationProvider.InstallDirectory;
@@ -190,11 +190,10 @@ namespace WPILibInstaller_Avalonia.ViewModels
                 {
                     return;
                 }
-                var entry = extractor.Entry;
-                currentSize += entry.Size;
-                if (entry.IsDirectory) continue;
+                currentSize += extractor.EntrySize;
+                if (extractor.EntryIsDirectory) continue;
 
-                var entryName = entry.Key;
+                var entryName = extractor.EntryKey;
                 bool skip = false;
                 foreach (var ignore in directoriesToIgnore)
                 {
@@ -210,7 +209,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
                     continue;
                 }
 
-                Text = "Installing " + entry.Key;
+                Text = "Installing " + entryName;
 
                 double currentPercentage = (currentSize / totalSize) * 100;
                 if (currentPercentage > 100) currentPercentage = 100;
@@ -294,7 +293,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
             await Task.Yield();
         }
 
-        
+
 
         private async Task RunVsCodeExtensionsSetup()
         {

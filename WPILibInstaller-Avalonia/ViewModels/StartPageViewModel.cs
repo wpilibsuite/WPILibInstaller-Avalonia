@@ -141,8 +141,6 @@ namespace WPILibInstaller_Avalonia.ViewModels
             refresher.RefreshForwardBackProperties();
         }
 
-        public SharpZip localArchive;
-
         public async Task SelectSupportFilesFunc()
         {
             var file = await programWindow.ShowFilePicker("Select Support File", Environment.GetFolderPath(Environment.SpecialFolder.Personal));
@@ -152,13 +150,9 @@ namespace WPILibInstaller_Avalonia.ViewModels
                 return;
             }
 
-            //FileStream fileStream = File.OpenRead(file);
+            FileStream fileStream = File.OpenRead(file);
 
-            localArchive = SharpZip.Open(file);
-            ZipArchive = localArchive.ExtractAllEntries();
-            ZipArchiveLength = (int)localArchive.TotalUncompressSize;
-
-            //(ZipArchive, ZipArchiveLength, localArchive) = ArchiveUtils.OpenArchive(fileStream);
+            ZipArchive = ArchiveUtils.OpenArchive(fileStream);
 
             MissingSupportFiles = false;
             forwardVisible = !MissingEitherFile;
@@ -185,9 +179,12 @@ namespace WPILibInstaller_Avalonia.ViewModels
                 var publicFolder = Environment.GetEnvironmentVariable("PUBLIC");
                 if (publicFolder == null)
                 {
-                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    {
                         publicFolder = "C:\\Users\\Public";
-                    } else {
+                    }
+                    else
+                    {
                         publicFolder = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
                     }
                 }
@@ -201,7 +198,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
             return di.Resolve<VSCodePageViewModel>();
         }
 
-        public IReader ZipArchive { get; private set; }
+        public IArchiveExtractor ZipArchive { get; private set; }
 
         public UpgradeConfig UpgradeConfig { get; private set; }
 
@@ -209,6 +206,5 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         public JdkConfig JdkConfig { get; private set; }
 
-        public int ZipArchiveLength { get; set; } = 1;
     }
 }

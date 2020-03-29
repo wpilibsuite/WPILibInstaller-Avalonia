@@ -4,16 +4,17 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using SharpCompress.Archives;
-using SharpCompress.Archives.Zip;
 using SharpCompress.Archives.GZip;
 using SharpCompress.Readers;
 using SharpCompress.Readers.Tar;
 using System.Runtime.InteropServices;
+using System.IO.Compression;
+
 namespace WPILibInstaller_Avalonia.Utils
 {
     public static class ArchiveUtils
     {
-        public static (IReader reader, int size, IArchive archive) OpenArchive(Stream stream)
+        public static IArchiveExtractor OpenArchive(Stream stream)
         {
             stream.Seek(0, SeekOrigin.Begin);
 
@@ -28,14 +29,15 @@ namespace WPILibInstaller_Avalonia.Utils
                 int uncompressedSize = intSpan[0];
 
                 stream.Seek(0, SeekOrigin.Begin);
-                var gzip = GZipArchive.Open(stream);
-                return (TarReader.Open(gzip.Entries.First().OpenEntryStream()), uncompressedSize, gzip);
+
+                var gzip = new GZipStream(stream, CompressionMode.Decompress);
+                return new TarArchiveExtractor(TarReader.Open(gzip), uncompressedSize);
             }
 
             stream.Seek(0, SeekOrigin.Begin);
-            IArchive archive = ZipArchive.Open(stream);
-            return (archive.ExtractAllEntries(), (int)archive.TotalUncompressSize, archive);
-            
+            var archive = new ZipArchive(stream);
+            return new ZipArchiveExtractor(archive);
+
         }
     }
 }
