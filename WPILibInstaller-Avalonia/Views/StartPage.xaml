@@ -13,7 +13,7 @@
                VerticalAlignment="Center" />
     <TextBlock Text="The Installer Support And Resource Files were not found. Please click the button to select them."
                IsVisible="{Binding MissingEitherFile}"/>
-    <Button Content="Select Support Files" 
+    <Button Content="Select Installer Files" 
             Command="{Binding SelectSupportFiles}"
             IsVisible="{Binding MissingSupportFiles}"/>
     <Button Margin="0,10,0,0" Content="Select Resource Files"
