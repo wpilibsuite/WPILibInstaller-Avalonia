@@ -1,4 +1,7 @@
-﻿using ReactiveUI;
+﻿using MessageBox.Avalonia;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using ReactiveUI;
 using SharpCompress.Readers;
 using System;
 using System.Collections.Generic;
@@ -22,6 +25,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
         private readonly IToInstallProvider toInstallProvider;
         private readonly IConfigurationProvider configurationProvider;
         private readonly IVsCodeInstallLocationProvider vsInstallProvider;
+        private readonly IProgramWindow programWindow;
 
         public int Progress { get; set; }
         public string Text { get; set; } = "";
@@ -38,13 +42,15 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         public bool succeeded = false;
 
-        public InstallPageViewModel(IDependencyInjection di, IToInstallProvider toInstallProvider, IConfigurationProvider configurationProvider, IVsCodeInstallLocationProvider vsInstallProvider)
+        public InstallPageViewModel(IDependencyInjection di, IToInstallProvider toInstallProvider, IConfigurationProvider configurationProvider, IVsCodeInstallLocationProvider vsInstallProvider,
+            IProgramWindow programWindow)
             : base("", "")
         {
             this.di = di;
             this.toInstallProvider = toInstallProvider;
             this.configurationProvider = configurationProvider;
             this.vsInstallProvider = vsInstallProvider;
+            this.programWindow = programWindow;
             _ = RunInstall();
         }
 
@@ -66,6 +72,8 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
             var updateTask = UIUpdateTask(updateSource.Token);
 
+            Stopwatch sw = Stopwatch.StartNew();
+
 
             do
             {
@@ -75,6 +83,8 @@ namespace WPILibInstaller_Avalonia.ViewModels
                     await ExtractArchive(source.Token);
                     if (source.IsCancellationRequested) break;
                     await RunGradleSetup();
+                    if (source.IsCancellationRequested) break;
+                    await ConfigureVsCodeSettings();
                     if (source.IsCancellationRequested) break;
                     await RunToolSetup();
                     if (source.IsCancellationRequested) break;
@@ -107,6 +117,9 @@ namespace WPILibInstaller_Avalonia.ViewModels
             {
                 succeeded = true;
             }
+
+            await MessageBoxManager.GetMessageBoxStandardWindow("Time",
+                    $"{sw.Elapsed}", icon: MessageBox.Avalonia.Enums.Icon.None).ShowDialog(programWindow.Window);
 
             di.Resolve<MainWindowViewModel>().GoNext();
         }
@@ -141,6 +154,102 @@ namespace WPILibInstaller_Avalonia.ViewModels
             if (!model.InstallWPILibDeps) ignoreDirs.Add(configurationProvider.UpgradeConfig.Maven.Folder + "/");
 
             return ignoreDirs;
+        }
+
+        private void SetIfNotSet<T>(string key, T value, dynamic settingsJson)
+        {
+            if (!settingsJson.ContainsKey(key))
+            {
+
+                settingsJson[key] = value;
+            }
+        }
+
+        private async Task ConfigureVsCodeSettings()
+        {
+
+
+            var homePath = configurationProvider.InstallDirectory;
+            var vscodePath = Path.Combine(homePath, "vscode");
+            var settingsDir = Path.Combine(vscodePath, "data", "user-data", "User");
+            var settingsFile = Path.Combine(settingsDir, "settings.json");
+
+            var dataFolder = Path.Combine(vscodePath, "data");
+            try
+            {
+                Directory.CreateDirectory(dataFolder);
+            }
+            catch (IOException)
+            {
+
+            }
+
+            var codeFolder = Path.Combine(homePath, configurationProvider.UpgradeConfig.PathFolder);
+
+            try
+            {
+                Directory.CreateDirectory(codeFolder);
+            }
+            catch (IOException)
+            {
+
+            }
+
+            try
+            {
+                Directory.CreateDirectory(settingsDir);
+            }
+            catch (IOException)
+            {
+
+            }
+
+            dynamic settingsJson = new JObject();
+            if (File.Exists(settingsFile))
+            {
+                settingsJson = (JObject)JsonConvert.DeserializeObject(await File.ReadAllTextAsync(settingsFile))!;
+            }
+
+            SetIfNotSet("java.home", Path.Combine(homePath, "jdk"), settingsJson);
+            SetIfNotSet("extensions.autoUpdate", false, settingsJson);
+            SetIfNotSet("extensions.autoCheckUpdates", false, settingsJson);
+            SetIfNotSet("extensions.ignoreRecommendations", true, settingsJson);
+            SetIfNotSet("extensions.showRecommendationsOnlyOnDemand", false, settingsJson);
+            SetIfNotSet("update.channel", "none", settingsJson);
+            SetIfNotSet("update.showReleaseNotes", false, settingsJson);
+
+            if (!settingsJson.ContainsKey("terminal.integrated.env.windows"))
+            {
+                dynamic terminalProps = new JObject();
+
+                terminalProps["JAVA_HOME"] = Path.Combine(homePath, "jdk");
+                terminalProps["PATH"] = Path.Combine(homePath, "jdk", "bin") + ":${env:PATH}";
+
+                settingsJson["terminal.integrated.env.windows"] = terminalProps;
+
+            }
+            else
+            {
+                dynamic terminalEnv = settingsJson["terminal.integrated.env.windows"];
+                terminalEnv["JAVA_HOME"] = Path.Combine(homePath, "jdk");
+                string path = terminalEnv["PATH"];
+                if (path == null)
+                {
+                    terminalEnv["PATH"] = Path.Combine(homePath, "jdk", "bin") + ";${env:PATH}";
+                }
+                else
+                {
+                    var binPath = Path.Combine(homePath, "jdk", "bin");
+                    if (!path.Contains(binPath))
+                    {
+                        path = binPath + ";" + path;
+                        terminalEnv["PATH"] = path;
+                    }
+                }
+            }
+
+            var serialized = JsonConvert.SerializeObject(settingsJson, Formatting.Indented);
+            await File.WriteAllTextAsync(settingsFile, serialized);
         }
 
         private async Task RunVsCodeSetup(CancellationToken token)
