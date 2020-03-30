@@ -74,7 +74,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
         }
 
         private bool missingResourceFiles = true;
-        private VsCodeConfig vscodeConfig;
+
 
         public ReactiveCommand<Unit, Unit> SelectSupportFiles { get; }
         public ReactiveCommand<Unit, Unit> SelectResourceFiles { get; }
@@ -95,7 +95,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
             using (StreamReader reader = new StreamReader(entry.Open()))
             {
                 var vsConfigStr = await reader.ReadToEndAsync();
-                vscodeConfig = JsonConvert.DeserializeObject<VsCodeConfig>(vsConfigStr, new JsonSerializerSettings
+                VsCodeConfig = JsonConvert.DeserializeObject<VsCodeConfig>(vsConfigStr, new JsonSerializerSettings
                 {
                     MissingMemberHandling = MissingMemberHandling.Error
                 }) ?? throw new InvalidOperationException("Not Valid");
@@ -163,11 +163,11 @@ namespace WPILibInstaller_Avalonia.ViewModels
         {
             get
             {
-                VsCodeModel model = new VsCodeModel(vscodeConfig.VsCodeVersion);
-                model.Platforms.Add(Utils.Platform.Win32, new VsCodeModel.PlatformData(vscodeConfig.VsCode32Url, vscodeConfig.VsCode32Name));
-                model.Platforms.Add(Utils.Platform.Win64, new VsCodeModel.PlatformData(vscodeConfig.VsCode64Url, vscodeConfig.VsCode64Name));
-                model.Platforms.Add(Utils.Platform.Linux64, new VsCodeModel.PlatformData(vscodeConfig.VsCodeLinuxUrl, vscodeConfig.VsCodeLinuxName));
-                model.Platforms.Add(Utils.Platform.Mac64, new VsCodeModel.PlatformData(vscodeConfig.VsCodeMacUrl, vscodeConfig.VsCodeMacName));
+                VsCodeModel model = new VsCodeModel(VsCodeConfig.VsCodeVersion);
+                model.Platforms.Add(Utils.Platform.Win32, new VsCodeModel.PlatformData(VsCodeConfig.VsCode32Url, VsCodeConfig.VsCode32Name));
+                model.Platforms.Add(Utils.Platform.Win64, new VsCodeModel.PlatformData(VsCodeConfig.VsCode64Url, VsCodeConfig.VsCode64Name));
+                model.Platforms.Add(Utils.Platform.Linux64, new VsCodeModel.PlatformData(VsCodeConfig.VsCodeLinuxUrl, VsCodeConfig.VsCodeLinuxName));
+                model.Platforms.Add(Utils.Platform.Mac64, new VsCodeModel.PlatformData(VsCodeConfig.VsCodeMacUrl, VsCodeConfig.VsCodeMacName));
                 return model;
             }
         }
@@ -205,6 +205,8 @@ namespace WPILibInstaller_Avalonia.ViewModels
         public FullConfig FullConfig { get; private set; }
 
         public JdkConfig JdkConfig { get; private set; }
+
+        public VsCodeConfig VsCodeConfig { get; private set; }
 
     }
 }

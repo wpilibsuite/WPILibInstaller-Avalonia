@@ -8,5 +8,6 @@
     <TextBlock FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center">
       Installation Canceled! Press finish to exit.
     </TextBlock>
+    <TextBlock TextWrapping="Wrap" Text="{Binding ExceptionText, Mode=OneWay}"/>
   </StackPanel>
 </UserControl>

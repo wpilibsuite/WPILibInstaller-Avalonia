@@ -20,6 +20,8 @@ namespace WPILibInstaller_Avalonia.Interfaces
 
         JdkConfig JdkConfig { get; }
 
+        VsCodeConfig VsCodeConfig { get; }
+
         string InstallDirectory { get; }
     }
 }

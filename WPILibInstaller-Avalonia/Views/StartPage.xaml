@@ -11,7 +11,7 @@
     <TextBlock Text="Welcome to the WPILib Installer!"
                HorizontalAlignment="Center"
                VerticalAlignment="Center" />
-    <TextBlock Text="The Installer Support And Resource Files were not found. Please click the button to select them."
+    <TextBlock Text="The Installer And Resource Files were not found. Please click the button to select them."
                IsVisible="{Binding MissingEitherFile}"/>
     <Button Content="Select Installer Files" 
             Command="{Binding SelectSupportFiles}"

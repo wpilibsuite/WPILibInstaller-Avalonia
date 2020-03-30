@@ -10,6 +10,16 @@ namespace WPILibInstaller_Avalonia.ViewModels
     {
         private readonly IProgramWindow progWindow;
 
+        private Exception? canceledByException = null;
+
+        public string ExceptionText => canceledByException?.ToString() ?? "";
+
+        public void SetException(Exception ex)
+        {
+            canceledByException = ex;
+            this.RaisePropertyChanged(nameof(ExceptionText));
+        }
+
         public CanceledPageViewModel(IProgramWindow progWindow)
             : base("Finish", "")
         {
