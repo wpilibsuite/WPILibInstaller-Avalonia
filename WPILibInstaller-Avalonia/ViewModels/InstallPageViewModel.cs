@@ -84,8 +84,6 @@ namespace WPILibInstaller_Avalonia.ViewModels
                     if (source.IsCancellationRequested) break;
                     await RunGradleSetup();
                     if (source.IsCancellationRequested) break;
-                    await ConfigureVsCodeSettings();
-                    if (source.IsCancellationRequested) break;
                     await RunToolSetup();
                     if (source.IsCancellationRequested) break;
                     await RunCppSetup();
@@ -93,6 +91,8 @@ namespace WPILibInstaller_Avalonia.ViewModels
                     await RunMavenMetaDataFixer();
                     if (source.IsCancellationRequested) break;
                     await RunVsCodeSetup(source.Token);
+                    await ConfigureVsCodeSettings();
+                    if (source.IsCancellationRequested) break;
                     if (source.IsCancellationRequested) break;
                     await RunVsCodeExtensionsSetup();
                 }
@@ -156,6 +156,30 @@ namespace WPILibInstaller_Avalonia.ViewModels
             return ignoreDirs;
         }
 
+        private ValueTask<string> SetVsCodePortableMode()
+        {
+            string portableFolder = Path.Combine(configurationProvider.InstallDirectory, "vscode");
+            if (PlatformUtils.CurrentPlatform == Platform.Mac64)
+            {
+                portableFolder = Path.Combine(portableFolder, "data");
+            }
+            else
+            {
+                portableFolder = Path.Combine(portableFolder, "code-portable-data");
+            }
+
+            try
+            {
+                Directory.CreateDirectory(portableFolder);
+            }
+            catch (IOException)
+            {
+
+            }
+
+            return new ValueTask<string>(portableFolder);
+        }
+
         private void SetIfNotSet<T>(string key, T value, dynamic settingsJson)
         {
             if (!settingsJson.ContainsKey(key))
@@ -167,22 +191,15 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         private async Task ConfigureVsCodeSettings()
         {
+            var vsVm = di.Resolve<VSCodePageViewModel>();
+            if (!toInstallProvider.Model.InstallVsCode && !vsVm.AlreadyInstalled) return;
 
+            var dataPath = await SetVsCodePortableMode();
 
-            var homePath = configurationProvider.InstallDirectory;
-            var vscodePath = Path.Combine(homePath, "vscode");
-            var settingsDir = Path.Combine(vscodePath, "data", "user-data", "User");
+            var settingsDir = Path.Combine(dataPath, "user-data", "User");
             var settingsFile = Path.Combine(settingsDir, "settings.json");
 
-            var dataFolder = Path.Combine(vscodePath, "data");
-            try
-            {
-                Directory.CreateDirectory(dataFolder);
-            }
-            catch (IOException)
-            {
-
-            }
+            var homePath = configurationProvider.InstallDirectory;
 
             var codeFolder = Path.Combine(homePath, configurationProvider.UpgradeConfig.PathFolder);
 
@@ -247,6 +264,8 @@ namespace WPILibInstaller_Avalonia.ViewModels
                     }
                 }
             }
+
+            // TODO Handle Unix and Mac Paths
 
             var serialized = JsonConvert.SerializeObject(settingsJson, Formatting.Indented);
             await File.WriteAllTextAsync(settingsFile, serialized);
