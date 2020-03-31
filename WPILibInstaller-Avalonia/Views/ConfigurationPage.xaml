@@ -5,17 +5,17 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="WPILibInstaller_Avalonia.Views.ConfigurationPage">
   <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-    <TextBlock Margin="0,0,0,25">Select the items you would like to install.</TextBlock>
-    <CheckBox IsEnabled="{Binding CanInstallVsCode, Mode=OneWay}" IsChecked="{Binding InstallVsCode}">Visual Studio Code</CheckBox>
-    <CheckBox IsChecked="{Binding Model.InstallCpp}">C++ Compiler</CheckBox>
-    <CheckBox IsChecked="{Binding Model.InstallGradle}">Gradle</CheckBox>
-    <CheckBox IsChecked="{Binding Model.InstallJDK}">Java JDK/JRE</CheckBox>
-    <CheckBox IsChecked="{Binding Model.InstallTools}">Tools and Utilities</CheckBox>
-    <CheckBox IsChecked="{Binding Model.InstallWPILibDeps}">WPILib Dependencies</CheckBox>
-    <CheckBox IsEnabled="{Binding CanInstallExtensions, Mode=OneWay}" IsChecked="{Binding InstallVsCodeExtensions}">Visual Studio Code Extensions</CheckBox>
-    <StackPanel>
-      <Button Command="{Binding InstallLocalUser}" Margin="0,10,0,10">Install for Local User</Button>
-      <Button IsVisible="{Binding CanRunAsAdmin}" Command="{Binding InstallAdmin}">Install as Admin</Button>
-    </StackPanel>
+    <TextBlock Margin="0,0,0,20" FontSize="20" FontWeight="Bold">Select the items you would like to install.</TextBlock>
+    <CheckBox FontSize="15" IsEnabled="{Binding CanInstallVsCode, Mode=OneWay}" IsChecked="{Binding InstallVsCode}">Visual Studio Code</CheckBox>
+    <CheckBox FontSize="15" IsChecked="{Binding Model.InstallCpp}">C++ Compiler</CheckBox>
+    <CheckBox FontSize="15" IsChecked="{Binding Model.InstallGradle}">Gradle</CheckBox>
+    <CheckBox FontSize="15" IsChecked="{Binding Model.InstallJDK}">Java JDK/JRE</CheckBox>
+    <CheckBox FontSize="15" IsChecked="{Binding Model.InstallTools}">Tools and Utilities</CheckBox>
+    <CheckBox FontSize="15" IsChecked="{Binding Model.InstallWPILibDeps}">WPILib Dependencies</CheckBox>
+    <CheckBox FontSize="15" IsEnabled="{Binding CanInstallExtensions, Mode=OneWay}" IsChecked="{Binding InstallVsCodeExtensions}">Visual Studio Code Extensions</CheckBox>
+    <Grid Margin="0, 20, 0, 0">
+      <Button HorizontalAlignment="Left" FontSize="15" Command="{Binding InstallLocalUser}" Padding="10">Install for this User</Button>
+      <Button HorizontalAlignment="Right" FontSize="15" Padding="10" IsVisible="{Binding CanRunAsAdmin}" Command="{Binding InstallAdmin}">Install for all Users</Button>
+    </Grid>
   </StackPanel>
 </UserControl>

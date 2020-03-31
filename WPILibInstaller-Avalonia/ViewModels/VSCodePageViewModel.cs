@@ -146,7 +146,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
             var vscodePath = Path.Join(rootPath, "vscode");
             if (Directory.Exists(vscodePath))
             {
-                DoneText = "VS Code Already Installed. You can either download to reinstall, or click Next to skip";
+                DoneText = "VS Code already Installed. You can either download to reinstall, or click Next to skip";
                 DoneVisible = true;
                 forwardVisible = true;
                 refresher.RefreshForwardBackProperties();
