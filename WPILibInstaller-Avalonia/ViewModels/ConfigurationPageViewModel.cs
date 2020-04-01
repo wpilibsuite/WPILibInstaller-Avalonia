@@ -2,9 +2,14 @@
 using System;
 using System.Collections.Generic;
 using System.Reactive;
+using System.Reactive.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using WPILibInstaller_Avalonia.Interfaces;
 using WPILibInstaller_Avalonia.Models;
+
+using static WPILibInstaller_Avalonia.Utils.ReactiveExtensions;
+
 
 namespace WPILibInstaller_Avalonia.ViewModels
 {
@@ -63,19 +68,24 @@ namespace WPILibInstaller_Avalonia.ViewModels
         {
             this.di = di;
             this.vsProvider = vsInstallProvider;
+            InstallLocalUser = CreateCatchableButton(InstallLocalUserFunc);
+            InstallAdmin = CreateCatchableButton(InstallAdminFunc);
             UpdateVsSettings();
         }
 
-        public void InstallLocalUser()
+        public ReactiveCommand<Unit, Unit> InstallLocalUser { get; }
+        public ReactiveCommand<Unit, Unit> InstallAdmin { get; }
+
+        private async Task InstallLocalUserFunc()
         {
             Model.InstallAsAdmin = false;
-            di.Resolve<MainWindowViewModel>().GoNext();
+            await di.Resolve<MainWindowViewModel>().GoNext.Execute();
         }
 
-        public void InstallAdmin()
+        private async Task InstallAdminFunc()
         {
             Model.InstallAsAdmin = true;
-            di.Resolve<MainWindowViewModel>().GoNext();
+            await di.Resolve<MainWindowViewModel>().GoNext.Execute();
         }
 
         public void UpdateVsSettings()

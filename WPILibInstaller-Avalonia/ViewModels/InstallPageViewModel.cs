@@ -9,6 +9,8 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Reactive;
+using System.Reactive.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -16,6 +18,8 @@ using System.Threading.Tasks;
 using WPILibInstaller_Avalonia.Interfaces;
 using WPILibInstaller_Avalonia.Models;
 using WPILibInstaller_Avalonia.Utils;
+
+using static WPILibInstaller_Avalonia.Utils.ReactiveExtensions;
 
 namespace WPILibInstaller_Avalonia.ViewModels
 {
@@ -42,6 +46,8 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         public bool succeeded = false;
 
+        private readonly Task runInstallTask;
+
         public InstallPageViewModel(IDependencyInjection di, IToInstallProvider toInstallProvider, IConfigurationProvider configurationProvider, IVsCodeInstallLocationProvider vsInstallProvider,
             IProgramWindow programWindow)
             : base("", "")
@@ -51,14 +57,18 @@ namespace WPILibInstaller_Avalonia.ViewModels
             this.configurationProvider = configurationProvider;
             this.vsInstallProvider = vsInstallProvider;
             this.programWindow = programWindow;
-            _ = RunInstall();
+            CancelInstall = CreateCatchableButton(CancelInstallFunc);
+            runInstallTask = RunInstall();
         }
 
         private CancellationTokenSource? source;
 
-        public void CancelInstall()
+        public ReactiveCommand<Unit, Unit> CancelInstall;
+
+        public async Task CancelInstallFunc()
         {
             source?.Cancel();
+            await runInstallTask;
         }
 
         private Exception? exp = null;
@@ -121,7 +131,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
             await MessageBoxManager.GetMessageBoxStandardWindow("Time",
                     $"{sw.Elapsed}", icon: MessageBox.Avalonia.Enums.Icon.None).ShowDialog(programWindow.Window);
 
-            di.Resolve<MainWindowViewModel>().GoNext();
+            await di.Resolve<MainWindowViewModel>().GoNext.Execute();
         }
 
         public override PageViewModelBase MoveNext()
@@ -459,7 +469,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
             Text = "Configuring Tools";
             Progress = 50;
 
-            var didComplete = await RunScriptExecutable(Path.Combine(configurationProvider.InstallDirectory,
+            await RunScriptExecutable(Path.Combine(configurationProvider.InstallDirectory,
                 configurationProvider.UpgradeConfig.Tools.Folder,
                 configurationProvider.UpgradeConfig.Tools.UpdaterExe), "silent");
         }
@@ -472,7 +482,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
             Text = "Fixing up maven metadata";
             Progress = 50;
 
-            var didComplete = await RunScriptExecutable(Path.Combine(configurationProvider.InstallDirectory,
+            await RunScriptExecutable(Path.Combine(configurationProvider.InstallDirectory,
                 configurationProvider.UpgradeConfig.Maven.Folder,
                 configurationProvider.UpgradeConfig.Maven.MetaDataFixerExe), "silent");
         }

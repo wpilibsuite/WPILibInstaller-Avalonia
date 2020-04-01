@@ -14,6 +14,8 @@ using WPILibInstaller_Avalonia.Interfaces;
 using WPILibInstaller_Avalonia.Models;
 using WPILibInstaller_Avalonia.Views;
 
+using static WPILibInstaller_Avalonia.Utils.ReactiveExtensions;
+
 namespace WPILibInstaller_Avalonia.ViewModels
 {
     public class MainWindowViewModel : ReactiveObject, IMainWindowViewModelRefresher
@@ -39,15 +41,21 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         public bool BackVisible => CurrentPage?.BackVisible ?? false;
 
-        public void GoNext()
+        public ReactiveCommand<Unit, Unit> GoNext { get; }
+
+        public ReactiveCommand<Unit, Unit> GoBack { get; }
+
+        private Task GoNextFunc()
         {
             HandleStateChange();
+            return Task.CompletedTask;
         }
 
-        public void GoBack()
+        private Task GoBackFunc()
         {
             pages.Pop();
             CurrentPage = pages.Pop();
+            return Task.CompletedTask;
         }
 
         public void RefreshForwardBackProperties()
@@ -66,6 +74,10 @@ namespace WPILibInstaller_Avalonia.ViewModels
         {
             this.WhenAnyValue(x => x.CurrentPage)
                 .Subscribe(o => RefreshForwardBackProperties());
+
+            GoNext = CreateCatchableButton(GoNextFunc);
+            GoBack = CreateCatchableButton(GoBackFunc);
+
 
             this.di = di;
         }

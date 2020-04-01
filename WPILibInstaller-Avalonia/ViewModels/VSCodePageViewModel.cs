@@ -9,6 +9,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
+using System.Reactive;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,6 +22,8 @@ using static WPILibInstaller_Avalonia.Utils.ArchiveUtils;
 
 using SharpZip = SharpCompress.Archives.Zip.ZipArchive;
 
+using static WPILibInstaller_Avalonia.Utils.ReactiveExtensions;
+
 namespace WPILibInstaller_Avalonia.ViewModels
 {
     public class VSCodePageViewModel : PageViewModelBase, IVsCodeInstallLocationProvider
@@ -30,14 +33,10 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         private bool forwardVisible = false;
 
-        private bool LocalForwardVisible
+        private void SetLocalForwardVisible(bool value)
         {
-            get => forwardVisible;
-            set
-            {
-                forwardVisible = value;
-                refresher.RefreshForwardBackProperties();
-            }
+            forwardVisible = value;
+            refresher.RefreshForwardBackProperties();
         }
 
         public bool EnableSelectionButtons
@@ -117,6 +116,12 @@ namespace WPILibInstaller_Avalonia.ViewModels
         public VSCodePageViewModel(IMainWindowViewModelRefresher mainRefresher, IProgramWindow programWindow, IConfigurationProvider modelProvider, IDependencyInjection di)
             : base("Next", "Back")
         {
+            SkipVsCode = CreateCatchableButton(SkipVsCodeFunc);
+            DownloadSingleVsCode = CreateCatchableButton(DownloadSingleVSCodeFunc);
+            DownloadVsCode = CreateCatchableButton(DownloadVsCodeFunc);
+            SelectVsCode = CreateCatchableButton(SelectVsCodeFunc);
+
+
             this.refresher = mainRefresher;
             this.programWindow = programWindow;
             Model = modelProvider.VsCodeModel;
@@ -130,17 +135,22 @@ namespace WPILibInstaller_Avalonia.ViewModels
             if (Directory.Exists(vscodePath))
             {
                 DoneText = "VS Code already Installed. You can either download to reinstall, or click Next to skip";
-                LocalForwardVisible = true;
+                SetLocalForwardVisible(true);
                 AlreadyInstalled = true;
             }
         }
 
-        public async Task SkipVSCode()
-        {
+        public ReactiveCommand<Unit, Unit> SkipVsCode { get; }
+        public ReactiveCommand<Unit, Unit> SelectVsCode { get; }
+        public ReactiveCommand<Unit, Unit> DownloadVsCode { get; }
+        public ReactiveCommand<Unit, Unit> DownloadSingleVsCode { get; }
 
+        private async Task SkipVsCodeFunc()
+        {
+            await Task.Yield();
         }
 
-        public async Task SelectVsCode()
+        private async Task SelectVsCodeFunc()
         {
             var file = await programWindow.ShowFilePicker("Select VS Code");
             if (file == null)
@@ -170,14 +180,14 @@ namespace WPILibInstaller_Avalonia.ViewModels
             EnableSelectionButtons = false;
         }
 
-        public async void DownloadVsCode()
+        private async Task DownloadVsCodeFunc()
         {
             var currentPlatform = PlatformUtils.CurrentPlatform;
 
             DoneText = "Downloading VS Code for all platforms. Please wait.";
 
             EnableSelectionButtons = false;
-            LocalForwardVisible = false;
+            SetLocalForwardVisible(false);
 
             var win32 = DownloadToMemoryStream(Platform.Win32, Model.Platforms[Platform.Win32].DownloadUrl, CancellationToken.None, (d) => ProgressBar1 = d);
             var win64 = DownloadToMemoryStream(Platform.Win64, Model.Platforms[Platform.Win64].DownloadUrl, CancellationToken.None, (d) => ProgressBar2 = d);
@@ -222,11 +232,11 @@ namespace WPILibInstaller_Avalonia.ViewModels
                 Model.ToExtractArchive = OpenArchive(ms);
                 DoneText = "Done Downloading. Press Next to continue";
                 EnableSelectionButtons = true;
-                LocalForwardVisible = true;
+                SetLocalForwardVisible(true);
             }
         }
 
-        public async Task DownloadSingleVSCode()
+        private async Task DownloadSingleVSCodeFunc()
         {
             DoneText = "Downloading VS Code for current platform. Please wait.";
             Console.WriteLine("Single Download");
@@ -234,7 +244,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
             var url = Model.Platforms[currentPlatform].DownloadUrl;
 
             EnableSelectionButtons = false;
-            LocalForwardVisible = false;
+            SetLocalForwardVisible(false);
 
             var (stream, platform) = await DownloadToMemoryStream(currentPlatform, url, CancellationToken.None, (d) => ProgressBar1 = d);
             if (stream != null)
@@ -243,7 +253,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
                 Model.ToExtractArchive = OpenArchive(stream);
                 DoneText = "Done Downloading. Press Next to continue";
                 EnableSelectionButtons = true;
-                LocalForwardVisible = true;
+                SetLocalForwardVisible(true);
                 refresher.RefreshForwardBackProperties();
             }
             else
@@ -252,7 +262,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
                 EnableSelectionButtons = true;
                 if (AlreadyInstalled)
                 {
-                    LocalForwardVisible = true;
+                    SetLocalForwardVisible(true);
                 }
                 ; // TODO Fail
             }
