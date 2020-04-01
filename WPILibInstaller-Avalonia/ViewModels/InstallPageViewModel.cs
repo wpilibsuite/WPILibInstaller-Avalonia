@@ -58,7 +58,19 @@ namespace WPILibInstaller_Avalonia.ViewModels
             this.vsInstallProvider = vsInstallProvider;
             this.programWindow = programWindow;
             CancelInstall = CreateCatchableButton(CancelInstallFunc);
-            runInstallTask = RunInstall();
+            runInstallTask = installFunc();
+
+            async Task installFunc()
+            {
+                try
+                {
+                    await RunInstall();
+                }
+                catch (Exception e)
+                {
+                    di.Resolve<MainWindowViewModel>().HandleException(e);
+                }
+            }
         }
 
         private CancellationTokenSource? source;

@@ -11,8 +11,6 @@ namespace WPILibInstaller_Avalonia.Views
         public InstallPage()
         {
             this.InitializeComponent();
-            var vm = this.ViewModel;
-            ;
         }
 
         private void InitializeComponent()

@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using WPILibInstaller_Avalonia.Interfaces;
 using WPILibInstaller_Avalonia.Models;
+using WPILibInstaller_Avalonia.Utils;
 using WPILibInstaller_Avalonia.Views;
 
 using static WPILibInstaller_Avalonia.Utils.ReactiveExtensions;
@@ -45,6 +46,13 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         public ReactiveCommand<Unit, Unit> GoBack { get; }
 
+        public void HandleException(Exception e)
+        {
+            var cancelPage = di.Resolve<CanceledPageViewModel>();
+            cancelPage.SetException(e);
+            CurrentPage = cancelPage;
+        }
+
         private Task GoNextFunc()
         {
             HandleStateChange();
@@ -72,6 +80,8 @@ namespace WPILibInstaller_Avalonia.ViewModels
         public MainWindowViewModel(IDependencyInjection di)
 #pragma warning restore CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
         {
+            ReactiveExtensions.MainWindowVM = this;
+
             this.WhenAnyValue(x => x.CurrentPage)
                 .Subscribe(o => RefreshForwardBackProperties());
 

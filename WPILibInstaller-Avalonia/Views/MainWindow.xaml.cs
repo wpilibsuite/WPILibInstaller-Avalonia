@@ -9,6 +9,7 @@ using Splat;
 using System;
 using System.Threading.Tasks;
 using WPILibInstaller_Avalonia.Interfaces;
+using WPILibInstaller_Avalonia.Utils;
 using WPILibInstaller_Avalonia.ViewModels;
 
 namespace WPILibInstaller_Avalonia.Views
@@ -34,7 +35,6 @@ namespace WPILibInstaller_Avalonia.Views
             ViewModel.Initialize();
 
             DataContext = ViewModel;
-
 
             InitializeComponent();
 #if DEBUG
