@@ -30,6 +30,27 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         private bool forwardVisible = false;
 
+        private bool LocalForwardVisible
+        {
+            get => forwardVisible;
+            set
+            {
+                forwardVisible = value;
+                refresher.RefreshForwardBackProperties();
+            }
+        }
+
+        public bool EnableSelectionButtons
+        {
+            get => enableSelectionButtons;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref enableSelectionButtons, value);
+            }
+        }
+
+        private bool enableSelectionButtons = true;
+
         public string SelectText
         {
             get => selectText;
@@ -41,39 +62,6 @@ namespace WPILibInstaller_Avalonia.ViewModels
             get => downloadText;
             set => this.RaiseAndSetIfChanged(ref downloadText, value);
         }
-
-
-        public bool DownloadAllEnabled
-        {
-            get => downloadAllEnabled;
-            set => this.RaiseAndSetIfChanged(ref downloadAllEnabled, value);
-        }
-
-        private bool downloadAllEnabled = true;
-
-        public bool DownloadSingleEnabled
-        {
-            get => downloadSingleEnabled;
-            set => this.RaiseAndSetIfChanged(ref downloadSingleEnabled, value);
-        }
-
-        private bool downloadSingleEnabled = true;
-
-        public bool SelectExistingEnabled
-        {
-            get => selectExistingEnabled;
-            set => this.RaiseAndSetIfChanged(ref selectExistingEnabled, value);
-        }
-
-        private bool selectExistingEnabled = true;
-
-        public bool DoneVisible
-        {
-            get => doneVisible;
-            set => this.RaiseAndSetIfChanged(ref doneVisible, value);
-        }
-
-        private bool doneVisible = false;
 
         private string selectText = "Select Existing VS Code Download";
         private string downloadText = "Download VS Code For All Platforms";
@@ -112,11 +100,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         public string DoneText
         {
-            get
-            {
-                Console.WriteLine("DoneText " + doneText);
-                return doneText;
-            }
+            get => doneText;
             set => this.RaiseAndSetIfChanged(ref doneText, value);
         }
 
@@ -138,7 +122,6 @@ namespace WPILibInstaller_Avalonia.ViewModels
             Model = modelProvider.VsCodeModel;
             this.di = di;
 
-            forwardVisible = true;
             refresher.RefreshForwardBackProperties();
 
             // Check to see if VS Code is already installed
@@ -147,11 +130,14 @@ namespace WPILibInstaller_Avalonia.ViewModels
             if (Directory.Exists(vscodePath))
             {
                 DoneText = "VS Code already Installed. You can either download to reinstall, or click Next to skip";
-                DoneVisible = true;
-                forwardVisible = true;
-                refresher.RefreshForwardBackProperties();
+                LocalForwardVisible = true;
                 AlreadyInstalled = true;
             }
+        }
+
+        public async Task SkipVSCode()
+        {
+
         }
 
         public async Task SelectVsCode()
@@ -181,12 +167,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
             }
 
             DoneText = "Valid VS Code Selected. Press Next to continue";
-            forwardVisible = true;
-            DownloadSingleEnabled = false;
-            DownloadAllEnabled = false;
-            SelectExistingEnabled = false;
-            DoneVisible = true;
-            refresher.RefreshForwardBackProperties();
+            EnableSelectionButtons = false;
         }
 
         public async void DownloadVsCode()
@@ -195,11 +176,8 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
             DoneText = "Downloading VS Code for all platforms. Please wait.";
 
-            DownloadSingleEnabled = false;
-            DownloadAllEnabled = false;
-            SelectExistingEnabled = false;
-            forwardVisible = false;
-            refresher.RefreshForwardBackProperties();
+            EnableSelectionButtons = false;
+            LocalForwardVisible = false;
 
             var win32 = DownloadToMemoryStream(Platform.Win32, Model.Platforms[Platform.Win32].DownloadUrl, CancellationToken.None, (d) => ProgressBar1 = d);
             var win64 = DownloadToMemoryStream(Platform.Win64, Model.Platforms[Platform.Win64].DownloadUrl, CancellationToken.None, (d) => ProgressBar2 = d);
@@ -243,12 +221,8 @@ namespace WPILibInstaller_Avalonia.ViewModels
                 ms.Seek(0, SeekOrigin.Begin);
                 Model.ToExtractArchive = OpenArchive(ms);
                 DoneText = "Done Downloading. Press Next to continue";
-                forwardVisible = true;
-                DownloadSingleEnabled = false;
-                DownloadAllEnabled = false;
-                SelectExistingEnabled = false;
-                DoneVisible = true;
-                refresher.RefreshForwardBackProperties();
+                EnableSelectionButtons = true;
+                LocalForwardVisible = true;
             }
         }
 
@@ -258,32 +232,28 @@ namespace WPILibInstaller_Avalonia.ViewModels
             Console.WriteLine("Single Download");
             var currentPlatform = PlatformUtils.CurrentPlatform;
             var url = Model.Platforms[currentPlatform].DownloadUrl;
-            Console.WriteLine(url);
-            DownloadSingleEnabled = false;
-            DownloadAllEnabled = false;
-            SelectExistingEnabled = false;
-            forwardVisible = false;
-            refresher.RefreshForwardBackProperties();
+
+            EnableSelectionButtons = false;
+            LocalForwardVisible = false;
+
             var (stream, platform) = await DownloadToMemoryStream(currentPlatform, url, CancellationToken.None, (d) => ProgressBar1 = d);
             if (stream != null)
             {
                 Console.WriteLine("Trying to open archive");
                 Model.ToExtractArchive = OpenArchive(stream);
                 DoneText = "Done Downloading. Press Next to continue";
-                Console.WriteLine("Done");
-                forwardVisible = true;
-                DownloadSingleEnabled = false;
-                DownloadAllEnabled = false;
-                SelectExistingEnabled = false;
-                DoneVisible = true;
+                EnableSelectionButtons = true;
+                LocalForwardVisible = true;
                 refresher.RefreshForwardBackProperties();
             }
             else
             {
                 Console.WriteLine("Failed");
-                DownloadSingleEnabled = true;
-                DownloadAllEnabled = true;
-                SelectExistingEnabled = true;
+                EnableSelectionButtons = true;
+                if (AlreadyInstalled)
+                {
+                    LocalForwardVisible = true;
+                }
                 ; // TODO Fail
             }
         }
