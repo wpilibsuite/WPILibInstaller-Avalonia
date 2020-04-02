@@ -157,9 +157,8 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
             if (result == MessageBox.Avalonia.Enums.ButtonResult.Yes)
             {
-
+                await viewModelResolver.ResolveMainWindow().ExecuteGoNext();
             }
-            await viewModelResolver.ResolveMainWindow().ExecuteGoNext();
         }
 
         private async Task SelectVsCodeFunc()
