@@ -14,7 +14,7 @@ using WPILibInstaller_Avalonia.ViewModels;
 
 namespace WPILibInstaller_Avalonia.Views
 {
-    public class MainWindow : ReactiveWindow<MainWindowViewModel>, IProgramWindow, IDependencyInjection
+    public class MainWindow : ReactiveWindow<MainWindowViewModel>, IProgramWindow, IViewModelResolver
     {
         public IContainer Container { get; }
 
@@ -25,7 +25,7 @@ namespace WPILibInstaller_Avalonia.Views
             // Initialize our DI
             ContainerBuilder builder = new ContainerBuilder();
 
-            builder.RegisterAssemblyTypes(typeof(MainWindow).Assembly).Where(x => x.Name.EndsWith("ViewModel")).SingleInstance().AsSelf().AsImplementedInterfaces();
+            builder.RegisterAssemblyTypes(typeof(MainWindow).Assembly).Where(x => x.IsClass && x.Name.EndsWith("ViewModel")).SingleInstance().AsSelf().AsImplementedInterfaces();
             builder.RegisterInstance(this).AsImplementedInterfaces();
 
             Container = builder.Build();
@@ -67,6 +67,16 @@ namespace WPILibInstaller_Avalonia.Views
         private void InitializeComponent()
         {
             AvaloniaXamlLoader.Load(this);
+        }
+
+        public T Resolve<T>() where T : notnull, PageViewModelBase
+        {
+            return Container.Resolve<T>();
+        }
+
+        public IMainWindowViewModel ResolveMainWindow()
+        {
+            return ViewModel;
         }
     }
 }

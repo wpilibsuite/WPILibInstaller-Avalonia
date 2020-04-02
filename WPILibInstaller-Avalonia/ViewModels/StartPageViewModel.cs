@@ -19,7 +19,6 @@ using WPILibInstaller_Avalonia.Interfaces;
 using WPILibInstaller_Avalonia.Models;
 using WPILibInstaller_Avalonia.Utils;
 using WPILibInstaller_Avalonia.Views;
-using static WPILibInstaller_Avalonia.Utils.ReactiveExtensions;
 
 using SharpZip = SharpCompress.Archives.Zip.ZipArchive;
 
@@ -29,23 +28,24 @@ namespace WPILibInstaller_Avalonia.ViewModels
     {
 
         private readonly IProgramWindow programWindow;
-        private readonly IDependencyInjection di;
-        private readonly IMainWindowViewModelRefresher refresher;
+        private readonly IViewModelResolver viewModelResolver;
+        private readonly IMainWindowViewModel refresher;
 
         public override bool ForwardVisible => forwardVisible;
         private bool forwardVisible = false;
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
-        public StartPageViewModel(IMainWindowViewModelRefresher mainRefresher, IProgramWindow mainWindow, IDependencyInjection di)
+        public StartPageViewModel(IMainWindowViewModel mainRefresher, IProgramWindow mainWindow, IViewModelResolver viewModelResolver,
+            ICatchableButtonFactory buttonFactory)
 #pragma warning restore CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
             : base("Start", "")
         {
 
-            SelectSupportFiles = CreateCatchableButton(SelectSupportFilesFunc);
-            SelectResourceFiles = CreateCatchableButton(SelectResourceFilesFunc);
+            SelectSupportFiles = buttonFactory.CreateCatchableButton(SelectSupportFilesFunc);
+            SelectResourceFiles = buttonFactory.CreateCatchableButton(SelectResourceFilesFunc);
 
             this.programWindow = mainWindow;
-            this.di = di;
+            this.viewModelResolver = viewModelResolver;
             refresher = mainRefresher;
         }
 
@@ -195,7 +195,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         public override PageViewModelBase MoveNext()
         {
-            return di.Resolve<VSCodePageViewModel>();
+            return viewModelResolver.Resolve<VSCodePageViewModel>();
         }
 
         public IArchiveExtractor ZipArchive { get; private set; }

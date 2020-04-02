@@ -22,8 +22,6 @@ using static WPILibInstaller_Avalonia.Utils.ArchiveUtils;
 
 using SharpZip = SharpCompress.Archives.Zip.ZipArchive;
 
-using static WPILibInstaller_Avalonia.Utils.ReactiveExtensions;
-
 namespace WPILibInstaller_Avalonia.ViewModels
 {
     public class VSCodePageViewModel : PageViewModelBase, IVsCodeInstallLocationProvider
@@ -110,22 +108,23 @@ namespace WPILibInstaller_Avalonia.ViewModels
         public bool AlreadyInstalled { get; }
 
         private readonly IProgramWindow programWindow;
-        private readonly IMainWindowViewModelRefresher refresher;
-        private readonly IDependencyInjection di;
+        private readonly IMainWindowViewModel refresher;
+        private readonly IViewModelResolver viewModelResolver;
 
-        public VSCodePageViewModel(IMainWindowViewModelRefresher mainRefresher, IProgramWindow programWindow, IConfigurationProvider modelProvider, IDependencyInjection di)
+        public VSCodePageViewModel(IMainWindowViewModel mainRefresher, IProgramWindow programWindow, IConfigurationProvider modelProvider, IViewModelResolver viewModelResolver,
+            ICatchableButtonFactory buttonFactory)
             : base("Next", "Back")
         {
-            SkipVsCode = CreateCatchableButton(SkipVsCodeFunc);
-            DownloadSingleVsCode = CreateCatchableButton(DownloadSingleVSCodeFunc);
-            DownloadVsCode = CreateCatchableButton(DownloadVsCodeFunc);
-            SelectVsCode = CreateCatchableButton(SelectVsCodeFunc);
+            SkipVsCode = buttonFactory.CreateCatchableButton(SkipVsCodeFunc);
+            DownloadSingleVsCode = buttonFactory.CreateCatchableButton(DownloadSingleVSCodeFunc);
+            DownloadVsCode = buttonFactory.CreateCatchableButton(DownloadVsCodeFunc);
+            SelectVsCode = buttonFactory.CreateCatchableButton(SelectVsCodeFunc);
 
 
             this.refresher = mainRefresher;
             this.programWindow = programWindow;
             Model = modelProvider.VsCodeModel;
-            this.di = di;
+            this.viewModelResolver = viewModelResolver;
 
             refresher.RefreshForwardBackProperties();
 
@@ -292,7 +291,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         public override PageViewModelBase MoveNext()
         {
-            var configPage = di.Resolve<ConfigurationPageViewModel>();
+            var configPage = viewModelResolver.Resolve<ConfigurationPageViewModel>();
             configPage.UpdateVsSettings();
             return configPage;
         }

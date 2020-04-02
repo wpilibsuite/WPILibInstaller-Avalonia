@@ -15,11 +15,9 @@ using WPILibInstaller_Avalonia.Models;
 using WPILibInstaller_Avalonia.Utils;
 using WPILibInstaller_Avalonia.Views;
 
-using static WPILibInstaller_Avalonia.Utils.ReactiveExtensions;
-
 namespace WPILibInstaller_Avalonia.ViewModels
 {
-    public class MainWindowViewModel : ReactiveObject, IMainWindowViewModelRefresher
+    public class MainWindowViewModel : ReactiveObject, IMainWindowViewModel, ICatchableButtonFactory
     {
         private PageViewModelBase currentPage;
         public PageViewModelBase CurrentPage
@@ -48,7 +46,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         public void HandleException(Exception e)
         {
-            var cancelPage = di.Resolve<CanceledPageViewModel>();
+            var cancelPage = viewModelResolver.Resolve<CanceledPageViewModel>();
             cancelPage.SetException(e);
             CurrentPage = cancelPage;
         }
@@ -74,14 +72,12 @@ namespace WPILibInstaller_Avalonia.ViewModels
             this.RaisePropertyChanged(nameof(BackVisible));
         }
 
-        private readonly IDependencyInjection di;
+        private readonly IViewModelResolver viewModelResolver;
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
-        public MainWindowViewModel(IDependencyInjection di)
+        public MainWindowViewModel(IViewModelResolver viewModelResolver)
 #pragma warning restore CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
         {
-            ReactiveExtensions.MainWindowVM = this;
-
             this.WhenAnyValue(x => x.CurrentPage)
                 .Subscribe(o => RefreshForwardBackProperties());
 
@@ -89,17 +85,29 @@ namespace WPILibInstaller_Avalonia.ViewModels
             GoBack = CreateCatchableButton(GoBackFunc);
 
 
-            this.di = di;
+            this.viewModelResolver = viewModelResolver;
+        }
+
+        public ReactiveCommand<Unit, Unit> CreateCatchableButton(Func<Task> toRun)
+        {
+            var command = ReactiveCommand.CreateFromTask(toRun);
+            command.ThrownExceptions.Subscribe(HandleException);
+            return command;
         }
 
         public void Initialize()
         {
-            CurrentPage = di.Resolve<StartPageViewModel>();
+            CurrentPage = viewModelResolver.Resolve<StartPageViewModel>();
         }
 
         private void HandleStateChange()
         {
             CurrentPage = CurrentPage.MoveNext();
+        }
+
+        public IObservable<Unit> ExecuteGoNext()
+        {
+            return GoNext.Execute();
         }
     }
 }

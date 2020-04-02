@@ -19,13 +19,11 @@ using WPILibInstaller_Avalonia.Interfaces;
 using WPILibInstaller_Avalonia.Models;
 using WPILibInstaller_Avalonia.Utils;
 
-using static WPILibInstaller_Avalonia.Utils.ReactiveExtensions;
-
 namespace WPILibInstaller_Avalonia.ViewModels
 {
     public class InstallPageViewModel : PageViewModelBase
     {
-        private readonly IDependencyInjection di;
+        private readonly IViewModelResolver viewModelResolver;
         private readonly IToInstallProvider toInstallProvider;
         private readonly IConfigurationProvider configurationProvider;
         private readonly IVsCodeInstallLocationProvider vsInstallProvider;
@@ -48,16 +46,16 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         private readonly Task runInstallTask;
 
-        public InstallPageViewModel(IDependencyInjection di, IToInstallProvider toInstallProvider, IConfigurationProvider configurationProvider, IVsCodeInstallLocationProvider vsInstallProvider,
-            IProgramWindow programWindow)
+        public InstallPageViewModel(IViewModelResolver viewModelResolver, IToInstallProvider toInstallProvider, IConfigurationProvider configurationProvider, IVsCodeInstallLocationProvider vsInstallProvider,
+            IProgramWindow programWindow, ICatchableButtonFactory buttonFactory)
             : base("", "")
         {
-            this.di = di;
+            this.viewModelResolver = viewModelResolver;
             this.toInstallProvider = toInstallProvider;
             this.configurationProvider = configurationProvider;
             this.vsInstallProvider = vsInstallProvider;
             this.programWindow = programWindow;
-            CancelInstall = CreateCatchableButton(CancelInstallFunc);
+            CancelInstall = buttonFactory.CreateCatchableButton(CancelInstallFunc);
             runInstallTask = installFunc();
 
             async Task installFunc()
@@ -68,7 +66,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
                 }
                 catch (Exception e)
                 {
-                    di.Resolve<MainWindowViewModel>().HandleException(e);
+                    viewModelResolver.ResolveMainWindow().HandleException(e);
                 }
             }
         }
@@ -83,8 +81,6 @@ namespace WPILibInstaller_Avalonia.ViewModels
             await runInstallTask;
         }
 
-        private Exception? exp = null;
-
         private async Task RunInstall()
         {
             source = new CancellationTokenSource();
@@ -94,38 +90,23 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
             var updateTask = UIUpdateTask(updateSource.Token);
 
-            Stopwatch sw = Stopwatch.StartNew();
-
-
             do
             {
-
-                try
-                {
-                    await ExtractArchive(source.Token);
-                    if (source.IsCancellationRequested) break;
-                    await RunGradleSetup();
-                    if (source.IsCancellationRequested) break;
-                    await RunToolSetup();
-                    if (source.IsCancellationRequested) break;
-                    await RunCppSetup();
-                    if (source.IsCancellationRequested) break;
-                    await RunMavenMetaDataFixer();
-                    if (source.IsCancellationRequested) break;
-                    await RunVsCodeSetup(source.Token);
-                    await ConfigureVsCodeSettings();
-                    if (source.IsCancellationRequested) break;
-                    if (source.IsCancellationRequested) break;
-                    await RunVsCodeExtensionsSetup();
-                }
-#pragma warning disable CS0168 // Variable is declared but never used
-                catch (Exception e)
-#pragma warning restore CS0168 // Variable is declared but never used
-                {
-                    Debug.WriteLine(e);
-                    exp = e;
-                }
-
+                await ExtractArchive(source.Token);
+                if (source.IsCancellationRequested) break;
+                await RunGradleSetup();
+                if (source.IsCancellationRequested) break;
+                await RunToolSetup();
+                if (source.IsCancellationRequested) break;
+                await RunCppSetup();
+                if (source.IsCancellationRequested) break;
+                await RunMavenMetaDataFixer();
+                if (source.IsCancellationRequested) break;
+                await RunVsCodeSetup(source.Token);
+                if (source.IsCancellationRequested) break;
+                await ConfigureVsCodeSettings();
+                if (source.IsCancellationRequested) break;
+                await RunVsCodeExtensionsSetup();
             } while (false);
 
             updateSource.Cancel();
@@ -140,28 +121,18 @@ namespace WPILibInstaller_Avalonia.ViewModels
                 succeeded = true;
             }
 
-            await MessageBoxManager.GetMessageBoxStandardWindow("Time",
-                    $"{sw.Elapsed}", icon: MessageBox.Avalonia.Enums.Icon.None).ShowDialog(programWindow.Window);
-
-            await di.Resolve<MainWindowViewModel>().GoNext.Execute();
+            await viewModelResolver.ResolveMainWindow().ExecuteGoNext();
         }
 
         public override PageViewModelBase MoveNext()
         {
-            if (exp != null)
-            {
-                var vm = di.Resolve<CanceledPageViewModel>();
-                vm.SetException(exp);
-                return vm;
-            }
-
             if (succeeded)
             {
-                return di.Resolve<FinalPageViewModel>();
+                return viewModelResolver.Resolve<FinalPageViewModel>();
             }
             else
             {
-                return di.Resolve<CanceledPageViewModel>();
+                return viewModelResolver.Resolve<CanceledPageViewModel>();
             }
         }
 
@@ -213,7 +184,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         private async Task ConfigureVsCodeSettings()
         {
-            var vsVm = di.Resolve<VSCodePageViewModel>();
+            var vsVm = viewModelResolver.Resolve<VSCodePageViewModel>();
             if (!toInstallProvider.Model.InstallVsCode && !vsVm.AlreadyInstalled) return;
 
             var dataPath = await SetVsCodePortableMode();

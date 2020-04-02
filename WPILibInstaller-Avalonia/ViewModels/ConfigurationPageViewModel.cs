@@ -8,14 +8,11 @@ using System.Threading.Tasks;
 using WPILibInstaller_Avalonia.Interfaces;
 using WPILibInstaller_Avalonia.Models;
 
-using static WPILibInstaller_Avalonia.Utils.ReactiveExtensions;
-
-
 namespace WPILibInstaller_Avalonia.ViewModels
 {
     public class ConfigurationPageViewModel : PageViewModelBase, IToInstallProvider
     {
-        private readonly IDependencyInjection di;
+        private readonly IViewModelResolver viewModelResolver;
 
         public InstallSelectionModel Model { get; } = new InstallSelectionModel();
 
@@ -63,13 +60,14 @@ namespace WPILibInstaller_Avalonia.ViewModels
             set => this.RaiseAndSetIfChanged(ref canRunAsAdmin, value);
         }
 
-        public ConfigurationPageViewModel(IDependencyInjection di, IVsCodeInstallLocationProvider vsInstallProvider)
+        public ConfigurationPageViewModel(IViewModelResolver viewModelResolver, IVsCodeInstallLocationProvider vsInstallProvider,
+            ICatchableButtonFactory buttonFactory)
             : base("Install", "Back")
         {
-            this.di = di;
+            this.viewModelResolver = viewModelResolver;
             this.vsProvider = vsInstallProvider;
-            InstallLocalUser = CreateCatchableButton(InstallLocalUserFunc);
-            InstallAdmin = CreateCatchableButton(InstallAdminFunc);
+            InstallLocalUser = buttonFactory.CreateCatchableButton(InstallLocalUserFunc);
+            InstallAdmin = buttonFactory.CreateCatchableButton(InstallAdminFunc);
             UpdateVsSettings();
         }
 
@@ -79,13 +77,13 @@ namespace WPILibInstaller_Avalonia.ViewModels
         private async Task InstallLocalUserFunc()
         {
             Model.InstallAsAdmin = false;
-            await di.Resolve<MainWindowViewModel>().GoNext.Execute();
+            await viewModelResolver.ResolveMainWindow().ExecuteGoNext();
         }
 
         private async Task InstallAdminFunc()
         {
             Model.InstallAsAdmin = true;
-            await di.Resolve<MainWindowViewModel>().GoNext.Execute();
+            await viewModelResolver.ResolveMainWindow().ExecuteGoNext();
         }
 
         public void UpdateVsSettings()
@@ -101,7 +99,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         public override PageViewModelBase MoveNext()
         {
-            return di.Resolve<InstallPageViewModel>();
+            return viewModelResolver.Resolve<InstallPageViewModel>();
         }
     }
 }
