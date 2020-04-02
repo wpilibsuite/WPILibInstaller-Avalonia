@@ -10,6 +10,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
 using System.Reactive;
+using System.Reactive.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -101,7 +102,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
             set => this.RaiseAndSetIfChanged(ref doneText, value);
         }
 
-        private string doneText = "Done! Click Next To Continue";
+        private string doneText = "";
 
         public VsCodeModel Model { get; }
 
@@ -144,6 +145,12 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         private async Task SkipVsCodeFunc()
         {
+            if (Model.AlreadyInstalled)
+            {
+                await viewModelResolver.ResolveMainWindow().ExecuteGoNext();
+                return;
+            }
+
             var result = await MessageBoxManager.GetMessageBoxStandardWindow("Confirmation",
                 "Are you sure you want to skip installing VS Code?",
                 icon: MessageBox.Avalonia.Enums.Icon.None, @enum: MessageBox.Avalonia.Enums.ButtonEnum.YesNo).ShowDialog(programWindow.Window);
@@ -152,7 +159,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
             {
 
             }
-            viewModelResolver.ResolveMainWindow().ExecuteGoNext();
+            await viewModelResolver.ResolveMainWindow().ExecuteGoNext();
         }
 
         private async Task SelectVsCodeFunc()

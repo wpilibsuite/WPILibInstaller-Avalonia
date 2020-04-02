@@ -10,13 +10,16 @@
       <RowDefinition Height="1*"/>
       <RowDefinition Height="3*"/>
     </Grid.RowDefinitions>
-    <TextBlock Grid.Row="0" TextWrapping="Wrap" FontSize="13">
+    <ScrollViewer Grid.Row="0" HorizontalScrollBarVisibility="Disabled">
+    <TextBlock TextWrapping="Wrap" FontSize="13">
     For licensing reasons, VS Code cannot be included in the WPILib Installer. WPILib installs it's own copy of VS Code every year, not shared between years or a system install. If you have already installed VS Code for the current year, the Next button will be enabled and you can skip this step, otherwise choose from the following options.
       
     1. Download VS Code for Single Install: Use this if you don't plan on sharing the VS Code download between systems. This will be the fastest download.
     2. Select Existing VS Code Download: Use this to select an existing download.
     3. Download VS Code for All Platforms: Use this to download VS Code for all platforms, which can be shared between systems for offline use
+    4. Skip installing VS Code. This will prompt unless already installed.
     </TextBlock>
+    </ScrollViewer>
     <TextBlock TextWrapping="Wrap" Grid.Row="1" Height="15" FontWeight="Bold" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding DoneText}"></TextBlock>
     <Grid Grid.Row="2">
       <Grid.RowDefinitions>

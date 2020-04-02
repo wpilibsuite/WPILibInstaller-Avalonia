@@ -187,6 +187,9 @@ namespace WPILibInstaller_Avalonia.ViewModels
             var vsVm = viewModelResolver.Resolve<VSCodePageViewModel>();
             if (!toInstallProvider.Model.InstallVsCode && !vsVm.Model.AlreadyInstalled) return;
 
+            // Skip this on non windows platforms
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
+
             var dataPath = await SetVsCodePortableMode();
 
             var settingsDir = Path.Combine(dataPath, "user-data", "User");
