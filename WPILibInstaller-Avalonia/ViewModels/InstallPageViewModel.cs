@@ -185,7 +185,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
         private async Task ConfigureVsCodeSettings()
         {
             var vsVm = viewModelResolver.Resolve<VSCodePageViewModel>();
-            if (!toInstallProvider.Model.InstallVsCode && !vsVm.AlreadyInstalled) return;
+            if (!toInstallProvider.Model.InstallVsCode && !vsVm.Model.AlreadyInstalled) return;
 
             var dataPath = await SetVsCodePortableMode();
 

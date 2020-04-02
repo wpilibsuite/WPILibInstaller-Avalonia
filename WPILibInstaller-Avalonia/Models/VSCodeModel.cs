@@ -28,6 +28,8 @@ namespace WPILibInstaller_Avalonia.Models
 
         public IArchiveExtractor? ToExtractArchive { get; set; }
 
+        public bool AlreadyInstalled { get; set; }
+
         public VsCodeModel(string vscodeVersion)
         {
             VSCodeVersion = vscodeVersion;

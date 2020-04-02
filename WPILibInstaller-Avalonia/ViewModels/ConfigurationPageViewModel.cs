@@ -88,9 +88,10 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         public void UpdateVsSettings()
         {
-            vsAlreadyInstalled = vsProvider.AlreadyInstalled;
+            vsAlreadyInstalled = vsProvider.Model.AlreadyInstalled;
             CanInstallVsCode = vsProvider.Model.ToExtractArchive != null;
             Model.InstallVsCode = CanInstallVsCode;
+            Model.InstallVsCodeExtensions = CanInstallExtensions;
             this.RaisePropertyChanged(nameof(CanInstallExtensions));
             this.RaisePropertyChanged(nameof(InstallVsCode));
             this.RaisePropertyChanged(nameof(CanInstallVsCode));

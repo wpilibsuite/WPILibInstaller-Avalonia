@@ -46,9 +46,9 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         public void HandleException(Exception e)
         {
-            var cancelPage = viewModelResolver.Resolve<CanceledPageViewModel>();
-            cancelPage.SetException(e);
-            CurrentPage = cancelPage;
+            var failedPage = viewModelResolver.Resolve<FailedPageViewModel>();
+            failedPage.SetException(e);
+            CurrentPage = failedPage;
         }
 
         private Task GoNextFunc()

@@ -8,6 +8,5 @@ namespace WPILibInstaller_Avalonia.Interfaces
     public interface IVsCodeInstallLocationProvider
     {
         VsCodeModel Model { get; }
-        bool AlreadyInstalled { get; }
     }
 }

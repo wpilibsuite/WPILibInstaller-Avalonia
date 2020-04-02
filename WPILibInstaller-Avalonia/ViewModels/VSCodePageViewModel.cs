@@ -105,8 +105,6 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         public VsCodeModel Model { get; }
 
-        public bool AlreadyInstalled { get; }
-
         private readonly IProgramWindow programWindow;
         private readonly IMainWindowViewModel refresher;
         private readonly IViewModelResolver viewModelResolver;
@@ -135,7 +133,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
             {
                 DoneText = "VS Code already Installed. You can either download to reinstall, or click Next to skip";
                 SetLocalForwardVisible(true);
-                AlreadyInstalled = true;
+                Model.AlreadyInstalled = true;
             }
         }
 
@@ -146,7 +144,15 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         private async Task SkipVsCodeFunc()
         {
-            await Task.Yield();
+            var result = await MessageBoxManager.GetMessageBoxStandardWindow("Confirmation",
+                "Are you sure you want to skip installing VS Code?",
+                icon: MessageBox.Avalonia.Enums.Icon.None, @enum: MessageBox.Avalonia.Enums.ButtonEnum.YesNo).ShowDialog(programWindow.Window);
+
+            if (result == MessageBox.Avalonia.Enums.ButtonResult.Yes)
+            {
+
+            }
+            viewModelResolver.ResolveMainWindow().ExecuteGoNext();
         }
 
         private async Task SelectVsCodeFunc()
@@ -259,7 +265,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
             {
                 Console.WriteLine("Failed");
                 EnableSelectionButtons = true;
-                if (AlreadyInstalled)
+                if (Model.AlreadyInstalled)
                 {
                     SetLocalForwardVisible(true);
                 }

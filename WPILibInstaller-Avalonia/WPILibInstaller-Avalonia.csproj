@@ -25,6 +25,7 @@
   <ItemGroup>
     <AvaloniaResource Remove="Views\CanceledPage.xaml" />
     <AvaloniaResource Remove="Views\ConfigurationPage.xaml" />
+    <AvaloniaResource Remove="Views\FailedPage.xaml" />
     <AvaloniaResource Remove="Views\FinalPage.xaml" />
     <AvaloniaResource Remove="Views\InstallPage.xaml" />
     <AvaloniaResource Remove="Views\StartPage.xaml" />
@@ -34,6 +35,7 @@
     <None Remove="Assets\wpilib-128.png" />
     <None Remove="Views\CanceledPage.xaml" />
     <None Remove="Views\ConfigurationPage.xaml" />
+    <None Remove="Views\FailedPage.xaml" />
     <None Remove="Views\FinalPage.xaml" />
     <None Remove="Views\InstallPage.xaml" />
     <None Remove="Views\StartPage.xaml" />
@@ -76,6 +78,11 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Views\CanceledPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Views\FailedPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </EmbeddedResource>
   </ItemGroup>

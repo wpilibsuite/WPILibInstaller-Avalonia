@@ -30,7 +30,6 @@ namespace WPILibInstaller_Avalonia.Views
 
             Container = builder.Build();
 
-
             ViewModel = Container.Resolve<MainWindowViewModel>();
             ViewModel.Initialize();
 
