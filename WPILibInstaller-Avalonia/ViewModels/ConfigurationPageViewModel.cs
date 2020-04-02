@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using WPILibInstaller_Avalonia.Interfaces;
@@ -30,35 +31,13 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         public override bool ForwardVisible => false;
 
-        public bool InstallVsCodeExtensions
-        {
-            get => Model.InstallVsCodeExtensions;
-            set
-            {
-                Model.InstallVsCodeExtensions = value;
-                this.RaisePropertyChanged();
-            }
-        }
+        public bool CanInstallExtensions => vsProvider.Model.AlreadyInstalled || Model.InstallVsCode;
 
-
-        public bool CanInstallExtensions
-        {
-            get => vsAlreadyInstalled || Model.InstallVsCode;
-        }
-
-        public bool CanInstallVsCode { get; private set; }
-
-        private bool vsAlreadyInstalled;
+        public bool CanInstallVsCode => vsProvider.Model.ToExtractArchive != null;
 
         private readonly IVsCodeInstallLocationProvider vsProvider;
 
-        private bool canRunAsAdmin = true;
-
-        public bool CanRunAsAdmin
-        {
-            get => canRunAsAdmin;
-            set => this.RaiseAndSetIfChanged(ref canRunAsAdmin, value);
-        }
+        public bool CanRunAsAdmin => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
         public ConfigurationPageViewModel(IViewModelResolver viewModelResolver, IVsCodeInstallLocationProvider vsInstallProvider,
             ICatchableButtonFactory buttonFactory)
@@ -88,14 +67,11 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         public void UpdateVsSettings()
         {
-            vsAlreadyInstalled = vsProvider.Model.AlreadyInstalled;
-            CanInstallVsCode = vsProvider.Model.ToExtractArchive != null;
             Model.InstallVsCode = CanInstallVsCode;
             Model.InstallVsCodeExtensions = CanInstallExtensions;
             this.RaisePropertyChanged(nameof(CanInstallExtensions));
             this.RaisePropertyChanged(nameof(InstallVsCode));
             this.RaisePropertyChanged(nameof(CanInstallVsCode));
-            this.RaisePropertyChanged(nameof(InstallVsCodeExtensions));
         }
 
         public override PageViewModelBase MoveNext()

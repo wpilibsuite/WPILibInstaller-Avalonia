@@ -12,7 +12,7 @@
     <CheckBox FontSize="15" IsChecked="{Binding Model.InstallJDK}">Java JDK/JRE</CheckBox>
     <CheckBox FontSize="15" IsChecked="{Binding Model.InstallTools}">Tools and Utilities</CheckBox>
     <CheckBox FontSize="15" IsChecked="{Binding Model.InstallWPILibDeps}">WPILib Dependencies</CheckBox>
-    <CheckBox FontSize="15" IsEnabled="{Binding CanInstallExtensions, Mode=OneWay}" IsChecked="{Binding InstallVsCodeExtensions}">Visual Studio Code Extensions</CheckBox>
+    <CheckBox FontSize="15" IsEnabled="{Binding CanInstallExtensions, Mode=OneWay}" IsChecked="{Binding Model.InstallVsCodeExtensions}">Visual Studio Code Extensions</CheckBox>
     <Grid Margin="0, 20, 0, 0">
       <Button HorizontalAlignment="Left" FontSize="15" Command="{Binding InstallLocalUser}" Padding="10">Install for this User</Button>
       <Button HorizontalAlignment="Right" FontSize="15" Padding="10" IsVisible="{Binding CanRunAsAdmin}" Command="{Binding InstallAdmin}">Install for all Users</Button>
