@@ -91,4 +91,8 @@
       <HintPath>..\..\sharpcompress\src\SharpCompress\bin\Debug\netstandard2.1\SharpCompress.dll</HintPath>
     </Reference>
   </ItemGroup>
+
+  <PropertyGroup>
+    <DebugType>Embedded</DebugType>
+  </PropertyGroup>
 </Project>
