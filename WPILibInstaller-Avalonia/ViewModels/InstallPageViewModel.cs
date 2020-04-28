@@ -107,6 +107,8 @@ namespace WPILibInstaller_Avalonia.ViewModels
                 await ConfigureVsCodeSettings();
                 if (source.IsCancellationRequested) break;
                 await RunVsCodeExtensionsSetup();
+                if (source.IsCancellationRequested) break;
+                await RunShortcutCreator(source.Token);
             } while (false);
 
             updateSource.Cancel();
@@ -571,5 +573,35 @@ namespace WPILibInstaller_Avalonia.ViewModels
             }
         }
 
+        private async Task RunShortcutCreator(CancellationToken token)
+        {
+            var shortcutData = new ShortcutData();
+
+            var serializedData = JsonConvert.SerializeObject(shortcutData);
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // Run windows shortcut creater
+                var tempFile = Path.GetTempFileName();
+                await File.WriteAllTextAsync(tempFile, serializedData, token);
+                var shortcutCreatorPath = Path.Combine(configurationProvider.InstallDirectory, "installUtils", "WPILibShortcutCreator.exe");
+
+                var startInfo = new ProcessStartInfo(shortcutCreatorPath, $"\"{shortcutCreatorPath}\"");
+                startInfo.UseShellExecute = false;
+                startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                startInfo.CreateNoWindow = true;
+                startInfo.RedirectStandardOutput = true;
+                var exitCode = await Task.Run(() =>
+                {
+                    var proc = Process.Start(startInfo);
+                    proc.WaitForExit();
+                    return proc.ExitCode;
+                });
+
+                if (exitCode != 0) {
+                    // Print a message saying not all shortcuts were successful
+                }
+            }
+        }
     }
 }
