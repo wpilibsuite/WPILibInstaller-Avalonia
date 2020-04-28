@@ -37,6 +37,21 @@
     "xstring": "cpp",
     "xtr1common": "cpp",
     "xutility": "cpp",
-    "optional": "cpp"
+    "optional": "cpp",
+    "algorithm": "cpp",
+    "array": "cpp",
+    "clocale": "cpp",
+    "forward_list": "cpp",
+    "fstream": "cpp",
+    "functional": "cpp",
+    "iterator": "cpp",
+    "list": "cpp",
+    "map": "cpp",
+    "numeric": "cpp",
+    "unordered_map": "cpp",
+    "valarray": "cpp",
+    "vector": "cpp",
+    "xhash": "cpp",
+    "xtree": "cpp"
   }
 }
