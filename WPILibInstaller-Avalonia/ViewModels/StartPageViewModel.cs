@@ -41,6 +41,26 @@ namespace WPILibInstaller_Avalonia.ViewModels
             : base("Start", "")
         {
 
+            try
+            {
+                var rootDirectory = Directory.GetDirectoryRoot(Environment.GetFolderPath(Environment.SpecialFolder.Personal));
+
+                var driveInfo = new DriveInfo(rootDirectory);
+
+                if (driveInfo.AvailableFreeSpace < 3L * 1000L * 1000L * 1000L)
+                {
+                    ;
+                    // Fail
+                }
+            }
+            catch
+            {
+                // Do nothing if we couldn't determine the drive
+            }
+
+            ;
+
+
             SelectSupportFiles = buttonFactory.CreateCatchableButton(SelectSupportFilesFunc);
             SelectResourceFiles = buttonFactory.CreateCatchableButton(SelectResourceFilesFunc);
 
