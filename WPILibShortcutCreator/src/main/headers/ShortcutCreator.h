@@ -9,19 +9,7 @@
 #include "shlguid.h"
 #include "ComPtr.h"
 
-
-struct ShortcutInfo {
-    std::wstring path;
-    std::wstring name;
-    std::wstring description;
-};
-
-struct ShortcutData {
-    bool isAdmin;
-    std::vector<ShortcutInfo> desktopShortcuts;
-    std::vector<ShortcutInfo> startMenuShortcuts;
-    std::wstring iconLocation;
-};
+#include <ShortcutData.h>
 
 class ShortcutCreator {
 public:

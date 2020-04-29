@@ -16,6 +16,8 @@
 #include "shlguid.h"
 #include "ComPtr.h"
 
+#include "ShortcutData.h"
+
 #include <nlohmann/json.hpp>
 
 // for convenience
@@ -31,62 +33,36 @@ public:
  HRESULT m_hr;
 };
 
-static std::wstring ToWideString(const std::string& str) {
-    constexpr int numCharacters = 512;
-    WCHAR buf[numCharacters];
-    int length = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), str.length(), buf, numCharacters);
-    DWORD lastError = GetLastError();
-    if (length != 0) {
-        return std::wstring(buf, length);
-    }
-    else if (lastError == ERROR_INSUFFICIENT_BUFFER) {
-        // Call to get length
-        length = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), str.length(), nullptr, 0);
-        auto bigBuf = std::make_unique<WCHAR[]>(length);
-        length = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), str.length(), bigBuf.get(), length);
-        return std::wstring(bigBuf.get(), length);
-    } else {
-        // Actual error, figure out what to do
-        return L"";
-    }
-}
+#define WPILIB_MISSING_PROGRAM_ARGUMENTS -1
+#define WPILIB_INITIALIZATION_FAILURE -2
+#define WPILIB_CREATION_FAILURE -3
+#define WPILIB_SUCCESS 0
 
-void from_json(const json& j, ShortcutInfo& s) {
-    s.path = ToWideString(j.at("Path").get<std::string>());
-    s.name = ToWideString(j.at("Name").get<std::string>());
-    s.description = ToWideString(j.at("Description").get<std::string>());
-}
-
-void from_json(const json& j, ShortcutData& s) {
-    j.at("IsAdmin").get_to(s.isAdmin);
-    j.at("DesktopShortcuts").get_to(s.desktopShortcuts);
-    j.at("StartMenuShortcuts").get_to(s.startMenuShortcuts);
-    s.iconLocation = ToWideString(j.at("IconLocation").get<std::string>());
-}
 
 int main (int argc, char *argv[]) {
+    if (argc < 2) {
+        return WPILIB_MISSING_PROGRAM_ARGUMENTS;
+    }
+
+
     // Initialize COM
     CCoInitialize init;
 
     if(FAILED(init)) {
-        return -1;
+        return WPILIB_INITIALIZATION_FAILURE;
     }
 
     // Initialize the shortcut creator
     ShortcutCreator shortcutCreator;
 
     if (FAILED(shortcutCreator)) {
-        return -1;
+        return WPILIB_INITIALIZATION_FAILURE;
     }
 
     json j;
 
-    if (argc < 2) {
-        std::cin >> j;
-    } else {
-        std::ifstream i(argv[1]);
-        i >> j;
-    }
+    std::ifstream i(argv[1]);
+    i >> j;
 
     ShortcutData s = j.get<ShortcutData>();
 
@@ -113,7 +89,9 @@ int main (int argc, char *argv[]) {
         createdStartMenu = shortcutCreator.CreateShortcuts(s.startMenuShortcuts, s.iconLocation, *startMenuFolder);
     }
 
+    if (!createdDesktop || !createdStartMenu) {
+        return WPILIB_CREATION_FAILURE;
+    }
 
-
-    return 0;
+    return WPILIB_SUCCESS;
 }

@@ -10,8 +10,7 @@
 #include "Shlobj_core.h"
 #include "ComPtr.h"
 
-
-bool createDirectoryRecursively(const std::wstring &directory);
+#include "CreateDirectoryRecursively.h"
 
 #pragma comment(lib, "Shell32.lib")
 
