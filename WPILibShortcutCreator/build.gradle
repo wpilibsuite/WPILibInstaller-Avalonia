@@ -22,5 +22,36 @@ tasks.withType(CppCompile).configureEach {
 
 // Set the target operating system and architecture for this application
 application {
-    targetMachines.add(machines.windows.x86_64)
+    targetMachines.add(machines.windows.x86)
+
+    // Add support for windows resources
+binaries.whenElementFinalized { binary ->
+        def compileResources = tasks.register("compileResources${binary.name.capitalize()}", WindowsResourceCompile) {
+            targetPlatform = binary.compileTask.get().targetPlatform
+            toolChain = binary.toolChain
+            includes.from file("src/main/headers")
+            source.from fileTree(dir: "src/main/rc", includes: ["**/*.rc"])
+            compilerArgs.addAll toolChain.map({ NativeToolChain toolChain ->
+                if (toolChain instanceof VisualCpp) {
+                    return ["/v"]
+                }
+                return []
+            }).get()
+            it.outputDir = layout.buildDirectory.dir("windows-resources/${binary.name}").get().asFile
+        }
+
+        binary.linkTask.get().configure {
+            dependsOn compileResources
+            source.from compileResources.map({ return fileTree(dir: it.outputDir, includes: ["**/*.res","**/*.obj"]) })
+
+            linkerArgs.addAll toolChain.map { NativeToolChain toolChain ->
+                if (toolChain instanceof VisualCpp) {
+                    return ["user32.lib"]
+                }
+                return []
+            }
+        }
+    }
 }
+
+
