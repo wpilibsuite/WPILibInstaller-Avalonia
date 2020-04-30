@@ -8,6 +8,7 @@
 #include <stdlib.h>
 
 #include "ShortcutCreator.h"
+#include "PathEditor.h"
 
 #include <objbase.h>
 #include <winerror.h>
@@ -54,6 +55,7 @@ int main (int argc, char *argv[]) {
 
     // Initialize the shortcut creator
     ShortcutCreator shortcutCreator;
+    
 
     if (FAILED(shortcutCreator)) {
         return WPILIB_INITIALIZATION_FAILURE;
@@ -65,6 +67,9 @@ int main (int argc, char *argv[]) {
     i >> j;
 
     ShortcutData s = j.get<ShortcutData>();
+    
+    PathEditor pathEditor(s.isAdmin);
+    
 
     std::optional<std::wstring> desktopFolder;
     std::optional<std::wstring> startMenuFolder;

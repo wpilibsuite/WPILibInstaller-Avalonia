@@ -12,7 +12,7 @@ public:
 
   bool AddEnvVariables(std::vector<NewEnvVariable> newEnvironmentalVariables) const;
 
-  bool AddEnvVariable(std::wstring name, std::wstring value) const;
+  bool AddEnvVariable(const std::wstring& name, const std::wstring& value) const;
 
   operator HRESULT() const { return m_hr; }
 

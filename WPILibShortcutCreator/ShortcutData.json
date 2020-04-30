@@ -9,5 +9,11 @@
   ],
   "StartMenuShortcuts": [
   ],
+  "NewEnvironmentalVariables": [
+    
+  ],
+  "AddToPath": [
+    
+  ],
   "IconLocation": "C:\\Users\\Public\\wpilib\\2020\\frccode\\wpilib-256.ico"
 }
