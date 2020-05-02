@@ -238,7 +238,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
                 dynamic terminalProps = new JObject();
 
                 terminalProps["JAVA_HOME"] = Path.Combine(homePath, "jdk");
-                terminalProps["PATH"] = Path.Combine(homePath, "jdk", "bin") + ":${env:PATH}";
+                terminalProps["PATH"] = Path.Combine(homePath, "jdk", "bin") + ";${env:PATH}";
 
                 settingsJson["terminal.integrated.env.windows"] = terminalProps;
 
