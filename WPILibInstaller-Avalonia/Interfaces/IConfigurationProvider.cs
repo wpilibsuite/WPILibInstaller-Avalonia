@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO.Compression;
-using System.Text;
-using SharpCompress.Archives;
-using SharpCompress.Readers;
-using WPILibInstaller_Avalonia.Models;
+﻿using WPILibInstaller_Avalonia.Models;
 using WPILibInstaller_Avalonia.Utils;
 
 namespace WPILibInstaller_Avalonia.Interfaces

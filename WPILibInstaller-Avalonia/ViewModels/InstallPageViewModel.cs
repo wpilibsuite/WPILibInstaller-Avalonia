@@ -598,7 +598,8 @@ namespace WPILibInstaller_Avalonia.ViewModels
                     return proc.ExitCode;
                 });
 
-                if (exitCode != 0) {
+                if (exitCode != 0)
+                {
                     // Print a message saying not all shortcuts were successful
                 }
             }
