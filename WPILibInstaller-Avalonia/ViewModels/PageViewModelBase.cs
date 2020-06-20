@@ -1,7 +1,6 @@
 ﻿using Avalonia.Controls;
 using ReactiveUI;
 using Splat;
-using System;
 
 namespace WPILibInstaller_Avalonia.ViewModels
 {

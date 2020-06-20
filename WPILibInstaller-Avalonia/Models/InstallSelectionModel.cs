@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace WPILibInstaller_Avalonia.Models
+﻿namespace WPILibInstaller_Avalonia.Models
 {
     public class InstallSelectionModel
     {

@@ -3,13 +3,8 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
-using MessageBox.Avalonia;
-using ReactiveUI;
-using Splat;
-using System;
 using System.Threading.Tasks;
 using WPILibInstaller_Avalonia.Interfaces;
-using WPILibInstaller_Avalonia.Utils;
 using WPILibInstaller_Avalonia.ViewModels;
 
 namespace WPILibInstaller_Avalonia.Views

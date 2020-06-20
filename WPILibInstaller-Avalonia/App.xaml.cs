@@ -1,13 +1,9 @@
-﻿using Autofac;
-using Avalonia;
+﻿using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using ReactiveUI;
 using Splat;
-using System;
 using System.Reflection;
-using System.Threading.Tasks;
-using WPILibInstaller_Avalonia.ViewModels;
 using WPILibInstaller_Avalonia.Views;
 
 namespace WPILibInstaller_Avalonia

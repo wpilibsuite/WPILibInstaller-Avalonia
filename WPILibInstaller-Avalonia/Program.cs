@@ -1,11 +1,6 @@
-﻿using System;
-using System.Reflection;
-using Avalonia;
-using Avalonia.Controls.ApplicationLifetimes;
+﻿using Avalonia;
 using Avalonia.Logging.Serilog;
 using Avalonia.ReactiveUI;
-using ReactiveUI;
-using Splat;
 
 namespace WPILibInstaller_Avalonia
 {

@@ -1,27 +1,16 @@
-﻿using Avalonia.Controls;
-using MessageBox.Avalonia;
+﻿using MessageBox.Avalonia;
 using ReactiveUI;
-using SharpCompress.Archives.Zip;
-using SharpCompress.Readers;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
-using System.Net.Http;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using WPILibInstaller_Avalonia.Interfaces;
 using WPILibInstaller_Avalonia.Models;
 using WPILibInstaller_Avalonia.Utils;
-using WPILibInstaller_Avalonia.Views;
-using static WPILibInstaller_Avalonia.Models.VsCodeModel;
 using static WPILibInstaller_Avalonia.Utils.ArchiveUtils;
-
-using SharpZip = SharpCompress.Archives.Zip.ZipArchive;
 
 namespace WPILibInstaller_Avalonia.ViewModels
 {

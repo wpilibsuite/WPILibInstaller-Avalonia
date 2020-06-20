@@ -1,26 +1,14 @@
-﻿using Avalonia.Controls;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using ReactiveUI;
-using SharpCompress.Archives;
-using SharpCompress.Archives.GZip;
-using SharpCompress.Archives.Tar;
-using SharpCompress.Readers;
-using SharpCompress.Readers.Tar;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Reactive;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading.Tasks;
 using WPILibInstaller_Avalonia.Interfaces;
 using WPILibInstaller_Avalonia.Models;
 using WPILibInstaller_Avalonia.Utils;
-using WPILibInstaller_Avalonia.Views;
-
-using SharpZip = SharpCompress.Archives.Zip.ZipArchive;
 
 namespace WPILibInstaller_Avalonia.ViewModels
 {

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using WPILibInstaller_Avalonia.Models;
+﻿using WPILibInstaller_Avalonia.Models;
 
 namespace WPILibInstaller_Avalonia.Interfaces
 {

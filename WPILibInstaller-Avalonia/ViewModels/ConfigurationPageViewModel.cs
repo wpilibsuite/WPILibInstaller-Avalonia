@@ -1,10 +1,7 @@
 ﻿using ReactiveUI;
-using System;
-using System.Collections.Generic;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading.Tasks;
 using WPILibInstaller_Avalonia.Interfaces;
 using WPILibInstaller_Avalonia.Models;

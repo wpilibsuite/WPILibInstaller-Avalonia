@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
-using SharpCompress.Common;
+﻿using System.IO;
 using SharpCompress.Readers.Tar;
 
 namespace WPILibInstaller_Avalonia.Utils

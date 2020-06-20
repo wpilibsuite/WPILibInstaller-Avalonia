@@ -1,19 +1,9 @@
-﻿using Avalonia.Controls;
-using DynamicData;
-using Newtonsoft.Json;
-using ReactiveUI;
+﻿using ReactiveUI;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.IO.Compression;
 using System.Reactive;
-using System.Reactive.Disposables;
-using System.Text;
 using System.Threading.Tasks;
 using WPILibInstaller_Avalonia.Interfaces;
-using WPILibInstaller_Avalonia.Models;
-using WPILibInstaller_Avalonia.Utils;
-using WPILibInstaller_Avalonia.Views;
 
 namespace WPILibInstaller_Avalonia.ViewModels
 {
