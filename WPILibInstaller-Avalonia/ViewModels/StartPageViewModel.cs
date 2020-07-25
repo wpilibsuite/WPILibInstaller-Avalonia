@@ -28,7 +28,6 @@ namespace WPILibInstaller_Avalonia.ViewModels
 #pragma warning restore CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
             : base("Start", "")
         {
-
             try
             {
                 var rootDirectory = Directory.GetDirectoryRoot(Environment.GetFolderPath(Environment.SpecialFolder.Personal));
@@ -46,15 +45,29 @@ namespace WPILibInstaller_Avalonia.ViewModels
                 // Do nothing if we couldn't determine the drive
             }
 
-            ;
-
-
             SelectSupportFiles = buttonFactory.CreateCatchableButton(SelectSupportFilesFunc);
             SelectResourceFiles = buttonFactory.CreateCatchableButton(SelectResourceFilesFunc);
 
             this.programWindow = mainWindow;
             this.viewModelResolver = viewModelResolver;
             refresher = mainRefresher;
+
+            var version = typeof(StartPageViewModel).Assembly.GetName().Version!;
+            string verString = $"{version.Major}.{version.Minor}.{version.Build}";
+            var baseDir = AppContext.BaseDirectory;
+            var extension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "zip" : "tar.gz";
+            // Enumerate all files in base dir
+            foreach (var file in Directory.EnumerateFiles(baseDir))
+            {
+                if (file.EndsWith($"{verString}-resources.{extension}"))
+                {
+                    _ = SelectResourceFilesWithFile(file);
+                }
+                else if (file.EndsWith($"{verString}-artifacts.{extension}"))
+                {
+                    _ = SelectSupportFilesWithFile(file);
+                }
+            }
         }
 
         public bool MissingSupportFiles
@@ -87,18 +100,16 @@ namespace WPILibInstaller_Avalonia.ViewModels
         public ReactiveCommand<Unit, Unit> SelectSupportFiles { get; }
         public ReactiveCommand<Unit, Unit> SelectResourceFiles { get; }
 
-        public async Task SelectResourceFilesFunc()
+        private async Task<bool> SelectResourceFilesWithFile(string file)
         {
-            var file = await programWindow.ShowFilePicker("Select Resource File", Environment.GetFolderPath(Environment.SpecialFolder.Personal));
-
-            if (file == null)
-            {
-                return;
-            }
-
             var zipArchive = ZipFile.OpenRead(file);
 
             var entry = zipArchive.GetEntry("vscodeConfig.json");
+
+            if (entry == null)
+            {
+                return false;
+            }
 
             using (StreamReader reader = new StreamReader(entry!.Open()))
             {
@@ -147,6 +158,35 @@ namespace WPILibInstaller_Avalonia.ViewModels
             MissingResourceFiles = false;
             forwardVisible = !MissingEitherFile;
             refresher.RefreshForwardBackProperties();
+
+            return true;
+        }
+
+        public async Task SelectResourceFilesFunc()
+        {
+            var file = await programWindow.ShowFilePicker("Select Resource File", Environment.GetFolderPath(Environment.SpecialFolder.Personal));
+
+            if (file == null)
+            {
+                return;
+            }
+
+            await SelectResourceFilesWithFile(file);
+        }
+
+        private Task<bool> SelectSupportFilesWithFile(string file)
+        {
+            FileStream fileStream = File.OpenRead(file);
+
+            ZipArchive = ArchiveUtils.OpenArchive(fileStream);
+
+            // TODO Figure out how to verify this
+
+            MissingSupportFiles = false;
+            forwardVisible = !MissingEitherFile;
+            refresher.RefreshForwardBackProperties();
+
+            return Task.FromResult(true);
         }
 
         public async Task SelectSupportFilesFunc()
@@ -158,13 +198,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
                 return;
             }
 
-            FileStream fileStream = File.OpenRead(file);
-
-            ZipArchive = ArchiveUtils.OpenArchive(fileStream);
-
-            MissingSupportFiles = false;
-            forwardVisible = !MissingEitherFile;
-            refresher.RefreshForwardBackProperties();
+            await SelectSupportFilesWithFile(file);
         }
 
         public VsCodeModel VsCodeModel

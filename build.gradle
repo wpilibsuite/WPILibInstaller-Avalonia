@@ -49,6 +49,7 @@ if (project.hasProperty('linuxBuild')) {
     offlineRepositoryRoot = "$buildDir/dependencies/linux"
     project.ext.archiveType = Tar
     project.ext.isUnix = true
+    project.ext.dotnetRuntime = 'linux-x64'
 } else if (project.hasProperty('macBuild')) {
     project.ext.forceNativeClassifier = 'osxx86-64'
     project.ext.forceToolsClassifier = 'mac64'
@@ -56,6 +57,7 @@ if (project.hasProperty('linuxBuild')) {
     offlineRepositoryRoot = "$buildDir/dependencies/mac"
     project.ext.archiveType = Tar
     project.ext.isUnix = true
+    project.ext.dotnetRuntime = 'osx-x64'
 } else if (project.hasProperty('windows32')) {
     project.ext.forceNativeClassifier = 'windowsx86'
     project.ext.forceToolsClassifier = 'win32'
@@ -63,6 +65,7 @@ if (project.hasProperty('linuxBuild')) {
     offlineRepositoryRoot = "$buildDir/dependencies/win32"
     project.ext.archiveType = Zip
     project.ext.isUnix = false
+    project.ext.dotnetRuntime = 'win-x86'
 } else {
     project.ext.forceNativeClassifier = 'windowsx86-64'
     project.ext.forceToolsClassifier = 'win64'
@@ -70,6 +73,7 @@ if (project.hasProperty('linuxBuild')) {
     offlineRepositoryRoot = "$buildDir/dependencies/win64"
     project.ext.archiveType = Zip
     project.ext.isUnix = false
+    project.ext.dotnetRuntime = 'win-x64'
 }
 
 ext.frcYear = '2020'
@@ -196,7 +200,7 @@ def generateConfigFiles = tasks.register('generateCommonResources', Zip) {
 }
 
 def generateFullResourcesTask = tasks.register('generateFullResources', project.ext.archiveType) {
-    archiveBaseName = 'WPILib_' + buildClassifier + '-' + pubVersion
+    archiveBaseName = 'WPILib_' + buildClassifier + '-' + pubVersion + '-artifacts'
 
     destinationDirectory = file("$buildDir/outputs")
     println destinationDirectory.get()
@@ -237,24 +241,24 @@ def generateFullResourcesTask = tasks.register('generateFullResources', project.
     }
 }
 
-def generateFullZipBaseTask = tasks.register('generateFullZipBase', Zip) {
-    archiveBaseName = 'WPILibInstaller_' + buildClassifier + '-artifacts'
-    destinationDirectory = buildDir
-    duplicatesStrategy 'exclude'
+def dotnetInstallerTask = tasks.register('createInstaller', Exec) {
+    workingDir = "$projectDir/WPILibInstaller-Avalonia"
 
-    dependsOn generateFullResourcesTask
-    inputs.file generateFullResourcesTask.get().archivePath
+    commandLine 'dotnet', 'publish', '-c', 'Release', '-r', dotnetRuntime, '/p:PublishSingleFile=true', '/p:PublishTrimmed=true', '/p:IncludeNativeLibrariesInSingleFile=true', "/p:Version=$pubVersion"
+}
 
-    entryCompression = ZipEntryCompression.STORED
+def installDirectory = "$projectDir/WPILibInstaller-Avalonia/bin/Release/net5.0/$dotnetRuntime/publish"
 
-    from (generateFullResourcesTask.get().archivePath) {
-        rename { 'files.zip' }
-    }
+def copyInstallerFiles = tasks.register('copyInstallerFiles', Copy) {
+    from installDirectory
+    into "$buildDir/outputs"
+    dependsOn dotnetInstallerTask
 }
 
 tasks.register('generateInstallers', Task) {
     dependsOn generateConfigFiles
     dependsOn generateFullResourcesTask
+    dependsOn copyInstallerFiles
 }
 
 wrapper {
