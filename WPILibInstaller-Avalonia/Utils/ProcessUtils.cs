@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace WPILibInstaller_Avalonia.Utils
 {
@@ -6,7 +7,7 @@ namespace WPILibInstaller_Avalonia.Utils
     {
         public static string GetStartingExecutablePath()
         {
-            string executablePath = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
+            string executablePath = System.Diagnostics.Process.GetCurrentProcess().MainModule!.FileName!;
             string executable = System.IO.Path.GetFileNameWithoutExtension(executablePath);
 
             if ("dotnet".Equals(executable, StringComparison.InvariantCultureIgnoreCase))

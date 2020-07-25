@@ -165,7 +165,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
                 var currentPlatform = PlatformUtils.CurrentPlatform;
                 var entry = archive.GetEntry(Model.Platforms[currentPlatform].NameInZip);
                 MemoryStream ms = new MemoryStream(100000000);
-                await entry.Open().CopyToAsync(ms);
+                await entry!.Open().CopyToAsync(ms);
 
                 Model.ToExtractArchive = OpenArchive(ms);
             }

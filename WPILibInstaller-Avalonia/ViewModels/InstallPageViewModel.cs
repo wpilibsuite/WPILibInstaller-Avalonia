@@ -441,7 +441,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
             var p = Process.Start(pstart);
             return Task.Run(() =>
             {
-                return p.WaitForExit(5000);
+                return p!.WaitForExit(5000);
             });
         }
 
@@ -498,7 +498,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
                 startInfo.CreateNoWindow = true;
                 startInfo.RedirectStandardOutput = true;
                 var proc = Process.Start(startInfo);
-                proc.WaitForExit();
+                proc!.WaitForExit();
                 var lines = new List<(string name, WPIVersion version)>();
                 while (true)
                 {
@@ -555,7 +555,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
                 await Task.Run(() =>
                 {
                     var proc = Process.Start(startInfo);
-                    proc.WaitForExit();
+                    proc!.WaitForExit();
                 });
 
                 idx++;
@@ -590,7 +590,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
                 var exitCode = await Task.Run(() =>
                 {
                     var proc = Process.Start(startInfo);
-                    proc.WaitForExit();
+                    proc!.WaitForExit();
                     return proc.ExitCode;
                 });
 

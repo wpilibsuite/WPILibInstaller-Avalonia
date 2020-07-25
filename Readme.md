@@ -11,3 +11,5 @@ will not show up anymore in stack traces. Tracked with the following issues.
 
 https://github.com/dotnet/runtime/issues/33386
 https://github.com/dotnet/runtime/issues/34187
+
+dotnet publish -c Release -r win-x64 /p:PublishSingleFile=true /p:PublishTrimmed=true /p:IncludeNativeLibrariesInSingleFile=true

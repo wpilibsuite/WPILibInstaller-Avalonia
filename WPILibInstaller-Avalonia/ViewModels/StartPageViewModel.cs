@@ -100,7 +100,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
             var entry = zipArchive.GetEntry("vscodeConfig.json");
 
-            using (StreamReader reader = new StreamReader(entry.Open()))
+            using (StreamReader reader = new StreamReader(entry!.Open()))
             {
                 var vsConfigStr = await reader.ReadToEndAsync();
                 VsCodeConfig = JsonConvert.DeserializeObject<VsCodeConfig>(vsConfigStr, new JsonSerializerSettings
@@ -111,7 +111,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
             entry = zipArchive.GetEntry("jdkConfig.json");
 
-            using (StreamReader reader = new StreamReader(entry.Open()))
+            using (StreamReader reader = new StreamReader(entry!.Open()))
             {
                 var configStr = await reader.ReadToEndAsync();
                 JdkConfig = JsonConvert.DeserializeObject<JdkConfig>(configStr, new JsonSerializerSettings
@@ -123,7 +123,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
             entry = zipArchive.GetEntry("fullConfig.json");
 
-            using (StreamReader reader = new StreamReader(entry.Open()))
+            using (StreamReader reader = new StreamReader(entry!.Open()))
             {
                 var configStr = await reader.ReadToEndAsync();
                 FullConfig = JsonConvert.DeserializeObject<FullConfig>(configStr, new JsonSerializerSettings
@@ -135,7 +135,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
             entry = zipArchive.GetEntry("upgradeConfig.json");
 
-            using (StreamReader reader = new StreamReader(entry.Open()))
+            using (StreamReader reader = new StreamReader(entry!.Open()))
             {
                 var configStr = await reader.ReadToEndAsync();
                 UpgradeConfig = JsonConvert.DeserializeObject<UpgradeConfig>(configStr, new JsonSerializerSettings
