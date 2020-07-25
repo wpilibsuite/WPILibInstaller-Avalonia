@@ -96,7 +96,7 @@ jobs:
 
     - task: CopyFiles@2
       inputs:
-        contents: 'build\outputs\**'
+        contents: 'build/outputs/**'
         targetFolder: $(Build.ArtifactStagingDirectory)
 
     - task: PublishBuildArtifacts@1
@@ -129,7 +129,7 @@ jobs:
 
     - task: CopyFiles@2
       inputs:
-        contents: 'build\outputs\**'
+        contents: 'build/outputs/**'
         targetFolder: $(Build.ArtifactStagingDirectory)
 
     - task: PublishBuildArtifacts@1
