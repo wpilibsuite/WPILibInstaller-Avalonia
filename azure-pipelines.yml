@@ -10,6 +10,13 @@ jobs:
    timeoutInMinutes: 0
 
    steps:
+    - task: UseDotNet@2
+      displayName: 'Use .NET Core sdk'
+      inputs:
+        packageType: sdk
+        version: 5.x
+        includePreviewVersions: true
+        installationPath: $(Agent.ToolsDirectory)/dotnet
     - task: Gradle@2
       inputs:
         workingDirectory: ''
@@ -36,6 +43,13 @@ jobs:
    timeoutInMinutes: 0
 
    steps:
+    - task: UseDotNet@2
+      displayName: 'Use .NET Core sdk'
+      inputs:
+        packageType: sdk
+        version: 5.x
+        includePreviewVersions: true
+        installationPath: $(Agent.ToolsDirectory)/dotnet
     - task: Gradle@2
       inputs:
         workingDirectory: ''
@@ -62,6 +76,13 @@ jobs:
    timeoutInMinutes: 0
 
    steps:
+    - task: UseDotNet@2
+      displayName: 'Use .NET Core sdk'
+      inputs:
+        packageType: sdk
+        version: 5.x
+        includePreviewVersions: true
+        installationPath: $(Agent.ToolsDirectory)/dotnet
     - task: Gradle@2
       inputs:
         workingDirectory: ''
@@ -88,6 +109,13 @@ jobs:
    timeoutInMinutes: 0
 
    steps:
+    - task: UseDotNet@2
+      displayName: 'Use .NET Core sdk'
+      inputs:
+        packageType: sdk
+        version: 5.x
+        includePreviewVersions: true
+        installationPath: $(Agent.ToolsDirectory)/dotnet
     - task: Gradle@2
       inputs:
         workingDirectory: ''
