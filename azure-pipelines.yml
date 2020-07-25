@@ -15,6 +15,7 @@ jobs:
         workingDirectory: ''
         gradleWrapperFile: 'gradlew'
         gradleOptions: '-Xmx3072m'
+        jdkVersionOption: '1.11'
         publishJUnitResults: false
         testResultsFiles: '**/TEST-*.xml'
         tasks: 'generateInstallers'
@@ -40,6 +41,7 @@ jobs:
         workingDirectory: ''
         gradleWrapperFile: 'gradlew'
         gradleOptions: '-Xmx3072m'
+        jdkVersionOption: '1.11'
         publishJUnitResults: false
         testResultsFiles: '**/TEST-*.xml'
         tasks: 'generateInstallers'
