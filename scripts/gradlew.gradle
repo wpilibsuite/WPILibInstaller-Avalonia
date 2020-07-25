@@ -1,0 +1,31 @@
+import java.security.MessageDigest
+import org.gradle.wrapper.*
+
+ext.gradleConfigTaskSetup = {
+  def wrapperTask = tasks.named('wrapper').get()
+  return new Tuple2({ Task task ->
+    task.inputs.property 'wrapperUrl', wrapperTask.distributionUrl
+    task.inputs.file wrapperTask.propertiesFile
+  }, { config ->
+    def distributionHash = new BigInteger(1, MessageDigest.getInstance("MD5").digest(wrapperTask.distributionUrl.getBytes())).toString(36)
+
+    def gradleCfg = [
+        Hash: distributionHash,
+        ZipName: new File(wrapperTask.distributionUrl).name,
+        ExtractLocations: ['wrapper/dists', 'permwrapper/dists']
+    ]
+
+    config['Gradle'] = gradleCfg
+  })
+}
+
+ext.gradleZipTaskSetup = { AbstractArchiveTask zip->
+    def executor = WrapperExecutor.forProjectDirectory(project.rootDir)
+
+    PathAssembler assembler = new PathAssembler(GradleUserHomeLookup.gradleUserHome());
+
+    def distribution = assembler.getDistribution(executor.configuration)
+    zip.from (distribution.zipFile) {
+        into '/installUtils'
+    }
+}

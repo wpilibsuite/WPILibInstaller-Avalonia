@@ -1,0 +1,12 @@
+repositories {
+  mavenCentral()
+  maven { url 'https://repo.gradle.org/gradle/libs-releases' }
+}
+
+ext {
+  mavenVersion = '3.3.9'
+}
+
+dependencies {
+  api "org.apache.maven:maven-model-builder:$mavenVersion"
+}

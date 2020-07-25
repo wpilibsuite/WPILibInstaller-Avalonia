@@ -1,0 +1,69 @@
+def toolsJson = file("$buildDir/tools.json")
+def scriptBaseFile = file("files/ScriptBase.vbs")
+def scriptBaseUnixFile = file("files/ScriptBase.py")
+
+def toolsJsonTask = tasks.register('toolsJson', Task) {
+
+  dependsOn tasks.named('lazyModelEvaluation')
+
+  doLast {
+    def resolvedDeps = configurations.tools.resolvedConfiguration.resolvedArtifacts.toList()
+    def config = []
+    resolvedDeps.each {
+      def item = [:]
+      item['name'] = it.name
+      item['version'] = it.moduleVersion.id.version
+      def artif = [:]
+      artif['classifier'] = it.classifier
+      artif['extension'] = it.extension
+      def id = it.moduleVersion.id
+      artif['groupId'] = id.group
+      artif['version'] = id.version
+      artif['artifactId'] = id.name
+      item['artifact'] = artif
+      config << item
+    }
+    def gbuilder = getGsonBuilder()
+    gbuilder.setPrettyPrinting()
+    def json = gbuilder.create().toJson(config)
+
+    toolsJson.parentFile.mkdirs()
+    toolsJson.text = json
+  }
+}
+
+ext.toolsConfig = {
+  def toolsFolder = 'tools'
+  return new Tuple2({ task->
+    task.inputs.property 'toolsFolder', toolsFolder
+  }, { config->
+    def tools = [:]
+    tools['Folder'] = toolsFolder
+    if (project.ext.isUnix == true) {
+      tools['UpdaterExe'] = 'ToolsUpdater.py'
+    } else {
+      tools['UpdaterExe'] = 'ToolsUpdater.bat'
+    }
+    config['Tools'] = tools
+  })
+}
+
+ext.toolsSetup = { AbstractArchiveTask zip->
+  zip.dependsOn toolsJsonTask
+  zip.inputs.file toolsJson
+  zip.inputs.file scriptBaseFile
+  zip.inputs.file scriptBaseUnixFile
+
+  zip.from (toolsJson) {
+    into '/tools'
+  }
+
+  zip.from (scriptBaseFile) {
+    into '/tools'
+  }
+
+  zip.from (scriptBaseUnixFile) {
+    into '/tools'
+    fileMode 0755
+  }
+}

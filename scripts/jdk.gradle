@@ -1,0 +1,224 @@
+
+
+apply plugin: 'de.undercouch.download'
+
+
+def downloadLinuxJdk = tasks.register('downloadLinuxJdk', Download) {
+  src 'https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_linux-x64_bin.tar.gz'
+  dest buildDir
+  overwrite false
+}
+
+def jdkLinuxFile = file("$buildDir/openjdk-11.0.2_linux-x64_bin.tar.gz")
+
+def downloadMacJdk = tasks.register('downloadMacJdk', Download) {
+  src 'https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_osx-x64_bin.tar.gz'
+  dest buildDir
+  overwrite false
+}
+
+def jdkMacFile = file("$buildDir/openjdk-11.0.2_osx-x64_bin.tar.gz")
+
+def download32BitJdk = tasks.register('download32BitJdk', Download) {
+  src 'https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.4%2B11/OpenJDK11U-jdk_x86-32_windows_hotspot_11.0.4_11.zip'
+  dest buildDir
+  overwrite false
+}
+
+def jdk32File = file("$buildDir/OpenJDK11U-jdk_x86-32_windows_hotspot_11.0.4_11.zip")
+
+def download64BitJdk = tasks.register('download64BitJdk', Download) {
+  src 'https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.4%2B11/OpenJDK11U-jdk_x64_windows_hotspot_11.0.4_11.zip'
+  dest buildDir
+  overwrite false
+}
+
+def jdk64File = file("$buildDir/OpenJDK11U-jdk_x64_windows_hotspot_11.0.4_11.zip")
+
+def x86DllPath = "$projectDir/redist/x86"
+def x86DllFiles = []
+file(x86DllPath).eachFile {
+  x86DllFiles << it
+}
+
+def x64DllPath = "$projectDir/redist/x64"
+def x64DllFiles = []
+file(x64DllPath).eachFile {
+  x64DllFiles << it
+}
+
+def jdkConfigFile = file("$buildDir/jdkconfig.json")
+
+def jdkConfigFileTask = tasks.register("jdkConfigFile") {
+  it.outputs.file jdkConfigFile
+
+  doLast {
+
+    def config = [:]
+    config['folder'] = 'jdk'
+    config['tarFile'] = 'jdk.tar.gz'
+
+    def gbuilder = getGsonBuilder()
+
+    gbuilder.setPrettyPrinting()
+    def json = gbuilder.create().toJson(config)
+
+    jdkConfigFile.parentFile.mkdirs()
+
+    jdkConfigFile.text = json
+  }
+}
+
+ext.jdkConfigFileSetup = { AbstractArchiveTask zip->
+  zip.dependsOn jdkConfigFileTask
+  zip.inputs.file jdkConfigFile
+
+  zip.from(jdkConfigFile) {
+    rename {'jdkConfig.json'}
+  }
+}
+
+ext.jdkZipSetup32 = { AbstractArchiveTask zip->
+  zip.dependsOn download32BitJdk
+  zip.dependsOn jdkConfigFileTask
+
+  zip.inputs.file jdk32File
+  zip.inputs.file jdkConfigFile
+
+  zip.from(project.zipTree(jdk32File)) {
+
+    eachFile { f->
+      f.path = f.path.replace('jdk-11.0.4+11/', 'jdk/')
+    }
+
+    x86DllFiles.each {
+      exclude "**/${it.name}".toString()
+    }
+
+    exclude '**/src.zip'
+    exclude '**/bin/*.pdb'
+    exclude '**/bin/*.map'
+    exclude '**/bin/server/*.pdb'
+    exclude '**/bin/server/*.map'
+    exclude '**/demo/**'
+
+    includeEmptyDirs = false
+  }
+
+  zip.from(x86DllPath) {
+    into '/jdk/bin'
+  }
+
+  zip.from(jdkConfigFile) {
+    into '/installUtils'
+    rename {'jdkConfig.json'}
+  }
+}
+
+ext.jdkZipSetup64 = { AbstractArchiveTask zip->
+  zip.dependsOn download64BitJdk
+  zip.dependsOn jdkConfigFileTask
+
+  zip.inputs.file jdk64File
+  zip.inputs.file jdkConfigFile
+
+  zip.from(project.zipTree(jdk64File)) {
+
+    eachFile { f->
+      f.path = f.path.replace('jdk-11.0.4+11/', 'jdk/')
+    }
+
+    x64DllFiles.each {
+      exclude "**/${it.name}".toString()
+    }
+
+    exclude '**/src.zip'
+    exclude '**/bin/*.pdb'
+    exclude '**/bin/*.map'
+    exclude '**/bin/server/*.pdb'
+    exclude '**/bin/server/*.map'
+    exclude '**/demo/**'
+
+    includeEmptyDirs = false
+  }
+
+  zip.from(x64DllPath) {
+    into '/jdk/bin'
+  }
+
+  zip.from(jdkConfigFile) {
+    into '/installUtils'
+    rename {'jdkConfig.json'}
+  }
+}
+
+ext.jdkZipSetupLinux = { AbstractArchiveTask zip->
+  zip.dependsOn downloadLinuxJdk
+  zip.dependsOn jdkConfigFileTask
+
+  zip.inputs.file jdkLinuxFile
+  zip.inputs.file jdkConfigFile
+
+  zip.from(project.tarTree(project.resources.gzip(jdkLinuxFile))) {
+    eachFile { f->
+      f.path = f.path.replace('jdk-11.0.2/', 'jdk/')
+    }
+
+    exclude '**/src.zip'
+    exclude '**/bin/*.pdb'
+    exclude '**/bin/*.map'
+    exclude '**/bin/server/*.pdb'
+    exclude '**/bin/server/*.map'
+    exclude '**/demo/**'
+
+    includeEmptyDirs = false
+  }
+
+  zip.from(jdkConfigFile) {
+    into '/installUtils'
+    rename {'jdkConfig.json'}
+  }
+}
+
+ext.jdkZipSetupMac = { AbstractArchiveTask zip->
+  zip.dependsOn downloadMacJdk
+  zip.dependsOn jdkConfigFileTask
+
+  zip.inputs.file jdkMacFile
+  zip.inputs.file jdkConfigFile
+
+  zip.from(project.tarTree(project.resources.gzip(jdkMacFile))) {
+    eachFile { f->
+      f.path = f.path.replace('./jdk-11.0.2.jdk/Contents/Home/', 'jdk/')
+    }
+
+    exclude './jdk-11.jdk/Contents/MacOS/**'
+    exclude './jdk-11.jdk/Contents/Info.plist'
+
+    exclude '**/src.zip'
+    exclude '**/bin/*.pdb'
+    exclude '**/bin/*.map'
+    exclude '**/bin/server/*.pdb'
+    exclude '**/bin/server/*.map'
+    exclude '**/demo/**'
+
+    includeEmptyDirs = false
+  }
+
+    zip.from(jdkConfigFile) {
+    into '/installUtils'
+    rename {'jdkConfig.json'}
+  }
+}
+
+ext.jdkZipSetup = { AbstractArchiveTask zip ->
+  if (project.hasProperty('linuxBuild')) {
+    jdkZipSetupLinux(zip)
+  } else if (project.hasProperty('macBuild')) {
+    jdkZipSetupMac(zip)
+  } else if (project.hasProperty('windows32')) {
+    jdkZipSetup32(zip)
+  } else {
+    jdkZipSetup64(zip)
+  }
+}

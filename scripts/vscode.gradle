@@ -1,0 +1,273 @@
+
+def vscodeFile = file("$buildDir/vscodeConfig.json")
+
+def vsCodeVersion = '1.41.1'
+
+def wpilibVersion = '2020.3.2'
+
+def vscode32Url = "https://vscode-update.azurewebsites.net/${vsCodeVersion}/win32-archive/stable".toString()
+def vscode32ZipName = "Windows32.zip".toString()
+def vscode64Url = "https://vscode-update.azurewebsites.net/${vsCodeVersion}/win32-x64-archive/stable".toString()
+def vscode64ZipName = "Windows64.zip".toString()
+
+def vscodeLinuxUrl = "https://vscode-update.azurewebsites.net/${vsCodeVersion}/linux-x64/stable".toString()
+def vscodeLinuxZipName = "Linux.tar.gz"
+
+def vscodeMacUrl = "https://vscode-update.azurewebsites.net/${vsCodeVersion}/darwin/stable".toString()
+def vscodeMacZipName = "Mac.zip"
+
+def cppWindowsUrl = 'https://github.com/Microsoft/vscode-cpptools/releases/download/0.26.2/cpptools-win32.vsix'
+def cppWindowsVsix = 'Cpp.vsix'
+
+def cppMacUrl = 'https://github.com/Microsoft/vscode-cpptools/releases/download/0.26.2/cpptools-osx.vsix'
+def cppMacVsix = 'CppMac.vsix'
+
+def cppLinuxUrl = 'https://github.com/Microsoft/vscode-cpptools/releases/download/0.26.2/cpptools-linux.vsix'
+def cppLinuxVsix = 'CppLinux.vsix'
+
+def wpilibExtensionUrl = "https://github.com/wpilibsuite/vscode-wpilib/releases/download/v${wpilibVersion}/vscode-wpilib-${wpilibVersion}.vsix"
+def wpilibExtensionVsix = 'WPILib.vsix'
+
+def wpilibUtilWinUrl = "https://github.com/wpilibsuite/vscode-wpilib/releases/download/v${wpilibVersion}/wpilibutility-windows.zip"
+def wpilibUtilWinZipName = 'utilitywin.zip'
+
+def wpilibUtilLinuxUrl = "https://github.com/wpilibsuite/vscode-wpilib/releases/download/v${wpilibVersion}/wpilibutility-linux.tar.gz"
+def wpilibUtilLinuxZipName = 'utilitylinux.tar.gz'
+
+def wpilibUtilMacUrl = "https://github.com/wpilibsuite/vscode-wpilib/releases/download/v${wpilibVersion}/wpilibutility-mac.tar.gz"
+def wpilibUtilMacZipName = 'utilitymac.tar.gz'
+
+def javaDebugUrl = 'https://vscjava.gallery.vsassets.io/_apis/public/gallery/publisher/vscjava/extension/vscode-java-debug/0.24.0/assetbyname/Microsoft.VisualStudio.Services.VSIXPackage'
+def javaDebugVsix = 'JavaDebug.vsix'
+
+def javaLangUrl = 'https://redhat.gallery.vsassets.io/_apis/public/gallery/publisher/redhat/extension/java/0.55.1/assetbyname/Microsoft.VisualStudio.Services.VSIXPackage'
+def javaLangVsix = "JavaLang.vsix"
+
+def javaDepUrl = 'https://vscjava.gallery.vsassets.io/_apis/public/gallery/publisher/vscjava/extension/vscode-java-dependency/0.6.0/assetbyname/Microsoft.VisualStudio.Services.VSIXPackage'
+def javaDepVsix = "JavaDeps.vsix"
+
+def javaLangFile = file("$buildDir/$javaLangVsix")
+def javaDebugFile = file("$buildDir/$javaDebugVsix")
+def javaDepFile = file("$buildDir/$javaDepVsix")
+
+def cppFile
+def utilityFile
+if (project.hasProperty('linuxBuild')) {
+  cppFile = file("$buildDir/$cppLinuxVsix")
+  utilityFile = file("$buildDir/$wpilibUtilLinuxZipName")
+} else if (project.hasProperty('macBuild')) {
+  cppFile = file("$buildDir/$cppMacVsix")
+  utilityFile = file("$buildDir/$wpilibUtilMacZipName")
+} else {
+  cppFile = file("$buildDir/$cppWindowsVsix")
+  utilityFile = file("$buildDir/$wpilibUtilWinZipName")
+}
+
+def wpilibFile
+def wpilibExtensionDownload
+
+if (project.hasProperty('vscodeLoc')) {
+  wpilibFile = file(vscodeLoc)
+
+  wpilibExtensionDownload = tasks.register('wpilibExtensionDownload') {
+
+  }
+} else {
+  wpilibFile = file("$buildDir/$wpilibExtensionVsix")
+
+  wpilibExtensionDownload = tasks.register("wpilibExtensionDownload", Download) {
+    src wpilibExtensionUrl
+    dest file("$buildDir/$wpilibExtensionVsix")
+    overwrite false
+  }
+}
+
+def standaloneDownload
+
+if (project.hasProperty('standaloneLoc')) {
+  utilityFile = file(standaloneLoc)
+  standaloneDownload = tasks.register('standaloneDownload') {
+
+  }
+} else {
+  standaloneDownload = tasks.register("standaloneDownload", Download) {
+
+    if (project.hasProperty('linuxBuild')) {
+      src wpilibUtilLinuxUrl
+    } else if (project.hasProperty('macBuild')) {
+      src wpilibUtilMacUrl
+    } else {
+      src wpilibUtilWinUrl
+    }
+    dest utilityFile
+    overwrite false
+  }
+}
+
+def cppExtensionDownload = tasks.register("cppExtensionDownload", Download) {
+  src cppWindowsUrl
+  dest file("$buildDir/$cppWindowsVsix")
+  overwrite false
+}
+
+def cppMacExtensionDownload = tasks.register("cppMacExtensionDownload", Download) {
+  src cppMacUrl
+  dest file("$buildDir/$cppMacVsix")
+  overwrite false
+}
+
+def cppLinuxExtensionDownload = tasks.register("cppLinuxExtensionDownload", Download) {
+  src cppLinuxUrl
+  dest file("$buildDir/$cppLinuxVsix")
+  overwrite false
+}
+
+
+def javaLangExtensionDownload = tasks.register("javaLangExtensionDownload", Download) {
+  src javaLangUrl
+  dest file("$buildDir/$javaLangVsix")
+  overwrite false
+}
+
+
+def javaDebugExtensionDownload = tasks.register("javaDebugExtensionDownload", Download) {
+  src javaDebugUrl
+  dest file("$buildDir/$javaDebugVsix")
+  overwrite false
+}
+
+def javaDepExtensionDownload = tasks.register("javaDepExtensionDownload", Download) {
+  src javaDepUrl
+  dest file("$buildDir/$javaDepVsix")
+  overwrite false
+}
+
+def getInformationOfVsix = { vsix, map->
+  def pkg = vsix.matching { include '**/extension/package.json' }.files.asList()[0]
+  def packageJson = new groovy.json.JsonSlurper().parseText(pkg.text)
+  map['name'] = "${packageJson.publisher}.${packageJson.name}".toString()
+  map['version'] = packageJson.version
+}
+
+def vscodeTask = tasks.register('vscodeConfig', Task) {
+  dependsOn wpilibExtensionDownload
+  dependsOn cppExtensionDownload
+  dependsOn cppMacExtensionDownload
+  dependsOn cppLinuxExtensionDownload
+  dependsOn javaLangExtensionDownload
+  dependsOn javaDebugExtensionDownload
+  dependsOn javaDepExtensionDownload
+
+  inputs.file javaLangFile
+  inputs.file javaDebugFile
+  inputs.file cppFile
+  inputs.file wpilibFile
+  inputs.file javaDepFile
+
+  doLast {
+    def config = [:]
+
+    def wpilibMap = [:]
+    wpilibMap['vsix'] = wpilibExtensionVsix
+    getInformationOfVsix(zipTree(wpilibFile), wpilibMap)
+    def cppMap = [:]
+    cppMap['vsix'] = cppWindowsVsix
+    getInformationOfVsix(zipTree(cppFile), cppMap)
+    def javaLangMap = [:]
+    javaLangMap['vsix'] = javaLangVsix
+    getInformationOfVsix(zipTree(javaLangFile), javaLangMap)
+    def javaDebugMap = [:]
+    javaDebugMap['vsix'] = javaDebugVsix
+    getInformationOfVsix(zipTree(javaDebugFile), javaDebugMap)
+
+    def javaDepMap = [:]
+    javaDepMap['vsix'] = javaDepVsix
+    getInformationOfVsix(zipTree(javaDepFile), javaDepMap)
+
+    config['VsCode32Url'] = vscode32Url
+    config['VsCode32Name'] = vscode32ZipName
+    config['VsCode64Url'] = vscode64Url
+    config['VsCode64Name'] = vscode64ZipName
+    config['VsCodeMacUrl'] = vscodeMacUrl
+    config['VsCodeMacName'] = vscodeMacZipName
+    config['VsCodeLinuxUrl'] = vscodeLinuxUrl
+    config['VsCodeLinuxName'] = vscodeLinuxZipName
+    config['VsCodeVersion'] = vsCodeVersion
+
+    config['wpilibExtension'] = wpilibMap
+
+    config['thirdPartyExtensions'] = [
+      cppMap,
+      javaLangMap,
+      javaDebugMap,
+      javaDepMap
+    ]
+
+
+    def gbuilder = getGsonBuilder()
+
+    gbuilder.setPrettyPrinting()
+    def json = gbuilder.create().toJson(config)
+
+    vscodeFile.parentFile.mkdirs()
+
+    vscodeFile.text = json
+  }
+}
+
+ext.vscodeConfigZipSetup = { AbstractArchiveTask zip->
+  zip.dependsOn vscodeTask
+  zip.inputs.file vscodeFile
+
+  zip.from (vscodeFile)
+}
+
+ext.vscodeZipSetup = { AbstractArchiveTask zip->
+  zip.dependsOn vscodeTask
+  zip.dependsOn wpilibExtensionDownload
+  zip.dependsOn standaloneDownload
+
+  zip.inputs.file vscodeFile
+
+  if (project.hasProperty('linuxBuild')) {
+    // Linux
+    zip.from(project.tarTree(project.resources.gzip(utilityFile))) {
+      into '/utility'
+      includeEmptyDirs = false
+    }
+  } else if (project.hasProperty('macBuild')) {
+    // Mac
+    // Cannot extract, otherwise mac borks
+    zip.from (utilityFile) {
+      into '/utility'
+    }
+  } else {
+    // Windows
+    zip.from(project.zipTree(utilityFile)) {
+      into '/utility'
+
+      includeEmptyDirs = false
+    }
+  }
+
+  zip.from (vscodeFile) {
+    into '/installUtils'
+  }
+
+  zip.from (javaLangFile) {
+    into '/vsCodeExtensions'
+  }
+  zip.from (javaDebugFile) {
+    into '/vsCodeExtensions'
+  }
+  zip.from (cppFile) {
+    into '/vsCodeExtensions'
+    rename {cppWindowsVsix}
+  }
+  zip.from (wpilibFile) {
+    into '/vsCodeExtensions'
+  }
+  zip.from (javaDepFile) {
+    into '/vsCodeExtensions'
+  }
+}

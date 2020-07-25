@@ -357,3 +357,9 @@ MigrationBackup/
 WindowsShortcutCreator/*.sln
 WindowsShortcutCreator/*.vcxproj
 WindowsShortcutCreator/*.vcxproj.filters
+
+build/
+.gradle/
+.project
+.classpath
+.settings/

@@ -1,0 +1,262 @@
+import com.google.gson.GsonBuilder
+import com.google.gson.Gson
+import org.gradle.wrapper.*
+import java.security.MessageDigest
+import org.gradle.internal.os.OperatingSystem
+
+buildscript {
+    dependencies {
+        classpath files('gradle/wrapper/gradle-wrapper.jar')
+        classpath 'com.google.code.gson:gson:2.8.6'
+    }
+}
+
+plugins {
+    id 'java'
+    id 'cpp'
+    id "de.undercouch.download" version "4.1.1" apply false
+    id "com.github.johnrengelman.shadow" version "6.0.0" apply false
+}
+
+def azureRelease = System.getenv('BUILD_SOURCEBRANCH')
+if (azureRelease != null) {
+    if (azureRelease.startsWith('refs/tags/')) {
+        println 'tagged build'
+    }
+}
+
+apply plugin: io.pry.gradle.offline_dependencies.OfflineDependenciesPlugin
+
+ext.pubVersion = ''
+if (project.hasProperty("publishVersion")) {
+    pubVersion = project.publishVersion
+} else {
+    pubVersion = gradleRioVersion
+}
+
+if (pubVersion == '') {
+    pubVersion = '0.0.1-unknown'
+}
+
+println pubVersion
+
+project.ext.setProperty('toolchain-optional-roboRio', '')
+
+if (project.hasProperty('linuxBuild')) {
+    project.ext.forceNativeClassifier = 'linuxx86-64'
+    project.ext.forceToolsClassifier = 'linux64'
+    project.ext.buildClassifier = 'Linux'
+    offlineRepositoryRoot = "$buildDir/dependencies/linux"
+    project.ext.archiveType = Tar
+    project.ext.isUnix = true
+} else if (project.hasProperty('macBuild')) {
+    project.ext.forceNativeClassifier = 'osxx86-64'
+    project.ext.forceToolsClassifier = 'mac64'
+    project.ext.buildClassifier = 'Mac'
+    offlineRepositoryRoot = "$buildDir/dependencies/mac"
+    project.ext.archiveType = Tar
+    project.ext.isUnix = true
+} else if (project.hasProperty('windows32')) {
+    project.ext.forceNativeClassifier = 'windowsx86'
+    project.ext.forceToolsClassifier = 'win32'
+    project.ext.buildClassifier = 'Windows32'
+    offlineRepositoryRoot = "$buildDir/dependencies/win32"
+    project.ext.archiveType = Zip
+    project.ext.isUnix = false
+} else {
+    project.ext.forceNativeClassifier = 'windowsx86-64'
+    project.ext.forceToolsClassifier = 'win64'
+    project.ext.buildClassifier = 'Windows64'
+    offlineRepositoryRoot = "$buildDir/dependencies/win64"
+    project.ext.archiveType = Zip
+    project.ext.isUnix = false
+}
+
+ext.frcYear = '2020'
+
+apply from: 'scripts/gradlew.gradle'
+apply from: 'scripts/installer.gradle'
+
+apply from: 'scripts/toolchain.gradle'
+apply from: 'scripts/jdk.gradle'
+apply from: 'scripts/maven.gradle'
+// Tools must happen after maven
+apply from: 'scripts/tools.gradle'
+apply from: 'scripts/vscode.gradle'
+apply from: 'scripts/vars.gradle'
+
+ext.getGsonBuilder = {
+    return new GsonBuilder()
+}
+
+def upgradeConfigFile = file("$buildDir/upgradeConfig.json")
+
+def upgradeConfigFileTask = tasks.register('generateUpgradeConfigFile', Task) { Task task ->
+    task.outputs.file upgradeConfigFile
+
+    def configurations = []
+    configurations << toolsConfig()
+    configurations << mavenConfigSetup()
+    configurations << varConfigSetup()
+
+    configurations.each {
+        it.first(task)
+    }
+
+    doLast {
+        def config = [:]
+
+        config['FrcYear'] = frcYear
+
+        config['InstallerType'] = project.ext.buildClassifier
+
+        configurations.each {
+            it.second(config)
+        }
+
+        def gbuilder = getGsonBuilder()
+        gbuilder.setPrettyPrinting()
+        def json = gbuilder.create().toJson(config)
+
+        upgradeConfigFile.parentFile.mkdirs()
+
+        upgradeConfigFile.text = json
+    }
+}
+
+def commonResources = { AbstractArchiveTask zip->
+    zip.dependsOn upgradeConfigFileTask
+    zip.inputs.file upgradeConfigFile
+
+    zip.from (upgradeConfigFile) {
+        into '/installUtils'
+    }
+
+    msBuildExtraSetup(zip)
+
+    toolsSetup(zip)
+    mavenZipSetup(zip)
+    vscodeZipSetup(zip)
+    varsZipSetup(zip)
+}
+
+def fullConfigFile = file("$buildDir/fullConfig.json")
+
+def fullConfigFileTask = tasks.register('generateFullConfigFile', Task) { Task task ->
+    task.outputs.file fullConfigFile
+
+    def configurations = []
+    configurations << gradleConfigTaskSetup()
+    configurations << toolchainConfigTaskSetup()
+
+    configurations.each {
+        it.first(task)
+    }
+
+    doLast {
+        def config = [:]
+
+        configurations.each {
+            it.second(config)
+        }
+
+        def gbuilder = new GsonBuilder()
+        gbuilder.setPrettyPrinting()
+        def json = gbuilder.create().toJson(config)
+
+        fullConfigFile.parentFile.mkdirs()
+
+        fullConfigFile.text = json
+    }
+}
+
+def generateConfigFiles = tasks.register('generateCommonResources', Zip) {
+    archiveBaseName = 'WPILib_' + buildClassifier + '-' + pubVersion + '-resources'
+
+    destinationDirectory = file("$buildDir/outputs")
+    println destinationDirectory.get()
+
+    duplicatesStrategy 'exclude'
+
+    dependsOn fullConfigFileTask
+    inputs.file fullConfigFile
+
+    it.from (fullConfigFile)
+
+    def zip = it
+
+    zip.dependsOn upgradeConfigFileTask
+    zip.inputs.file upgradeConfigFile
+
+    zip.from (upgradeConfigFile)
+
+    jdkConfigFileSetup(zip)
+
+    vscodeConfigZipSetup(zip)
+}
+
+def generateFullResourcesTask = tasks.register('generateFullResources', project.ext.archiveType) {
+    archiveBaseName = 'WPILib_' + buildClassifier + '-' + pubVersion
+
+    destinationDirectory = file("$buildDir/outputs")
+    println destinationDirectory.get()
+
+    duplicatesStrategy 'exclude'
+
+
+    if (project.ext.isUnix) {
+        extension = 'tar.gz'
+        compression = Compression.GZIP
+    }
+
+    dependsOn fullConfigFileTask
+    inputs.file fullConfigFile
+
+    it.from (fullConfigFile) {
+        into '/installUtils'
+    }
+
+    commonResources(it)
+
+    gradleZipTaskSetup(it)
+    toolchainZipSetup(it)
+
+    jdkZipSetup(it)
+
+    if (OperatingSystem.current().isWindows()) {
+        def task = it
+        // Grab release shortcut creator
+        project(':WPILibShortcutCreator').application.binaries.whenElementFinalized { binary ->
+            if (binary.name == 'mainRelease') {
+                task.from (binary.executableFile) {
+                    into '/installUtils'
+                }
+                task.dependsOn binary.executableFileProducer
+            }
+        }
+    }
+}
+
+def generateFullZipBaseTask = tasks.register('generateFullZipBase', Zip) {
+    archiveBaseName = 'WPILibInstaller_' + buildClassifier + '-artifacts'
+    destinationDirectory = buildDir
+    duplicatesStrategy 'exclude'
+
+    dependsOn generateFullResourcesTask
+    inputs.file generateFullResourcesTask.get().archivePath
+
+    entryCompression = ZipEntryCompression.STORED
+
+    from (generateFullResourcesTask.get().archivePath) {
+        rename { 'files.zip' }
+    }
+}
+
+tasks.register('generateInstallers', Task) {
+    dependsOn generateConfigFiles
+    dependsOn generateFullResourcesTask
+}
+
+wrapper {
+    gradleVersion = '6.0.1'
+}

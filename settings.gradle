@@ -1,0 +1,22 @@
+pluginManagement {
+    repositories {
+        mavenLocal()
+        gradlePluginPortal()
+        maven {
+            name 'artifactory'
+            url 'https://frcmaven.wpi.edu/artifactory/plugins'
+        }
+    }
+    resolutionStrategy {
+        eachPlugin {
+            if ( requested.id.id == 'edu.wpi.first.GradleRIO' ) {
+                useModule( "edu.wpi.first.GradleRIO:edu.wpi.first.GradleRIO.gradle.plugin:$gradleRioVersion" )
+            }
+        }
+    }
+}
+
+include 'gradleriobase'
+include 'apps:MavenMetaDataFixer'
+include 'apps:ToolsUpdater'
+include 'WPILibShortcutCreator'

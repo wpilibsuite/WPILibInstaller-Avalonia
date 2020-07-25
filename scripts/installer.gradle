@@ -1,0 +1,55 @@
+import org.gradle.internal.os.OperatingSystem
+
+
+evaluationDependsOn(':apps:MavenMetaDataFixer')
+evaluationDependsOn(':apps:ToolsUpdater')
+
+def metaDataScriptBatch = file("$rootDir/files/MavenMetaDataFixer.bat")
+def metaDataScriptSh = file("$rootDir/files/MavenMetaDataFixer.py")
+def toolsUpdaterBatch = file("$rootDir/files/ToolsUpdater.bat")
+def toolsUpdaterSh = file("$rootDir/files/ToolsUpdater.py")
+
+ext.msBuildExtraSetup = { AbstractArchiveTask zip->
+  //zip.dependsOn msbuild
+  zip.inputs.file project(':apps:MavenMetaDataFixer').shadowJar.archivePath
+  zip.inputs.file project(':apps:ToolsUpdater').shadowJar.archivePath
+  zip.inputs.file metaDataScriptBatch
+  zip.inputs.file metaDataScriptSh
+  zip.inputs.file toolsUpdaterBatch
+  zip.inputs.file toolsUpdaterSh
+
+  zip.dependsOn project(':apps:MavenMetaDataFixer').shadowJar
+  zip.dependsOn project(':apps:ToolsUpdater').shadowJar
+
+  zip.from (project(':apps:MavenMetaDataFixer').shadowJar.archivePath) {
+    into '/maven'
+    rename { 'MavenMetaDataFixer.jar' }
+  }
+
+  if (project.ext.isUnix == true) {
+    zip.from(metaDataScriptSh) {
+      into '/maven'
+      fileMode 0755
+    }
+  } else {
+    zip.from(metaDataScriptBatch) {
+      into '/maven'
+    }
+  }
+
+  zip.from (project(':apps:ToolsUpdater').shadowJar.archivePath) {
+    into '/tools'
+    rename { 'ToolsUpdater.jar' }
+  }
+
+  if (project.ext.isUnix == true) {
+    zip.from(toolsUpdaterSh) {
+      into '/tools'
+      fileMode 0755
+    }
+  } else {
+    zip.from(toolsUpdaterBatch) {
+      into '/tools'
+    }
+  }
+}

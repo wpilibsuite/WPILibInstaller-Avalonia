@@ -1,0 +1,171 @@
+import org.gradle.internal.component.external.model.DefaultModuleComponentIdentifier
+import jaci.gradle.nativedeps.NativeDepsSpec
+import com.google.gson.GsonBuilder
+
+buildscript {
+    dependencies {
+        classpath 'com.google.code.gson:gson:2.8.6'
+    }
+}
+
+
+plugins {
+    id "java"
+    id 'cpp'
+    id "edu.wpi.first.GradleRIO"
+}
+
+
+// Defining my dependencies. In this case, WPILib (+ friends), CTRE Toolsuite (Talon SRX)
+// and NavX.
+dependencies {
+    implementation wpi.deps.wpilib()
+    nativeZip wpi.deps.wpilibJni(wpi.platforms.roborio)
+    nativeDesktopZip wpi.deps.wpilibJni(wpi.platforms.desktop)
+
+
+    implementation wpi.deps.vendor.java()
+    nativeZip wpi.deps.vendor.jni(wpi.platforms.roborio)
+    nativeDesktopZip wpi.deps.vendor.jni(wpi.platforms.desktop)
+
+    simulation wpi.deps.sim.gui(wpi.platforms.desktop, false)
+    simulation wpi.deps.sim.gui(wpi.platforms.desktop, true)
+
+
+    implementation 'junit:junit:4.12'
+
+    // commands
+    implementation "edu.wpi.first.wpilibNewCommands:wpilibNewCommands-java:${wpi.wpilibVersion}"
+    implementation "edu.wpi.first.wpilibOldCommands:wpilibOldCommands-java:${wpi.wpilibVersion}"
+}
+
+model {
+    components {
+        frcUserProgram(NativeExecutableSpec) {
+            targetPlatform wpi.platforms.roborio
+            targetPlatform wpi.platforms.desktop
+
+            // Defining my dependencies. In this case, WPILib (+ friends), CTRE Toolsuite (Talon SRX)
+            // and NavX.
+            wpi.deps.wpilib(it)
+            wpi.deps.googleTest(it)
+
+            wpi.useLibrary(it, 'wpilib_new_commands_shared')
+            wpi.useLibrary(it, 'wpilib_old_commands_shared')
+        }
+        frcUserProgramStatic(NativeExecutableSpec) {
+            targetPlatform wpi.platforms.roborio
+            targetPlatform wpi.platforms.desktop
+
+            // Defining my dependencies. In this case, WPILib (+ friends), CTRE Toolsuite (Talon SRX)
+            // and NavX.
+            wpi.deps.wpilibStatic(it)
+            wpi.deps.googleTest(it)
+        }
+    }
+}
+
+class WPIDepsGrabber implements Plugin<Project> {
+    void apply(Project project) {
+
+    }
+
+    static class WPIDepGrabberRules extends RuleSource {
+
+        @Mutate
+        void triggerDeps(ModelMap<Task> tasks, NativeDepsSpec deps) {
+            System.out.println('Model triggered')
+        }
+    }
+}
+
+apply plugin: WPIDepsGrabber
+
+tasks.register('modelEvaluationTrigger') {
+
+}
+
+def getConfig = { configs, deps->
+    configs.each { config->
+        if (config.canBeResolved) {
+            config.resolvedConfiguration.resolvedArtifacts.each {
+                def item = [:];
+                item['classifier'] = it.classifier
+                item['extension'] = it.extension
+                def id = it.moduleVersion.id
+                item['groupId'] = id.group
+                item['version'] = id.version
+                item['artifactId'] = id.name
+                deps << item
+            }
+            def componentIds = config.incoming.resolutionResult.allDependencies.collect { it.selected.id }
+            def result = dependencies.createArtifactResolutionQuery()
+                                     .forComponents(componentIds)
+                                     .withArtifacts(JvmLibrary, SourcesArtifact, JavadocArtifact)
+                                     .execute()
+
+            for (component in result.resolvedComponents) {
+                component.getArtifacts(SourcesArtifact).each {
+
+                    def item = [:];
+                    item['classifier'] = 'sources'
+                    item['extension'] = 'jar'
+                    def id = it.id.componentIdentifier
+                    item['groupId'] = id.group
+                    item['version'] = id.version
+                    item['artifactId'] = id.module
+                    deps << item
+
+                }
+                component.getArtifacts(JavadocArtifact).each {
+                                        def item = [:];
+                    item['classifier'] = 'javadoc'
+                    item['extension'] = 'jar'
+                    def id = it.id.componentIdentifier
+                    item['groupId'] = id.group
+                    item['version'] = id.version
+                    item['artifactId'] = id.module
+                    deps << item
+                }
+            }
+        }
+    }
+}
+
+repositories {
+    gradlePluginPortal()
+    mavenLocal()
+}
+
+ext.getGradleRioUrls = {
+    Set urls = [];
+
+    repositories.each {
+        urls << it.url
+    }
+
+    return urls
+}
+
+ext.getGradleRioDependencies = {
+    def output = [:]
+    Set deps = []
+
+    getConfig(configurations, deps)
+    getConfig(buildscript.configurations, deps)
+
+    buildscript.configurations.each { config ->
+        config.allDependencies.each {
+            def item = [:];
+            item['groupId'] = it.group
+            item['version'] = it.version
+            item['artifactId'] = it.name
+            item['extension'] = 'pom'
+            deps << item
+        }
+    }
+
+    output['deps'] = deps
+
+    return output
+}

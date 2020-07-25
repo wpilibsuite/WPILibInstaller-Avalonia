@@ -1,0 +1,176 @@
+evaluationDependsOn(':gradleriobase')
+
+def otherDeps = []
+
+apply plugin: 'de.undercouch.download'
+
+configurations {
+  offline
+  tools
+  documentationJava
+  documentationCpp
+}
+
+def toolArtifacts = [
+  'edu.wpi.first.shuffleboard:shuffleboard',
+  'edu.wpi.first.wpilib:OutlineViewer',
+  'edu.wpi.first.wpilib:SmartDashboard',
+  'edu.wpi.first.wpilib:RobotBuilder',
+  'edu.wpi.first.wpilib:PathWeaver'
+]
+
+dependencies {
+    documentationCpp "edu.wpi.first.wpilibc:documentation:${project(':gradleriobase').wpi.wpilibVersion}@zip"
+    documentationJava "edu.wpi.first.wpilibj:documentation:${project(':gradleriobase').wpi.wpilibVersion}@zip"
+}
+
+def lazyEvaluator = tasks.register('lazyModelEvaluation') {
+
+  dependsOn project(':gradleriobase').tasks.named('modelEvaluationTrigger')
+  doLast {
+    def gradleRioDeps = project(':gradleriobase').getGradleRioDependencies()
+    dependencies {
+      gradleRioDeps.deps.each { dep->
+        if (dep.classifier == null) {
+          offline "$dep.groupId:$dep.artifactId:$dep.version:@$dep.extension"
+        } else if (dep.classifier.startsWith(project.ext.forceNativeClassifier)) {
+          // Special case win 32
+          if (project.ext.forceNativeClassifier == 'windowsx86') {
+            def cls = dep.classifier.replace('windowsx86-64', 'windowsx86')
+            offline "$dep.groupId:$dep.artifactId:$dep.version:$cls@$dep.extension"
+          } else {
+            offline "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
+          }
+        } else if (dep.classifier.contains('athena')) {
+          offline "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
+        } else if (dep.classifier.contains('headers')) {
+          offline "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
+        } else if (dep.classifier.contains('sources')) {
+          offline "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
+        }
+
+
+        toolArtifacts.each { tool->
+          if ("$dep.groupId:$dep.artifactId" == tool) {
+            if (dep.classifier == null) {
+              tools "$dep.groupId:$dep.artifactId:$dep.version:@$dep.extension"
+            } else {
+              if (dep.classifier != 'sources' && dep.classifier != 'javadoc') {
+                tools "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+repositories {
+    project(':gradleriobase').getGradleRioUrls().each { gUrl->
+      maven {
+        url = gUrl
+      }
+    }
+    maven {
+      name 'artifactory'
+      url 'https://frcmaven.wpi.edu/artifactory/plugins'
+    }
+}
+
+def cleanoffline = tasks.register("cleanOfflineRepository", Delete) {
+  delete offlineRepositoryRoot
+}
+
+updateOfflineRepository.dependsOn cleanoffline
+updateOfflineRepository.dependsOn lazyEvaluator
+
+offlineDependencies {
+  repositories {
+    // You'll have to add your buildscript repositories here too
+    project(':gradleriobase').getGradleRioUrls().each { gUrl->
+      maven {
+        url = gUrl
+      }
+    }
+    maven {
+      name 'artifactory'
+      url 'https://frcmaven.wpi.edu/artifactory/plugins'
+    }
+  }
+
+  configurations 'offline'
+  configurations 'tools'
+
+  includeSources = true
+  includeJavadocs = true
+  includePoms = true
+  includeIvyXmls = true
+}
+
+ext.mavenConfigSetup = {
+  return new Tuple2({ task->
+  }, { config->
+    config['Maven'] = [:]
+    config['Maven']['Folder'] = 'maven'
+
+    if (project.ext.isUnix == true) {
+      config['Maven']['MetaDataFixerExe'] = 'MavenMetaDataFixer.py'
+    } else {
+      config['Maven']['MetaDataFixerExe'] = 'MavenMetaDataFixer.bat'
+    }
+  })
+}
+
+def downloadReadTheDocs = tasks.register('downloadReadTheDocs', Download) {
+  src 'https://buildmedia.readthedocs.org/media/htmlzip/frc-docs/latest/frc-docs.zip'
+  dest buildDir
+  overwrite false
+}
+
+def rtdFile = file("$buildDir/frc-docs.zip")
+
+def downloadNewCommands = tasks.register('downloadNewCommands', Download) {
+  src 'https://raw.githubusercontent.com/wpilibsuite/allwpilib/master/wpilibNewCommands/WPILibNewCommands.json'
+  dest buildDir
+  overwrite false
+}
+
+def downloadOldCommands = tasks.register('downloadOldCommands', Download) {
+  src 'https://raw.githubusercontent.com/wpilibsuite/allwpilib/master/wpilibOldCommands/WPILibOldCommands.json'
+  dest buildDir
+  overwrite false
+}
+
+ext.mavenZipSetup = { AbstractArchiveTask zip->
+  zip.dependsOn updateOfflineRepository
+  zip.inputs.dir offlineRepositoryRoot
+  zip.from(fileTree(offlineRepositoryRoot)) {
+    into '/maven'
+  }
+
+  zip.dependsOn downloadNewCommands
+  zip.dependsOn downloadOldCommands
+  zip.dependsOn downloadReadTheDocs
+
+  zip.from("$buildDir/WPILibNewCommands.json") {
+    into '/vendordeps'
+  }
+
+  zip.from("$buildDir/WPILibOldCommands.json") {
+    into '/vendordeps'
+  }
+
+  def file = configurations.documentationCpp.resolvedConfiguration.resolvedArtifacts.first().file
+
+  zip.from(project.zipTree(configurations.documentationCpp.resolvedConfiguration.resolvedArtifacts.first().file)) {
+    into '/documentation/cpp'
+  }
+  zip.from(project.zipTree(configurations.documentationJava.resolvedConfiguration.resolvedArtifacts.first().file)) {
+    into '/documentation/java'
+  }
+
+  zip.from(project.zipTree(rtdFile)) {
+    into '/documentation/rtd'
+  }
+}
+
