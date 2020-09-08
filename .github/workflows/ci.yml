@@ -31,7 +31,7 @@ jobs:
           with:
             java-version: 11
         - name: Build Installer
-          run: ./gradlew generateInstallers -PXmx3072m ${{ matrix.build-options }} -DsystemProp.org.gradle.internal.http.connectionTimeout=180000 -DsystemProp.org.gradle.internal.http.socketTimeout=180000 -PjenkinsBuild
+          run: ./gradlew generateInstallers -PXmx3072m -DsystemProp.org.gradle.internal.http.connectionTimeout=180000 -DsystemProp.org.gradle.internal.http.socketTimeout=180000 -PjenkinsBuild ${{ matrix.build-options }}
         - uses: actions/upload-artifact@v2
           with:
             name: ${{ matrix.artifact-name }}
