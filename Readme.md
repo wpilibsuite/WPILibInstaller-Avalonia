@@ -25,6 +25,16 @@ gradlew generateInstallers -PXmx3072m -PlinuxBuild -DsystemProp.org.gradle.inter
 
 If no OS argument is given, it will default to building Windows 64. Additionally, the other gradle options ensure that the build has enough RAM and time needed to build properly. It's not recommended to build the installer if your system has less than 4GB of RAM.
 
+## Organization of repository
+
+This is the organization of the repository directories
+
+- WPILibInstaller-Avalonia (Contains the C# application files for the installer UI, as well as the main installer program)
+- WPILibShortcutCreator (Contains various scripts to handle creating shortcuts on different OSes)
+- apps (Integrates with Gradle into downloading the various WPILib tools and applications needed)
+- files (Miscellaneous script files that are used for VSCode integration, and path handling)
+- scripts (Core gradle scripts that download required dependencies)
+
 ## License
 
 This repository is licensed under BSD 3. Copyright FIRST All rights reserved.
