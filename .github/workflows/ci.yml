@@ -24,7 +24,7 @@ jobs:
               artifact-name: MacOS
               architecture: x64
               build-options: "-PmacBuild"
-  name: "Build - ${{ matrix.artifact-name }}"
+    name: "Build - ${{ matrix.artifact-name }}"
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
