@@ -63,7 +63,7 @@ jobs:
         with:
           name: linux-installer
           path: build\outputs\
-  mac-os:
+  macos:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
