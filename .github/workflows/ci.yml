@@ -3,8 +3,29 @@ name: CI
 on: [pull_request, push]
 
 jobs:
-  windows-32:
-    runs-on: windows-latest
+  build:
+      strategy:
+        fail-fast: false
+        matrix:
+          include:
+            - os: ubuntu-latest
+              artifact-name: Linux
+              architecture: x64
+              build-options: "-PlinuxBuild"
+            - os: windows-latest
+              artifact-name: Win64
+              architecture: x64
+              build-options: ""
+            - os: windows-latest
+              artifact-name: Win32
+              architecture: x86
+              build-options: "-Pwindows32"
+            - os: macos-latest
+              artifact-name: MacOS
+              architecture: x64
+              build-options: "-PmacBuild"
+  name: "Build - ${{ matrix.artifact-name }}"
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-dotnet@v1
@@ -17,69 +38,10 @@ jobs:
         uses: eskatos/gradle-command-action@v1
         with:
           gradle-version: 6.0.1
-          arguments: generateInstallers -PXmx3072m -Pwindows32 -DsystemProp.org.gradle.internal.http.connectionTimeout=180000 -DsystemProp.org.gradle.internal.http.socketTimeout=180000 -PjenkinsBuild
+          arguments: generateInstallers -PXmx3072m ${{ matrix.build-options }} -DsystemProp.org.gradle.internal.http.connectionTimeout=180000 -DsystemProp.org.gradle.internal.http.socketTimeout=180000 -PjenkinsBuild
       - name: Archive Artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: win32-installer
+          name: ${{ matrix.artifact-name }}-installer
           path: build\outputs\
-  windows-64:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: 5.0.100-preview.8.20417.9
-      - uses: actions/setup-java@v1
-        with:
-          java-version: 11
-      - name: Build Installer
-        uses: eskatos/gradle-command-action@v1
-        with:
-          gradle-version: 6.0.1
-          arguments: generateInstallers -PXmx3072m -DsystemProp.org.gradle.internal.http.connectionTimeout=180000 -DsystemProp.org.gradle.internal.http.socketTimeout=180000 -PjenkinsBuild
-      - name: Archive Artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: win64-installer
-          path: build\outputs\
-  linux:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: 5.0.100-preview.8.20417.9
-      - uses: actions/setup-java@v1
-        with:
-          java-version: 11
-      - name: Build Installer
-        uses: eskatos/gradle-command-action@v1
-        with:
-          gradle-version: 6.0.1
-          arguments: generateInstallers -PXmx3072m -PlinuxBuild -DsystemProp.org.gradle.internal.http.connectionTimeout=180000 -DsystemProp.org.gradle.internal.http.socketTimeout=180000 -PjenkinsBuild
-      - name: Archive Artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: linux-installer
-          path: build\outputs\
-  macos:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: 5.0.100-preview.8.20417.9
-      - uses: actions/setup-java@v1
-        with:
-          java-version: 11
-      - name: Build Installer
-        uses: eskatos/gradle-command-action@v1
-        with:
-          gradle-version: 6.0.1
-          arguments: generateInstallers -PXmx3072m -PmacBuild -DsystemProp.org.gradle.internal.http.connectionTimeout=180000 -DsystemProp.org.gradle.internal.http.socketTimeout=180000 -PjenkinsBuild
-      - name: Archive Artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: macos-installer
-          path: build\outputs\
+  
