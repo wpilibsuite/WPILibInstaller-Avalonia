@@ -1,17 +1,20 @@
 import java.security.MessageDigest
-import org.gradle.wrapper.*
+
+def props = new Properties()
+def propsFile = file("distwrapper/gradle-wrapper.properties")
+propsFile.withInputStream { props.load(it) }
 
 ext.gradleConfigTaskSetup = {
+
   def wrapperTask = tasks.named('wrapper').get()
   return new Tuple2({ Task task ->
-    task.inputs.property 'wrapperUrl', wrapperTask.distributionUrl
-    task.inputs.file wrapperTask.propertiesFile
+    task.inputs.file propsFile
   }, { config ->
-    def distributionHash = new BigInteger(1, MessageDigest.getInstance("MD5").digest(wrapperTask.distributionUrl.getBytes())).toString(36)
+    def distributionHash = new BigInteger(1, MessageDigest.getInstance("MD5").digest(props.distributionUrl.getBytes())).toString(36)
 
     def gradleCfg = [
         Hash: distributionHash,
-        ZipName: new File(wrapperTask.distributionUrl).name,
+        ZipName: new File(props.distributionUrl).name,
         ExtractLocations: ['wrapper/dists', 'permwrapper/dists']
     ]
 
@@ -19,13 +22,19 @@ ext.gradleConfigTaskSetup = {
   })
 }
 
+apply plugin: 'de.undercouch.download'
+
+def downloadGradle = tasks.register('downloadGradle', Download) {
+  src props.distributionUrl
+  dest buildDir
+  overwrite false
+}
+
 ext.gradleZipTaskSetup = { AbstractArchiveTask zip->
-    def executor = WrapperExecutor.forProjectDirectory(project.rootDir)
 
-    PathAssembler assembler = new PathAssembler(GradleUserHomeLookup.gradleUserHome());
+    zip.dependsOn downloadGradle
 
-    def distribution = assembler.getDistribution(executor.configuration)
-    zip.from (distribution.zipFile) {
+    zip.from (downloadGradle.get().outputFiles) {
         into '/installUtils'
     }
 }
