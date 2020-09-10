@@ -13,10 +13,10 @@ jobs:
               build-options: "-PlinuxBuild"
             - os: windows-latest
               artifact-name: Win64
-              build-options: "-Dhttp.keepAlive=false"
+              build-options: ""
             - os: windows-latest
               artifact-name: Win32
-              build-options: "-Pwindows32 -Dhttp.keepAlive=false"
+              build-options: "-Pwindows32"
             - os: macos-latest
               artifact-name: MacOS
               build-options: "-PmacBuild"
