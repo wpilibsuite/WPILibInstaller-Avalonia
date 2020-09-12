@@ -203,10 +203,8 @@ def generateFullResourcesTask = tasks.register('generateFullResources', project.
     archiveBaseName = 'WPILib_' + buildClassifier + '-' + pubVersion + '-artifacts'
 
     destinationDirectory = file("$buildDir/outputs")
-    println destinationDirectory.get()
 
     duplicatesStrategy 'exclude'
-
 
     if (project.ext.isUnix) {
         extension = 'tar.gz'
