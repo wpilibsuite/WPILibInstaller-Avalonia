@@ -237,10 +237,6 @@ def generateFullResourcesTask = tasks.register('generateFullResources', project.
             }
         }
     }
-
-    eachFile {
-        println it
-    }
 }
 
 def dotnetInstallerTask = tasks.register('createInstaller', Exec) {
