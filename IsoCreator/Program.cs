@@ -10,21 +10,25 @@ namespace IsoCreator
     {
         static int Main(string? input = null, string? output = null, string? version = null)
         {
-            if (input == null) {
+            if (input == null)
+            {
                 Console.WriteLine("Input is required");
                 return 1;
             }
 
-            if (output == null) {
+            if (output == null)
+            {
                 Console.WriteLine("Output is required");
                 return 1;
             }
 
-            if (version == null) {
+            if (version == null)
+            {
                 version = "unknown";
             }
 
-            if (!Directory.Exists(input)) {
+            if (!Directory.Exists(input))
+            {
                 Console.WriteLine("Input must be a directory and must exist");
                 return 1;
             }
@@ -33,7 +37,8 @@ namespace IsoCreator
             builder.UseJoliet = true;
             builder.VolumeIdentifier = $"WPILib Installer - {version}";
 
-            foreach (var file in Directory.EnumerateFiles(input)) {
+            foreach (var file in Directory.EnumerateFiles(input))
+            {
                 var fileName = Path.GetFileName(file);
                 builder.AddFile(fileName, file);
             }
