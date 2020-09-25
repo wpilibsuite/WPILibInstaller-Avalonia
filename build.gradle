@@ -175,10 +175,9 @@ def fullConfigFileTask = tasks.register('generateFullConfigFile', Task) { Task t
 }
 
 def generateConfigFiles = tasks.register('generateCommonResources', Zip) {
-    archiveBaseName = 'WPILib_' + buildClassifier + '-' + pubVersion + '-resources'
+    archiveBaseName = 'WPILibInstaller_' + buildClassifier + '-' + pubVersion + '-resources'
 
     destinationDirectory = file("$buildDir/outputs")
-    println destinationDirectory.get()
 
     duplicatesStrategy 'exclude'
 
@@ -253,10 +252,42 @@ def copyInstallerFiles = tasks.register('copyInstallerFiles', Copy) {
     dependsOn dotnetInstallerTask
 }
 
+def dotnetCreateImageTask = tasks.register('createDiskImage', Exec) {
+    workingDir = "$projectDir/IsoCreator"
+    inputs.dir "$buildDir/outputs"
+
+    def file = "$buildDir/pubOutputs/WPILib_" + buildClassifier + '-' + pubVersion + '.iso'
+
+    outputs.file file
+
+    commandLine 'dotnet', 'run', '--input', "$buildDir/outputs", '--output', file, '--version', pubVersion
+}
+
+def unixCreateImageTask = tasks.register('createTarImage', Tar) {
+    extension = 'tar.gz'
+    compression = Compression.GZIP
+
+    inputs.dir "$buildDir/outputs"
+
+    archiveBaseName = 'WPILibInstaller_' + buildClassifier + '-' + pubVersion + ''
+
+    destinationDirectory = file("$buildDir/pubOutputs")
+
+    duplicatesStrategy 'exclude'
+
+    from("$buildDir/outputs")
+}
+
 tasks.register('generateInstallers', Task) {
     dependsOn generateConfigFiles
     dependsOn generateFullResourcesTask
     dependsOn copyInstallerFiles
+
+    if (OperatingSystem.current().isWindows()) {
+        dependsOn dotnetCreateImageTask
+    } else {
+        dependsOn unixCreateImageTask
+    }
 }
 
 wrapper {

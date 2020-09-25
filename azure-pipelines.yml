@@ -30,7 +30,7 @@ jobs:
 
     - task: CopyFiles@2
       inputs:
-        contents: 'build\outputs\**'
+        contents: 'build\pubOutputs\**'
         targetFolder: $(Build.ArtifactStagingDirectory)
 
     - task: PublishBuildArtifacts@1
@@ -63,7 +63,7 @@ jobs:
 
     - task: CopyFiles@2
       inputs:
-        contents: 'build\outputs\**'
+        contents: 'build\pubOutputs\**'
         targetFolder: $(Build.ArtifactStagingDirectory)
 
     - task: PublishBuildArtifacts@1
@@ -96,7 +96,7 @@ jobs:
 
     - task: CopyFiles@2
       inputs:
-        contents: 'build/outputs/**'
+        contents: 'build/pubOutputs/**'
         targetFolder: $(Build.ArtifactStagingDirectory)
 
     - task: PublishBuildArtifacts@1
@@ -129,7 +129,7 @@ jobs:
 
     - task: CopyFiles@2
       inputs:
-        contents: 'build/outputs/**'
+        contents: 'build/pubOutputs/**'
         targetFolder: $(Build.ArtifactStagingDirectory)
 
     - task: PublishBuildArtifacts@1
