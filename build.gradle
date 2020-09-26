@@ -253,6 +253,10 @@ def copyInstallerFiles = tasks.register('copyInstallerFiles', Copy) {
 }
 
 def dotnetCreateImageTask = tasks.register('createDiskImage', Exec) {
+    dependsOn generateConfigFiles
+    dependsOn generateFullResourcesTask
+    dependsOn copyInstallerFiles
+
     workingDir = "$projectDir/IsoCreator"
     inputs.dir "$buildDir/outputs"
 
@@ -264,6 +268,10 @@ def dotnetCreateImageTask = tasks.register('createDiskImage', Exec) {
 }
 
 def unixCreateImageTask = tasks.register('createTarImage', Tar) {
+    dependsOn generateConfigFiles
+    dependsOn generateFullResourcesTask
+    dependsOn copyInstallerFiles
+
     extension = 'tar.gz'
     compression = Compression.GZIP
 
@@ -279,9 +287,7 @@ def unixCreateImageTask = tasks.register('createTarImage', Tar) {
 }
 
 tasks.register('generateInstallers', Task) {
-    dependsOn generateConfigFiles
-    dependsOn generateFullResourcesTask
-    dependsOn copyInstallerFiles
+
 
     if (OperatingSystem.current().isWindows()) {
         dependsOn dotnetCreateImageTask
