@@ -1,4 +1,4 @@
-# WPILibInstaller-Avalonia
+# WPILibInstaller-Avalonia - an amazing project
 
 Welcome to the WPILibInstaller repository, which hosts the source code used to install the various components, libraries, and applications of the wpilibsuite.
 
