@@ -1,9 +1,8 @@
 ﻿using System;
 using System.IO;
-using SharpCompress.Archives.GZip;
-using SharpCompress.Readers.Tar;
 using System.Runtime.InteropServices;
 using System.IO.Compression;
+using System.Threading.Tasks;
 
 namespace WPILibInstaller_Avalonia.Utils
 {
@@ -13,7 +12,17 @@ namespace WPILibInstaller_Avalonia.Utils
         {
             stream.Seek(0, SeekOrigin.Begin);
 
-            if (GZipArchive.IsGZipFile(stream))
+            // Read first 3 bytes, check for first 3 bytes 1F 8B 08
+            Span<byte> header = stackalloc byte[3];
+
+            int bytesRead = stream.Read(header);
+
+            if (bytesRead != 3)
+            {
+                throw new InvalidDataException("Empty Stream?");
+            }
+
+            if (header[0] == 0x1F && header[1] == 0x8B && header[2] == 0x08)
             {
                 // Seek to end, grab size
                 stream.Seek(-4, SeekOrigin.End);
@@ -25,13 +34,11 @@ namespace WPILibInstaller_Avalonia.Utils
 
                 stream.Seek(0, SeekOrigin.Begin);
 
-                var gzip = new GZipStream(stream, CompressionMode.Decompress);
-                return new TarArchiveExtractor(TarReader.Open(gzip), uncompressedSize);
+                return new TarArchiveExtractor(stream, uncompressedSize);
             }
 
             stream.Seek(0, SeekOrigin.Begin);
-            var archive = new ZipArchive(stream);
-            return new ZipArchiveExtractor(archive);
+            return new ZipArchiveExtractor(stream);
 
         }
     }

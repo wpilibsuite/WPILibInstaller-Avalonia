@@ -56,16 +56,39 @@ namespace WPILibInstaller_Avalonia.ViewModels
             string verString = $"{version.Major}.{version.Minor}.{version.Build}";
             var baseDir = AppContext.BaseDirectory;
             var extension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "zip" : "tar.gz";
+
+            bool foundResources = false;
+            bool foundSupport = false;
+
             // Enumerate all files in base dir
             foreach (var file in Directory.EnumerateFiles(baseDir))
             {
                 if (file.EndsWith($"{verString}-resources.{extension}"))
                 {
                     _ = SelectResourceFilesWithFile(file);
+                    foundResources = true;
                 }
                 else if (file.EndsWith($"{verString}-artifacts.{extension}"))
                 {
                     _ = SelectSupportFilesWithFile(file);
+                    foundSupport = true;
+                }
+            }
+
+            if ((!foundResources || !foundSupport) && RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                // Go back 3 directories to back out of mac package
+                baseDir = Path.GetFullPath(Path.Join(baseDir, "..", "..", ".."));
+                foreach (var file in Directory.EnumerateFiles(baseDir))
+                {
+                    if (!foundResources && file.EndsWith($"{verString}-resources.{extension}"))
+                    {
+                        _ = SelectResourceFilesWithFile(file);
+                    }
+                    else if (!foundSupport && file.EndsWith($"{verString}-artifacts.{extension}"))
+                    {
+                        _ = SelectSupportFilesWithFile(file);
+                    }
                 }
             }
         }
