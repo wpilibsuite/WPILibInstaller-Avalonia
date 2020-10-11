@@ -81,6 +81,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
         {
             source = new CancellationTokenSource();
 
+            await Task.Yield();
 
             var updateSource = new CancellationTokenSource();
 
