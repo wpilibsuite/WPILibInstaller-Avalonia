@@ -69,7 +69,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         private CancellationTokenSource? source;
 
-        public ReactiveCommand<Unit, Unit> CancelInstall;
+        public ReactiveCommand<Unit, Unit> CancelInstall { get; }
 
         public async Task CancelInstallFunc()
         {
