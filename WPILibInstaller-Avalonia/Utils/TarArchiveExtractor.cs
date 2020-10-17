@@ -17,9 +17,9 @@ namespace WPILibInstaller_Avalonia.Utils
         public TarArchiveExtractor(Stream stream, int size)
         {
             TotalUncompressSize = size;
-            //this.dataStream = new GZipStream(stream, CompressionMode.Decompress);
+            var gzipStream = new GZipStream(stream, CompressionMode.Decompress);
 
-            this.dataStream = new TarInputStream(stream, Encoding.ASCII);
+            this.dataStream = new TarInputStream(gzipStream, Encoding.ASCII);
         }
 
         public int TotalUncompressSize { get; }
