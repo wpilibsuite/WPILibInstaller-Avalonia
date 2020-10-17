@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Threading.Tasks;
 
 namespace WPILibInstaller_Avalonia.Utils
 {
@@ -10,9 +11,9 @@ namespace WPILibInstaller_Avalonia.Utils
         private IEnumerator<ZipArchiveEntry> entries;
 
 
-        public ZipArchiveExtractor(ZipArchive archive)
+        public ZipArchiveExtractor(Stream stream)
         {
-            this.archive = archive;
+            this.archive = new ZipArchive(stream);
             TotalUncompressSize = (int)archive.Entries.Count;
             entries = archive.Entries.GetEnumerator();
         }
@@ -34,9 +35,11 @@ namespace WPILibInstaller_Avalonia.Utils
             return entries.MoveNext();
         }
 
-        public Stream OpenEntryStream()
+        public Task CopyToStreamAsync(Stream stream)
         {
-            return entries.Current.Open();
+            return entries.Current.Open().CopyToAsync(stream);
         }
+
+        public bool EntryIsExecutable => false;
     }
 }

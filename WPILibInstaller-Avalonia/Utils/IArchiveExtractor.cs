@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace WPILibInstaller_Avalonia.Utils
 {
@@ -15,6 +16,8 @@ namespace WPILibInstaller_Avalonia.Utils
 
         bool EntryIsDirectory { get; }
 
-        Stream OpenEntryStream();
+        bool EntryIsExecutable { get; }
+
+        Task CopyToStreamAsync(Stream stream);
     }
 }

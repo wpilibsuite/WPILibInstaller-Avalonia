@@ -69,7 +69,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         private CancellationTokenSource? source;
 
-        public ReactiveCommand<Unit, Unit> CancelInstall;
+        public ReactiveCommand<Unit, Unit> CancelInstall { get; }
 
         public async Task CancelInstallFunc()
         {
@@ -81,6 +81,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
         {
             source = new CancellationTokenSource();
 
+            await Task.Yield();
 
             var updateSource = new CancellationTokenSource();
 
@@ -298,9 +299,6 @@ namespace WPILibInstaller_Avalonia.ViewModels
                 if (currentPercentage < 0) currentPercentage = 0;
                 Progress = (int)currentPercentage;
 
-
-
-                using var stream = extractor.OpenEntryStream();
                 string fullZipToPath = Path.Combine(intoPath, entryName);
                 string? directoryName = Path.GetDirectoryName(fullZipToPath);
                 if (directoryName?.Length > 0)
@@ -315,8 +313,18 @@ namespace WPILibInstaller_Avalonia.ViewModels
                     }
                 }
 
-                using FileStream writer = File.Create(fullZipToPath);
-                await stream.CopyToAsync(writer);
+                {
+                    using FileStream writer = File.Create(fullZipToPath);
+                    await extractor.CopyToStreamAsync(writer);
+                }
+
+                if (extractor.EntryIsExecutable)
+                {
+                    new Mono.Unix.UnixFileInfo(fullZipToPath).FileAccessPermissions |=
+                        (Mono.Unix.FileAccessPermissions.GroupExecute |
+                         Mono.Unix.FileAccessPermissions.UserExecute |
+                         Mono.Unix.FileAccessPermissions.OtherExecute);
+                }
             }
 
         }
@@ -368,7 +376,6 @@ namespace WPILibInstaller_Avalonia.ViewModels
                 if (currentPercentage < 0) currentPercentage = 0;
                 Progress = (int)currentPercentage;
 
-                using var stream = extractor.OpenEntryStream();
                 string fullZipToPath = Path.Combine(intoPath, entryName);
                 string? directoryName = Path.GetDirectoryName(fullZipToPath);
                 if (directoryName?.Length > 0)
@@ -384,7 +391,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
                 }
 
                 using FileStream writer = File.Create(fullZipToPath);
-                await stream.CopyToAsync(writer);
+                await extractor.CopyToStreamAsync(writer);
             }
 
             ;
