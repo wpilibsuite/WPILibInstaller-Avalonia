@@ -276,20 +276,18 @@ def unixCreateImageTask = tasks.register('createTarImage', Tar) {
     dependsOn generateFullResourcesTask
     dependsOn copyInstallerFiles
 
-    if (!project.hasProperty("macBuild")) {
-        extension = 'tar.gz'
-        compression = Compression.GZIP
+    extension = 'tar.gz'
+    compression = Compression.GZIP
 
-        inputs.dir "$buildDir/outputs"
+    inputs.dir "$buildDir/outputs"
 
-        archiveBaseName = 'WPILibInstaller_' + buildClassifier + '-' + pubVersion + ''
+    archiveBaseName = 'WPILibInstaller_' + buildClassifier + '-' + pubVersion + ''
 
-        destinationDirectory = file("$buildDir/pubOutputs")
+    destinationDirectory = file("$buildDir/pubOutputs")
 
-        duplicatesStrategy 'exclude'
+    duplicatesStrategy 'exclude'
 
-        from("$buildDir/outputs")
-    }
+    from("$buildDir/outputs")
 }
 
 tasks.register('generateInstallers', Task) {
@@ -297,8 +295,12 @@ tasks.register('generateInstallers', Task) {
 
     if (OperatingSystem.current().isWindows()) {
         dependsOn dotnetCreateImageTask
-    } else {
+    } else if (!project.hasProperty("macBuild")){
         dependsOn unixCreateImageTask
+    } else {
+        dependsOn generateConfigFiles
+        dependsOn generateFullResourcesTask
+        dependsOn copyInstallerFiles
     }
 }
 

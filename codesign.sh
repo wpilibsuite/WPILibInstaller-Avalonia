@@ -1,7 +1,7 @@
 #!/bin/bash
 APP_NAME="build/pubOutputs/WPILibInstaller.app"
 ENTITLEMENTS="WPILibInstaller.entitlements"
-SIGNING_IDENTITY="Developer ID Application: 5190 Roboboosters, Inc (5KZ3796BC5)" # matches Keychain Access certificate name
+SIGNING_IDENTITY="$1"
 
 find "$APP_NAME/Contents/MacOS/"|while read fname; do
     if [[ -f $fname ]]; then

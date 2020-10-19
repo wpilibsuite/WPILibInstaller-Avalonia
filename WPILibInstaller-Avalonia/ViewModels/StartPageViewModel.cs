@@ -76,9 +76,9 @@ namespace WPILibInstaller.ViewModels
             }
 
             // Assume app is running in a translocated process.
-            if ((!foundResources || !foundSupport) && RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            if ((!foundResources || !foundSupport) && RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
+                && Directory.Exists("/Volumes/WPILibInstaller"))
             {
-                // Go back 3 directories to back out of mac package
                 baseDir = Path.GetFullPath("/Volumes/WPILibInstaller");
                 foreach (var file in Directory.EnumerateFiles(baseDir))
                 {

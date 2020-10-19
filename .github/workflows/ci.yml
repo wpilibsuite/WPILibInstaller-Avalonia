@@ -1,10 +1,6 @@
 name: CI
 
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+on: [push, pull_request]
 
 jobs:
   macos:
@@ -27,6 +23,7 @@ jobs:
       - name: Build Installer with Gradle
         run: |
           ./gradlew generateInstallers -PXmx3072m -PmacBuild -DsystemProp.org.gradle.internal.http.connectionTimeout=180000 -DsystemProp.org.gradle.internal.http.socketTimeout=180000 -PjenkinsBuild
+      
       - name: Copy Installer and Resources to Build Directory
         working-directory: build
         run: |
@@ -35,26 +32,39 @@ jobs:
           cp outputs/*.zip pubOutputs/WPILibInstaller.app/Contents/MacOS/
           cp ../WPILibInstaller-Avalonia/wpilib-256.ico pubOutputs/WPILibInstaller.app/Contents/Resources/
           cp outputs/*.tar.gz pubOutputs/
+      
       - name: Import Developer ID Certificate
         uses: devbotsxyz/xcode-import-certificate@v1
         with:
           certificate-data: ${{ secrets.CERTIFICATE_DATA }}
           certificate-passphrase: ${{ secrets.CERTIFICATE_PASSWORD }}
           keychain-password: ${{ secrets.KEYCHAIN_PASSWORD }}
+        if: |
+          github.repository_owner == 'prateekma' ||
+          (github.repository_owner == 'wpilibsuite' && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v')))
 
       - name: Sign Installer with Developer ID
-        run: ./codesign.sh
+        run: ./codesign.sh ${{ secrets.DEVELOPER_ID }}
+        if: |
+          github.repository_owner == 'prateekma' ||
+          (github.repository_owner == 'wpilibsuite' && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v')))
 
       - name: Notarize Installer
         uses: devbotsxyz/xcode-notarize@v1
         with:
           product-path: "build/pubOutputs/WPILibInstaller.app"
-          primary-bundle-id: com.prateekma.wpilibinstallertest
+          primary-bundle-id: edu.wpi.first.wpilibinstaller
           appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
           appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
+        if: |
+          github.repository_owner == 'prateekma' ||
+          (github.repository_owner == 'wpilibsuite' && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v')))
 
       - name: Staple Notarization Ticket to Installer
         run: xcrun stapler staple -v build/pubOutputs/WPILibInstaller.app
+        if: |
+          github.repository_owner == 'prateekma' ||
+          (github.repository_owner == 'wpilibsuite' && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v')))
 
       - name: Create DMG
         working-directory: build
@@ -64,7 +74,11 @@ jobs:
       - name: Sign DMG with Developer ID
         working-directory: build
         run: |
-          codesign -s "Developer ID Application: 5190 Roboboosters, Inc (5KZ3796BC5)" WPILibInstaller.dmg
+          codesign -s ${{ secrets.DEVELOPER_ID }} WPILibInstaller.dmg
+        if: |
+          github.repository_owner == 'prateekma' ||
+          (github.repository_owner == 'wpilibsuite' && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v')))
+          
       - name: Upload Installer DMG
         uses: actions/upload-artifact@v2
         with:
