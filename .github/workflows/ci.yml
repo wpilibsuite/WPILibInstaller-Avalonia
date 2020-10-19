@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  macos:
+    name: Build - macOS
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - uses: actions/setup-dotnet@v1
+        name: Setup .NET
+        with:
+          dotnet-version: '5.0.100-rc.1.20452.10'
+
+      - uses: actions/setup-java@v1
+        name: Setup Java 11
+        with:
+          java-version: '11'
+
+      - name: Build Installer with Gradle
+        run: |
+          ./gradlew generateInstallers -PXmx3072m -PmacBuild -DsystemProp.org.gradle.internal.http.connectionTimeout=180000 -DsystemProp.org.gradle.internal.http.socketTimeout=180000 -PjenkinsBuild
+      - name: Copy Installer and Resources to Build Directory
+        working-directory: build
+        run: |
+          mkdir -p pubOutputs
+          cp -R outputs/WPILibInstaller_Avalonia.app pubOutputs/WPILibInstaller.app
+          cp outputs/*.zip pubOutputs/WPILibInstaller.app/Contents/MacOS/
+          cp ../WPILibInstaller-Avalonia/wpilib-256.ico pubOutputs/WPILibInstaller.app/Contents/Resources/
+          cp outputs/*.tar.gz pubOutputs/
+      - name: Import Developer ID Certificate
+        uses: devbotsxyz/xcode-import-certificate@v1
+        with:
+          certificate-data: ${{ secrets.CERTIFICATE_DATA }}
+          certificate-passphrase: ${{ secrets.CERTIFICATE_PASSWORD }}
+          keychain-password: ${{ secrets.KEYCHAIN_PASSWORD }}
+
+      - name: Sign Installer with Developer ID
+        run: ./codesign.sh
+
+      - name: Notarize Installer
+        uses: devbotsxyz/xcode-notarize@v1
+        with:
+          product-path: "build/pubOutputs/WPILibInstaller.app"
+          primary-bundle-id: com.prateekma.wpilibinstallertest
+          appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
+          appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
+
+      - name: Staple Notarization Ticket to Installer
+        run: xcrun stapler staple -v build/pubOutputs/WPILibInstaller.app
+
+      - name: Create DMG
+        working-directory: build
+        run: |
+          hdiutil create -volname WPILibInstaller -srcfolder pubOutputs/ -format UDRO WPILibInstaller.dmg
+      
+      - name: Sign DMG with Developer ID
+        working-directory: build
+        run: |
+          codesign -s "Developer ID Application: 5190 Roboboosters, Inc (5KZ3796BC5)" WPILibInstaller.dmg
+      - name: Upload Installer DMG
+        uses: actions/upload-artifact@v2
+        with:
+          name: wpilib-installer
+          path: build/WPILibInstaller.dmg

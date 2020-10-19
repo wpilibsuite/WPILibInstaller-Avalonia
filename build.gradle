@@ -241,7 +241,11 @@ def generateFullResourcesTask = tasks.register('generateFullResources', project.
 def dotnetInstallerTask = tasks.register('createInstaller', Exec) {
     workingDir = "$projectDir/WPILibInstaller-Avalonia"
 
-    commandLine 'dotnet', 'publish', '-c', 'Release', '-r', dotnetRuntime, '/p:PublishSingleFile=true', '/p:PublishTrimmed=true', "/p:Version=$pubVersion"
+    if (project.hasProperty("macBuild")) {
+        commandLine 'dotnet', 'publish', '-c', 'Release', '-r', dotnetRuntime, "/p:Version=$pubVersion", "/t:BundleApp", "-p:RuntimeIdentifier=osx-x64", "-p:CFBundleShortVersionString=2020.3.2", "-p:CFBundleVersion=2020.3.2"
+    } else {
+        commandLine 'dotnet', 'publish', '-c', 'Release', '-r', dotnetRuntime, '/p:PublishSingleFile=true', '/p:PublishTrimmed=true', "/p:Version=$pubVersion"
+    }
 }
 
 def installDirectory = "$projectDir/WPILibInstaller-Avalonia/bin/Release/net5.0/$dotnetRuntime/publish"
@@ -272,18 +276,20 @@ def unixCreateImageTask = tasks.register('createTarImage', Tar) {
     dependsOn generateFullResourcesTask
     dependsOn copyInstallerFiles
 
-    extension = 'tar.gz'
-    compression = Compression.GZIP
+    if (!project.hasProperty("macBuild")) {
+        extension = 'tar.gz'
+        compression = Compression.GZIP
 
-    inputs.dir "$buildDir/outputs"
+        inputs.dir "$buildDir/outputs"
 
-    archiveBaseName = 'WPILibInstaller_' + buildClassifier + '-' + pubVersion + ''
+        archiveBaseName = 'WPILibInstaller_' + buildClassifier + '-' + pubVersion + ''
 
-    destinationDirectory = file("$buildDir/pubOutputs")
+        destinationDirectory = file("$buildDir/pubOutputs")
 
-    duplicatesStrategy 'exclude'
+        duplicatesStrategy 'exclude'
 
-    from("$buildDir/outputs")
+        from("$buildDir/outputs")
+    }
 }
 
 tasks.register('generateInstallers', Task) {
