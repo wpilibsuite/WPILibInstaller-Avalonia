@@ -241,15 +241,22 @@ def generateFullResourcesTask = tasks.register('generateFullResources', project.
 def dotnetInstallerTask = tasks.register('createInstaller', Exec) {
     workingDir = "$projectDir/WPILibInstaller-Avalonia"
 
-    commandLine 'dotnet', 'publish', '-c', 'Release', '-r', dotnetRuntime, '/p:PublishSingleFile=true', '/p:PublishTrimmed=true', '/p:IncludeNativeLibrariesInSingleFile=true', "/p:Version=$pubVersion"
+    commandLine 'dotnet', 'publish', '-c', 'Release', '-r', dotnetRuntime, '/p:PublishSingleFile=true', '/p:PublishTrimmed=true', '/p:IncludeNativeLibrariesForSelfExtract=true', "/p:Version=$pubVersion"
 }
 
 def installDirectory = "$projectDir/WPILibInstaller-Avalonia/bin/Release/net5.0/$dotnetRuntime/publish"
+
+def versionFile = file("$buildDir/WPILibInstallerVersion.txt")
+versionFile.text = pubVersion
 
 def copyInstallerFiles = tasks.register('copyInstallerFiles', Copy) {
     from installDirectory
     into "$buildDir/outputs"
     dependsOn dotnetInstallerTask
+
+    if (OperatingSystem.current().isWindows()) {
+        from versionFile
+    }
 }
 
 def dotnetCreateImageTask = tasks.register('createDiskImage', Exec) {

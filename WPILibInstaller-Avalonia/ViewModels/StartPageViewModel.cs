@@ -52,9 +52,22 @@ namespace WPILibInstaller_Avalonia.ViewModels
             this.viewModelResolver = viewModelResolver;
             refresher = mainRefresher;
 
-            var version = typeof(StartPageViewModel).Assembly.GetName().Version!;
-            string verString = $"{version.Major}.{version.Minor}.{version.Build}";
             var baseDir = AppContext.BaseDirectory;
+
+            var version = typeof(StartPageViewModel).Assembly.GetName().Version!;
+            var verString = $"{version.Major}.{version.Minor}.{version.Build}";
+
+            if (OperatingSystem.IsWindows())
+            {
+                try
+                {
+                    verString = File.ReadAllText(Path.Join(baseDir, "WPILibInstallerVersion.txt")).Trim();
+                }
+                catch
+                {
+                }
+            }
+
             var extension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "zip" : "tar.gz";
 
             bool foundResources = false;
