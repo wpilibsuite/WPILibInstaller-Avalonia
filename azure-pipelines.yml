@@ -70,39 +70,6 @@ jobs:
       inputs:
         artifactName: 'Win64'
 
- - job: Mac
-   pool:
-    vmImage: 'macOS-10.14'
-   timeoutInMinutes: 0
-
-   steps:
-    - task: UseDotNet@2
-      displayName: 'Use .NET Core sdk'
-      inputs:
-        packageType: sdk
-        version: 5.x
-        includePreviewVersions: true
-        installationPath: $(Agent.ToolsDirectory)/dotnet
-    - task: Gradle@2
-      inputs:
-        workingDirectory: ''
-        gradleWrapperFile: 'gradlew'
-        gradleOptions: '-Xmx3072m'
-        jdkVersionOption: '1.11'
-        publishJUnitResults: false
-        testResultsFiles: '**/TEST-*.xml'
-        tasks: 'generateInstallers'
-        options: '-PmacBuild -DsystemProp.org.gradle.internal.http.connectionTimeout=180000 -DsystemProp.org.gradle.internal.http.socketTimeout=180000 -PjenkinsBuild --stacktrace'
-
-    - task: CopyFiles@2
-      inputs:
-        contents: 'build/pubOutputs/**'
-        targetFolder: $(Build.ArtifactStagingDirectory)
-
-    - task: PublishBuildArtifacts@1
-      inputs:
-        artifactName: 'Mac'
-
  - job: Linux
    pool:
     vmImage: 'ubuntu-18.04'
