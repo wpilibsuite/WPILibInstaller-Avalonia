@@ -151,7 +151,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
         private ValueTask<string> SetVsCodePortableMode()
         {
             string portableFolder = Path.Combine(configurationProvider.InstallDirectory, "vscode");
-            if (PlatformUtils.CurrentPlatform == Platform.Mac64)
+            if (PlatformUtils.CurrentPlatform != Platform.Mac64)
             {
                 portableFolder = Path.Combine(portableFolder, "data");
             }
@@ -185,9 +185,6 @@ namespace WPILibInstaller_Avalonia.ViewModels
         {
             var vsVm = viewModelResolver.Resolve<VSCodePageViewModel>();
             if (!toInstallProvider.Model.InstallVsCode && !vsVm.Model.AlreadyInstalled) return;
-
-            // Skip this on non windows platforms
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
 
             var dataPath = await SetVsCodePortableMode();
 
