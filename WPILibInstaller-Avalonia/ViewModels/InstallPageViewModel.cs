@@ -273,15 +273,27 @@ namespace WPILibInstaller_Avalonia.ViewModels
             Text = "Installing Visual Studio Code";
             Progress = 0;
 
+            string intoPath = Path.Join(configurationProvider.InstallDirectory, "vscode");
+
+            if (vsInstallProvider.Model.ToExtractArchiveMacOs != null)
+            {
+                vsInstallProvider.Model.ToExtractArchiveMacOs.Seek(0, SeekOrigin.Begin);
+                var zipPath = Path.Join(intoPath, "MacVsCode.zip");
+                Directory.CreateDirectory(intoPath);
+                {
+                    using var fileToWrite = new FileStream(zipPath, FileMode.Create, FileAccess.Write, FileShare.None);
+                    await vsInstallProvider.Model.ToExtractArchiveMacOs.CopyToAsync(fileToWrite);
+                }
+                await RunScriptExecutable("unzip", Timeout.Infinite, zipPath ,"-d", intoPath);
+                return;
+            }
+
             var archive = vsInstallProvider.Model.ToExtractArchive!;
 
             var extractor = archive;
 
             double totalSize = archive.TotalUncompressSize;
             long currentSize = 0;
-
-
-            string intoPath = Path.Join(configurationProvider.InstallDirectory, "vscode");
 
             while (extractor.MoveToNextEntry())
             {
@@ -450,13 +462,13 @@ namespace WPILibInstaller_Avalonia.ViewModels
             await Task.Yield();
         }
 
-        private Task<bool> RunScriptExecutable(string script, params string[] args)
+        private Task<bool> RunScriptExecutable(string script, int timeoutMs, params string[] args)
         {
             ProcessStartInfo pstart = new ProcessStartInfo(script, string.Join(" ", args));
             var p = Process.Start(pstart);
             return Task.Run(() =>
             {
-                return p!.WaitForExit(5000);
+                return p!.WaitForExit(timeoutMs);
             });
         }
 
@@ -470,7 +482,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
             await RunScriptExecutable(Path.Combine(configurationProvider.InstallDirectory,
                 configurationProvider.UpgradeConfig.Tools.Folder,
-                configurationProvider.UpgradeConfig.Tools.UpdaterExe), "silent");
+                configurationProvider.UpgradeConfig.Tools.UpdaterExe), 5000, "silent");
         }
 
         private async Task RunMavenMetaDataFixer()
@@ -483,7 +495,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
             await RunScriptExecutable(Path.Combine(configurationProvider.InstallDirectory,
                 configurationProvider.UpgradeConfig.Maven.Folder,
-                configurationProvider.UpgradeConfig.Maven.MetaDataFixerExe), "silent");
+                configurationProvider.UpgradeConfig.Maven.MetaDataFixerExe), 5000, "silent");
         }
 
 

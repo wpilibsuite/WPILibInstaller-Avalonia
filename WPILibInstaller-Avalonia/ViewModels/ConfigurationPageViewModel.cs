@@ -30,7 +30,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         public bool CanInstallExtensions => vsProvider.Model.AlreadyInstalled || Model.InstallVsCode;
 
-        public bool CanInstallVsCode => vsProvider.Model.ToExtractArchive != null;
+        public bool CanInstallVsCode => vsProvider.Model.ToExtractArchive != null || vsProvider.Model.ToExtractArchiveMacOs != null;
 
         private readonly IVsCodeInstallLocationProvider vsProvider;
 
