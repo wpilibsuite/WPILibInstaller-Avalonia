@@ -390,11 +390,19 @@ namespace WPILibInstaller_Avalonia.ViewModels
                     }
                 }
 
-                using FileStream writer = File.Create(fullZipToPath);
-                await extractor.CopyToStreamAsync(writer);
-            }
+                {
+                    using FileStream writer = File.Create(fullZipToPath);
+                    await extractor.CopyToStreamAsync(writer);
+                }
 
-            ;
+                if (extractor.EntryIsExecutable)
+                {
+                    new Mono.Unix.UnixFileInfo(fullZipToPath).FileAccessPermissions |=
+                        (Mono.Unix.FileAccessPermissions.GroupExecute |
+                         Mono.Unix.FileAccessPermissions.UserExecute |
+                         Mono.Unix.FileAccessPermissions.OtherExecute);
+                }
+            }
         }
 
         private Task RunGradleSetup()
