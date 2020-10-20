@@ -275,17 +275,14 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
             string intoPath = Path.Join(configurationProvider.InstallDirectory, "vscode");
 
-
             if (vsInstallProvider.Model.ToExtractArchiveMacOs != null)
             {
-                var zipPath = Path.Join(configurationProvider.InstallDirectory, "vscodezip", "MacVsCode.zip");
+                vsInstallProvider.Model.ToExtractArchiveMacOs.Seek(0, SeekOrigin.Begin);
+                var zipPath = Path.Join(intoPath, "MacVsCode.zip");
                 Directory.CreateDirectory(intoPath);
-                Directory.CreateDirectory(Path.Join(configurationProvider.InstallDirectory, "vscodezip"));
                 {
                     using var fileToWrite = new FileStream(zipPath, FileMode.Create, FileAccess.Write, FileShare.None);
                     await vsInstallProvider.Model.ToExtractArchiveMacOs.CopyToAsync(fileToWrite);
-                    await fileToWrite.FlushAsync();
-
                 }
                 await RunScriptExecutable("unzip", Timeout.Infinite, zipPath ,"-d", intoPath);
                 return;
