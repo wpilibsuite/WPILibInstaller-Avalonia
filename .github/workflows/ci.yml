@@ -5,7 +5,7 @@ on: [push, pull_request]
 jobs:
   macos:
     name: Build - macOS
-    runs-on: macos-latest
+    runs-on: macos-10.15
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
@@ -28,7 +28,7 @@ jobs:
         working-directory: build
         run: |
           mkdir -p pubOutputs
-          cp -R outputs/WPILibInstaller_Avalonia.app pubOutputs/WPILibInstaller.app
+          cp -R outputs/WPILibInstaller.app pubOutputs/WPILibInstaller.app
           cp outputs/*.zip pubOutputs/WPILibInstaller.app/Contents/MacOS/
           cp ../WPILibInstaller-Avalonia/wpilib-256.ico pubOutputs/WPILibInstaller.app/Contents/Resources/
           cp outputs/*.tar.gz pubOutputs/
