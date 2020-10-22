@@ -7,12 +7,12 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using WPILibInstaller_Avalonia.Interfaces;
-using WPILibInstaller_Avalonia.Models;
-using WPILibInstaller_Avalonia.Utils;
-using static WPILibInstaller_Avalonia.Utils.ArchiveUtils;
+using WPILibInstaller.Interfaces;
+using WPILibInstaller.Models;
+using WPILibInstaller.Utils;
+using static WPILibInstaller.Utils.ArchiveUtils;
 
-namespace WPILibInstaller_Avalonia.ViewModels
+namespace WPILibInstaller.ViewModels
 {
     public class VSCodePageViewModel : PageViewModelBase, IVsCodeInstallLocationProvider
     {

@@ -2,7 +2,7 @@
 using ReactiveUI;
 using Splat;
 
-namespace WPILibInstaller_Avalonia.ViewModels
+namespace WPILibInstaller.ViewModels
 {
     public abstract class PageViewModelBase : ReactiveObject
     {

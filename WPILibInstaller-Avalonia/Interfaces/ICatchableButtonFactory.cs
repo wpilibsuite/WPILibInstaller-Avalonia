@@ -3,7 +3,7 @@ using System.Reactive;
 using System.Threading.Tasks;
 using ReactiveUI;
 
-namespace WPILibInstaller_Avalonia.Interfaces
+namespace WPILibInstaller.Interfaces
 {
     public interface ICatchableButtonFactory
     {

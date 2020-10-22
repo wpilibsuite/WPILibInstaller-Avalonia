@@ -3,7 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="400"
-             x:Class="WPILibInstaller_Avalonia.Views.VSCodePage">
+             x:Class="WPILibInstaller.Views.VSCodePage">
   <Grid Margin="10">
     <Grid.RowDefinitions>
       <RowDefinition Height="7*"/>
@@ -13,7 +13,7 @@
     <ScrollViewer Grid.Row="0" HorizontalScrollBarVisibility="Disabled">
     <TextBlock TextWrapping="Wrap" FontSize="13">
     For licensing reasons, VS Code cannot be included in the WPILib Installer. WPILib installs it's own copy of VS Code every year, not shared between years or a system install. If you have already installed VS Code for the current year, the Next button will be enabled and you can skip this step, otherwise choose from the following options.
-      
+
     1. Download VS Code for Single Install: Use this if you don't plan on sharing the VS Code download between systems. This will be the fastest download.
     2. Select Existing VS Code Download: Use this to select an existing download.
     3. Download VS Code for All Platforms: Use this to download VS Code for all platforms, which can be shared between systems for offline use

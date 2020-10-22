@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reactive;
 
-namespace WPILibInstaller_Avalonia.Interfaces
+namespace WPILibInstaller.Interfaces
 {
     public interface IMainWindowViewModel
     {

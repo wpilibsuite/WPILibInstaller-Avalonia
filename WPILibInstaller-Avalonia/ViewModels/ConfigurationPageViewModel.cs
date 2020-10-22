@@ -3,10 +3,10 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using WPILibInstaller_Avalonia.Interfaces;
-using WPILibInstaller_Avalonia.Models;
+using WPILibInstaller.Interfaces;
+using WPILibInstaller.Models;
 
-namespace WPILibInstaller_Avalonia.ViewModels
+namespace WPILibInstaller.ViewModels
 {
     public class ConfigurationPageViewModel : PageViewModelBase, IToInstallProvider
     {

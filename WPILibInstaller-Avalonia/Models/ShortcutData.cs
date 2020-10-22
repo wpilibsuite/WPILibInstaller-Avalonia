@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace WPILibInstaller_Avalonia.Models
+namespace WPILibInstaller.Models
 {
     public class ShortcutData
     {

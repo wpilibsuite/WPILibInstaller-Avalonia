@@ -3,8 +3,8 @@
     <OutputType>WinExe</OutputType>
 
     <TargetFramework>net5.0</TargetFramework>
-    <AssemblyName>WPILibInstaller_Avalonia</AssemblyName>
-    <RootNamespace>WPILibInstaller_Avalonia</RootNamespace>
+    <AssemblyName>WPILibInstaller</AssemblyName>
+    <RootNamespace>WPILibInstaller</RootNamespace>
     <ApplicationIcon>wpilib-256.ico</ApplicationIcon>
     <Win32Resource />
     <Nullable>enable</Nullable>
