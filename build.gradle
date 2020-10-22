@@ -241,7 +241,7 @@ def generateFullResourcesTask = tasks.register('generateFullResources', project.
 def dotnetInstallerTask = tasks.register('createInstaller', Exec) {
     workingDir = "$projectDir/WPILibInstaller-Avalonia"
 
-    commandLine 'dotnet', 'publish', '-c', 'Release', '-r', dotnetRuntime, '/p:PublishSingleFile=true', '/p:PublishTrimmed=true', '/p:IncludeNativeLibrariesInSingleFile=true', "/p:Version=$pubVersion"
+    commandLine 'dotnet', 'publish', '-c', 'Release', '-r', dotnetRuntime, '/p:PublishSingleFile=true', '/p:PublishTrimmed=true', "/p:Version=$pubVersion"
 }
 
 def installDirectory = "$projectDir/WPILibInstaller-Avalonia/bin/Release/net5.0/$dotnetRuntime/publish"
