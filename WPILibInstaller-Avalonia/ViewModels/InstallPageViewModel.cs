@@ -507,9 +507,12 @@ namespace WPILibInstaller_Avalonia.ViewModels
             {
                 codeExe = Path.Combine(configurationProvider.InstallDirectory, "vscode", "bin", "code.cmd");
             }
+            else if (OperatingSystem.IsMacOS()) {
+                codeExe = Path.Combine(configurationProvider.InstallDirectory, "vscode", "Visual Studio Code.app", "Contents", "Resources", "app", "bin", "code");
+            }
             else
             {
-                return;
+                codeExe = Path.Combine(configurationProvider.InstallDirectory, "vscode", "VSCode-linux-x64", "bin", "code");
             }
 
             // Load existing extensions
