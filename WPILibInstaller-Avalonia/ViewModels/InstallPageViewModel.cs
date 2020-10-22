@@ -281,7 +281,7 @@ namespace WPILibInstaller.ViewModels
                     using var fileToWrite = new FileStream(zipPath, FileMode.Create, FileAccess.Write, FileShare.None);
                     await vsInstallProvider.Model.ToExtractArchiveMacOs.CopyToAsync(fileToWrite);
                 }
-                await RunScriptExecutable("unzip", Timeout.Infinite, zipPath ,"-d", intoPath);
+                await RunExecutable("unzip", Timeout.Infinite, zipPath ,"-d", intoPath);
                 return;
             }
 
@@ -459,9 +459,24 @@ namespace WPILibInstaller.ViewModels
             await Task.Yield();
         }
 
+        private Task<bool> RunExecutable(string exe, int timeoutMs, params string[] args)
+        {
+            ProcessStartInfo pstart = new ProcessStartInfo(exe, string.Join(" ", args));
+            var p = Process.Start(pstart);
+            return Task.Run(() =>
+            {
+                return p!.WaitForExit(timeoutMs);
+            });
+        }
+
         private Task<bool> RunScriptExecutable(string script, int timeoutMs, params string[] args)
         {
-            ProcessStartInfo pstart = new ProcessStartInfo(script, string.Join(" ", args));
+            ProcessStartInfo pstart;
+            if (OperatingSystem.IsWindows()) {
+                pstart = new ProcessStartInfo(script, string.Join(" ", args));
+            } else {
+                pstart = new ProcessStartInfo("python3", script + " " + string.Join(" ", args));
+            }
             var p = Process.Start(pstart);
             return Task.Run(() =>
             {
