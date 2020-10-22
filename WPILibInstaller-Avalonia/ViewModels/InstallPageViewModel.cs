@@ -11,11 +11,11 @@ using System.Reactive.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using WPILibInstaller_Avalonia.Interfaces;
-using WPILibInstaller_Avalonia.Models;
-using WPILibInstaller_Avalonia.Utils;
+using WPILibInstaller.Interfaces;
+using WPILibInstaller.Models;
+using WPILibInstaller.Utils;
 
-namespace WPILibInstaller_Avalonia.ViewModels
+namespace WPILibInstaller.ViewModels
 {
     public class InstallPageViewModel : PageViewModelBase
     {

@@ -2,7 +2,7 @@
 using Avalonia.Logging.Serilog;
 using Avalonia.ReactiveUI;
 
-namespace WPILibInstaller_Avalonia
+namespace WPILibInstaller
 {
     class Program
     {

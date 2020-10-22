@@ -1,7 +1,7 @@
-﻿using WPILibInstaller_Avalonia.Models;
-using WPILibInstaller_Avalonia.Utils;
+﻿using WPILibInstaller.Models;
+using WPILibInstaller.Utils;
 
-namespace WPILibInstaller_Avalonia.Interfaces
+namespace WPILibInstaller.Interfaces
 {
     public interface IConfigurationProvider
     {

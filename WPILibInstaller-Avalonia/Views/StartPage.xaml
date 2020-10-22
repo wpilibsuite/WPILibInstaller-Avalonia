@@ -3,10 +3,10 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="WPILibInstaller_Avalonia.Views.StartPage">
+             x:Class="WPILibInstaller.Views.StartPage">
   <StackPanel HorizontalAlignment="Center"
               VerticalAlignment="Center">
-    <Image Source="resm:WPILibInstaller_Avalonia.Assets.wpilib-128.png?assembly=WPILibInstaller_Avalonia"
+    <Image Source="resm:WPILibInstaller.Assets.wpilib-128.png?assembly=WPILibInstaller"
            Stretch="None"/>
     <TextBlock Text="Welcome to the WPILib Installer!"
                HorizontalAlignment="Center"
@@ -15,7 +15,7 @@
                VerticalAlignment="Center" />
     <TextBlock Text="The installer and resource files were not found. Please click the buttons below to select them."
                IsVisible="{Binding MissingEitherFile}"/>
-    <Button Margin="0, 10, 0, 0" Content="Select Installer Files" 
+    <Button Margin="0, 10, 0, 0" Content="Select Installer Files"
             Height="45"
             Command="{Binding SelectSupportFiles}"
             IsVisible="{Binding MissingSupportFiles}"/>
@@ -24,6 +24,6 @@
             Command="{Binding SelectResourceFiles}"
             IsVisible="{Binding MissingResourceFiles}"
             />
-    
+
   </StackPanel>
 </UserControl>

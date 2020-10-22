@@ -4,10 +4,10 @@ using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
 using System.Threading.Tasks;
-using WPILibInstaller_Avalonia.Interfaces;
-using WPILibInstaller_Avalonia.ViewModels;
+using WPILibInstaller.Interfaces;
+using WPILibInstaller.ViewModels;
 
-namespace WPILibInstaller_Avalonia.Views
+namespace WPILibInstaller.Views
 {
     public class MainWindow : ReactiveWindow<MainWindowViewModel>, IProgramWindow, IViewModelResolver
     {

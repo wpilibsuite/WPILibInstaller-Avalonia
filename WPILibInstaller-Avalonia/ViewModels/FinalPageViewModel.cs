@@ -1,6 +1,6 @@
-﻿using WPILibInstaller_Avalonia.Interfaces;
+﻿using WPILibInstaller.Interfaces;
 
-namespace WPILibInstaller_Avalonia.ViewModels
+namespace WPILibInstaller.ViewModels
 {
     public class FinalPageViewModel : PageViewModelBase
     {

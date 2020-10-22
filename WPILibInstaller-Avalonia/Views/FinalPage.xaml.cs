@@ -1,8 +1,8 @@
 ﻿using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
-using WPILibInstaller_Avalonia.ViewModels;
+using WPILibInstaller.ViewModels;
 
-namespace WPILibInstaller_Avalonia.Views
+namespace WPILibInstaller.Views
 {
     public class FinalPage : ReactiveUserControl<FinalPageViewModel>
     {

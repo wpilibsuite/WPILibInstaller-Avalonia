@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using WPILibInstaller_Avalonia.Utils;
+using WPILibInstaller.Utils;
 
-namespace WPILibInstaller_Avalonia.Models
+namespace WPILibInstaller.Models
 {
     public class VsCodeModel : IDisposable
     {

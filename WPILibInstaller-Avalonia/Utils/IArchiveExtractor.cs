@@ -2,7 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 
-namespace WPILibInstaller_Avalonia.Utils
+namespace WPILibInstaller.Utils
 {
     public interface IArchiveExtractor : IDisposable
     {
