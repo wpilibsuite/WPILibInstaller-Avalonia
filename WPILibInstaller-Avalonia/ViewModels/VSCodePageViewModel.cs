@@ -7,12 +7,12 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using WPILibInstaller_Avalonia.Interfaces;
-using WPILibInstaller_Avalonia.Models;
-using WPILibInstaller_Avalonia.Utils;
-using static WPILibInstaller_Avalonia.Utils.ArchiveUtils;
+using WPILibInstaller.Interfaces;
+using WPILibInstaller.Models;
+using WPILibInstaller.Utils;
+using static WPILibInstaller.Utils.ArchiveUtils;
 
-namespace WPILibInstaller_Avalonia.ViewModels
+namespace WPILibInstaller.ViewModels
 {
     public class VSCodePageViewModel : PageViewModelBase, IVsCodeInstallLocationProvider
     {
@@ -167,7 +167,14 @@ namespace WPILibInstaller_Avalonia.ViewModels
                 MemoryStream ms = new MemoryStream(100000000);
                 await entry!.Open().CopyToAsync(ms);
 
-                Model.ToExtractArchive = OpenArchive(ms);
+                if (OperatingSystem.IsMacOS())
+                {
+                    Model.ToExtractArchiveMacOs = ms;
+                }
+                else
+                {
+                    Model.ToExtractArchive = OpenArchive(ms);
+                }
             }
             catch
             {
@@ -229,7 +236,16 @@ namespace WPILibInstaller_Avalonia.ViewModels
             if (ms != null)
             {
                 ms.Seek(0, SeekOrigin.Begin);
-                Model.ToExtractArchive = OpenArchive(ms);
+
+                if (OperatingSystem.IsMacOS())
+                {
+                    Model.ToExtractArchiveMacOs = ms;
+                }
+                else
+                {
+                    Model.ToExtractArchive = OpenArchive(ms);
+                }
+
                 DoneText = "Done Downloading. Press Next to continue";
                 EnableSelectionButtons = true;
                 SetLocalForwardVisible(true);
@@ -250,7 +266,16 @@ namespace WPILibInstaller_Avalonia.ViewModels
             if (stream != null)
             {
                 Console.WriteLine("Trying to open archive");
-                Model.ToExtractArchive = OpenArchive(stream);
+
+                if (OperatingSystem.IsMacOS())
+                {
+                    Model.ToExtractArchiveMacOs = stream;
+                }
+                else
+                {
+                    Model.ToExtractArchive = OpenArchive(stream);
+                }
+
                 DoneText = "Done Downloading. Press Next to continue";
                 EnableSelectionButtons = true;
                 SetLocalForwardVisible(true);

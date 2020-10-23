@@ -1,6 +1,6 @@
-﻿using WPILibInstaller_Avalonia.Models;
+﻿using WPILibInstaller.Models;
 
-namespace WPILibInstaller_Avalonia.Interfaces
+namespace WPILibInstaller.Interfaces
 {
     public interface IVsCodeInstallLocationProvider
     {

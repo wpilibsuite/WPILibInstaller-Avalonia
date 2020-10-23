@@ -3,10 +3,10 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using WPILibInstaller_Avalonia.Interfaces;
-using WPILibInstaller_Avalonia.Models;
+using WPILibInstaller.Interfaces;
+using WPILibInstaller.Models;
 
-namespace WPILibInstaller_Avalonia.ViewModels
+namespace WPILibInstaller.ViewModels
 {
     public class ConfigurationPageViewModel : PageViewModelBase, IToInstallProvider
     {
@@ -30,7 +30,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
         public bool CanInstallExtensions => vsProvider.Model.AlreadyInstalled || Model.InstallVsCode;
 
-        public bool CanInstallVsCode => vsProvider.Model.ToExtractArchive != null;
+        public bool CanInstallVsCode => vsProvider.Model.ToExtractArchive != null || vsProvider.Model.ToExtractArchiveMacOs != null;
 
         private readonly IVsCodeInstallLocationProvider vsProvider;
 

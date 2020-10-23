@@ -1,4 +1,4 @@
-﻿namespace WPILibInstaller_Avalonia.Models
+﻿namespace WPILibInstaller.Models
 {
     public class InstallSelectionModel
     {

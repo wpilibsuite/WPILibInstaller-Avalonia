@@ -2,12 +2,12 @@
   xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:rxui="clr-namespace:Avalonia.ReactiveUI;assembly=Avalonia.ReactiveUI"
-        xmlns:utils="clr-namespace:WPILibInstaller_Avalonia.Utils;assembly=WPILibInstaller_Avalonia"
-        xmlns:vm="clr-namespace:WPILibInstaller_Avalonia.ViewModels;assembly=WPILibInstaller_Avalonia"
+        xmlns:utils="clr-namespace:WPILibInstaller.Utils;assembly=WPILibInstaller"
+        xmlns:vm="clr-namespace:WPILibInstaller.ViewModels;assembly=WPILibInstaller"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="400"
-        x:Class="WPILibInstaller_Avalonia.Views.MainWindow"
+        x:Class="WPILibInstaller.Views.MainWindow"
         Icon="/Assets/wpilib-256.ico"
         Title="WPILib Installer" Width="600" Height="400">
 

@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using WPILibInstaller_Avalonia.Utils;
+using System.IO;
+using WPILibInstaller.Utils;
 
-namespace WPILibInstaller_Avalonia.Models
+namespace WPILibInstaller.Models
 {
     public class VsCodeModel : IDisposable
     {
@@ -23,6 +24,8 @@ namespace WPILibInstaller_Avalonia.Models
 
         public IArchiveExtractor? ToExtractArchive { get; set; }
 
+        public Stream? ToExtractArchiveMacOs { get; set; }
+
         public bool AlreadyInstalled { get; set; }
 
         public VsCodeModel(string vscodeVersion)
@@ -33,6 +36,7 @@ namespace WPILibInstaller_Avalonia.Models
         public void Dispose()
         {
             ToExtractArchive?.Dispose();
+            ToExtractArchiveMacOs?.Dispose();
         }
     }
 }

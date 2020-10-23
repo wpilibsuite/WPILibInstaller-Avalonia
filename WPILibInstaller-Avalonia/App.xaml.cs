@@ -4,9 +4,9 @@ using Avalonia.Markup.Xaml;
 using ReactiveUI;
 using Splat;
 using System.Reflection;
-using WPILibInstaller_Avalonia.Views;
+using WPILibInstaller.Views;
 
-namespace WPILibInstaller_Avalonia
+namespace WPILibInstaller
 {
     public class App : Application
     {

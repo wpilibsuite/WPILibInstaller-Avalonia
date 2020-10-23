@@ -1,6 +1,6 @@
-﻿using WPILibInstaller_Avalonia.ViewModels;
+﻿using WPILibInstaller.ViewModels;
 
-namespace WPILibInstaller_Avalonia.Interfaces
+namespace WPILibInstaller.Interfaces
 {
     public interface IViewModelResolver
     {
