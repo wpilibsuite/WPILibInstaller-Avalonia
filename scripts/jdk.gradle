@@ -4,36 +4,36 @@ apply plugin: 'de.undercouch.download'
 
 
 def downloadLinuxJdk = tasks.register('downloadLinuxJdk', Download) {
-  src 'https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_linux-x64_bin.tar.gz'
+  src 'https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.8%2B10/OpenJDK11U-jdk_x64_linux_hotspot_11.0.8_10.tar.gz'
   dest buildDir
   overwrite false
 }
 
-def jdkLinuxFile = file("$buildDir/openjdk-11.0.2_linux-x64_bin.tar.gz")
+def jdkLinuxFile = file("$buildDir/OpenJDK11U-jdk_x64_linux_hotspot_11.0.8_10.tar.gz")
 
 def downloadMacJdk = tasks.register('downloadMacJdk', Download) {
-  src 'https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_osx-x64_bin.tar.gz'
+  src 'https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.8%2B10/OpenJDK11U-jdk_x64_mac_hotspot_11.0.8_10.tar.gz'
   dest buildDir
   overwrite false
 }
 
-def jdkMacFile = file("$buildDir/openjdk-11.0.2_osx-x64_bin.tar.gz")
+def jdkMacFile = file("$buildDir/OpenJDK11U-jdk_x64_mac_hotspot_11.0.8_10.tar.gz")
 
 def download32BitJdk = tasks.register('download32BitJdk', Download) {
-  src 'https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.4%2B11/OpenJDK11U-jdk_x86-32_windows_hotspot_11.0.4_11.zip'
+  src 'https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.8%2B10/OpenJDK11U-jdk_x86-32_windows_hotspot_11.0.8_10.zip'
   dest buildDir
   overwrite false
 }
 
-def jdk32File = file("$buildDir/OpenJDK11U-jdk_x86-32_windows_hotspot_11.0.4_11.zip")
+def jdk32File = file("$buildDir//OpenJDK11U-jdk_x86-32_windows_hotspot_11.0.8_10.zip")
 
 def download64BitJdk = tasks.register('download64BitJdk', Download) {
-  src 'https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.4%2B11/OpenJDK11U-jdk_x64_windows_hotspot_11.0.4_11.zip'
+  src 'https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.8%2B10/OpenJDK11U-jdk_x64_windows_hotspot_11.0.8_10.zip'
   dest buildDir
   overwrite false
 }
 
-def jdk64File = file("$buildDir/OpenJDK11U-jdk_x64_windows_hotspot_11.0.4_11.zip")
+def jdk64File = file("$buildDir/OpenJDK11U-jdk_x64_windows_hotspot_11.0.8_10.zip")
 
 def x86DllPath = "$projectDir/redist/x86"
 def x86DllFiles = []
@@ -88,7 +88,7 @@ ext.jdkZipSetup32 = { AbstractArchiveTask zip->
   zip.from(project.zipTree(jdk32File)) {
 
     eachFile { f->
-      f.path = f.path.replace('jdk-11.0.4+11/', 'jdk/')
+      f.path = f.path.replace('jdk-11.0.8+10/', 'jdk/')
     }
 
     x86DllFiles.each {
@@ -125,7 +125,7 @@ ext.jdkZipSetup64 = { AbstractArchiveTask zip->
   zip.from(project.zipTree(jdk64File)) {
 
     eachFile { f->
-      f.path = f.path.replace('jdk-11.0.4+11/', 'jdk/')
+      f.path = f.path.replace('jdk-11.0.8+10/', 'jdk/')
     }
 
     x64DllFiles.each {
@@ -161,7 +161,7 @@ ext.jdkZipSetupLinux = { AbstractArchiveTask zip->
 
   zip.from(project.tarTree(project.resources.gzip(jdkLinuxFile))) {
     eachFile { f->
-      f.path = f.path.replace('jdk-11.0.2/', 'jdk/')
+      f.path = f.path.replace('jdk-11.0.8+10/', 'jdk/')
     }
 
     exclude '**/src.zip'
@@ -188,12 +188,12 @@ ext.jdkZipSetupMac = { AbstractArchiveTask zip->
   zip.inputs.file jdkConfigFile
 
   zip.from(project.tarTree(project.resources.gzip(jdkMacFile))) {
-    eachFile { f->
-      f.path = f.path.replace('./jdk-11.0.2.jdk/Contents/Home/', 'jdk/')
+    eachFile { f ->
+      f.path = f.path.replace('jdk-11.0.8+10/Contents/Home/', 'jdk/')
     }
 
-    exclude './jdk-11.jdk/Contents/MacOS/**'
-    exclude './jdk-11.jdk/Contents/Info.plist'
+    exclude './jdk-11.0.8+10/Contents/MacOS/**'
+    exclude './jdk-11.0.8+10/Contents/Info.plist'
 
     exclude '**/src.zip'
     exclude '**/bin/*.pdb'
