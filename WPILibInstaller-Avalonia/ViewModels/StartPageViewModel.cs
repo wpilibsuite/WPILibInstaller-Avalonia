@@ -63,7 +63,7 @@ namespace WPILibInstaller.ViewModels
             // Enumerate all files in base dir
             foreach (var file in Directory.EnumerateFiles(baseDir))
             {
-                if (file.EndsWith($"{verString}-resources.{extension}"))
+                if (file.EndsWith($"{verString}-resources.zip"))
                 {
                     _ = SelectResourceFilesWithFile(file);
                     foundResources = true;
@@ -75,19 +75,42 @@ namespace WPILibInstaller.ViewModels
                 }
             }
 
+            // Assume app is running in a translocated process.
+            if ((!foundResources || !foundSupport) && RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
+                && Directory.Exists("/Volumes/WPILibInstaller"))
+            {
+                baseDir = Path.GetFullPath("/Volumes/WPILibInstaller");
+                foreach (var file in Directory.EnumerateFiles(baseDir))
+                {
+                    if (!foundResources && file.EndsWith($"{verString}-resources.zip"))
+                    {
+                        _ = SelectResourceFilesWithFile(file);
+                        foundResources = true;
+                    }
+                    else if (!foundSupport && file.EndsWith($"{verString}-artifacts.{extension}"))
+                    {
+                        _ = SelectSupportFilesWithFile(file);
+                        foundSupport = true;
+                    }
+                }
+            }
+
+            // Look beside the .app
             if ((!foundResources || !foundSupport) && RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
                 // Go back 3 directories to back out of mac package
                 baseDir = Path.GetFullPath(Path.Join(baseDir, "..", "..", ".."));
                 foreach (var file in Directory.EnumerateFiles(baseDir))
                 {
-                    if (!foundResources && file.EndsWith($"{verString}-resources.{extension}"))
+                    if (!foundResources && file.EndsWith($"{verString}-resources.zip"))
                     {
                         _ = SelectResourceFilesWithFile(file);
+                        foundResources = true;
                     }
                     else if (!foundSupport && file.EndsWith($"{verString}-artifacts.{extension}"))
                     {
                         _ = SelectSupportFilesWithFile(file);
+                        foundSupport = true;
                     }
                 }
             }

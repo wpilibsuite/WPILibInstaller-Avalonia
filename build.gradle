@@ -241,7 +241,11 @@ def generateFullResourcesTask = tasks.register('generateFullResources', project.
 def dotnetInstallerTask = tasks.register('createInstaller', Exec) {
     workingDir = "$projectDir/WPILibInstaller-Avalonia"
 
-    commandLine 'dotnet', 'publish', '-c', 'Release', '-r', dotnetRuntime, '/p:PublishSingleFile=true', '/p:PublishTrimmed=true', "/p:Version=$pubVersion"
+    if (project.hasProperty("macBuild")) {
+        commandLine 'dotnet', 'publish', '-c', 'Release', '-r', dotnetRuntime, "/p:Version=$pubVersion", "/t:BundleApp", "-p:RuntimeIdentifier=osx-x64", "-p:CFBundleShortVersionString=$pubVersion", "-p:CFBundleVersion=$pubVersion"
+    } else {
+        commandLine 'dotnet', 'publish', '-c', 'Release', '-r', dotnetRuntime, '/p:PublishSingleFile=true', '/p:PublishTrimmed=true', "/p:Version=$pubVersion"
+    }
 }
 
 def installDirectory = "$projectDir/WPILibInstaller-Avalonia/bin/Release/net5.0/$dotnetRuntime/publish"
@@ -291,8 +295,12 @@ tasks.register('generateInstallers', Task) {
 
     if (OperatingSystem.current().isWindows()) {
         dependsOn dotnetCreateImageTask
-    } else {
+    } else if (!project.hasProperty("macBuild")){
         dependsOn unixCreateImageTask
+    } else {
+        dependsOn generateConfigFiles
+        dependsOn generateFullResourcesTask
+        dependsOn copyInstallerFiles
     }
 }
 
