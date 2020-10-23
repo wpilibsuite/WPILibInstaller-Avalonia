@@ -113,5 +113,5 @@ jobs:
       - name: Upload Installer DMG
         uses: actions/upload-artifact@v2
         with:
-          name: wpilib-installer
+          name: macOS
           path: build/WPILibInstaller.dmg
