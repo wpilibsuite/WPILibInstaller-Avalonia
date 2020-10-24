@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-"$(dirname "$(dirname "$(realpath "$0")")")"/vscode/bin/code "$@"
+$(realpath $(find ../vscode -type f -name code | grep bin)) $@
