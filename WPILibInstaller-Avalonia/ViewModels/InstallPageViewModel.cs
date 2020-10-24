@@ -34,7 +34,7 @@ namespace WPILibInstaller.ViewModels
             {
                 this.RaisePropertyChanged(nameof(Progress));
                 this.RaisePropertyChanged(nameof(Text));
-                await Task.Delay(100);
+                await Task.Delay(100, token);
             }
         }
 
@@ -279,7 +279,7 @@ namespace WPILibInstaller.ViewModels
                 Directory.CreateDirectory(intoPath);
                 {
                     using var fileToWrite = new FileStream(zipPath, FileMode.Create, FileAccess.Write, FileShare.None);
-                    await vsInstallProvider.Model.ToExtractArchiveMacOs.CopyToAsync(fileToWrite);
+                    await vsInstallProvider.Model.ToExtractArchiveMacOs.CopyToAsync(fileToWrite, token);
                 }
                 await RunExecutable("unzip", Timeout.Infinite, zipPath ,"-d", intoPath);
                 return;

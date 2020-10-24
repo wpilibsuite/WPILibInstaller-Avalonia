@@ -9,10 +9,8 @@ namespace WPILibInstaller.Utils
 {
     public class TarArchiveExtractor : IArchiveExtractor
     {
-        private TarInputStream dataStream;
+        private readonly TarInputStream dataStream;
         private TarEntry currentEntry = null!;
-        private byte[] headerStorage = new byte[512];
-        private char[] charStorage = new char[512];
 
         public TarArchiveExtractor(Stream stream, int size)
         {
@@ -32,6 +30,7 @@ namespace WPILibInstaller.Utils
 
         public void Dispose()
         {
+            GC.SuppressFinalize(this);
             dataStream.Dispose();
         }
 

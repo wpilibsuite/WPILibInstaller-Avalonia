@@ -31,9 +31,6 @@ namespace WPILibInstaller.Views
             DataContext = ViewModel;
 
             InitializeComponent();
-#if DEBUG
-            this.AttachDevTools();
-#endif
         }
 
         public void CloseProgram()
