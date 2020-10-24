@@ -8,8 +8,7 @@
     <TextBlock FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center">
       Finished installing! Press finish to exit.
     </TextBlock>
-  <TextBlock FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center">
-    Use the WPILib VS Code desktop icon to start VS Code.
+  <TextBlock FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding FinishText}">
   </TextBlock>
   </StackPanel>
 
