@@ -281,7 +281,7 @@ namespace WPILibInstaller.ViewModels
                     using var fileToWrite = new FileStream(zipPath, FileMode.Create, FileAccess.Write, FileShare.None);
                     await vsInstallProvider.Model.ToExtractArchiveMacOs.CopyToAsync(fileToWrite);
                 }
-                await RunExecutable("unzip", Timeout.Infinite, zipPath ,"-d", intoPath);
+                await RunExecutable("unzip", Timeout.Infinite, zipPath, "-d", intoPath);
                 return;
             }
 
@@ -472,9 +472,12 @@ namespace WPILibInstaller.ViewModels
         private Task<bool> RunScriptExecutable(string script, int timeoutMs, params string[] args)
         {
             ProcessStartInfo pstart;
-            if (OperatingSystem.IsWindows()) {
+            if (OperatingSystem.IsWindows())
+            {
                 pstart = new ProcessStartInfo(script, string.Join(" ", args));
-            } else {
+            }
+            else
+            {
                 pstart = new ProcessStartInfo("python3", script + " " + string.Join(" ", args));
             }
             var p = Process.Start(pstart);
@@ -522,7 +525,8 @@ namespace WPILibInstaller.ViewModels
             {
                 codeExe = Path.Combine(configurationProvider.InstallDirectory, "vscode", "bin", "code.cmd");
             }
-            else if (OperatingSystem.IsMacOS()) {
+            else if (OperatingSystem.IsMacOS())
+            {
                 codeExe = Path.Combine(configurationProvider.InstallDirectory, "vscode", "Visual Studio Code.app", "Contents", "Resources", "app", "bin", "code");
             }
             else
@@ -640,6 +644,24 @@ namespace WPILibInstaller.ViewModels
                 {
                     // Print a message saying not all shortcuts were successful
                 }
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                // Create Linux desktop shortcut
+                var frcYear = configurationProvider.UpgradeConfig.FrcYear;
+                var desktopFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Desktop", $@"FRC VS Code {frcYear}.desktop");
+                string contents = $@"#!/usr/bin/env xdg-open
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=FRC VS Code {frcYear}
+Comment=Official C++/Java IDE for the FIRST Robotics Competition
+Exec={configurationProvider.InstallDirectory}/frccode/frccode{frcYear}
+Icon={configurationProvider.InstallDirectory}/frccode/wpilib-256.ico
+Terminal=false
+StartupNotify=true
+";
+                await File.WriteAllTextAsync(desktopFile, contents);
             }
         }
     }
