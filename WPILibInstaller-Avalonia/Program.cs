@@ -16,7 +16,7 @@ namespace WPILibInstaller
         {
             return AppBuilder.Configure<App>()
                 .UsePlatformDetect()
-                .LogToDebug()
+                .LogToTrace()
                 .UseReactiveUI();
         }
     }
