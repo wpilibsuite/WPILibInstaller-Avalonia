@@ -21,7 +21,7 @@ namespace WPILibInstaller.ViewModels
             {
                 if (OperatingSystem.IsMacOS())
                 {
-                    FinishText = "Finish will open the VS Code folder. Please drag this to your dock.";
+                    FinishText = "Clicking finish will open the VS Code folder. Please drag this to your dock.";
                 }
                 else
                 {
