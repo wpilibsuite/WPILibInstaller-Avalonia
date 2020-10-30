@@ -277,7 +277,7 @@ namespace WPILibInstaller.ViewModels
                     }
                 }
                 Console.WriteLine(publicFolder);
-                return Path.Combine(publicFolder, "wpilibtest", UpgradeConfig.FrcYear);
+                return Path.Combine(publicFolder, "wpilib", UpgradeConfig.FrcYear);
             }
         }
 
