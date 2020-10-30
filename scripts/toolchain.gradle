@@ -1,4 +1,4 @@
-def gitTag = 'v2020-2'
+def gitTag = 'v2021-2'
 def baseUrl = "https://github.com/wpilibsuite/roborio-toolchain/releases/download/$gitTag/"
 
 def gccVersion = '7.3.0'
