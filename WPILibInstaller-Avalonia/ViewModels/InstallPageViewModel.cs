@@ -640,7 +640,7 @@ namespace WPILibInstaller.ViewModels
                 await File.WriteAllTextAsync(tempFile, serializedData, token);
                 var shortcutCreatorPath = Path.Combine(configurationProvider.InstallDirectory, "installUtils", "WPILibShortcutCreator.exe");
 
-                var startInfo = new ProcessStartInfo(shortcutCreatorPath, $"\"{shortcutCreatorPath}\"");
+                var startInfo = new ProcessStartInfo(shortcutCreatorPath, $"\"{tempFile}\"");
                 startInfo.UseShellExecute = false;
                 startInfo.WindowStyle = ProcessWindowStyle.Hidden;
                 startInfo.CreateNoWindow = true;
