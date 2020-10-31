@@ -34,7 +34,13 @@ namespace WPILibInstaller.ViewModels
             {
                 this.RaisePropertyChanged(nameof(Progress));
                 this.RaisePropertyChanged(nameof(Text));
-                await Task.Delay(100, token);
+                try {
+                    await Task.Delay(100, token);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
             }
         }
 
@@ -87,29 +93,35 @@ namespace WPILibInstaller.ViewModels
 
             var updateTask = UIUpdateTask(updateSource.Token);
 
-            do
-            {
-                await ExtractArchive(source.Token);
-                if (source.IsCancellationRequested) break;
-                await RunGradleSetup();
-                if (source.IsCancellationRequested) break;
-                await RunToolSetup();
-                if (source.IsCancellationRequested) break;
-                await RunCppSetup();
-                if (source.IsCancellationRequested) break;
-                await RunMavenMetaDataFixer();
-                if (source.IsCancellationRequested) break;
-                await RunVsCodeSetup(source.Token);
-                if (source.IsCancellationRequested) break;
-                await ConfigureVsCodeSettings();
-                if (source.IsCancellationRequested) break;
-                await RunVsCodeExtensionsSetup();
-                if (source.IsCancellationRequested) break;
-                await RunShortcutCreator(source.Token);
-            } while (false);
+            try {
+                do
+                {
+                    await ExtractArchive(source.Token);
+                    if (source.IsCancellationRequested) break;
+                    await RunGradleSetup();
+                    if (source.IsCancellationRequested) break;
+                    await RunToolSetup();
+                    if (source.IsCancellationRequested) break;
+                    await RunCppSetup();
+                    if (source.IsCancellationRequested) break;
+                    await RunMavenMetaDataFixer();
+                    if (source.IsCancellationRequested) break;
+                    await RunVsCodeSetup(source.Token);
+                    if (source.IsCancellationRequested) break;
+                    await ConfigureVsCodeSettings();
+                    if (source.IsCancellationRequested) break;
+                    await RunVsCodeExtensionsSetup();
+                    if (source.IsCancellationRequested) break;
+                    await RunShortcutCreator(source.Token);
+                } while (false);
 
-            updateSource.Cancel();
-            await updateTask;
+                updateSource.Cancel();
+                await updateTask;
+            }
+            catch (OperationCanceledException)
+            {
+                // Ignore, as we just want to continue
+            }
 
             if (source.IsCancellationRequested)
             {
