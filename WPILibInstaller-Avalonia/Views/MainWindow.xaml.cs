@@ -40,6 +40,7 @@ namespace WPILibInstaller.Views
 
         public async Task<string?> ShowFilePicker(string title, string? initialiDirectory)
         {
+
             OpenFileDialog dialog = new OpenFileDialog
             {
                 AllowMultiple = false,
@@ -53,6 +54,22 @@ namespace WPILibInstaller.Views
             if (result == null) return null;
             if (result.Length != 1) return null;
             return result[0];
+        }
+
+        public async Task<string?> ShowFolderPicker(string title, string? initialiDirectory)
+        {
+
+            OpenFolderDialog dialog = new OpenFolderDialog
+            {
+                Title = title,
+            };
+            if (initialiDirectory != null)
+            {
+                dialog.Directory = initialiDirectory;
+            }
+            var result = await dialog.ShowAsync(this);
+            if (string.IsNullOrWhiteSpace(result)) return null;
+            return result;
         }
 
         private void InitializeComponent()

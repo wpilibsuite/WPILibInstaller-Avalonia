@@ -191,6 +191,13 @@ namespace WPILibInstaller.ViewModels
         {
             var currentPlatform = PlatformUtils.CurrentPlatform;
 
+            var file = await programWindow.ShowFolderPicker("Select Directory For VS Code File", Environment.GetFolderPath(Environment.SpecialFolder.Personal));
+
+            if (file == null)
+            {
+                return;
+            }
+
             DoneText = "Downloading VS Code for all platforms. Please wait.";
 
             EnableSelectionButtons = false;
@@ -203,7 +210,9 @@ namespace WPILibInstaller.ViewModels
 
             var results = await Task.WhenAll(win32, win64, linux64, mac64);
 
-            string vscodeName = $"WPILib-VSCode-{Model.VSCodeVersion}.zip";
+            string vscodeFileName = $"WPILib-VSCode-{Model.VSCodeVersion}.zip";
+
+            string vscodeName = Path.Join(file, vscodeFileName);
 
             try
             {
@@ -246,7 +255,7 @@ namespace WPILibInstaller.ViewModels
                     Model.ToExtractArchive = OpenArchive(ms);
                 }
 
-                DoneText = "Done Downloading. Press Next to continue";
+                DoneText = $"Done Downloading. File is named {vscodeFileName} Press Next to continue";
                 EnableSelectionButtons = true;
                 SetLocalForwardVisible(true);
             }
