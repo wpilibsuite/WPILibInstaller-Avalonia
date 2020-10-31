@@ -54,18 +54,14 @@ namespace WPILibInstaller.ViewModels
 
             var baseDir = AppContext.BaseDirectory;
 
-            var version = typeof(StartPageViewModel).Assembly.GetName().Version!;
-            var verString = $"{version.Major}.{version.Minor}.{version.Build}";
+            var verString = $"0.0.0";
 
-            if (OperatingSystem.IsWindows())
+            try
             {
-                try
-                {
-                    verString = File.ReadAllText(Path.Join(baseDir, "WPILibInstallerVersion.txt")).Trim();
-                }
-                catch
-                {
-                }
+                verString = File.ReadAllText(Path.Join(baseDir, "WPILibInstallerVersion.txt")).Trim();
+            }
+            catch
+            {
             }
 
             var extension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "zip" : "tar.gz";

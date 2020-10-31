@@ -250,6 +250,7 @@ def dotnetInstallerTask = tasks.register('createInstaller', Exec) {
 
 def installDirectory = "$projectDir/WPILibInstaller-Avalonia/bin/Release/net5.0/$dotnetRuntime/publish"
 
+// TODO Make this a task
 def versionFile = file("$buildDir/WPILibInstallerVersion.txt")
 versionFile.text = pubVersion
 
@@ -258,9 +259,7 @@ def copyInstallerFiles = tasks.register('copyInstallerFiles', Copy) {
     into "$buildDir/outputs"
     dependsOn dotnetInstallerTask
 
-    if (OperatingSystem.current().isWindows()) {
-        from versionFile
-    }
+    from versionFile
 }
 
 def dotnetCreateImageTask = tasks.register('createDiskImage', Exec) {
