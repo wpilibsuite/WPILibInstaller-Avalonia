@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
+SCRIPT_PATH="$(dirname "$(realpath -s "$BASH_SOURCE[0]")")"
 
-$(realpath $(find ../vscode -type f -name code | grep bin)) $@
+"$(realpath "$(find "$SCRIPT_PATH/../vscode" -type f -name code | grep bin)")" $@
