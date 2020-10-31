@@ -3,27 +3,53 @@ name: CI
 on: [push, pull_request]
 
 jobs:
-  macos:
-    name: Build - macOS
-    runs-on: macos-10.15
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact-name: Linux
+            build-options: "-PlinuxBuild"
+          - os: windows-latest
+            artifact-name: Win64
+            build-options: ""
+          - os: windows-latest
+            artifact-name: Win32
+            build-options: "-Pwindows32"
+    name: "Build - ${{ matrix.artifact-name }}"
+    runs-on: ${{ matrix.os }}
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
+      - uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.0.100-rc.1.20452.10
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Build Installer
+        shell: bash
+        run: ./gradlew generateInstallers -PjenkinsBuild ${{ matrix.build-options }}
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: build/outputs/
 
+  build-macos:
+    name: Build - macOS
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
       - uses: actions/setup-dotnet@v1
         name: Setup .NET
         with:
-          dotnet-version: '5.0.100-rc.1.20452.10'
-
+          dotnet-version: 5.0.100-rc.1.20452.10
       - uses: actions/setup-java@v1
-        name: Setup Java 11
         with:
-          java-version: '11'
-
-      - name: Build Installer with Gradle
-        run: |
-          ./gradlew generateInstallers -PXmx3072m -PmacBuild -DsystemProp.org.gradle.internal.http.connectionTimeout=180000 -DsystemProp.org.gradle.internal.http.socketTimeout=180000 -PjenkinsBuild
-
+          java-version: 11
+      - name: Build Installer
+        shell: bash
+        run: ./gradlew generateInstallers -PjenkinsBuild -PmacBuild
       - name: Copy Installer and Resources to Build Directory
         working-directory: build
         run: |
@@ -32,7 +58,6 @@ jobs:
           cp outputs/*.zip pubOutputs/WPILibInstaller.app/Contents/MacOS/
           cp ../WPILibInstaller-Avalonia/wpilib-256.ico pubOutputs/WPILibInstaller.app/Contents/Resources/
           cp outputs/*.tar.gz pubOutputs/
-
       - name: Import Developer ID Certificate
         uses: wpilibsuite/import-signing-certificate@v1
         with:
@@ -88,5 +113,5 @@ jobs:
       - name: Upload Installer DMG
         uses: actions/upload-artifact@v2
         with:
-          name: wpilib-installer
+          name: macOS
           path: build/WPILibInstaller.dmg
