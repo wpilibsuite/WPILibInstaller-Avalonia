@@ -1,8 +1,7 @@
 ﻿using Avalonia;
-using Avalonia.Logging.Serilog;
 using Avalonia.ReactiveUI;
 
-namespace WPILibInstaller_Avalonia
+namespace WPILibInstaller
 {
     class Program
     {
@@ -17,7 +16,7 @@ namespace WPILibInstaller_Avalonia
         {
             return AppBuilder.Configure<App>()
                 .UsePlatformDetect()
-                .LogToDebug()
+                .LogToTrace()
                 .UseReactiveUI();
         }
     }

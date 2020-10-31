@@ -1,12 +1,12 @@
-﻿<UserControl xmlns="https://github.com/avaloniaui"
+<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="WPILibInstaller_Avalonia.Views.StartPage">
+             x:Class="WPILibInstaller.Views.StartPage">
   <StackPanel HorizontalAlignment="Center"
               VerticalAlignment="Center">
-    <Image Source="resm:WPILibInstaller_Avalonia.Assets.wpilib-128.png?assembly=WPILibInstaller_Avalonia"
+    <Image Source="resm:WPILibInstaller.Assets.wpilib-128.png?assembly=WPILibInstaller"
            Stretch="None"/>
     <TextBlock Text="Welcome to the WPILib Installer!"
                HorizontalAlignment="Center"
@@ -19,11 +19,10 @@
             Height="45"
             Command="{Binding SelectSupportFiles}"
             IsVisible="{Binding MissingSupportFiles}"/>
-    <Button Margin="0,10,0,0" Content="Select Resources File (-resources)"
+    <Button Margin="0,10,0,0" Content="Select Resourcs File (-resources)"
             Height="45"
             Command="{Binding SelectResourceFiles}"
             IsVisible="{Binding MissingResourceFiles}"
             />
-
   </StackPanel>
 </UserControl>

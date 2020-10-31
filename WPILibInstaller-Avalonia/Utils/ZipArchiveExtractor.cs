@@ -3,7 +3,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Threading.Tasks;
 
-namespace WPILibInstaller_Avalonia.Utils
+namespace WPILibInstaller.Utils
 {
     public class ZipArchiveExtractor : IArchiveExtractor
     {

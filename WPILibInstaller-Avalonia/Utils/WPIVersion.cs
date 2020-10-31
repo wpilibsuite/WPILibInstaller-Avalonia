@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace WPILibInstaller_Avalonia.Utils
+namespace WPILibInstaller.Utils
 {
     public class WPIVersion
     {

@@ -11,11 +11,11 @@ using System.Reactive.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using WPILibInstaller_Avalonia.Interfaces;
-using WPILibInstaller_Avalonia.Models;
-using WPILibInstaller_Avalonia.Utils;
+using WPILibInstaller.Interfaces;
+using WPILibInstaller.Models;
+using WPILibInstaller.Utils;
 
-namespace WPILibInstaller_Avalonia.ViewModels
+namespace WPILibInstaller.ViewModels
 {
     public class InstallPageViewModel : PageViewModelBase
     {
@@ -34,7 +34,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
             {
                 this.RaisePropertyChanged(nameof(Progress));
                 this.RaisePropertyChanged(nameof(Text));
-                await Task.Delay(100);
+                await Task.Delay(100, token);
             }
         }
 
@@ -151,7 +151,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
         private ValueTask<string> SetVsCodePortableMode()
         {
             string portableFolder = Path.Combine(configurationProvider.InstallDirectory, "vscode");
-            if (PlatformUtils.CurrentPlatform == Platform.Mac64)
+            if (PlatformUtils.CurrentPlatform != Platform.Mac64)
             {
                 portableFolder = Path.Combine(portableFolder, "data");
             }
@@ -185,9 +185,6 @@ namespace WPILibInstaller_Avalonia.ViewModels
         {
             var vsVm = viewModelResolver.Resolve<VSCodePageViewModel>();
             if (!toInstallProvider.Model.InstallVsCode && !vsVm.Model.AlreadyInstalled) return;
-
-            // Skip this on non windows platforms
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
 
             var dataPath = await SetVsCodePortableMode();
 
@@ -273,15 +270,27 @@ namespace WPILibInstaller_Avalonia.ViewModels
             Text = "Installing Visual Studio Code";
             Progress = 0;
 
+            string intoPath = Path.Join(configurationProvider.InstallDirectory, "vscode");
+
+            if (vsInstallProvider.Model.ToExtractArchiveMacOs != null)
+            {
+                vsInstallProvider.Model.ToExtractArchiveMacOs.Seek(0, SeekOrigin.Begin);
+                var zipPath = Path.Join(intoPath, "MacVsCode.zip");
+                Directory.CreateDirectory(intoPath);
+                {
+                    using var fileToWrite = new FileStream(zipPath, FileMode.Create, FileAccess.Write, FileShare.None);
+                    await vsInstallProvider.Model.ToExtractArchiveMacOs.CopyToAsync(fileToWrite, token);
+                }
+                await RunExecutable("unzip", Timeout.Infinite, zipPath, "-d", intoPath);
+                return;
+            }
+
             var archive = vsInstallProvider.Model.ToExtractArchive!;
 
             var extractor = archive;
 
             double totalSize = archive.TotalUncompressSize;
             long currentSize = 0;
-
-
-            string intoPath = Path.Join(configurationProvider.InstallDirectory, "vscode");
 
             while (extractor.MoveToNextEntry())
             {
@@ -390,11 +399,19 @@ namespace WPILibInstaller_Avalonia.ViewModels
                     }
                 }
 
-                using FileStream writer = File.Create(fullZipToPath);
-                await extractor.CopyToStreamAsync(writer);
-            }
+                {
+                    using FileStream writer = File.Create(fullZipToPath);
+                    await extractor.CopyToStreamAsync(writer);
+                }
 
-            ;
+                if (extractor.EntryIsExecutable)
+                {
+                    new Mono.Unix.UnixFileInfo(fullZipToPath).FileAccessPermissions |=
+                        (Mono.Unix.FileAccessPermissions.GroupExecute |
+                         Mono.Unix.FileAccessPermissions.UserExecute |
+                         Mono.Unix.FileAccessPermissions.OtherExecute);
+                }
+            }
         }
 
         private Task RunGradleSetup()
@@ -442,13 +459,31 @@ namespace WPILibInstaller_Avalonia.ViewModels
             await Task.Yield();
         }
 
-        private Task<bool> RunScriptExecutable(string script, params string[] args)
+        private Task<bool> RunExecutable(string exe, int timeoutMs, params string[] args)
         {
-            ProcessStartInfo pstart = new ProcessStartInfo(script, string.Join(" ", args));
+            ProcessStartInfo pstart = new ProcessStartInfo(exe, string.Join(" ", args));
             var p = Process.Start(pstart);
             return Task.Run(() =>
             {
-                return p!.WaitForExit(5000);
+                return p!.WaitForExit(timeoutMs);
+            });
+        }
+
+        private Task<bool> RunScriptExecutable(string script, int timeoutMs, params string[] args)
+        {
+            ProcessStartInfo pstart;
+            if (OperatingSystem.IsWindows())
+            {
+                pstart = new ProcessStartInfo(script, string.Join(" ", args));
+            }
+            else
+            {
+                pstart = new ProcessStartInfo("python3", script + " " + string.Join(" ", args));
+            }
+            var p = Process.Start(pstart);
+            return Task.Run(() =>
+            {
+                return p!.WaitForExit(timeoutMs);
             });
         }
 
@@ -462,7 +497,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
             await RunScriptExecutable(Path.Combine(configurationProvider.InstallDirectory,
                 configurationProvider.UpgradeConfig.Tools.Folder,
-                configurationProvider.UpgradeConfig.Tools.UpdaterExe), "silent");
+                configurationProvider.UpgradeConfig.Tools.UpdaterExe), 5000, "silent");
         }
 
         private async Task RunMavenMetaDataFixer()
@@ -475,7 +510,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
 
             await RunScriptExecutable(Path.Combine(configurationProvider.InstallDirectory,
                 configurationProvider.UpgradeConfig.Maven.Folder,
-                configurationProvider.UpgradeConfig.Maven.MetaDataFixerExe), "silent");
+                configurationProvider.UpgradeConfig.Maven.MetaDataFixerExe), 5000, "silent");
         }
 
 
@@ -490,9 +525,13 @@ namespace WPILibInstaller_Avalonia.ViewModels
             {
                 codeExe = Path.Combine(configurationProvider.InstallDirectory, "vscode", "bin", "code.cmd");
             }
+            else if (OperatingSystem.IsMacOS())
+            {
+                codeExe = Path.Combine(configurationProvider.InstallDirectory, "vscode", "Visual Studio Code.app", "Contents", "Resources", "app", "bin", "code");
+            }
             else
             {
-                return;
+                codeExe = Path.Combine(configurationProvider.InstallDirectory, "vscode", "VSCode-linux-x64", "bin", "code");
             }
 
             // Load existing extensions
@@ -605,6 +644,24 @@ namespace WPILibInstaller_Avalonia.ViewModels
                 {
                     // Print a message saying not all shortcuts were successful
                 }
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                // Create Linux desktop shortcut
+                var frcYear = configurationProvider.UpgradeConfig.FrcYear;
+                var desktopFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Desktop", $@"FRC VS Code {frcYear}.desktop");
+                string contents = $@"#!/usr/bin/env xdg-open
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=FRC VS Code {frcYear}
+Comment=Official C++/Java IDE for the FIRST Robotics Competition
+Exec={configurationProvider.InstallDirectory}/frccode/frccode{frcYear}
+Icon={configurationProvider.InstallDirectory}/frccode/wpilib-256.ico
+Terminal=false
+StartupNotify=true
+";
+                await File.WriteAllTextAsync(desktopFile, contents);
             }
         }
     }

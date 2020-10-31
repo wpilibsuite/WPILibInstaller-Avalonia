@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using System.IO.Compression;
 using System.Threading.Tasks;
 
-namespace WPILibInstaller_Avalonia.Utils
+namespace WPILibInstaller.Utils
 {
     public static class ArchiveUtils
     {

@@ -1,7 +1,7 @@
 ﻿using Avalonia.Controls;
 using System.Threading.Tasks;
 
-namespace WPILibInstaller_Avalonia.Interfaces
+namespace WPILibInstaller.Interfaces
 {
     public interface IProgramWindow
     {

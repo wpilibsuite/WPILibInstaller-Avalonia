@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Discutils" Version="0.15.1-ci0002" />
+    <PackageReference Include="Discutils" Version="0.15.1-ci0007" />
     <PackageReference Include="System.CommandLine.DragonFruit" Version="0.3.0-alpha.20371.2" />
   </ItemGroup>
 

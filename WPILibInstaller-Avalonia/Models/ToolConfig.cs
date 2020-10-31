@@ -2,7 +2,7 @@
 
 using Newtonsoft.Json;
 
-namespace WPILibInstaller_Avalonia.Models
+namespace WPILibInstaller.Models
 {
     public class ArtifactConfig
     {

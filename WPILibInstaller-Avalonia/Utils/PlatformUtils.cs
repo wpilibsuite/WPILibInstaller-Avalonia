@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace WPILibInstaller_Avalonia.Utils
+namespace WPILibInstaller.Utils
 {
     public enum Platform
     {

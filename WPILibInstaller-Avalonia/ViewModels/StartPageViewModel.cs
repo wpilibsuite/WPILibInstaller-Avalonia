@@ -6,11 +6,11 @@ using System.IO.Compression;
 using System.Reactive;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using WPILibInstaller_Avalonia.Interfaces;
-using WPILibInstaller_Avalonia.Models;
-using WPILibInstaller_Avalonia.Utils;
+using WPILibInstaller.Interfaces;
+using WPILibInstaller.Models;
+using WPILibInstaller.Utils;
 
-namespace WPILibInstaller_Avalonia.ViewModels
+namespace WPILibInstaller.ViewModels
 {
     public class StartPageViewModel : PageViewModelBase, IConfigurationProvider
     {
@@ -76,7 +76,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
             // Enumerate all files in base dir
             foreach (var file in Directory.EnumerateFiles(baseDir))
             {
-                if (file.EndsWith($"{verString}-resources.{extension}"))
+                if (file.EndsWith($"{verString}-resources.zip"))
                 {
                     _ = SelectResourceFilesWithFile(file);
                     foundResources = true;
@@ -88,19 +88,42 @@ namespace WPILibInstaller_Avalonia.ViewModels
                 }
             }
 
+            // Assume app is running in a translocated process.
+            if ((!foundResources || !foundSupport) && RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
+                && Directory.Exists("/Volumes/WPILibInstaller"))
+            {
+                baseDir = Path.GetFullPath("/Volumes/WPILibInstaller");
+                foreach (var file in Directory.EnumerateFiles(baseDir))
+                {
+                    if (!foundResources && file.EndsWith($"{verString}-resources.zip"))
+                    {
+                        _ = SelectResourceFilesWithFile(file);
+                        foundResources = true;
+                    }
+                    else if (!foundSupport && file.EndsWith($"{verString}-artifacts.{extension}"))
+                    {
+                        _ = SelectSupportFilesWithFile(file);
+                        foundSupport = true;
+                    }
+                }
+            }
+
+            // Look beside the .app
             if ((!foundResources || !foundSupport) && RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
                 // Go back 3 directories to back out of mac package
                 baseDir = Path.GetFullPath(Path.Join(baseDir, "..", "..", ".."));
                 foreach (var file in Directory.EnumerateFiles(baseDir))
                 {
-                    if (!foundResources && file.EndsWith($"{verString}-resources.{extension}"))
+                    if (!foundResources && file.EndsWith($"{verString}-resources.zip"))
                     {
                         _ = SelectResourceFilesWithFile(file);
+                        foundResources = true;
                     }
                     else if (!foundSupport && file.EndsWith($"{verString}-artifacts.{extension}"))
                     {
                         _ = SelectSupportFilesWithFile(file);
+                        foundSupport = true;
                     }
                 }
             }
@@ -267,7 +290,7 @@ namespace WPILibInstaller_Avalonia.ViewModels
                     }
                 }
                 Console.WriteLine(publicFolder);
-                return Path.Combine(publicFolder, "wpilibtest", UpgradeConfig.FrcYear);
+                return Path.Combine(publicFolder, "wpilib", UpgradeConfig.FrcYear);
             }
         }
 
