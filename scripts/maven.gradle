@@ -13,10 +13,10 @@ configurations {
 
 def toolArtifacts = [
   'edu.wpi.first.shuffleboard:shuffleboard',
-  'edu.wpi.first.wpilib:OutlineViewer',
-  'edu.wpi.first.wpilib:SmartDashboard',
-  'edu.wpi.first.wpilib:RobotBuilder',
-  'edu.wpi.first.wpilib:PathWeaver'
+  'edu.wpi.first.tools:OutlineViewer',
+  'edu.wpi.first.tools:SmartDashboard',
+  'edu.wpi.first.tools:RobotBuilder',
+  'edu.wpi.first.tools:PathWeaver'
 ]
 
 dependencies {
