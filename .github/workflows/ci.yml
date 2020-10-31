@@ -33,7 +33,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.artifact-name }}
-          path: build/outputs/
+          path: build/pubOutputs/
 
   build-macos:
     name: Build - macOS
