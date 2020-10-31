@@ -16,8 +16,6 @@ plugins {
 }
 
 
-// Defining my dependencies. In this case, WPILib (+ friends), CTRE Toolsuite (Talon SRX)
-// and NavX.
 dependencies {
     implementation wpi.deps.wpilib()
     nativeZip wpi.deps.wpilibJni(wpi.platforms.roborio)
@@ -45,8 +43,7 @@ model {
             targetPlatform wpi.platforms.roborio
             targetPlatform wpi.platforms.desktop
 
-            // Defining my dependencies. In this case, WPILib (+ friends), CTRE Toolsuite (Talon SRX)
-            // and NavX.
+            // Defining the dependencies.
             wpi.deps.wpilib(it)
             wpi.deps.googleTest(it)
 
@@ -57,8 +54,7 @@ model {
             targetPlatform wpi.platforms.roborio
             targetPlatform wpi.platforms.desktop
 
-            // Defining my dependencies. In this case, WPILib (+ friends), CTRE Toolsuite (Talon SRX)
-            // and NavX.
+            // Defining the dependencies.
             wpi.deps.wpilibStatic(it)
             wpi.deps.googleTest(it)
         }
