@@ -35,7 +35,7 @@ namespace IsoCreator
 
             CDBuilder builder = new CDBuilder();
             builder.UseJoliet = true;
-            builder.VolumeIdentifier = $"WPILIB_{version.Replace('-', '_').Replace(' ','_')}";
+            builder.VolumeIdentifier = $"WPILIB_{version.Replace('-', '_').Replace(' ','_').Replace('.', '_')}";
 
             foreach (var file in Directory.EnumerateFiles(input))
             {
