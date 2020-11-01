@@ -631,38 +631,50 @@ namespace WPILibInstaller.ViewModels
         {
             var shortcutData = new ShortcutData();
 
+            var frcHomePath = configurationProvider.InstallDirectory;
+            var frcYear = configurationProvider.UpgradeConfig.FrcYear;
+
+            shortcutData.IconLocation = Path.Join(frcHomePath, configurationProvider.UpgradeConfig.PathFolder, "wpilib-256.ico");
+            shortcutData.IsAdmin = toInstallProvider.Model.InstallAsAdmin;
+
+            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "vscode", "Code.exe"), $"FRC VS Code {frcYear}", $"FRC VS Code {frcYear}"));
+
             var serializedData = JsonConvert.SerializeObject(shortcutData);
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                // Run windows shortcut creater
-                var tempFile = Path.GetTempFileName();
-                await File.WriteAllTextAsync(tempFile, serializedData, token);
-                var shortcutCreatorPath = Path.Combine(configurationProvider.InstallDirectory, "installUtils", "WPILibShortcutCreator.exe");
+           if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+           {
+               // Run windows shortcut creater
+               var tempFile = Path.GetTempFileName();
+               await File.WriteAllTextAsync(tempFile, serializedData, token);
+               var shortcutCreatorPath = Path.Combine(configurationProvider.InstallDirectory, "installUtils", "WPILibShortcutCreator.exe");
 
-                var startInfo = new ProcessStartInfo(shortcutCreatorPath, $"\"{tempFile}\"");
-                startInfo.UseShellExecute = false;
-                startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                startInfo.CreateNoWindow = true;
-                startInfo.RedirectStandardOutput = true;
-                var exitCode = await Task.Run(() =>
-                {
-                    var proc = Process.Start(startInfo);
-                    proc!.WaitForExit();
-                    return proc.ExitCode;
-                });
+               var startInfo = new ProcessStartInfo(shortcutCreatorPath, $"\"{tempFile}\"");
+               startInfo.UseShellExecute = false;
+               startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+               startInfo.CreateNoWindow = true;
+               startInfo.RedirectStandardOutput = true;
+               startInfo.WorkingDirectory = Environment.CurrentDirectory;
+               if (shortcutData.IsAdmin)
+               {
+                   startInfo.Verb = "runsas";
+               }
+               var exitCode = await Task.Run(() =>
+               {
+                   var proc = Process.Start(startInfo);
+                   proc!.WaitForExit();
+                   return proc.ExitCode;
+               });
 
-                if (exitCode != 0)
-                {
-                    // Print a message saying not all shortcuts were successful
-                }
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                // Create Linux desktop shortcut
-                var frcYear = configurationProvider.UpgradeConfig.FrcYear;
-                var desktopFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Desktop", $@"FRC VS Code {frcYear}.desktop");
-                string contents = $@"#!/usr/bin/env xdg-open
+               if (exitCode != 0)
+               {
+                   // Print a message saying not all shortcuts were successful
+               }
+           }
+           else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+           {
+               // Create Linux desktop shortcut
+               var desktopFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Desktop", $@"FRC VS Code {frcYear}.desktop");
+               string contents = $@"#!/usr/bin/env xdg-open
 [Desktop Entry]
 Version=1.0
 Type=Application
@@ -673,8 +685,8 @@ Icon={configurationProvider.InstallDirectory}/frccode/wpilib-256.ico
 Terminal=false
 StartupNotify=true
 ";
-                await File.WriteAllTextAsync(desktopFile, contents);
-            }
+               await File.WriteAllTextAsync(desktopFile, contents);
+           }
         }
     }
 }
