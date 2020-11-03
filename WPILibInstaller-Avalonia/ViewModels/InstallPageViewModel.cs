@@ -167,13 +167,13 @@ namespace WPILibInstaller.ViewModels
             {
                 portableFolder = Path.Combine(portableFolder, "VSCode-linux-x64", "data");
             }
-            else if (PlatformUtils.CurrentPlatform != Platform.Mac64)
+            else if (OperatingSystem.IsMacOS())
             {
-                portableFolder = Path.Combine(portableFolder, "data");
+                portableFolder = Path.Combine(portableFolder, "code-portable-data");
             }
             else
             {
-                portableFolder = Path.Combine(portableFolder, "code-portable-data");
+                portableFolder = Path.Combine(portableFolder, "data");
             }
 
             try
