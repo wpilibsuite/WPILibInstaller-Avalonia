@@ -101,7 +101,7 @@ jobs:
       - name: Create DMG
         working-directory: build
         run: |
-          hdiutil create -volname WPILibInstaller -srcfolder pubOutputs/ -format UDRO WPILibInstaller.dmg
+          hdiutil create -volname WPILibInstaller -srcfolder pubOutputs/ -format UDRO WPILib_macOS-`/usr/libexec/PlistBuddy -c "Print CFBundleVersion" pubOutputs/WPILibInstaller.app/Contents/Info.plist`.dmg
 
       - name: Sign DMG with Developer ID
         working-directory: build
