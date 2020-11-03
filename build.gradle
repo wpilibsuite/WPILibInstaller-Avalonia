@@ -295,9 +295,9 @@ def unixCreateImageTask = tasks.register('createTarImage', Tar) {
 
     inputs.dir "$buildDir/outputs"
 
-    archiveBaseName = 'WPILibInstaller_' + buildClassifier + '-' + pubVersion + ''
+    archiveBaseName = 'WPILib_' + buildClassifier + '-' + pubVersion + ''
 
-    into 'WPILibInstaller_' + buildClassifier + '-' + pubVersion + ''
+    into 'WPILib_' + buildClassifier + '-' + pubVersion + ''
 
     destinationDirectory = file("$buildDir/pubOutputs")
 
