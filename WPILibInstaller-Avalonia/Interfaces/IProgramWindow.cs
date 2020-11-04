@@ -5,7 +5,7 @@ namespace WPILibInstaller.Interfaces
 {
     public interface IProgramWindow
     {
-        Task<string?> ShowFilePicker(string title, string? defaultPath = null, string extensionFilter);
+        Task<string?> ShowFilePicker(string title, string extensionFilter, string? defaultPath = null);
         Task<string?> ShowFolderPicker(string title, string? initialiDirectory = null);
         void CloseProgram();
 

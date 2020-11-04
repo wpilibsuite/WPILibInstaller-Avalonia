@@ -38,7 +38,7 @@ namespace WPILibInstaller.Views
             this.Close();
         }
 
-        public async Task<string?> ShowFilePicker(string title, string? initialiDirectory, string extensionFilter)
+        public async Task<string?> ShowFilePicker(string title, string extensionFilter, string? initialiDirectory)
         {
 
             OpenFileDialog dialog = new OpenFileDialog
