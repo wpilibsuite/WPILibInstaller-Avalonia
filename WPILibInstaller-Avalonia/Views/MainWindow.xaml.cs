@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using WPILibInstaller.Interfaces;
 using WPILibInstaller.ViewModels;
@@ -45,12 +46,12 @@ namespace WPILibInstaller.Views
             {
                 AllowMultiple = false,
                 Title = title,
-                Filters  = new List<FileDialogFilter>() { 
+                Filters = new List<FileDialogFilter>() {
                     new FileDialogFilter {
                         Name = "ZIP Archive",
                         Extensions = new List<string>() {
                             extensionFilter,
-                        }
+                        },
                     },
                 },
             };
