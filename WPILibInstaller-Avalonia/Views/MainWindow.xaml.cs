@@ -45,8 +45,8 @@ namespace WPILibInstaller.Views
             {
                 AllowMultiple = false,
                 Title = title,
-                Filter = "ZIP Files (.zip)|*.zip",
             };
+            dialog.Filter = "ZIP Files (.zip)|*.zip";
             if (initialiDirectory != null)
             {
                 dialog.Directory = initialiDirectory;
