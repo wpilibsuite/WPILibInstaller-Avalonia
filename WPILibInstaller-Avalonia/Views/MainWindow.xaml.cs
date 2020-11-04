@@ -38,15 +38,23 @@ namespace WPILibInstaller.Views
             this.Close();
         }
 
-        public async Task<string?> ShowFilePicker(string title, string? initialiDirectory)
+        public async Task<string?> ShowFilePicker(string title, string? initialiDirectory, string extensionFilter)
         {
 
             OpenFileDialog dialog = new OpenFileDialog
             {
                 AllowMultiple = false,
                 Title = title,
+                Filters  = new List<FileDialogFilter>() { 
+                    new FileDialogFilter {
+                        Name = "ZIP Archive",
+                        Extensions = new List<string>() {
+                            extensionFilter,
+                        }
+                    },
+                },
             };
-            dialog.Filter = "ZIP Files (.zip)|*.zip";
+            
             if (initialiDirectory != null)
             {
                 dialog.Directory = initialiDirectory;

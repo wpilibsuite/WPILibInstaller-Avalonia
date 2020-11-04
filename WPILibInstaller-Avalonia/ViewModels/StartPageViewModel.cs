@@ -219,7 +219,7 @@ namespace WPILibInstaller.ViewModels
 
         public async Task SelectResourceFilesFunc()
         {
-            var file = await programWindow.ShowFilePicker("Select Resource File", Environment.GetFolderPath(Environment.SpecialFolder.Personal));
+            var file = await programWindow.ShowFilePicker("Select Resource File", Environment.GetFolderPath(Environment.SpecialFolder.Personal), RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "*.zip" : "*.tar.gz");
 
             if (file == null)
             {
@@ -246,7 +246,7 @@ namespace WPILibInstaller.ViewModels
 
         public async Task SelectSupportFilesFunc()
         {
-            var file = await programWindow.ShowFilePicker("Select Support File", Environment.GetFolderPath(Environment.SpecialFolder.Personal));
+            var file = await programWindow.ShowFilePicker("Select Support File", Environment.GetFolderPath(Environment.SpecialFolder.Personal), RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "*.zip" : "*.tar.gz");
 
             if (file == null)
             {

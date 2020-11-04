@@ -152,7 +152,7 @@ namespace WPILibInstaller.ViewModels
 
         private async Task SelectVsCodeFunc()
         {
-            var file = await programWindow.ShowFilePicker("Select VS Code");
+            var file = await programWindow.ShowFilePicker("Select VS Code Installer ZIP", "*.zip");
             if (file == null)
             {
                 // No need to error, user explicitly canceled.
