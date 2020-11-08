@@ -262,12 +262,6 @@ def versionFileTask = tasks.register('writeVersionNumber', Task) {
 
 
 def copyInstallerFiles = tasks.register('copyInstallerFiles', Copy) {
-    doFirst {
-        exec {
-            workingDir installDirectory
-            commandLine 'ls', '-alR'
-        }
-    }
 
     from (installDirectory) {
         exclude ('WPILibInstaller', 'WPILibInstaller.app')
@@ -283,12 +277,6 @@ def copyInstallerFiles = tasks.register('copyInstallerFiles', Copy) {
 
     from versionFile
 
-    doLast {
-        exec {
-            workingDir "$buildDir/outputs"
-            commandLine 'ls', '-alR'
-        }
-    }
 }
 
 def dotnetCreateImageTask = tasks.register('createDiskImage', Exec) {
