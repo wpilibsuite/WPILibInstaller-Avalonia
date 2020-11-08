@@ -262,7 +262,15 @@ def versionFileTask = tasks.register('writeVersionNumber', Task) {
 
 
 def copyInstallerFiles = tasks.register('copyInstallerFiles', Copy) {
-    from installDirectory
+
+    from (installDirectory) {
+        exclude ('WPILibInstaller')
+        fileMode 0644
+    }
+    from (installDirectory) {
+        include ('WPILibInstaller')
+    }
+
     into "$buildDir/outputs"
     dependsOn dotnetInstallerTask
     dependsOn versionFileTask
