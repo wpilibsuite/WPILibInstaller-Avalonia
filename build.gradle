@@ -274,7 +274,7 @@ def copyInstallerFiles = tasks.register('copyInstallerFiles', Copy) {
         fileMode 0644
     }
     from (installDirectory) {
-        include ('WPILibInstaller', 'WPILibInstaller.app')
+        include ('WPILibInstaller', 'WPILibInstaller.app/**')
     }
 
     into "$buildDir/outputs"
