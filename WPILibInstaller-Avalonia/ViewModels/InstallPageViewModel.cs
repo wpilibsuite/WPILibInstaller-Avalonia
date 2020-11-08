@@ -678,6 +678,7 @@ namespace WPILibInstaller.ViewModels
            {
                // Create Linux desktop shortcut
                var desktopFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Desktop", $@"FRC VS Code {frcYear}.desktop");
+               var launcherFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local/share/applications", $@"FRC VS Code {frcYear}.desktop");
                string contents = $@"#!/usr/bin/env xdg-open
 [Desktop Entry]
 Version=1.0
@@ -690,6 +691,7 @@ Terminal=false
 StartupNotify=true
 ";
                await File.WriteAllTextAsync(desktopFile, contents);
+               await File.WriteAllTextAsync(launcherFile, contents);
            }
         }
     }
