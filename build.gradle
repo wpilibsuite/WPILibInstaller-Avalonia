@@ -265,7 +265,7 @@ def copyInstallerFiles = tasks.register('copyInstallerFiles', Copy) {
     doFirst {
         exec {
             workingDir installDirectory
-            commandLine 'ls', '-al'
+            commandLine 'ls', '-alR'
         }
     }
 
@@ -286,7 +286,7 @@ def copyInstallerFiles = tasks.register('copyInstallerFiles', Copy) {
     doLast {
         exec {
             workingDir "$buildDir/outputs"
-            commandLine 'ls', '-al'
+            commandLine 'ls', '-alR'
         }
     }
 }
