@@ -101,12 +101,12 @@ jobs:
       - name: Create DMG
         working-directory: build
         run: |
-          hdiutil create -volname WPILibInstaller -srcfolder pubOutputs/ -format UDRO WPILibInstaller.dmg
+          hdiutil create -volname WPILibInstaller -srcfolder pubOutputs/ -format UDRO WPILib_macOS-`/usr/libexec/PlistBuddy -c "Print CFBundleVersion" pubOutputs/WPILibInstaller.app/Contents/Info.plist`.dmg
 
       - name: Sign DMG with Developer ID
         working-directory: build
         run: |
-          codesign -s ${{ secrets.APPLE_DEVELOPER_ID }} WPILibInstaller.dmg
+          codesign -s ${{ secrets.APPLE_DEVELOPER_ID }} `ls *.dmg | head -1`
         if: |
           github.repository_owner == 'wpilibsuite' &&
           (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v'))
@@ -115,4 +115,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: macOS
-          path: build/WPILibInstaller.dmg
+          path: ${{ github.workspace }}/build/*.dmg
