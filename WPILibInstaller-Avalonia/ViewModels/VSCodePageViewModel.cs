@@ -50,8 +50,8 @@ namespace WPILibInstaller.ViewModels
             set => this.RaiseAndSetIfChanged(ref downloadText, value);
         }
 
-        private string selectText = "Select Existing VS Code Download";
-        private string downloadText = "Download VS Code For All Platforms";
+        private string selectText = "Select Existing VS Code Installer";
+        private string downloadText = "Download VS Code Installers For All Platforms";
 
         public double ProgressBar1
         {
@@ -152,7 +152,7 @@ namespace WPILibInstaller.ViewModels
 
         private async Task SelectVsCodeFunc()
         {
-            var file = await programWindow.ShowFilePicker("Select VS Code");
+            var file = await programWindow.ShowFilePicker("Select VS Code Installer ZIP", "*.zip");
             if (file == null)
             {
                 // No need to error, user explicitly canceled.

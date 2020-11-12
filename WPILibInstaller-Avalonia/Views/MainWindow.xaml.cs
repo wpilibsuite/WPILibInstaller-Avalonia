@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using WPILibInstaller.Interfaces;
 using WPILibInstaller.ViewModels;
@@ -38,14 +39,23 @@ namespace WPILibInstaller.Views
             this.Close();
         }
 
-        public async Task<string?> ShowFilePicker(string title, string? initialiDirectory)
+        public async Task<string?> ShowFilePicker(string title, string extensionFilter, string? initialiDirectory)
         {
 
             OpenFileDialog dialog = new OpenFileDialog
             {
                 AllowMultiple = false,
                 Title = title,
+                Filters = new List<FileDialogFilter>() {
+                    new FileDialogFilter {
+                        Name = "ZIP Archive",
+                        Extensions = new List<string>() {
+                            extensionFilter,
+                        },
+                    },
+                },
             };
+            
             if (initialiDirectory != null)
             {
                 dialog.Directory = initialiDirectory;
