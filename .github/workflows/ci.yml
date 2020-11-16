@@ -58,6 +58,7 @@ jobs:
           cp outputs/*.zip pubOutputs/WPILibInstaller.app/Contents/MacOS/
           cp outputs/WPILibInstallerVersion.txt pubOutputs/WPILibInstaller.app/Contents/MacOS/
           cp ../WPILibInstaller-Avalonia/wpilib.icns pubOutputs/WPILibInstaller.app/Contents/Resources/
+          cp ../Info.plist pubOutputs/WPILibInstaller.app/Contents/Info.plist
           cp outputs/*.tar.gz pubOutputs/
       - name: Import Developer ID Certificate
         uses: wpilibsuite/import-signing-certificate@v1
