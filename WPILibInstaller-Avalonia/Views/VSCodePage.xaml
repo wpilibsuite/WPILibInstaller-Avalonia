@@ -16,7 +16,7 @@
 
     1. Download VS Code for Single Install: Use this if you don't plan on sharing the VS Code installer between systems. This will be the fastest download.
     2. Select Existing VS Code Download: Use this to select a pre-existing installer zip file.
-    3. Download VS Code for All Platforms: Use this to download VS Code installers for all platforms, which can be shared between systems for offline use.
+    3. Download VS Code for Offline Install: Use this to download VS Code installers for all platforms, which can be shared between systems for offline use.
     4. Skip installing VS Code. This will prompt unless already installed.
     </TextBlock>
     </ScrollViewer>
