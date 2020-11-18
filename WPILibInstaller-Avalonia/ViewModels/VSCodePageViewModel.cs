@@ -51,7 +51,7 @@ namespace WPILibInstaller.ViewModels
         }
 
         private string selectText = "Select Existing VS Code Installer";
-        private string downloadText = "Download VS Code Installers For Offline Installs";
+        private string downloadText = "Download VS Code for Offline Install";
 
         public double ProgressBar1
         {
