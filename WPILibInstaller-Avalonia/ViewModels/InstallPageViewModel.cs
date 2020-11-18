@@ -665,6 +665,7 @@ namespace WPILibInstaller.ViewModels
 [Desktop Entry]
 Version=1.0
 Type=Application
+Categories=Development
 Name=FRC VS Code {frcYear}
 Comment=Official C++/Java IDE for the FIRST Robotics Competition
 Exec={configurationProvider.InstallDirectory}/frccode/frccode{frcYear}
