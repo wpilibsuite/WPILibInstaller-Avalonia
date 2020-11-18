@@ -6,7 +6,7 @@
     <RootNamespace>WPILibInstaller</RootNamespace>
     <ApplicationIcon>wpilib-256.ico</ApplicationIcon>
     <CFBundleIconFile>wpilib.icns</CFBundleIconFile>
-    <CFBundleVersion>2021.1.1-beta-1</CFBundleVersion>
+    <CFBundleVersion>2021.1.1-beta-2</CFBundleVersion>
     <Win32Resource />
     <Nullable>enable</Nullable>
   </PropertyGroup>
