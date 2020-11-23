@@ -61,13 +61,13 @@ namespace WPILibInstaller.ViewModels
 
         private double progressBar1 = 0;
 
-        public Boolean ProgressBar1Visible
+        public bool ProgressBar1Visible
         {
             get => progressBar1Visible;
             set => this.RaiseAndSetIfChanged(ref progressBar1Visible, value);
         }
 
-        private Boolean progressBar1Visible = false;
+        private bool progressBar1Visible = false;
 
         public double ProgressBar2
         {
@@ -77,13 +77,13 @@ namespace WPILibInstaller.ViewModels
 
         private double progressBar2 = 0;
 
-        public Boolean ProgressBarAllVisible
+        public bool ProgressBarAllVisible
         {
             get => progressBarAllVisible;
             set => this.RaiseAndSetIfChanged(ref progressBarAllVisible, value);
         }
 
-        private Boolean progressBarAllVisible = false;
+        private bool progressBarAllVisible = false;
 
         public double ProgressBar3
         {
