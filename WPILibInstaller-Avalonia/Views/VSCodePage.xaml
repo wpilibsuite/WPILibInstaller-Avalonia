@@ -36,10 +36,10 @@
       <Button Grid.Column="0" Grid.Row="1" Margin="0,0,5,0" IsEnabled="{Binding EnableSelectionButtons}" Content="{Binding SelectText}" Command="{Binding SelectVsCode}"/>
       <Button Grid.Column="1" Grid.Row="1" Margin="5,0,0,0" IsEnabled="{Binding EnableSelectionButtons}" Content="{Binding DownloadText}" Command="{Binding DownloadVsCode}"/>
       <StackPanel Margin="5,0,0,0" Grid.Column="2" Grid.Row="0" Grid.RowSpan="2">
-        <ProgressBar Value="{Binding ProgressBar1}" Margin="0,2,0,0" MinWidth="20" />
-        <ProgressBar Value="{Binding ProgressBar2}" Margin="0,2,0,0" MinWidth="20" />
-        <ProgressBar Value="{Binding ProgressBar3}" Margin="0,2,0,0" MinWidth="20" />
-        <ProgressBar Value="{Binding ProgressBar4}" Margin="0,2,0,0" MinWidth="20" />
+        <ProgressBar Value="{Binding ProgressBar1}" IsVisible="{Binding ProgressBar1Visible}" Margin="0,2,0,0" MinWidth="20" />
+        <ProgressBar Value="{Binding ProgressBar2}" IsVisible="{Binding ProgressBarAllVisible}" Margin="0,2,0,0" MinWidth="20" />
+        <ProgressBar Value="{Binding ProgressBar3}" IsVisible="{Binding ProgressBarAllVisible}" Margin="0,2,0,0" MinWidth="20" />
+        <ProgressBar Value="{Binding ProgressBar4}" IsVisible="{Binding ProgressBarAllVisible}" Margin="0,2,0,0" MinWidth="20" />
       </StackPanel>
     </Grid>
   </Grid>
