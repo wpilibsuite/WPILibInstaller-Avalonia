@@ -642,7 +642,7 @@ namespace WPILibInstaller.ViewModels
                startInfo.WorkingDirectory = Environment.CurrentDirectory;
                if (shortcutData.IsAdmin)
                {
-                   startInfo.Verb = "runsas";
+                   startInfo.Verb = "runas";
                }
                var exitCode = await Task.Run(() =>
                {
@@ -653,8 +653,10 @@ namespace WPILibInstaller.ViewModels
 
                if (exitCode != 0)
                {
-                   // Print a message saying not all shortcuts were successful
-               }
+                    var result = await MessageBox.Avalonia.MessageBoxManager.GetMessageBoxStandardWindow("Warning",
+                   "Shortcut creation failed. Error Code: " + exitCode,
+                   icon: MessageBox.Avalonia.Enums.Icon.Warning, @enum: MessageBox.Avalonia.Enums.ButtonEnum.Ok).ShowDialog(programWindow.Window);
+                }
            }
            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
            {
