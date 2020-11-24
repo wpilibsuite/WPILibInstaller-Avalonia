@@ -48,7 +48,7 @@ namespace WPILibInstaller.Views
                 Title = title,
                 Filters = new List<FileDialogFilter>() {
                     new FileDialogFilter {
-                        Name = "ZIP Archive",
+                        Name = "Archive",
                         Extensions = new List<string>() {
                             extensionFilter,
                         },
