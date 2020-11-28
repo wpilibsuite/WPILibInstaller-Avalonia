@@ -6,10 +6,10 @@
         xmlns:vm="clr-namespace:WPILibInstaller.ViewModels;assembly=WPILibInstaller"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="400"
+        mc:Ignorable="d" d:DesignWidth="640" d:DesignHeight="400"
         x:Class="WPILibInstaller.Views.MainWindow"
         Icon="/Assets/wpilib-256.ico"
-        Title="WPILib Installer" Width="600" Height="400">
+        Title="WPILib Installer" Width="640" Height="400">
 
   <Grid>
     <Grid.RowDefinitions>
