@@ -61,6 +61,14 @@ namespace WPILibInstaller.ViewModels
 
         private double progressBar1 = 0;
 
+        public bool ProgressBar1Visible
+        {
+            get => progressBar1Visible;
+            set => this.RaiseAndSetIfChanged(ref progressBar1Visible, value);
+        }
+
+        private bool progressBar1Visible = false;
+
         public double ProgressBar2
         {
             get => progressBar2;
@@ -68,6 +76,14 @@ namespace WPILibInstaller.ViewModels
         }
 
         private double progressBar2 = 0;
+
+        public bool ProgressBarAllVisible
+        {
+            get => progressBarAllVisible;
+            set => this.RaiseAndSetIfChanged(ref progressBarAllVisible, value);
+        }
+
+        private bool progressBarAllVisible = false;
 
         public double ProgressBar3
         {
@@ -191,6 +207,8 @@ namespace WPILibInstaller.ViewModels
         private async Task DownloadVsCodeFunc()
         {
             var currentPlatform = PlatformUtils.CurrentPlatform;
+            ProgressBar1Visible = true;
+            ProgressBarAllVisible = true;
 
             var file = await programWindow.ShowFolderPicker("Select Directory For VS Code File", Environment.GetFolderPath(Environment.SpecialFolder.Personal));
 
@@ -271,6 +289,7 @@ namespace WPILibInstaller.ViewModels
 
             EnableSelectionButtons = false;
             SetLocalForwardVisible(false);
+            ProgressBar1Visible = true;
 
             var (stream, platform) = await DownloadToMemoryStream(currentPlatform, url, CancellationToken.None, (d) => ProgressBar1 = d);
             if (stream != null)
