@@ -27,6 +27,8 @@ namespace WPILibInstaller.ViewModels
 
         public int Progress { get; set; }
         public string Text { get; set; } = "";
+        public int ProgressTotal { get; set; }
+        public string TextTotal { get; set; } = "";
 
         public async Task UIUpdateTask(CancellationToken token)
         {
@@ -34,6 +36,8 @@ namespace WPILibInstaller.ViewModels
             {
                 this.RaisePropertyChanged(nameof(Progress));
                 this.RaisePropertyChanged(nameof(Text));
+                this.RaisePropertyChanged(nameof(ProgressTotal));
+                this.RaisePropertyChanged(nameof(TextTotal));
                 try {
                     await Task.Delay(100, token);
                 }
@@ -96,22 +100,40 @@ namespace WPILibInstaller.ViewModels
             try {
                 do
                 {
+                    ProgressTotal = 0;
+                    TextTotal = "Extracting";
                     await ExtractArchive(source.Token);
                     if (source.IsCancellationRequested) break;
+                    ProgressTotal = 11;
+                    TextTotal = "Installing Gradle";
                     await RunGradleSetup();
                     if (source.IsCancellationRequested) break;
+                    ProgressTotal = 22;
+                    TextTotal = "Installing Tools";
                     await RunToolSetup();
                     if (source.IsCancellationRequested) break;
+                    ProgressTotal = 33;
+                    TextTotal = "Installing CPP";
                     await RunCppSetup();
                     if (source.IsCancellationRequested) break;
+                    ProgressTotal = 44;
+                    TextTotal = "Fixing Maven";
                     await RunMavenMetaDataFixer();
                     if (source.IsCancellationRequested) break;
+                    ProgressTotal = 55;
+                    TextTotal = "Installing VS Code";
                     await RunVsCodeSetup(source.Token);
                     if (source.IsCancellationRequested) break;
+                    ProgressTotal = 66;
+                    TextTotal = "Configuring VS Code";
                     await ConfigureVsCodeSettings();
                     if (source.IsCancellationRequested) break;
+                    ProgressTotal = 77;
+                    TextTotal = "Installing VS Code Extensions";
                     await RunVsCodeExtensionsSetup();
                     if (source.IsCancellationRequested) break;
+                    ProgressTotal = 88;
+                    TextTotal = "Creating Shortcuts";
                     await RunShortcutCreator(source.Token);
                 } while (false);
 
