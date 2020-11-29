@@ -141,7 +141,7 @@ namespace WPILibInstaller.ViewModels
             }
 
             var result = await MessageBoxManager.GetMessageBoxStandardWindow("Confirmation",
-                "Are you sure you want to skip installing VS Code?",
+                "Are you sure you want to skip installing VS Code?\nA WPILib VS Code install was not detected,",
                 icon: MessageBox.Avalonia.Enums.Icon.None, @enum: MessageBox.Avalonia.Enums.ButtonEnum.YesNo).ShowDialog(programWindow.Window);
 
             if (result == MessageBox.Avalonia.Enums.ButtonResult.Yes)
@@ -179,7 +179,8 @@ namespace WPILibInstaller.ViewModels
             catch
             {
                 await MessageBoxManager.GetMessageBoxStandardWindow("Error",
-                    "Correct VS Code not found in archive", icon: MessageBox.Avalonia.Enums.Icon.None).ShowDialog(programWindow.Window);
+                    "Correct VS Code not found in archive.\nYou must select a VS Code installer zip downloaded with this tool.", 
+                    icon: MessageBox.Avalonia.Enums.Icon.None).ShowDialog(programWindow.Window);
                 return;
             }
 
