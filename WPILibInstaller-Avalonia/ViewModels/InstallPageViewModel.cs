@@ -320,6 +320,7 @@ namespace WPILibInstaller.ViewModels
                     await vsInstallProvider.Model.ToExtractArchiveMacOs.CopyToAsync(fileToWrite, token);
                 }
                 await RunScriptExecutable("unzip", Timeout.Infinite, zipPath, "-d", intoPath);
+                File.Delete(zipPath);
                 return;
             }
 
