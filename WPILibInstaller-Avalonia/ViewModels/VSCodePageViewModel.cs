@@ -50,7 +50,7 @@ namespace WPILibInstaller.ViewModels
             set => this.RaiseAndSetIfChanged(ref downloadText, value);
         }
 
-        private string selectText = "Select Existing VS Code Installer";
+        private string selectText = "Use Downloaded Offline Installer";
         private string downloadText = "Download VS Code for Offline Install";
 
         public double ProgressBar1
