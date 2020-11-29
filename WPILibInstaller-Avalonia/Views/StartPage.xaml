@@ -13,6 +13,10 @@
                FontWeight="Bold"
                FontSize="25"
                VerticalAlignment="Center" />
+    <TextBlock Text="{Binding VerString, StringFormat='Version: \{0\}'}"
+               HorizontalAlignment="Center"
+               FontSize="25"
+               VerticalAlignment="Center" />
     <TextBlock Text="The artifacts and/or resource files were not found. Please click the buttons below to select them."
                IsVisible="{Binding MissingEitherFile}"/>
     <Button Margin="0, 10, 0, 0" Content="Select Artifacts File (-artifacts)"
