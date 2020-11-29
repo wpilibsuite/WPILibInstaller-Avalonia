@@ -21,6 +21,9 @@ namespace WPILibInstaller.ViewModels
 
         public override bool ForwardVisible => forwardVisible;
         private bool forwardVisible = false;
+        public string VerString => verString;
+
+        private string verString = $"0.0.0";
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
         public StartPageViewModel(IMainWindowViewModel mainRefresher, IProgramWindow mainWindow, IViewModelResolver viewModelResolver,
@@ -53,8 +56,6 @@ namespace WPILibInstaller.ViewModels
             refresher = mainRefresher;
 
             var baseDir = AppContext.BaseDirectory;
-
-            var verString = $"0.0.0";
 
             try
             {
