@@ -195,7 +195,7 @@ namespace WPILibInstaller.ViewModels
             catch
             {
                 await MessageBoxManager.GetMessageBoxStandardWindow("Error",
-                    "Correct VS Code not found in archive.\nYou must select a VS Code installer zip downloaded with this tool.", 
+                    "Correct VS Code not found in archive.\nYou must select a VS Code installer zip downloaded with this tool.",
                     icon: MessageBox.Avalonia.Enums.Icon.None).ShowDialog(programWindow.Window);
                 return;
             }
