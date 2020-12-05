@@ -647,6 +647,7 @@ namespace WPILibInstaller.ViewModels
             shortcutData.IsAdmin = toInstallProvider.Model.InstallAsAdmin;
 
             shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "vscode", "Code.exe"), $"FRC VS Code {frcYear}", $"FRC VS Code {frcYear}"));
+            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "vscode", "Code.exe"), $"FRC VS Code {frcYear}", $"FRC VS Code {frcYear}"));
 
             var serializedData = JsonConvert.SerializeObject(shortcutData);
 
