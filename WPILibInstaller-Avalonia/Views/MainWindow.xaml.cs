@@ -55,7 +55,7 @@ namespace WPILibInstaller.Views
                     },
                 },
             };
-            
+
             if (initialiDirectory != null)
             {
                 dialog.Directory = initialiDirectory;

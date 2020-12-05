@@ -38,7 +38,8 @@ namespace WPILibInstaller.ViewModels
                 this.RaisePropertyChanged(nameof(Text));
                 this.RaisePropertyChanged(nameof(ProgressTotal));
                 this.RaisePropertyChanged(nameof(TextTotal));
-                try {
+                try
+                {
                     await Task.Delay(100, token);
                 }
                 catch (OperationCanceledException)
@@ -97,7 +98,8 @@ namespace WPILibInstaller.ViewModels
 
             var updateTask = UIUpdateTask(updateSource.Token);
 
-            try {
+            try
+            {
                 do
                 {
                     ProgressTotal = 0;
@@ -559,11 +561,13 @@ namespace WPILibInstaller.ViewModels
 
             var versions = await Task.Run(() =>
             {
-                var startInfo = new ProcessStartInfo(codeExe, "--list-extensions --show-versions");
-                startInfo.UseShellExecute = false;
-                startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                startInfo.CreateNoWindow = true;
-                startInfo.RedirectStandardOutput = true;
+                var startInfo = new ProcessStartInfo(codeExe, "--list-extensions --show-versions")
+                {
+                    UseShellExecute = false,
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    CreateNoWindow = true,
+                    RedirectStandardOutput = true
+                };
                 var proc = Process.Start(startInfo);
                 proc!.WaitForExit();
                 var lines = new List<(string name, WPIVersion version)>();
@@ -614,11 +618,13 @@ namespace WPILibInstaller.ViewModels
             Progress = 0;
             foreach (var item in installs)
             {
-                var startInfo = new ProcessStartInfo(codeExe, "--install-extension " + Path.Combine(configurationProvider.InstallDirectory, "vsCodeExtensions", item.Vsix));
-                startInfo.UseShellExecute = false;
-                startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                startInfo.CreateNoWindow = true;
-                startInfo.RedirectStandardOutput = true;
+                var startInfo = new ProcessStartInfo(codeExe, "--install-extension " + Path.Combine(configurationProvider.InstallDirectory, "vsCodeExtensions", item.Vsix))
+                {
+                    UseShellExecute = false,
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    CreateNoWindow = true,
+                    RedirectStandardOutput = true
+                };
                 await Task.Run(() =>
                 {
                     var proc = Process.Start(startInfo);
@@ -650,43 +656,49 @@ namespace WPILibInstaller.ViewModels
 
             var serializedData = JsonConvert.SerializeObject(shortcutData);
 
-           if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-           {
-               // Run windows shortcut creater
-               var tempFile = Path.GetTempFileName();
-               await File.WriteAllTextAsync(tempFile, serializedData, token);
-               var shortcutCreatorPath = Path.Combine(configurationProvider.InstallDirectory, "installUtils", "WPILibShortcutCreator.exe");
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // Run windows shortcut creater
+                var tempFile = Path.GetTempFileName();
+                await File.WriteAllTextAsync(tempFile, serializedData, token);
+                var shortcutCreatorPath = Path.Combine(configurationProvider.InstallDirectory, "installUtils", "WPILibShortcutCreator.exe");
 
-               var startInfo = new ProcessStartInfo(shortcutCreatorPath, $"\"{tempFile}\"");
-               startInfo.UseShellExecute = false;
-               startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-               startInfo.CreateNoWindow = true;
-               startInfo.RedirectStandardOutput = true;
-               startInfo.WorkingDirectory = Environment.CurrentDirectory;
-               if (shortcutData.IsAdmin)
-               {
-                   startInfo.Verb = "runas";
-               }
-               var exitCode = await Task.Run(() =>
-               {
-                   var proc = Process.Start(startInfo);
-                   proc!.WaitForExit();
-                   return proc.ExitCode;
-               });
+                var startInfo = new ProcessStartInfo(shortcutCreatorPath, $"\"{tempFile}\"")
+                {
+                    WorkingDirectory = Environment.CurrentDirectory
+                };
+                if (shortcutData.IsAdmin)
+                {
+                    startInfo.UseShellExecute = true;
+                    startInfo.Verb = "runas";
+                }
+                else
+                {
+                    startInfo.UseShellExecute = false;
+                    startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                    startInfo.CreateNoWindow = true;
+                    startInfo.RedirectStandardOutput = true;
+                }
+                var exitCode = await Task.Run(() =>
+                {
+                    var proc = Process.Start(startInfo);
+                    proc!.WaitForExit();
+                    return proc.ExitCode;
+                });
 
-               if (exitCode != 0)
-               {
+                if (exitCode != 0)
+                {
                     var result = await MessageBox.Avalonia.MessageBoxManager.GetMessageBoxStandardWindow("Warning",
                    "Shortcut creation failed. Error Code: " + exitCode,
                    icon: MessageBox.Avalonia.Enums.Icon.Warning, @enum: MessageBox.Avalonia.Enums.ButtonEnum.Ok).ShowDialog(programWindow.Window);
                 }
-           }
-           else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-           {
-               // Create Linux desktop shortcut
-               var desktopFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Desktop", $@"FRC VS Code {frcYear}.desktop");
-               var launcherFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local/share/applications", $@"FRC VS Code {frcYear}.desktop");
-               string contents = $@"#!/usr/bin/env xdg-open
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                // Create Linux desktop shortcut
+                var desktopFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Desktop", $@"FRC VS Code {frcYear}.desktop");
+                var launcherFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local/share/applications", $@"FRC VS Code {frcYear}.desktop");
+                string contents = $@"#!/usr/bin/env xdg-open
 [Desktop Entry]
 Version=1.0
 Type=Application
@@ -698,9 +710,9 @@ Icon={configurationProvider.InstallDirectory}/frccode/wpilib-256.ico
 Terminal=false
 StartupNotify=true
 ";
-               await File.WriteAllTextAsync(desktopFile, contents);
-               await File.WriteAllTextAsync(launcherFile, contents);
-           }
+                await File.WriteAllTextAsync(desktopFile, contents, token);
+                await File.WriteAllTextAsync(launcherFile, contents, token);
+            }
         }
     }
 }
