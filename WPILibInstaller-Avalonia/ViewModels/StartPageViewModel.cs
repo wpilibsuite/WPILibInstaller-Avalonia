@@ -211,11 +211,62 @@ namespace WPILibInstaller.ViewModels
                 }) ?? throw new InvalidOperationException("Not Valid");
             }
 
-            MissingResourceFiles = false;
-            forwardVisible = !MissingEitherFile;
-            refresher.RefreshForwardBackProperties();
+            string? neededInstaller = CheckInstallerType();
+            if (neededInstaller == null)
+            {
+                MissingResourceFiles = false;
+                forwardVisible = !MissingEitherFile;
+                refresher.RefreshForwardBackProperties();
 
-            return true;
+                return true;
+            }
+            else
+            {
+                viewModelResolver.ResolveMainWindow().HandleException(new IncorrectPlatformException(neededInstaller));
+                return false;
+            }
+        }
+
+
+        private string? CheckInstallerType()
+        {
+            // TODO Handle Arm someday
+            if (OperatingSystem.IsWindows())
+            {
+                if (IntPtr.Size == 8)
+                {
+                    if (UpgradeConfig.InstallerType != UpgradeConfig.Windows64InstallerType)
+                    {
+                        return UpgradeConfig.Windows64InstallerType;
+                    }
+                }
+                else
+                {
+                    if (UpgradeConfig.InstallerType != UpgradeConfig.Windows32InstallerType)
+                    {
+                        return UpgradeConfig.Windows32InstallerType;
+                    }
+                }
+            }
+            else if (OperatingSystem.IsMacOS())
+            {
+                if (UpgradeConfig.InstallerType != UpgradeConfig.MacInstallerType)
+                {
+                    return UpgradeConfig.MacInstallerType;
+                }
+            }
+            else if (OperatingSystem.IsLinux())
+            {
+                if (UpgradeConfig.InstallerType != UpgradeConfig.LinuxInstallerType)
+                {
+                    return UpgradeConfig.LinuxInstallerType;
+                }
+            }
+            else
+            {
+                return "Unknown";
+            }
+            return null;
         }
 
         public async Task SelectResourceFilesFunc()
