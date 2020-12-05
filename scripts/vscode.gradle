@@ -1,7 +1,7 @@
 
 def vscodeFile = file("$buildDir/vscodeConfig.json")
 
-def vsCodeVersion = '1.50.1'
+def vsCodeVersion = '1.51.1'
 
 def wpilibVersion = '2021.1.1-beta-2'
 
