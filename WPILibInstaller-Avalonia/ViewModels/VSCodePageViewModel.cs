@@ -202,6 +202,7 @@ namespace WPILibInstaller.ViewModels
 
             DoneText = "Valid VS Code Selected. Press Next to continue";
             EnableSelectionButtons = false;
+            SetLocalForwardVisible(true);
         }
 
         private async Task DownloadVsCodeFunc()
