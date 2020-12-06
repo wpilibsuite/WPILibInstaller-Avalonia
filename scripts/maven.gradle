@@ -7,6 +7,7 @@ apply plugin: 'de.undercouch.download'
 configurations {
   offline
   tools
+  cppTools
   documentationJava
   documentationCpp
 }
@@ -17,6 +18,10 @@ def toolArtifacts = [
   'edu.wpi.first.tools:SmartDashboard',
   'edu.wpi.first.tools:RobotBuilder',
   'edu.wpi.first.tools:PathWeaver'
+]
+
+def cppToolsArtifacts = [
+  'edu.wpi.first.tools:Glass'
 ]
 
 dependencies {
@@ -49,6 +54,11 @@ def lazyEvaluator = tasks.register('lazyModelEvaluation') {
           offline "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
         }
 
+        cppToolsArtifacts.each { tool->
+          if ("$dep.groupId:$dep.artifactId" == tool) {
+            cppTools "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
+          }
+        }
 
         toolArtifacts.each { tool->
           if ("$dep.groupId:$dep.artifactId" == tool) {
