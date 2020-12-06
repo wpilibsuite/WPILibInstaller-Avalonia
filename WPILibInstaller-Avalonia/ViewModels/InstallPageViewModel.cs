@@ -670,8 +670,8 @@ namespace WPILibInstaller.ViewModels
             shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "SmartDashboard.vbs"), $"{frcYear} WPILib Tools/SmartDashboard", "SmartDashboard"));
 
             // Add Documentation Shortcuts
-            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "documentation", "rtd", "frc-docs-latest", "index.html"), "WPILib Documentation", $"WPILib Documentation {frcYear}"));
-            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "documentation", "rtd", "frc-docs-latest", "index.html"), "WPILib Documentation", $"WPILib Documentation {frcYear}"));
+            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "documentation", "rtd", "frc-docs-latest", "index.html"), $"WPILib Documentation {frcYear}", $"WPILib Documentation {frcYear}"));
+            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "documentation", "rtd", "frc-docs-latest", "index.html"), $"WPILib Documentation {frcYear}", $"WPILib Documentation {frcYear}"));
 
 
             var serializedData = JsonConvert.SerializeObject(shortcutData);
