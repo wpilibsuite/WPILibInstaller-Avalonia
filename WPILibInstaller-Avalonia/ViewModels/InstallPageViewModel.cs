@@ -652,7 +652,19 @@ namespace WPILibInstaller.ViewModels
             shortcutData.IconLocation = Path.Join(frcHomePath, configurationProvider.UpgradeConfig.PathFolder, "wpilib-256.ico");
             shortcutData.IsAdmin = toInstallProvider.Model.InstallAsAdmin;
 
+            // Add VS Code Desktop Shortcut
             shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "vscode", "Code.exe"), $"FRC VS Code {frcYear}", $"FRC VS Code {frcYear}"));
+
+            // Add Tool Desktop Shortcuts
+            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "OutlineViewer.vbs"), "OutlineViewer");
+            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "PathWeaver.vbs"), "PathWeaver");
+            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "RobotBuilder.vbs"), "RobotBuilder");
+            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "shuffleboard.vbs"), "Shuffleboard");
+            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "SmartDashboard.vbs"), "SmartDashboard);
+            
+            // Add Documentation Desktop Shortcut
+            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "documentation", "rtd", "frc-docs", "index.html"), "Documentation");
+
             shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "vscode", "Code.exe"), $"FRC VS Code {frcYear}", $"FRC VS Code {frcYear}"));
 
             var serializedData = JsonConvert.SerializeObject(shortcutData);
