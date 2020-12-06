@@ -653,7 +653,7 @@ namespace WPILibInstaller.ViewModels
             shortcutData.IsAdmin = toInstallProvider.Model.InstallAsAdmin;
 
             // Add VS Code Shortcuts
-            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "vscode", "Code.exe"), $"WPILib VS Code {frcYear}", $"FRC VS Code {frcYear}"));
+            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "vscode", "Code.exe"), $"WPILib VS Code {frcYear}", $"WPILib VS Code {frcYear}"));
             shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "vscode", "Code.exe"), $"WPILib VS Code {frcYear}", $"WPILib VS Code {frcYear}"));
 
             // Add Tool Shortcuts
