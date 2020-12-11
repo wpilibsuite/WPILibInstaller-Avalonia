@@ -157,7 +157,7 @@ namespace WPILibInstaller.ViewModels
             }
 
             var result = await MessageBoxManager.GetMessageBoxStandardWindow("Confirmation",
-                "Are you sure you want to skip installing VS Code?\nA WPILib VS Code install was not detected,",
+                "Are you sure you want to skip installing VS Code?\nA WPILib VS Code install was not detected.",
                 icon: MessageBox.Avalonia.Enums.Icon.None, @enum: MessageBox.Avalonia.Enums.ButtonEnum.YesNo).ShowDialog(programWindow.Window);
 
             if (result == MessageBox.Avalonia.Enums.ButtonResult.Yes)
