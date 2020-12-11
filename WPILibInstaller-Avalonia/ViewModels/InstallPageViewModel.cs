@@ -653,8 +653,8 @@ namespace WPILibInstaller.ViewModels
             shortcutData.IsAdmin = toInstallProvider.Model.InstallAsAdmin;
 
             // Add VS Code Shortcuts
-            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "vscode", "Code.exe"), $"WPILib VS Code {frcYear}", $"WPILib VS Code {frcYear}"));
-            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "vscode", "Code.exe"), $"WPILib VS Code {frcYear}", $"Programs/WPILib VS Code {frcYear}"));
+            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "vscode", "Code.exe"), $"WPILib VS Code {frcYear}", $"{frcYear} WPILib VS Code"));
+            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "vscode", "Code.exe"), $"WPILib VS Code {frcYear}", $"{frcYear} Programs/WPILib VS Code"));
 
             // Add Tool Shortcuts
             shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "OutlineViewer.vbs"), $"{frcYear} WPILib Tools/OutlineViewer", "OutlineViewer"));
@@ -670,8 +670,8 @@ namespace WPILibInstaller.ViewModels
             shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "SmartDashboard.vbs"), $"Programs/{frcYear} WPILib Tools/SmartDashboard", "SmartDashboard"));
 
             // Add Documentation Shortcuts
-            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "documentation", "rtd", "frc-docs-latest", "index.html"), $"WPILib Documentation {frcYear}", $"WPILib Documentation {frcYear}"));
-            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "documentation", "rtd", "frc-docs-latest", "index.html"), $"Programs/WPILib Documentation {frcYear}", $"WPILib Documentation {frcYear}"));
+            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "documentation", "rtd", "frc-docs-latest", "index.html"), $"{frcYear} WPILib Documentation", $"WPILib Documentation {frcYear}"));
+            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "documentation", "rtd", "frc-docs-latest", "index.html"), $"{frcYear} Programs/WPILib Documentation", $"WPILib Documentation {frcYear}"));
 
 
             var serializedData = JsonConvert.SerializeObject(shortcutData);
