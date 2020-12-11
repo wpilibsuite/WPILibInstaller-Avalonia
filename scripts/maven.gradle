@@ -10,6 +10,8 @@ configurations {
   cppTools
   documentationJava
   documentationCpp
+  runtimex86
+  runtimex64
 }
 
 def toolArtifacts = [
@@ -27,6 +29,11 @@ def cppToolsArtifacts = [
 dependencies {
     documentationCpp "edu.wpi.first.wpilibc:documentation:${project(':gradleriobase').wpi.wpilibVersion}@zip"
     documentationJava "edu.wpi.first.wpilibj:documentation:${project(':gradleriobase').wpi.wpilibVersion}@zip"
+    if (project.ext.buildClassifier == 'Windows32') {
+        runtimex86 "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.wpilibVersion}:x86@zip"
+    } else if (project.ext.buildClassifier == 'Windows64') {
+        runtimex64 "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.wpilibVersion}:x64@zip"
+    }
 }
 
 def lazyEvaluator = tasks.register('lazyModelEvaluation') {
@@ -170,13 +177,21 @@ ext.mavenZipSetup = { AbstractArchiveTask zip->
     into '/vendordeps'
   }
 
-  def file = configurations.documentationCpp.resolvedConfiguration.resolvedArtifacts.first().file
-
   zip.from(project.zipTree(configurations.documentationCpp.resolvedConfiguration.resolvedArtifacts.first().file)) {
     into '/documentation/cpp'
   }
   zip.from(project.zipTree(configurations.documentationJava.resolvedConfiguration.resolvedArtifacts.first().file)) {
     into '/documentation/java'
+  }
+
+  if (project.ext.buildClassifier == 'Windows32') {
+    zip.from(project.zipTree(configurations.runtimex86.resolvedConfiguration.resolvedArtifacts.first().file)) {
+      into '/tools'
+    }
+  } else if (project.ext.buildClassifier == 'Windows64') {
+    zip.from(project.zipTree(configurations.runtimex64.resolvedConfiguration.resolvedArtifacts.first().file)) {
+      into '/tools'
+    }
   }
 
   zip.from(project.zipTree(rtdFile)) {

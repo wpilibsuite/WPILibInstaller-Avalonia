@@ -1,4 +1,5 @@
 
+evaluationDependsOn(':gradleriobase')
 
 apply plugin: 'de.undercouch.download'
 
@@ -35,16 +36,26 @@ def download64BitJdk = tasks.register('download64BitJdk', Download) {
 
 def jdk64File = file("$buildDir/OpenJDK11U-jdk_x64_windows_hotspot_11.0.8_10.zip")
 
-def x86DllPath = "$projectDir/redist/x86"
-def x86DllFiles = []
-file(x86DllPath).eachFile {
-  x86DllFiles << it
+configurations {
+  runtimex86
+  runtimex64
 }
 
-def x64DllPath = "$projectDir/redist/x64"
-def x64DllFiles = []
-file(x64DllPath).eachFile {
-  x64DllFiles << it
+dependencies {
+    if (project.ext.buildClassifier == 'Windows32') {
+        runtimex86 "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.wpilibVersion}:x86@zip"
+    } else if (project.ext.buildClassifier == 'Windows64') {
+        runtimex64 "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.wpilibVersion}:x64@zip"
+    }
+}
+
+def runtimeExtractTask = tasks.register('copyAndExtractRuntime', Copy) {
+  into 'build/runtime'
+  if (project.ext.buildClassifier == 'Windows32') {
+    from(project.zipTree(configurations.runtimex86.resolvedConfiguration.resolvedArtifacts.first().file))
+  } else if (project.ext.buildClassifier == 'Windows64') {
+    from(project.zipTree(configurations.runtimex64.resolvedConfiguration.resolvedArtifacts.first().file))
+  }
 }
 
 def jdkConfigFile = file("$buildDir/jdkconfig.json")
@@ -81,6 +92,7 @@ ext.jdkConfigFileSetup = { AbstractArchiveTask zip->
 ext.jdkZipSetup32 = { AbstractArchiveTask zip->
   zip.dependsOn download32BitJdk
   zip.dependsOn jdkConfigFileTask
+  zip.dependsOn runtimeExtractTask
 
   zip.inputs.file jdk32File
   zip.inputs.file jdkConfigFile
@@ -91,8 +103,12 @@ ext.jdkZipSetup32 = { AbstractArchiveTask zip->
       f.path = f.path.replace('jdk-11.0.8+10/', 'jdk/')
     }
 
-    x86DllFiles.each {
-      exclude "**/${it.name}".toString()
+    eachFile { f->
+      file('build/runtime').eachFile {
+        if (f.name.endsWith(it.name)) {
+          f.exclude()
+        }
+      }
     }
 
     exclude '**/src.zip'
@@ -105,7 +121,7 @@ ext.jdkZipSetup32 = { AbstractArchiveTask zip->
     includeEmptyDirs = false
   }
 
-  zip.from(x86DllPath) {
+  zip.from (runtimeExtractTask.get()) {
     into '/jdk/bin'
   }
 
@@ -118,6 +134,7 @@ ext.jdkZipSetup32 = { AbstractArchiveTask zip->
 ext.jdkZipSetup64 = { AbstractArchiveTask zip->
   zip.dependsOn download64BitJdk
   zip.dependsOn jdkConfigFileTask
+  zip.dependsOn runtimeExtractTask
 
   zip.inputs.file jdk64File
   zip.inputs.file jdkConfigFile
@@ -128,8 +145,12 @@ ext.jdkZipSetup64 = { AbstractArchiveTask zip->
       f.path = f.path.replace('jdk-11.0.8+10/', 'jdk/')
     }
 
-    x64DllFiles.each {
-      exclude "**/${it.name}".toString()
+    eachFile { f->
+      file('build/runtime').eachFile {
+        if (f.name.endsWith(it.name)) {
+          f.exclude()
+        }
+      }
     }
 
     exclude '**/src.zip'
@@ -142,7 +163,7 @@ ext.jdkZipSetup64 = { AbstractArchiveTask zip->
     includeEmptyDirs = false
   }
 
-  zip.from(x64DllPath) {
+  zip.from (runtimeExtractTask.get()) {
     into '/jdk/bin'
   }
 
