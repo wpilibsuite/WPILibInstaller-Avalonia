@@ -8,7 +8,7 @@ exeName = fso.GetBaseName(WScript.ScriptName) + ".exe"
 toolsFolder = fso.GetParentFolderName(WScript.ScriptFullName)
 
 'Get the full path to the Jar
-fullExeName = fso.BuildPath(toolsFolder, fullExeName)
+fullExeName = fso.BuildPath(toolsFolder, exeName)
 
 shellScript = fullExeName
 
