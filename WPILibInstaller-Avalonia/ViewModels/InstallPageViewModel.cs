@@ -679,7 +679,6 @@ namespace WPILibInstaller.ViewModels
             shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "documentation", "rtd", "frc-docs-latest", "index.html"), $"{frcYear} WPILib Documentation", $"WPILib Documentation {frcYear}"));
             shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "documentation", "rtd", "frc-docs-latest", "index.html"), $"{frcYear} Programs/WPILib Documentation", $"WPILib Documentation {frcYear}"));
 
-
             var serializedData = JsonConvert.SerializeObject(shortcutData);
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -719,7 +718,7 @@ namespace WPILibInstaller.ViewModels
                    icon: MessageBox.Avalonia.Enums.Icon.Warning, @enum: MessageBox.Avalonia.Enums.ButtonEnum.Ok).ShowDialog(programWindow.Window);
                 }
             }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && toInstallProvider.Model.InstallVsCode)
             {
                 // Create Linux desktop shortcut
                 var desktopFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Desktop", $@"FRC VS Code {frcYear}.desktop");
