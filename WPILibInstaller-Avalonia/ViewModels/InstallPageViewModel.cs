@@ -655,8 +655,8 @@ namespace WPILibInstaller.ViewModels
             if (toInstallProvider.Model.InstallVsCode)
             {
                 // Add VS Code Shortcuts
-                shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "vscode", "Code.exe"), $"WPILib VS Code {frcYear}", $"{frcYear} WPILib VS Code"));
-                shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "vscode", "Code.exe"), $"WPILib VS Code {frcYear}", $"{frcYear} Programs/WPILib VS Code"));
+                shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "vscode", "Code.exe"), $"{frcYear} WPILib VS Code", $"{frcYear} WPILib VS Code"));
+                shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "vscode", "Code.exe"), $"{frcYear} WPILib VS Code", $"{frcYear} Programs/WPILib VS Code"));
             }
 
             if (toInstallProvider.Model.InstallTools)
@@ -676,8 +676,8 @@ namespace WPILibInstaller.ViewModels
             }
 
             // Add Documentation Shortcuts
-            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "documentation", "rtd", "frc-docs-latest", "index.html"), $"{frcYear} WPILib Documentation", $"WPILib Documentation {frcYear}"));
-            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "documentation", "rtd", "frc-docs-latest", "index.html"), $"{frcYear} Programs/WPILib Documentation", $"WPILib Documentation {frcYear}"));
+            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "documentation", "rtd", "frc-docs-latest", "index.html"), $"{frcYear} WPILib Documentation", $"{frcYear} WPILib Documentation"));
+            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "documentation", "rtd", "frc-docs-latest", "index.html"), $"{frcYear} Programs/WPILib Documentation", $"{frcYear} WPILib Documentation"));
 
             var serializedData = JsonConvert.SerializeObject(shortcutData);
 
