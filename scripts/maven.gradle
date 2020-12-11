@@ -7,8 +7,11 @@ apply plugin: 'de.undercouch.download'
 configurations {
   offline
   tools
+  cppTools
   documentationJava
   documentationCpp
+  runtimex86
+  runtimex64
 }
 
 def toolArtifacts = [
@@ -19,9 +22,18 @@ def toolArtifacts = [
   'edu.wpi.first.tools:PathWeaver'
 ]
 
+def cppToolsArtifacts = [
+  'edu.wpi.first.tools:Glass'
+]
+
 dependencies {
     documentationCpp "edu.wpi.first.wpilibc:documentation:${project(':gradleriobase').wpi.wpilibVersion}@zip"
     documentationJava "edu.wpi.first.wpilibj:documentation:${project(':gradleriobase').wpi.wpilibVersion}@zip"
+    if (project.ext.buildClassifier == 'Windows32') {
+        runtimex86 "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.wpilibVersion}:x86@zip"
+    } else if (project.ext.buildClassifier == 'Windows64') {
+        runtimex64 "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.wpilibVersion}:x64@zip"
+    }
 }
 
 def lazyEvaluator = tasks.register('lazyModelEvaluation') {
@@ -49,6 +61,11 @@ def lazyEvaluator = tasks.register('lazyModelEvaluation') {
           offline "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
         }
 
+        cppToolsArtifacts.each { tool->
+          if ("$dep.groupId:$dep.artifactId" == tool) {
+            cppTools "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
+          }
+        }
 
         toolArtifacts.each { tool->
           if ("$dep.groupId:$dep.artifactId" == tool) {
@@ -160,13 +177,21 @@ ext.mavenZipSetup = { AbstractArchiveTask zip->
     into '/vendordeps'
   }
 
-  def file = configurations.documentationCpp.resolvedConfiguration.resolvedArtifacts.first().file
-
   zip.from(project.zipTree(configurations.documentationCpp.resolvedConfiguration.resolvedArtifacts.first().file)) {
     into '/documentation/cpp'
   }
   zip.from(project.zipTree(configurations.documentationJava.resolvedConfiguration.resolvedArtifacts.first().file)) {
     into '/documentation/java'
+  }
+
+  if (project.ext.buildClassifier == 'Windows32') {
+    zip.from(project.zipTree(configurations.runtimex86.resolvedConfiguration.resolvedArtifacts.first().file)) {
+      into '/tools'
+    }
+  } else if (project.ext.buildClassifier == 'Windows64') {
+    zip.from(project.zipTree(configurations.runtimex64.resolvedConfiguration.resolvedArtifacts.first().file)) {
+      into '/tools'
+    }
   }
 
   zip.from(project.zipTree(rtdFile)) {

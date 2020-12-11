@@ -45,6 +45,7 @@ project.ext.setProperty('toolchain-optional-roboRio', '')
 if (project.hasProperty('linuxBuild')) {
     project.ext.forceNativeClassifier = 'linuxx86-64'
     project.ext.forceToolsClassifier = 'linux64'
+    project.ext.forceCppToolsClassifier = 'linuxx86-64'
     project.ext.buildClassifier = 'Linux'
     offlineRepositoryRoot = "$buildDir/dependencies/linux"
     project.ext.archiveType = Tar
@@ -53,6 +54,7 @@ if (project.hasProperty('linuxBuild')) {
 } else if (project.hasProperty('macBuild')) {
     project.ext.forceNativeClassifier = 'osxx86-64'
     project.ext.forceToolsClassifier = 'mac64'
+    project.ext.forceCppToolsClassifier = 'osxx86-64'
     project.ext.buildClassifier = 'Mac'
     offlineRepositoryRoot = "$buildDir/dependencies/mac"
     project.ext.archiveType = Tar
@@ -61,6 +63,7 @@ if (project.hasProperty('linuxBuild')) {
 } else if (project.hasProperty('windows32')) {
     project.ext.forceNativeClassifier = 'windowsx86'
     project.ext.forceToolsClassifier = 'win32'
+    project.ext.forceCppToolsClassifier = 'windowsx86'
     project.ext.buildClassifier = 'Windows32'
     offlineRepositoryRoot = "$buildDir/dependencies/win32"
     project.ext.archiveType = Zip
@@ -69,6 +72,7 @@ if (project.hasProperty('linuxBuild')) {
 } else {
     project.ext.forceNativeClassifier = 'windowsx86-64'
     project.ext.forceToolsClassifier = 'win64'
+    project.ext.forceCppToolsClassifier = 'windowsx86-64'
     project.ext.buildClassifier = 'Windows64'
     offlineRepositoryRoot = "$buildDir/dependencies/win64"
     project.ext.archiveType = Zip
@@ -316,8 +320,6 @@ def unixCreateImageTask = tasks.register('createTarImage', Tar) {
 }
 
 tasks.register('generateInstallers', Task) {
-
-
     if (OperatingSystem.current().isWindows()) {
         dependsOn dotnetCreateImageTask
     } else if (!project.hasProperty("macBuild")){

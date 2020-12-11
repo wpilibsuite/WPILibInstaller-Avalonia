@@ -41,6 +41,11 @@ dependencies {
     // commands
     implementation "edu.wpi.first.wpilibNewCommands:wpilibNewCommands-java:${wpi.wpilibVersion}"
     implementation "edu.wpi.first.wpilibOldCommands:wpilibOldCommands-java:${wpi.wpilibVersion}"
+    if (project(":").ext.buildClassifier == 'Windows32') {
+        implementation "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.wpilibVersion}:x86@zip"
+    } else if (project(":").ext.buildClassifier == 'Windows64') {
+        implementation "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.wpilibVersion}:x64@zip"
+    }
 }
 
 model {
