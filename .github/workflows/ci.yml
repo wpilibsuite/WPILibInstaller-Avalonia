@@ -125,12 +125,21 @@ jobs:
     - uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 5.0.100
+    - uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
 
     - name: Restore format tool
       run: dotnet tool restore
 
+    - name: Install black
+      run: pip3 install black
+
     - name: Run dotnet format
       run: dotnet format
+
+    - name: Run black
+      run: black .
 
     - name: Verify formatters made no changes
       run: git --no-pager diff --exit-code HEAD
