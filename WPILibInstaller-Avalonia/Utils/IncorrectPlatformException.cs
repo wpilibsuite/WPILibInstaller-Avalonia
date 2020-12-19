@@ -11,7 +11,7 @@ namespace WPILibInstaller.Utils
 
         public IncorrectPlatformException(string platform) : base($"Installer {platform} needed for current system")
         {
-            
+
         }
     }
 }

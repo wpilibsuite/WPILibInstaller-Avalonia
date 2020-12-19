@@ -117,3 +117,20 @@ jobs:
         with:
           name: macOS
           path: ${{ github.workspace }}/build/*.dmg
+
+  format:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.100
+
+    - name: Restore format tool
+      run: dotnet tool restore
+
+    - name: Run dotnet format
+      run: dotnet format
+
+    - name: Verify formatters made no changes
+      run: git --no-pager diff --exit-code HEAD
