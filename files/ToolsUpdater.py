@@ -40,3 +40,4 @@ for i in range(3):
     if p.poll():
         print(p.stdout.read().decode("utf-8"))
         print(p.stderr.read().decode("utf-8"), file=sys.stderr)
+        break
