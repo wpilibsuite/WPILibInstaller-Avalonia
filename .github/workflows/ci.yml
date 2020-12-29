@@ -104,14 +104,6 @@ jobs:
         run: |
           hdiutil create -volname WPILibInstaller -srcfolder pubOutputs/ -format UDRO WPILib_macOS-`/usr/libexec/PlistBuddy -c "Print CFBundleVersion" pubOutputs/WPILibInstaller.app/Contents/Info.plist`.dmg
 
-      - name: Sign DMG with Developer ID
-        working-directory: build
-        run: |
-          codesign -s ${{ secrets.APPLE_DEVELOPER_ID }} `ls *.dmg | head -1`
-        if: |
-          github.repository_owner == 'wpilibsuite' &&
-          (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v'))
-
       - name: Upload Installer DMG
         uses: actions/upload-artifact@v2
         with:
