@@ -1,10 +1,12 @@
 ﻿using Newtonsoft.Json;
 using ReactiveUI;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Reactive;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using WPILibInstaller.Interfaces;
 using WPILibInstaller.Models;
@@ -24,6 +26,8 @@ namespace WPILibInstaller.ViewModels
         public string VerString => verString;
 
         private string verString = $"0.0.0";
+
+        private bool missingHash = false;
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
         public StartPageViewModel(IMainWindowViewModel mainRefresher, IProgramWindow mainWindow, IViewModelResolver viewModelResolver,
@@ -136,6 +140,15 @@ namespace WPILibInstaller.ViewModels
             }
         }
 
+        public bool MissingHash
+        {
+            get => missingHash;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref missingHash, value);
+            }
+        }
+
         public bool MissingEitherFile => MissingSupportFiles || MissingResourceFiles;
 
         private bool missingSupportFiles = true;
@@ -215,7 +228,7 @@ namespace WPILibInstaller.ViewModels
             if (neededInstaller == null)
             {
                 MissingResourceFiles = false;
-                forwardVisible = !MissingEitherFile;
+                forwardVisible = !MissingEitherFile && !MissingHash;
                 refresher.RefreshForwardBackProperties();
 
                 return true;
@@ -281,19 +294,41 @@ namespace WPILibInstaller.ViewModels
             await SelectResourceFilesWithFile(file);
         }
 
-        private Task<bool> SelectSupportFilesWithFile(string file)
+        private async Task<bool> SelectSupportFilesWithFile(string file)
         {
             FileStream fileStream = File.OpenRead(file);
+            MissingSupportFiles = false;
 
-            ZipArchive = ArchiveUtils.OpenArchive(fileStream);
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                MissingHash = true;
+                // Read the original hash.
+                string hash = File.ReadAllText(Path.Join(AppContext.BaseDirectory, "checksum.txt")).Trim();
 
-            // TODO Figure out how to verify this
+                // Compute the hash of the file that exists.
+                string s;
+                using (SHA256 SHA256 = SHA256Managed.Create())
+                {
+                    s = Convert.ToHexString(await SHA256.ComputeHashAsync(fileStream));
+                }
+
+                // Make sure they match.
+                if (!s.Equals(hash.ToUpper()))
+                {
+                    viewModelResolver.ResolveMainWindow().HandleException(new Exception("The artifacts file was damaged."));
+                    return false;
+                }
+                MissingHash = false;
+            }
 
             MissingSupportFiles = false;
-            forwardVisible = !MissingEitherFile;
+            forwardVisible = !MissingEitherFile && !MissingHash;
             refresher.RefreshForwardBackProperties();
 
-            return Task.FromResult(true);
+            fileStream.Position = 0;
+            ZipArchive = ArchiveUtils.OpenArchive(fileStream);
+
+            return true;
         }
 
         public async Task SelectSupportFilesFunc()
