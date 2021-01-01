@@ -269,15 +269,18 @@ namespace WPILibInstaller.ViewModels
 
             string os;
             string path_seperator;
-            if  (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 os = "windows";
                 path_seperator = ";";
-            } else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            }
+            else if (OperatingSystem.IsMacOS())
             {
                 os = "osx";
                 path_seperator = ":";
-            } else {
+            }
+            else
+            {
                 os = "linux";
                 path_seperator = ":";
             }
@@ -289,7 +292,7 @@ namespace WPILibInstaller.ViewModels
                 terminalProps["JAVA_HOME"] = Path.Combine(homePath, "jdk");
                 terminalProps["PATH"] = Path.Combine(homePath, "jdk", "bin") + path_seperator + "${env:PATH}";
 
-                settingsJson["terminal.integrated.env."+ os] = terminalProps;
+                settingsJson["terminal.integrated.env." + os] = terminalProps;
 
             }
             else
