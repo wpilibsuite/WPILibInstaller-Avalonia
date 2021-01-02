@@ -267,37 +267,53 @@ namespace WPILibInstaller.ViewModels
             SetIfNotSet("update.channel", "none", settingsJson);
             SetIfNotSet("update.showReleaseNotes", false, settingsJson);
 
-            if (!settingsJson.ContainsKey("terminal.integrated.env.windows"))
+            string os;
+            string path_seperator;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                os = "windows";
+                path_seperator = ";";
+            }
+            else if (OperatingSystem.IsMacOS())
+            {
+                os = "osx";
+                path_seperator = ":";
+            }
+            else
+            {
+                os = "linux";
+                path_seperator = ":";
+            }
+
+            if (!settingsJson.ContainsKey("terminal.integrated.env." + os))
             {
                 dynamic terminalProps = new JObject();
 
                 terminalProps["JAVA_HOME"] = Path.Combine(homePath, "jdk");
-                terminalProps["PATH"] = Path.Combine(homePath, "jdk", "bin") + ";${env:PATH}";
+                terminalProps["PATH"] = Path.Combine(homePath, "jdk", "bin") + path_seperator + "${env:PATH}";
 
-                settingsJson["terminal.integrated.env.windows"] = terminalProps;
+                settingsJson["terminal.integrated.env." + os] = terminalProps;
 
             }
             else
             {
-                dynamic terminalEnv = settingsJson["terminal.integrated.env.windows"];
+                dynamic terminalEnv = settingsJson["terminal.integrated.env." + os];
                 terminalEnv["JAVA_HOME"] = Path.Combine(homePath, "jdk");
                 string path = terminalEnv["PATH"];
                 if (path == null)
                 {
-                    terminalEnv["PATH"] = Path.Combine(homePath, "jdk", "bin") + ";${env:PATH}";
+                    terminalEnv["PATH"] = Path.Combine(homePath, "jdk", "bin") + path_seperator + "${env:PATH}";
                 }
                 else
                 {
                     var binPath = Path.Combine(homePath, "jdk", "bin");
                     if (!path.Contains(binPath))
                     {
-                        path = binPath + ";" + path;
+                        path = binPath + path_seperator + path;
                         terminalEnv["PATH"] = path;
                     }
                 }
             }
-
-            // TODO Handle Unix and Mac Paths
 
             var serialized = JsonConvert.SerializeObject(settingsJson, Formatting.Indented);
             await File.WriteAllTextAsync(settingsFile, serialized);
