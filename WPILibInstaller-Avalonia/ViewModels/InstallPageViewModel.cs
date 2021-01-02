@@ -278,6 +278,7 @@ namespace WPILibInstaller.ViewModels
             {
                 os = "osx";
                 path_seperator = ":";
+                settingsJson["terminal.integrated.inheritEnv"] = false;
             }
             else
             {
