@@ -319,6 +319,15 @@ def unixCreateImageTask = tasks.register('createTarImage', Tar) {
     from("$buildDir/outputs")
 }
 
+def signResourcesTask = tasks.register('signResources', Exec) {
+    dependsOn generateFullResourcesTask
+    dependsOn copyInstallerFiles
+    workingDir = "$buildDir/outputs"
+
+    def file = 'WPILib_' + buildClassifier + '-' + pubVersion + '-artifacts' + '.tar.gz'
+    commandLine 'sh', '-c', "shasum -a 256 $file | cut -d \" \" -f 1 > WPILibInstaller.app/Contents/MacOS/checksum.txt"
+}
+
 tasks.register('generateInstallers', Task) {
     if (OperatingSystem.current().isWindows()) {
         dependsOn dotnetCreateImageTask
@@ -328,6 +337,7 @@ tasks.register('generateInstallers', Task) {
         dependsOn generateConfigFiles
         dependsOn generateFullResourcesTask
         dependsOn copyInstallerFiles
+        dependsOn signResourcesTask
     }
 }
 
