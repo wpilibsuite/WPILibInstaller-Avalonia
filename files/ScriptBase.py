@@ -1,55 +1,43 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
-import sys
 import os
 import subprocess
+import sys
 import time
 
-fullScript = os.path.abspath(sys.argv[0])
+script_name = os.path.abspath(sys.argv[0])
+jar_name = os.path.splitext(script_name)[0] + ".jar"
 
-scriptName = os.path.basename(sys.argv[0])
-scriptName = os.path.splitext(scriptName)[0]
-
-jarName = scriptName + '.jar'
-
-toolsFolder = os.path.dirname(fullScript)
-
-fullJarPath = os.path.join(toolsFolder, jarName)
-
-jdkDir = os.path.dirname(toolsFolder)
-jdkDir = os.path.join(jdkDir, 'jdk', 'bin', 'java')
+jdk_dir = os.path.join(os.path.dirname(jar_name), "jdk", "bin", "java")
 
 try:
-  subProc = subprocess.Popen([jdkDir, '-jar', fullJarPath], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-  # If here, start succeeded
+    p = subprocess.Popen(
+        [jdk_dir, "-jar", jar_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
 except:
-  # Start failed, try JAVA_home
-  try:
-    javaHome = os.environ['JAVA_HOME']
-    jdkDir = os.path.join(javaHome, 'bin', 'java')
-  except:
-    # No JAVA_HOME, try just running java from path
-    jdkDir = 'java'
-  try:
-    subProc = subprocess.Popen([jdkDir, '-jar', fullJarPath], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-  except Exception as e:
-    # Really error
-    print('Error Launching Tool: ')
-    print(e)
-    exit(1)
+    # Start failed. Try JAVA_HOME.
+    try:
+        jdk_dir = os.path.join(os.environ["JAVA_HOME"], "bin", "java")
+    except:
+        # No JAVA_HOME. Try just running java from PATH.
+        jdk_dir = "java"
+    try:
+        p = subprocess.Popen(
+            [jdk_dir, "-jar", jar_name],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+    except Exception as e:
+        # Really error
+        print("Error launching tool:")
+        print(e)
+        exit(1)
 
-# wait 3 seconds, if still open good
-count = 0
-while subProc.poll() is None:
-  time.sleep(1)
-  count = count + 1
-  if count > 2:
-    exit(0)
-
-
-outputStd = subProc.stdout.read()
-outputErr = subProc.stderr.read()
-
-print(outputStd.decode('utf-8'))
-print(outputErr.decode('utf-8'), file=sys.stderr)
+# Wait 3 seconds and print stdout/stderr if the process exits
+for i in range(3):
+    time.sleep(1)
+    if p.poll():
+        print(p.stdout.read().decode("utf-8"))
+        print(p.stderr.read().decode("utf-8"), file=sys.stderr)
+        break
