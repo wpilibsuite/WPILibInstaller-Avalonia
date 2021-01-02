@@ -736,6 +736,16 @@ Terminal=false
 StartupNotify=true
 ";
 
+                var desktopPath = Path.GetDirectoryName(desktopFile);
+                if (desktopPath != null)
+                {
+                    Directory.CreateDirectory(desktopPath);
+                }
+                var launcherPath = Path.GetDirectoryName(launcherFile);
+                if (launcherPath != null)
+                {
+                    Directory.CreateDirectory(launcherPath);
+                }
                 await File.WriteAllTextAsync(desktopFile, contents, token);
                 await File.WriteAllTextAsync(launcherFile, contents, token);
             }
