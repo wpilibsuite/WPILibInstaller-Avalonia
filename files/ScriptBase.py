@@ -9,7 +9,7 @@ import time
 script_name = os.path.abspath(sys.argv[0])
 jar_name = os.path.splitext(script_name)[0] + ".jar"
 
-jdk_dir = os.path.join(os.path.dirname(jar_name), "jdk", "bin", "java")
+jdk_dir = os.path.join(os.path.dirname(jar_name), "..", "jdk", "bin", "java")
 
 try:
     p = subprocess.Popen(
