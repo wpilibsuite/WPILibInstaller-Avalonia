@@ -14,6 +14,24 @@ namespace WPILibInstaller.CLI {
             this.FullConfig = new FullConfig();
             this.JdkConfig = new JdkConfig();
             this.VsCodeConfig = new VsCodeConfig();
+
+            string file = "";
+            bool skip = false;
+            for (int i = 0; i < args.Length; i++) {
+                if (skip) {
+                    skip = false;
+                    continue;
+                }
+                if (args[i] == "--frc-year") {
+                    this.UpgradeConfig.FrcYear = args[i+1];
+                    skip = true;
+                }
+                if (args[i] == "--file") {
+                    file = args[i+1];
+                    skip = true;
+                }
+            }
+
             var publicFolder = Environment.GetEnvironmentVariable("PUBLIC");
             if (publicFolder == null)
             {
@@ -28,7 +46,7 @@ namespace WPILibInstaller.CLI {
             }
             this.InstallDirectory = Path.Combine(publicFolder, "wpilib", UpgradeConfig.FrcYear);
 
-            FileStream fileStream = File.OpenRead("");
+            FileStream fileStream = File.OpenRead(file);
             //if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             //{
                 //// Read the original hash.
