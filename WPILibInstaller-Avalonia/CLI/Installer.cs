@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -13,107 +13,23 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 
-namespace WPILibInstaller.CLI {
-    public class CLIConfigurationProvider : IConfigurationProvider {
-        public CLIConfigurationProvider(string[] args) {
-            this.UpgradeConfig = new UpgradeConfig();
-            this.FullConfig = new FullConfig();
-            this.JdkConfig = new JdkConfig();
-            this.VsCodeConfig = new VsCodeConfig();
-
-            string file = "";
-            bool skip = false;
-            for (int i = 0; i < args.Length; i++) {
-                if (skip) {
-                    skip = false;
-                    continue;
-                }
-                if (args[i] == "--frc-year") {
-                    this.UpgradeConfig.FrcYear = args[i+1];
-                    skip = true;
-                }
-                if (args[i] == "--file") {
-                    file = args[i+1];
-                    skip = true;
-                }
-            }
-
-            var publicFolder = Environment.GetEnvironmentVariable("PUBLIC");
-            if (publicFolder == null)
-            {
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    publicFolder = "C:\\Users\\Public";
-                }
-                else
-                {
-                    publicFolder = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
-                }
-            }
-            this.InstallDirectory = Path.Combine(publicFolder, "wpilib", UpgradeConfig.FrcYear);
-
-            FileStream fileStream = File.OpenRead(file);
-            //if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            //{
-                //// Read the original hash.
-                //string hash = File.ReadAllText(Path.Join(AppContext.BaseDirectory, "checksum.txt")).Trim();
-
-                //// Compute the hash of the file that exists.
-                //string s;
-                //using (SHA256 SHA256 = SHA256Managed.Create())
-                //{
-                    //s = Convert.ToHexString(await SHA256.ComputeHashAsync(fileStream));
-                //}
-
-                //// Make sure they match.
-                //if (!s.Equals(hash.ToUpper()))
-                //{
-                    //throw new Exception("The artifacts file was damaged.");
-                //}
-            //}
-
-
-            fileStream.Position = 0;
-            this.ZipArchive = ArchiveUtils.OpenArchive(fileStream);
-        }
-        public VsCodeModel VsCodeModel
-        {
-            get
-            {
-                VsCodeModel model = new VsCodeModel(VsCodeConfig.VsCodeVersion);
-                model.Platforms.Add(Utils.Platform.Win32, new VsCodeModel.PlatformData(VsCodeConfig.VsCode32Url, VsCodeConfig.VsCode32Name));
-                model.Platforms.Add(Utils.Platform.Win64, new VsCodeModel.PlatformData(VsCodeConfig.VsCode64Url, VsCodeConfig.VsCode64Name));
-                model.Platforms.Add(Utils.Platform.Linux64, new VsCodeModel.PlatformData(VsCodeConfig.VsCodeLinuxUrl, VsCodeConfig.VsCodeLinuxName));
-                model.Platforms.Add(Utils.Platform.Mac64, new VsCodeModel.PlatformData(VsCodeConfig.VsCodeMacUrl, VsCodeConfig.VsCodeMacName));
-                return model;
-            }
-        }
-
-
-        public IArchiveExtractor ZipArchive { get; private set; }
-
-        public UpgradeConfig UpgradeConfig { get; private set; }
-
-        public FullConfig FullConfig { get; private set; }
-
-        public JdkConfig JdkConfig { get; private set; }
-
-        public VsCodeConfig VsCodeConfig { get; private set; }
-
-        public string InstallDirectory { get; private set; }
-    }
-
-    public class Installer {
+namespace WPILibInstaller.CLI
+{
+    public class Installer
+    {
         private readonly IConfigurationProvider configurationProvider;
 
-        private readonly InstallSelectionModel selectionModel;
+        private readonly InstallSelectionModel installSelectionModel;
 
-        public Installer(string[] args) {
-            this.configurationProvider = new CLIConfigurationProvider(args);
-            this.selectionModel = new InstallSelectionModel();
+        public Installer(string[] args)
+        {
+            var parser = new Parser(args);
+            configurationProvider = parser.configurationProvider;
+            installSelectionModel = parser.installSelectionModel;
         }
 
-        public async Task Install() {
+        public async Task Install()
+        {
             Console.WriteLine("Extracting");
             await ExtractArchive();
             Console.WriteLine("Installing Gradle");
@@ -131,10 +47,11 @@ namespace WPILibInstaller.CLI {
             Console.WriteLine("Installing VS Code Extensions");
             await RunVsCodeExtensionsSetup();
             Console.WriteLine("Creating Shortcuts");
-            await RunShortcutCreator();
+            // await RunShortcutCreator();
         }
 
-        private async Task ExtractArchive() {
+        private async Task ExtractArchive()
+        {
             var directoriesToIgnore = GetExtractionIgnoreDirectories();
 
             var archive = configurationProvider.ZipArchive;
@@ -199,18 +116,18 @@ namespace WPILibInstaller.CLI {
         private List<string> GetExtractionIgnoreDirectories()
         {
             List<string> ignoreDirs = new List<string>();
-            if (!selectionModel.InstallCpp) ignoreDirs.Add(configurationProvider.FullConfig.CppToolchain.Directory + "/");
-            if (!selectionModel.InstallGradle) ignoreDirs.Add(configurationProvider.FullConfig.Gradle.ZipName);
-            if (!selectionModel.InstallJDK) ignoreDirs.Add(configurationProvider.JdkConfig.Folder + "/");
-            if (!selectionModel.InstallTools) ignoreDirs.Add(configurationProvider.UpgradeConfig.Tools.Folder + "/");
-            if (!selectionModel.InstallWPILibDeps) ignoreDirs.Add(configurationProvider.UpgradeConfig.Maven.Folder + "/");
+            if (!installSelectionModel.InstallCpp) ignoreDirs.Add(configurationProvider.FullConfig.CppToolchain.Directory + "/");
+            if (!installSelectionModel.InstallGradle) ignoreDirs.Add(configurationProvider.FullConfig.Gradle.ZipName);
+            if (!installSelectionModel.InstallJDK) ignoreDirs.Add(configurationProvider.JdkConfig.Folder + "/");
+            if (!installSelectionModel.InstallTools) ignoreDirs.Add(configurationProvider.UpgradeConfig.Tools.Folder + "/");
+            if (!installSelectionModel.InstallWPILibDeps) ignoreDirs.Add(configurationProvider.UpgradeConfig.Maven.Folder + "/");
 
             return ignoreDirs;
         }
 
         private Task RunGradleSetup()
         {
-            if (!selectionModel.InstallGradle || !selectionModel.InstallWPILibDeps) return Task.CompletedTask;
+            if (!installSelectionModel.InstallGradle || !installSelectionModel.InstallWPILibDeps) return Task.CompletedTask;
 
             string extractFolder = configurationProvider.InstallDirectory;
 
@@ -242,7 +159,7 @@ namespace WPILibInstaller.CLI {
 
         private async Task RunToolSetup()
         {
-            if (!selectionModel.InstallTools || !selectionModel.InstallWPILibDeps)
+            if (!installSelectionModel.InstallTools || !installSelectionModel.InstallWPILibDeps)
                 return;
 
             await RunScriptExecutable(Path.Combine(configurationProvider.InstallDirectory,
@@ -262,14 +179,14 @@ namespace WPILibInstaller.CLI {
 
         private async Task RunCppSetup()
         {
-            if (!selectionModel.InstallCpp) return;
+            if (!installSelectionModel.InstallCpp) return;
 
             await Task.Yield();
         }
 
         private async Task RunMavenMetaDataFixer()
         {
-            if (!selectionModel.InstallWPILibDeps)
+            if (!installSelectionModel.InstallWPILibDeps)
                 return;
 
             await RunScriptExecutable(Path.Combine(configurationProvider.InstallDirectory,
@@ -279,7 +196,7 @@ namespace WPILibInstaller.CLI {
 
         private async Task RunVsCodeSetup()
         {
-            if (!selectionModel.InstallVsCode) return;
+            if (!installSelectionModel.InstallVsCode) return;
 
             string intoPath = Path.Join(configurationProvider.InstallDirectory, "vscode");
 
@@ -290,7 +207,7 @@ namespace WPILibInstaller.CLI {
                 Directory.CreateDirectory(intoPath);
                 {
                     using var fileToWrite = new FileStream(zipPath, FileMode.Create, FileAccess.Write, FileShare.None);
-                    await configurationProvider.VsCodeModel.ToExtractArchiveMacOs.CopyToAsync(fileToWrite, token);
+                    configurationProvider.VsCodeModel.ToExtractArchiveMacOs.CopyTo(fileToWrite);
                 }
                 await RunScriptExecutable("unzip", Timeout.Infinite, zipPath, "-d", intoPath);
                 File.Delete(zipPath);
@@ -338,7 +255,7 @@ namespace WPILibInstaller.CLI {
 
         private async Task ConfigureVsCodeSettings()
         {
-            if (!selectionModel.InstallVsCode && !configurationProvider.VsCodeModel.AlreadyInstalled) return;
+            if (!installSelectionModel.InstallVsCode && !configurationProvider.VsCodeModel.AlreadyInstalled) return;
 
             var dataPath = await SetVsCodePortableMode();
 
@@ -472,7 +389,7 @@ namespace WPILibInstaller.CLI {
 
         private async Task RunVsCodeExtensionsSetup()
         {
-            if (!selectionModel.InstallVsCodeExtensions) return;
+            if (!installSelectionModel.InstallVsCodeExtensions) return;
 
             string codeExe;
 
@@ -561,7 +478,7 @@ namespace WPILibInstaller.CLI {
             }
         }
 
-        private async Task RunShortcutCreator()
+        private async Task RunShortcutCreator(CancellationToken token)
         {
             var shortcutData = new ShortcutData();
 
@@ -569,16 +486,16 @@ namespace WPILibInstaller.CLI {
             var frcYear = configurationProvider.UpgradeConfig.FrcYear;
 
             shortcutData.IconLocation = Path.Join(frcHomePath, configurationProvider.UpgradeConfig.PathFolder, "wpilib-256.ico");
-            shortcutData.IsAdmin = selectionModel.InstallAsAdmin;
+            shortcutData.IsAdmin = installSelectionModel.InstallAsAdmin;
 
-            if (selectionModel.InstallVsCode)
+            if (installSelectionModel.InstallVsCode)
             {
                 // Add VS Code Shortcuts
                 shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "vscode", "Code.exe"), $"{frcYear} WPILib VS Code", $"{frcYear} WPILib VS Code"));
                 shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "vscode", "Code.exe"), $"Programs/{frcYear} WPILib VS Code", $"{frcYear} WPILib VS Code"));
             }
 
-            if (selectionModel.InstallTools)
+            if (installSelectionModel.InstallTools)
             {
                 // Add Tool Shortcuts
                 shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "OutlineViewer.vbs"), $"{frcYear} WPILib Tools/OutlineViewer", "OutlineViewer"));
@@ -637,7 +554,7 @@ namespace WPILibInstaller.CLI {
                     Console.WriteLine("Warning: Shortcut creation failed. Error Code: " + exitCode);
                 }
             }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && selectionModel.InstallVsCode)
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && installSelectionModel.InstallVsCode)
             {
                 // Create Linux desktop shortcut
                 var desktopFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Desktop", $@"FRC VS Code {frcYear}.desktop");
