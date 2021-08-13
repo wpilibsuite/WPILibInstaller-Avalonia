@@ -7,7 +7,7 @@
   <StackPanel HorizontalAlignment="Center"
               VerticalAlignment="Center">
     <Image Source="resm:WPILibInstaller.Assets.wpilib-128.png?assembly=WPILibInstaller"
-           Stretch="None"/>
+           Stretch="None" Name="WPILibImage"/>
     <TextBlock Text="Welcome to the WPILib Installer!"
                HorizontalAlignment="Center"
                FontWeight="Bold"

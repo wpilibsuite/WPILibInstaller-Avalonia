@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using ReactiveUI;
+using Avalonia.Interactivity;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -11,6 +12,7 @@ using System.Threading.Tasks;
 using WPILibInstaller.Interfaces;
 using WPILibInstaller.Models;
 using WPILibInstaller.Utils;
+using System.Windows.Input;
 
 namespace WPILibInstaller.ViewModels
 {
@@ -130,6 +132,8 @@ namespace WPILibInstaller.ViewModels
             }
         }
 
+        private int ClickCount = 0;
+
         public bool MissingSupportFiles
         {
             get => missingSupportFiles;
@@ -164,7 +168,6 @@ namespace WPILibInstaller.ViewModels
         }
 
         private bool missingResourceFiles = true;
-
 
         public ReactiveCommand<Unit, Unit> SelectSupportFiles { get; }
         public ReactiveCommand<Unit, Unit> SelectResourceFiles { get; }
@@ -329,6 +332,10 @@ namespace WPILibInstaller.ViewModels
             ZipArchive = ArchiveUtils.OpenArchive(fileStream);
 
             return true;
+        }
+
+        public void LogoClicked(object? o, RoutedEventArgs eventArgs) {
+            ClickCount++;
         }
 
         public async Task SelectSupportFilesFunc()
