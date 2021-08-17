@@ -16,15 +16,16 @@ namespace WPILibInstaller.ViewModels
 {
     public class VSCodePageViewModel : PageViewModelBase, IVsCodeInstallLocationProvider
     {
-        private string baseInstallText = @"
+        private readonly string baseInstallText = @"
 For licensing reasons, VS Code cannot be included in the WPILib Installer. WPILib installs it's own copy of VS Code every year, not shared between years or a system install. If you have already installed VS Code for the current year, the Next button will be enabled and you can skip this step, otherwise choose from the following options. VS Code will be installed on this system using the installer selected here in later steps.
 
 1. Download VS Code for Single Install: Use this if you don't plan on sharing the VS Code installer between systems. This will be the fastest download.
 2. Use Downloaded Offline Installer: Use this to select a installer zip file previously downloaded from this tool.
 3. Download VS Code for Offline Install: Use this to download VS Code installers for all platforms, which can be shared between systems for offline use.
 {0}";
-        private string vsCodeInstallText = "4. Skip installing VS Code. This will display a warning if a compatibible VS Code installation isn't detected.";
-        
+
+        private readonly string vsCodeInstallText = "4. Skip installing VS Code. This will display a warning if a compatibible VS Code installation isn't detected.";
+
         public string InstallText { get; }
 
         public override bool ForwardVisible => forwardVisible;
@@ -124,7 +125,7 @@ For licensing reasons, VS Code cannot be included in the WPILib Installer. WPILi
         private readonly IProgramWindow programWindow;
         private readonly IMainWindowViewModel refresher;
         private readonly IViewModelResolver viewModelResolver;
-        
+
         public bool DevMode { get; }
 
         public VSCodePageViewModel(IMainWindowViewModel mainRefresher, IProgramWindow programWindow, IConfigurationProvider modelProvider, IViewModelResolver viewModelResolver,
@@ -135,8 +136,6 @@ For licensing reasons, VS Code cannot be included in the WPILib Installer. WPILi
             DownloadSingleVsCode = buttonFactory.CreateCatchableButton(DownloadSingleVSCodeFunc);
             DownloadVsCode = buttonFactory.CreateCatchableButton(DownloadVsCodeFunc);
             SelectVsCode = buttonFactory.CreateCatchableButton(SelectVsCodeFunc);
-
-            
 
             DevMode = devModeChecker.DevMode;
             this.refresher = mainRefresher;

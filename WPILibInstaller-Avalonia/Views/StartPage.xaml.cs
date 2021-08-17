@@ -20,8 +20,9 @@ namespace WPILibInstaller.Views
         {
             AvaloniaXamlLoader.Load(this);
             Image wpilibImage = this.LogicalChildren[0].LogicalChildren.OfType<Image>().First();
-            wpilibImage.Tapped += (o, e) => {
-              ((StartPageViewModel)this.DataContext!).LogoClicked(o, e);
+            wpilibImage.Tapped += (o, e) => 
+            {
+                ((StartPageViewModel)this.DataContext!).LogoClicked(o, e);
             };
         }
     }

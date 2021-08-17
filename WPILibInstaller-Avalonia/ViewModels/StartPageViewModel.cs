@@ -2,7 +2,6 @@
 using ReactiveUI;
 using Avalonia.Interactivity;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Reactive;
@@ -12,7 +11,6 @@ using System.Threading.Tasks;
 using WPILibInstaller.Interfaces;
 using WPILibInstaller.Models;
 using WPILibInstaller.Utils;
-using System.Windows.Input;
 
 namespace WPILibInstaller.ViewModels
 {
@@ -341,7 +339,8 @@ namespace WPILibInstaller.ViewModels
             set => this.RaiseAndSetIfChanged(ref devMode, value);
         }
 
-        public void LogoClicked(object? o, RoutedEventArgs eventArgs) {
+        public void LogoClicked(object? o, RoutedEventArgs eventArgs)
+        {
             if (ClickCount++ > 9)
             {
                 DevMode = true;
