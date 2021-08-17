@@ -16,7 +16,7 @@ using System.Windows.Input;
 
 namespace WPILibInstaller.ViewModels
 {
-    public class StartPageViewModel : PageViewModelBase, IConfigurationProvider
+    public class StartPageViewModel : PageViewModelBase, IConfigurationProvider, IDevModeChecker
     {
 
         private readonly IProgramWindow programWindow;
@@ -334,8 +334,18 @@ namespace WPILibInstaller.ViewModels
             return true;
         }
 
+        private bool devMode = false;
+        public bool DevMode
+        {
+            get => devMode;
+            set => this.RaiseAndSetIfChanged(ref devMode, value);
+        }
+
         public void LogoClicked(object? o, RoutedEventArgs eventArgs) {
-            ClickCount++;
+            if (ClickCount++ > 9)
+            {
+                DevMode = true;
+            }
         }
 
         public async Task SelectSupportFilesFunc()

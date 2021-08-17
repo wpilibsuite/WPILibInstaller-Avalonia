@@ -8,7 +8,7 @@ using WPILibInstaller.Models;
 
 namespace WPILibInstaller.ViewModels
 {
-    public class ConfigurationPageViewModel : PageViewModelBase, IToInstallProvider
+    public class ConfigurationPageViewModel : PageViewModelBase, IToInstallProvider, IDevModeChecker
     {
         private readonly IViewModelResolver viewModelResolver;
 
@@ -36,10 +36,13 @@ namespace WPILibInstaller.ViewModels
 
         public bool CanRunAsAdmin => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
+        public bool DevMode { get; }
+
         public ConfigurationPageViewModel(IViewModelResolver viewModelResolver, IVsCodeInstallLocationProvider vsInstallProvider,
-            ICatchableButtonFactory buttonFactory)
+            ICatchableButtonFactory buttonFactory, IDevModeChecker devModeChecker)
             : base("Install", "Back")
         {
+            this.DevMode = devModeChecker.DevMode;
             this.viewModelResolver = viewModelResolver;
             this.vsProvider = vsInstallProvider;
             InstallLocalUser = buttonFactory.CreateCatchableButton(InstallLocalUserFunc);

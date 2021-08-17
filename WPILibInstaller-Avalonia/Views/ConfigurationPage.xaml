@@ -6,10 +6,10 @@
              x:Class="WPILibInstaller.Views.ConfigurationPage">
   <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
     <TextBlock Margin="0,0,0,20" FontSize="20" FontWeight="Bold">Select the items you would like to install.</TextBlock>
-    <CheckBox FontSize="15" IsEnabled="{Binding CanInstallVsCode, Mode=OneWay}" IsChecked="{Binding InstallVsCode}">Visual Studio Code</CheckBox>
-    <CheckBox FontSize="15" IsChecked="{Binding Model.InstallCpp}">C++ Compiler</CheckBox>
-    <CheckBox FontSize="15" IsChecked="{Binding Model.InstallGradle}">Gradle</CheckBox>
-    <CheckBox FontSize="15" IsChecked="{Binding Model.InstallJDK}">Java JDK/JRE</CheckBox>
+    <CheckBox FontSize="15" IsVisible="{Binding DevMode}" IsEnabled="{Binding CanInstallVsCode, Mode=OneWay}" IsChecked="{Binding InstallVsCode}">Visual Studio Code</CheckBox>
+    <CheckBox FontSize="15" IsVisible="{Binding DevMode}" IsChecked="{Binding Model.InstallCpp}">C++ Compiler</CheckBox>
+    <CheckBox FontSize="15" IsVisible="{Binding DevMode}" IsChecked="{Binding Model.InstallGradle}">Gradle</CheckBox>
+    <CheckBox FontSize="15" IsVisible="{Binding DevMode}" IsChecked="{Binding Model.InstallJDK}">Java JDK/JRE</CheckBox>
     <CheckBox FontSize="15" IsChecked="{Binding Model.InstallTools}">Tools and Utilities</CheckBox>
     <CheckBox FontSize="15" IsChecked="{Binding Model.InstallWPILibDeps}">WPILib Dependencies</CheckBox>
     <CheckBox FontSize="15" IsEnabled="{Binding CanInstallExtensions, Mode=OneWay}" IsChecked="{Binding Model.InstallVsCodeExtensions}">Visual Studio Code Extensions</CheckBox>

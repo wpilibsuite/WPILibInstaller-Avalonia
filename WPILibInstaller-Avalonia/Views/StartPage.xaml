@@ -17,6 +17,11 @@
                HorizontalAlignment="Center"
                FontSize="25"
                VerticalAlignment="Center" />
+    <TextBlock Text="Advanced Mode Enabled"
+               HorizontalAlignment="Center"
+               FontSize="20"
+               VerticalAlignment="Center"
+               IsVisible="{Binding DevMode}"/>
     <TextBlock Text="The artifacts and/or resource files were not found. Please click the buttons below to select them."
                IsVisible="{Binding MissingEitherFile}"/>
     <TextBlock Text="Verifying Artifacts File..."
