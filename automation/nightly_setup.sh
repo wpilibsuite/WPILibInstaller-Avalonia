@@ -48,7 +48,7 @@ clone "vscode-wpilib"
 cd GradleRIO
 
 # Temporarily use 2020 ni-libraries while 2022 runtime is still not available.
-eval "$SED_CMD \"13s/+/2020.+/\"" versionupdates.gradle
+# eval "$SED_CMD \"13s/+/2020.+/\"" versionupdates.gradle
 
 ./gradlew updateVersions -PuseDevelopment
 ./gradlew publishToMavenLocal -x patchExamples -PpublishVersion=$VERSION
