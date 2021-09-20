@@ -1,6 +1,6 @@
 name: CI
 
-on: [ push, pull_request ]
+on: [ push, pull_request, workflow_dispatch ]
 
 jobs:
   build:
@@ -41,19 +41,20 @@ jobs:
           keychain-password: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
         if: |
           matrix.artifact-name == 'macOS' && github.repository_owner == 'wpilibsuite' &&
-          github.event_name == 'push'
+          (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
 
       - name: Set Keychain Lock Timeout
         run: security set-keychain-settings -lut 2700
         if: |
           matrix.artifact-name == 'macOS' && github.repository_owner == 'wpilibsuite' &&
-          github.event_name == 'push'
+          (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
 
       - name: Build Installer (PR)
         shell: bash
         run: ./gradlew generateInstallers -PjenkinsBuild ${{ matrix.build-options }}
         if: |
-          github.repository_owner != 'wpilibsuite' || github.event_name != 'push'
+          github.repository_owner != 'wpilibsuite' ||
+          (github.event_name != 'push' && github.event_name != 'workflow_dispatch')
 
       - name: Build Installer (Main)
         shell: bash
@@ -63,7 +64,8 @@ jobs:
           -Pnotarization-username=${{ secrets.APPLE_NOTARIZATION_USERNAME }} \
           -Pnotarization-password=${{ secrets.APPLE_NOTARIZATION_PASSWORD }}
         if: |
-          github.repository_owner == 'wpilibsuite' && github.event_name == 'push'
+          github.repository_owner == 'wpilibsuite' &&
+          (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
 
       - uses: actions/upload-artifact@v2
         with:
