@@ -72,6 +72,21 @@ jobs:
           name: ${{ matrix.artifact-name }}
           path: build/pubOutputs/
 
+  release:
+    name: "Release"
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v2
+      - name: Upload to GitHub wpilibsuite/allwpilib
+        if: |
+          github.repository_owner == 'wpilibsuite' &&
+          startsWith(github.ref, 'refs/tags/v')
+        run: gh -R wpilibsuite/allwpilib release create -d "${GITHUB_REF#refs/tags/}" **/*
+        env:
+          GITHUB_TOKEN: ${{secrets.GH_ADMIN_TOKEN}}
+        
+
   format:
     runs-on: ubuntu-latest
     steps:
