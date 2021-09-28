@@ -28,12 +28,12 @@ def cppToolsArtifacts = [
 ]
 
 dependencies {
-    documentationCpp "edu.wpi.first.wpilibc:documentation:${project(':gradleriobase').wpi.wpilibVersion}@zip"
-    documentationJava "edu.wpi.first.wpilibj:documentation:${project(':gradleriobase').wpi.wpilibVersion}@zip"
+    documentationCpp "edu.wpi.first.wpilibc:documentation:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}@zip"
+    documentationJava "edu.wpi.first.wpilibj:documentation:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}@zip"
     if (project.ext.buildClassifier == 'Windows32') {
-        runtimex86 "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.wpilibVersion}:x86@zip"
+        runtimex86 "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}:x86@zip"
     } else if (project.ext.buildClassifier == 'Windows64') {
-        runtimex64 "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.wpilibVersion}:x64@zip"
+        runtimex64 "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}:x64@zip"
     }
 }
 
