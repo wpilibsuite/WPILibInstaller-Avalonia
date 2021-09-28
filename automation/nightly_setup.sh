@@ -56,6 +56,7 @@ cd ..
 
 # Publish a development version of the VS Code Extension.
 cd vscode-wpilib
+echo "$VERSION" > vscode-wpilib/resources/gradle/version.txt
 ./gradlew updateVersions updateAllDependencies -PbuildServer -PpublishVersion=$VERSION
 
 cd vscode-wpilib
