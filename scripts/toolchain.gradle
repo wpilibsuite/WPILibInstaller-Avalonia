@@ -1,4 +1,4 @@
-def gitTag = 'v2022-2'
+def gitTag = 'v2022-1'
 def baseUrl = "https://github.com/wpilibsuite/roborio-toolchain/releases/download/$gitTag/"
 
 def gccVersion = '7.3.0'
@@ -52,7 +52,7 @@ def downloadTaskLinux = tasks.register('downloadToolchainLinux', Download) {
 
 ext.toolchainConfigTaskSetup = {
   return new Tuple2({ task->
-    task.inputs.property 'toolchainName', fileName
+    task.inputs.property 'toolchainName', fileName64
   }, { config->
     def toolchainConfig = [:];
 
