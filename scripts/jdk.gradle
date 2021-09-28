@@ -43,9 +43,9 @@ configurations {
 
 dependencies {
     if (project.ext.buildClassifier == 'Windows32') {
-        runtimex86 "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.wpilibVersion}:x86@zip"
+        runtimex86 "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.versions.wpilibVersion}:x86@zip"
     } else if (project.ext.buildClassifier == 'Windows64') {
-        runtimex64 "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.wpilibVersion}:x64@zip"
+        runtimex64 "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.versions.wpilibVersion}:x64@zip"
     }
 }
 
