@@ -16,7 +16,6 @@ configurations {
 
 def toolArtifacts = [
   'edu.wpi.first.shuffleboard:shuffleboard',
-  'edu.wpi.first.tools:OutlineViewer',
   'edu.wpi.first.tools:SmartDashboard',
   'edu.wpi.first.tools:RobotBuilder',
   'edu.wpi.first.tools:RobotBuilder-Old',
@@ -24,7 +23,9 @@ def toolArtifacts = [
 ]
 
 def cppToolsArtifacts = [
-  'edu.wpi.first.tools:Glass'
+  'edu.wpi.first.tools:Glass',
+  'edu.wpi.first.tools:OutlineViewer',
+  'edu.wpi.first.tools:SysId'
 ]
 
 dependencies {
