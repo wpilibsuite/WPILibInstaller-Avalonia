@@ -1,5 +1,4 @@
 import org.gradle.internal.component.external.model.DefaultModuleComponentIdentifier
-import jaci.gradle.nativedeps.NativeDepsSpec
 import com.google.gson.GsonBuilder
 
 buildscript {
@@ -15,38 +14,50 @@ plugins {
     id "edu.wpi.first.GradleRIO"
 }
 
+wpi.java.debugJni = false
 
 dependencies {
-    implementation wpi.deps.wpilib()
-    nativeZip wpi.deps.wpilibJni(wpi.platforms.roborio)
-    nativeDesktopZip wpi.deps.wpilibJni(wpi.platforms.desktop)
+    implementation wpi.java.deps.wpilib()
+    implementation wpi.java.vendor.java()
 
+    nativeDebug wpi.java.deps.wpilibJniDebug(wpi.platforms.roborio)
+    nativeDebug wpi.java.vendor.jniDebug(wpi.platforms.roborio)
 
-    implementation wpi.deps.vendor.java()
-    nativeZip wpi.deps.vendor.jni(wpi.platforms.roborio)
-    nativeDesktopZip wpi.deps.vendor.jni(wpi.platforms.desktop)
+    nativeRelease wpi.java.deps.wpilibJniRelease(wpi.platforms.roborio)
+    nativeRelease wpi.java.vendor.jniRelease(wpi.platforms.roborio)
 
-    simulation wpi.deps.sim.gui(wpi.platforms.desktop, false)
-    simulation wpi.deps.sim.gui(wpi.platforms.desktop, true)
-    simulation wpi.deps.sim.driverstation(wpi.platforms.desktop, false)
-    simulation wpi.deps.sim.driverstation(wpi.platforms.desktop, true)
-    simulation wpi.deps.sim.ws_server(wpi.platforms.desktop, false)
-    simulation wpi.deps.sim.ws_server(wpi.platforms.desktop, true)
-    simulation wpi.deps.sim.ws_client(wpi.platforms.desktop, false)
-    simulation wpi.deps.sim.ws_client(wpi.platforms.desktop, true)
+    nativeDebug wpi.java.deps.wpilibJniDebug(wpi.platforms.desktop)
+    nativeDebug wpi.java.vendor.jniDebug(wpi.platforms.desktop)
+    simulationDebug wpi.sim.enableDebug()
 
+    nativeRelease wpi.java.deps.wpilibJniRelease(wpi.platforms.desktop)
+    nativeRelease wpi.java.vendor.jniRelease(wpi.platforms.desktop)
+    simulationRelease wpi.sim.enableRelease()
 
-    implementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.12'
+
+    // simulation wpi.deps.sim.gui(wpi.platforms.desktop, false)
+    // simulation wpi.deps.sim.gui(wpi.platforms.desktop, true)
+    // simulation wpi.deps.sim.driverstation(wpi.platforms.desktop, false)
+    // simulation wpi.deps.sim.driverstation(wpi.platforms.desktop, true)
+    // simulation wpi.deps.sim.ws_server(wpi.platforms.desktop, false)
+    // simulation wpi.deps.sim.ws_server(wpi.platforms.desktop, true)
+    // simulation wpi.deps.sim.ws_client(wpi.platforms.desktop, false)
+    // simulation wpi.deps.sim.ws_client(wpi.platforms.desktop, true)
 
     // commands
-    implementation "edu.wpi.first.wpilibNewCommands:wpilibNewCommands-java:${wpi.wpilibVersion}"
-    implementation "edu.wpi.first.wpilibOldCommands:wpilibOldCommands-java:${wpi.wpilibVersion}"
+    implementation "edu.wpi.first.wpilibNewCommands:wpilibNewCommands-java:${wpi.versions.wpilibVersion.get()}"
+    implementation "edu.wpi.first.wpilibOldCommands:wpilibOldCommands-java:${wpi.versions.wpilibVersion.get()}"
     if (project(":").ext.buildClassifier == 'Windows32') {
-        implementation "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.wpilibVersion}:x86@zip"
+        implementation "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}:x86@zip"
     } else if (project(":").ext.buildClassifier == 'Windows64') {
-        implementation "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.wpilibVersion}:x64@zip"
+        implementation "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}:x64@zip"
     }
 }
+
+// TODO add the rest of simulation
+wpi.sim.addGui()
+wpi.sim.addDriverstation()
 
 model {
     components {
@@ -55,38 +66,38 @@ model {
             targetPlatform wpi.platforms.desktop
 
             // Defining the dependencies.
-            wpi.deps.wpilib(it)
-            wpi.deps.googleTest(it)
+            wpi.cpp.deps.wpilib(it)
+            wpi.cpp.deps.googleTest(it)
 
-            wpi.useLibrary(it, 'wpilib_new_commands_shared')
-            wpi.useLibrary(it, 'wpilib_old_commands_shared')
+            wpi.cpp.deps.useLibrary(it, 'wpilib_new_commands_shared')
+            wpi.cpp.deps.useLibrary(it, 'wpilib_old_commands_shared')
         }
         frcUserProgramStatic(NativeExecutableSpec) {
             targetPlatform wpi.platforms.roborio
             targetPlatform wpi.platforms.desktop
 
             // Defining the dependencies.
-            wpi.deps.wpilibStatic(it)
-            wpi.deps.googleTest(it)
+            wpi.cpp.deps.wpilibStatic(it)
+            wpi.cpp.deps.googleTest(it)
         }
     }
 }
 
-class WPIDepsGrabber implements Plugin<Project> {
-    void apply(Project project) {
+// class WPIDepsGrabber implements Plugin<Project> {
+//     void apply(Project project) {
 
-    }
+//     }
 
-    static class WPIDepGrabberRules extends RuleSource {
+//     static class WPIDepGrabberRules extends RuleSource {
 
-        @Mutate
-        void triggerDeps(ModelMap<Task> tasks, NativeDepsSpec deps) {
-            System.out.println('Model triggered')
-        }
-    }
-}
+//         @Mutate
+//         void triggerDeps(ModelMap<Task> tasks, NativeDepsSpec deps) {
+//             System.out.println('Model triggered')
+//         }
+//     }
+// }
 
-apply plugin: WPIDepsGrabber
+// apply plugin: WPIDepsGrabber
 
 tasks.register('modelEvaluationTrigger') {
 

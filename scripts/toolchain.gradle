@@ -1,30 +1,41 @@
-def gitTag = 'v2021-2'
+def gitTag = 'v2022-1'
 def baseUrl = "https://github.com/wpilibsuite/roborio-toolchain/releases/download/$gitTag/"
 
 def gccVersion = '7.3.0'
 
-def fileName = 'FRC-2021-Windows-Toolchain-7.3.0.zip'
+def fileName32 = 'FRC-2022-Windows32-Toolchain-7.3.0.zip'
+def fileName64 = 'FRC-2022-Windows64-Toolchain-7.3.0.zip'
 
-def downloadUrl = baseUrl + fileName
-def fileWin = file("$buildDir/$fileName")
+def downloadUrl32 = baseUrl + fileName32
+def fileWin32 = file("$buildDir/$fileName32")
 
-def fileNameMac = 'FRC-2021-Mac-Toolchain-7.3.0.tar.gz'
+def downloadUrl64 = baseUrl + fileName64
+def fileWin64 = file("$buildDir/$fileName64")
+
+def fileNameMac = 'FRC-2022-Mac-Toolchain-7.3.0.tar.gz'
 
 def downloadUrlMac = baseUrl + fileNameMac
 def fileMac = file("$buildDir/$fileNameMac")
 
-def fileNameLinux = 'FRC-2021-Linux-Toolchain-7.3.0.tar.gz'
+def fileNameLinux = 'FRC-2022-Linux-Toolchain-7.3.0.tar.gz'
 
 def downloadUrlLinux = baseUrl + fileNameLinux
 def fileLinux = file("$buildDir/$fileNameLinux")
 
 apply plugin: 'de.undercouch.download'
 
-def downloadTask = tasks.register('downloadToolchain', Download) {
-  src downloadUrl
+def downloadTask32 = tasks.register('downloadToolchain32', Download) {
+  src downloadUrl32
   dest buildDir
   overwrite false
 }
+
+def downloadTask64 = tasks.register('downloadToolchain64', Download) {
+  src downloadUrl64
+  dest buildDir
+  overwrite false
+}
+
 
 
 def downloadTaskMac = tasks.register('downloadToolchainMac', Download) {
@@ -41,7 +52,7 @@ def downloadTaskLinux = tasks.register('downloadToolchainLinux', Download) {
 
 ext.toolchainConfigTaskSetup = {
   return new Tuple2({ task->
-    task.inputs.property 'toolchainName', fileName
+    task.inputs.property 'toolchainName', fileName64
   }, { config->
     def toolchainConfig = [:];
 
@@ -61,7 +72,7 @@ ext.toolchainZipSetup = { AbstractArchiveTask zip->
     zip.from(project.tarTree(project.resources.gzip(fileLinux))) {
 
       eachFile { f->
-        f.path = f.path.replace('frc2021/roborio/', 'roborio/')
+        f.path = f.path.replace('frc2022/roborio/', 'roborio/')
       }
 
       includeEmptyDirs = false
@@ -75,20 +86,33 @@ ext.toolchainZipSetup = { AbstractArchiveTask zip->
     zip.from(project.tarTree(project.resources.gzip(fileMac))) {
 
       eachFile { f->
-        f.path = f.path.replace('frc2021/roborio/', 'roborio/')
+        f.path = f.path.replace('frc2022/roborio/', 'roborio/')
+      }
+
+      includeEmptyDirs = false
+    }
+  } else if (project.hasProperty('windows32')) {
+    zip.dependsOn downloadTask32
+
+    zip.inputs.file fileWin32
+
+    zip.from(project.zipTree(fileWin32)) {
+
+      eachFile { f->
+        f.path = f.path.replace('frc2022/roborio/', 'roborio/')
       }
 
       includeEmptyDirs = false
     }
   } else {
-    zip.dependsOn downloadTask
+    zip.dependsOn downloadTask64
 
-    zip.inputs.file fileWin
+    zip.inputs.file fileWin64
 
-    zip.from(project.zipTree(fileWin)) {
+    zip.from(project.zipTree(fileWin64)) {
 
       eachFile { f->
-        f.path = f.path.replace('frc2021/roborio/', 'roborio/')
+        f.path = f.path.replace('frc2022/roborio/', 'roborio/')
       }
 
       includeEmptyDirs = false

@@ -2,8 +2,8 @@
   "IsAdmin": false,
   "DesktopShortcuts": [
     {
-      "Path": "C:\\Users\\Public\\wpilib\\2021\\vscode\\Code.exe",
-      "Name": "FRC 2021\\FRC VS Code 2021",
+      "Path": "C:\\Users\\Public\\wpilib\\2022\\vscode\\Code.exe",
+      "Name": "FRC 2022\\FRC VS Code 2022",
       "Description": "Shortcut for FRC VS Code"
     }
   ],
@@ -15,5 +15,5 @@
   "AddToPath": [
 
   ],
-  "IconLocation": "C:\\Users\\Public\\wpilib\\2021\\frccode\\wpilib-256.ico"
+  "IconLocation": "C:\\Users\\Public\\wpilib\\2022\\frccode\\wpilib-256.ico"
 }
