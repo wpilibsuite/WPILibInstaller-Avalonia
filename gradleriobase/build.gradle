@@ -79,28 +79,11 @@ model {
             // Defining the dependencies.
             wpi.cpp.deps.wpilibStatic(it)
             wpi.cpp.deps.googleTest(it)
+
+            wpi.cpp.deps.useLibrary(it, 'wpilib_new_commands_static')
+            wpi.cpp.deps.useLibrary(it, 'wpilib_old_commands_static')
         }
     }
-}
-
-// class WPIDepsGrabber implements Plugin<Project> {
-//     void apply(Project project) {
-
-//     }
-
-//     static class WPIDepGrabberRules extends RuleSource {
-
-//         @Mutate
-//         void triggerDeps(ModelMap<Task> tasks, NativeDepsSpec deps) {
-//             System.out.println('Model triggered')
-//         }
-//     }
-// }
-
-// apply plugin: WPIDepsGrabber
-
-tasks.register('modelEvaluationTrigger') {
-
 }
 
 def getConfig = { configs, deps->
