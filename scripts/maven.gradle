@@ -40,28 +40,29 @@ dependencies {
 
 def lazyEvaluator = tasks.register('lazyModelEvaluation') {
 
-  dependsOn project(':gradleriobase').tasks.named('modelEvaluationTrigger')
+  dependsOn ':gradleriobase:build'
   doLast {
     def gradleRioDeps = project(':gradleriobase').getGradleRioDependencies()
     dependencies {
       gradleRioDeps.deps.each { dep->
-        //if (dep.classifier == null) {
-        //  offline "$dep.groupId:$dep.artifactId:$dep.version:@$dep.extension"
-        //} else if (dep.classifier.startsWith(project.ext.forceNativeClassifier)) {
-        //  // Special case win 32
-        //  if (project.ext.forceNativeClassifier == 'windowsx86') {
-        //    def cls = dep.classifier.replace('windowsx86-64', 'windowsx86')
-        //    offline "$dep.groupId:$dep.artifactId:$dep.version:$cls@$dep.extension"
-        //  } else {
-        //    offline "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
-        //  }
-        //} else if (dep.classifier.contains('athena')) {
-        //  offline "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
-        //} else if (dep.classifier.contains('headers')) {
-        //  offline "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
-        //} else if (dep.classifier.contains('sources')) {
-        //  offline "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
-        //}
+        println dep
+        if (dep.classifier == null) {
+         offline "$dep.groupId:$dep.artifactId:$dep.version:@$dep.extension"
+        } else if (dep.classifier.startsWith(project.ext.forceNativeClassifier)) {
+         // Special case win 32
+         if (project.ext.forceNativeClassifier == 'windowsx86') {
+           def cls = dep.classifier.replace('windowsx86-64', 'windowsx86')
+           offline "$dep.groupId:$dep.artifactId:$dep.version:$cls@$dep.extension"
+         } else {
+           offline "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
+         }
+        } else if (dep.classifier.contains('athena')) {
+         offline "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
+        } else if (dep.classifier.contains('headers')) {
+         offline "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
+        } else if (dep.classifier.contains('sources')) {
+         offline "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
+        }
 
         cppToolsArtifacts.each { tool->
           if ("$dep.groupId:$dep.artifactId" == tool) {
