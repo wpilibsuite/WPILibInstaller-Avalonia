@@ -82,6 +82,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v2
+      - name: Print Checksums
+        run: |
+          md5sum **/*
+          sha256sum **/*
       - name: Upload to GitHub wpilibsuite/allwpilib
         if: |
           github.repository_owner == 'wpilibsuite' &&
