@@ -766,6 +766,17 @@ StartupNotify=true
                 }
                 await File.WriteAllTextAsync(desktopFile, contents, token);
                 await File.WriteAllTextAsync(launcherFile, contents, token);
+                await Task.Run(() =>
+                {
+                    var startInfo = new ProcessStartInfo("chmod", $"+x \"{desktopFile}\"")
+                    {
+                        UseShellExecute = false,
+                        WindowStyle = ProcessWindowStyle.Hidden,
+                        CreateNoWindow = true
+                    };
+                    var proc = Process.Start(startInfo);
+                    proc!.WaitForExit();
+                });
             }
         }
     }
