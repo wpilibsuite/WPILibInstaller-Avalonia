@@ -6,8 +6,6 @@ namespace WPILibInstaller.ViewModels
 {
     public abstract class PageViewModelBase : ReactiveObject
     {
-        public UserControl Control => (UserControl)Locator.Current.GetService(typeof(IViewFor<>).MakeGenericType(this.GetType()));
-
         public string ForwardName { get; }
 
         public string BackName { get; }
