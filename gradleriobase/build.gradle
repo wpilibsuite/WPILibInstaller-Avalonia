@@ -14,6 +14,32 @@ plugins {
     id "edu.wpi.first.GradleRIO"
 }
 
+deploy {
+    targets {
+        roborio(getTargetTypeClass('RoboRIO')) {
+            team = 0
+            debug = false
+
+            artifacts {
+                frcJava(getArtifactTypeClass('FRCJavaArtifact')) {
+                }
+
+                frcCpp(getArtifactTypeClass('FRCNativeArtifact')) {
+                }
+
+                // Static files artifact
+                frcStaticFileDeploy(getArtifactTypeClass('FileTreeArtifact')) {
+                    files = project.fileTree('src/main/deploy')
+                    directory = '/home/lvuser/deploy'
+                }
+            }
+        }
+    }
+}
+
+def deployJavaArtifact = deploy.targets.roborio.artifacts.frcJava
+def deployCppArtifact = deploy.targets.roborio.artifacts.frcCpp
+
 wpi.java.debugJni = false
 
 dependencies {
@@ -55,15 +81,23 @@ dependencies {
     }
 }
 
-// TODO add the rest of simulation
 wpi.sim.addGui()
 wpi.sim.addDriverstation()
+wpi.sim.addWebsocketsServer().defaultEnabled = true
+wpi.sim.addWebsocketsClient().defaultEnabled = true
+
+deployJavaArtifact.jarTask = jar
+wpi.java.configureExecutableTasks(jar)
+wpi.java.configureTestTasks(test)
 
 model {
     components {
         frcUserProgram(NativeExecutableSpec) {
             targetPlatform wpi.platforms.roborio
             targetPlatform wpi.platforms.desktop
+
+            deployCppArtifact.component = it
+            wpi.cpp.enableExternalTasks(it)
 
             // Defining the dependencies.
             wpi.cpp.deps.wpilib(it)
