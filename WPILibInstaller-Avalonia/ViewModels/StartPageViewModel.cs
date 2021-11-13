@@ -307,7 +307,7 @@ namespace WPILibInstaller.ViewModels
 
                 // Compute the hash of the file that exists.
                 string s;
-                using (SHA256 SHA256 = SHA256Managed.Create())
+                using (SHA256 SHA256 = SHA256.Create())
                 {
                     s = Convert.ToHexString(await SHA256.ComputeHashAsync(fileStream));
                 }

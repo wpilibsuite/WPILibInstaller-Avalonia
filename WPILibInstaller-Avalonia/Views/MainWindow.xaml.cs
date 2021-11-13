@@ -94,7 +94,7 @@ namespace WPILibInstaller.Views
 
         public IMainWindowViewModel ResolveMainWindow()
         {
-            return ViewModel;
+            return ViewModel!;
         }
     }
 }
