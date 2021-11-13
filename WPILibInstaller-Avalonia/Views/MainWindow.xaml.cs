@@ -21,7 +21,14 @@ namespace WPILibInstaller.Views
             // Initialize our DI
             ContainerBuilder builder = new ContainerBuilder();
 
-            builder.RegisterAssemblyTypes(typeof(MainWindow).Assembly).Where(x => x.IsClass && x.Name.EndsWith("ViewModel")).SingleInstance().AsSelf().AsImplementedInterfaces();
+            builder.RegisterType<CanceledPageViewModel>().SingleInstance().AsSelf().AsImplementedInterfaces();
+            builder.RegisterType<ConfigurationPageViewModel>().SingleInstance().AsSelf().AsImplementedInterfaces();
+            builder.RegisterType<FailedPageViewModel>().SingleInstance().AsSelf().AsImplementedInterfaces();
+            builder.RegisterType<FinalPageViewModel>().SingleInstance().AsSelf().AsImplementedInterfaces();
+            builder.RegisterType<InstallPageViewModel>().SingleInstance().AsSelf().AsImplementedInterfaces();
+            builder.RegisterType<MainWindowViewModel>().SingleInstance().AsSelf().AsImplementedInterfaces();
+            builder.RegisterType<StartPageViewModel>().SingleInstance().AsSelf().AsImplementedInterfaces();
+            builder.RegisterType<VSCodePageViewModel>().SingleInstance().AsSelf().AsImplementedInterfaces();
             builder.RegisterInstance(this).AsImplementedInterfaces();
 
             Container = builder.Build();
