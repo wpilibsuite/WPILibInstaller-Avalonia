@@ -218,10 +218,10 @@ def dotnetInstallerTask = tasks.register('createInstaller', Exec) {
         commandLine 'dotnet', 'publish', '-c', 'Release', '-r', dotnetRuntime, '--self-contained', '/p:PublishTrimmed=true',
                 "/p:Version=$pubVersion", "/t:BundleApp", "-p:RuntimeIdentifier=osx-x64",
                 "-p:CFBundleShortVersionString=$pubVersion", "-p:CFBundleVersion=$pubVersion",
-                '/p:EnableCompressionInSingleFile'
+                '/p:EnableCompressionInSingleFile=true'
     } else {
         commandLine 'dotnet', 'publish', '-c', 'Release', '-r', dotnetRuntime, '/p:PublishSingleFile=true',
-                 "/p:Version=$pubVersion", '/p:EnableCompressionInSingleFile', '--self-contained'
+                 "/p:Version=$pubVersion", '/p:EnableCompressionInSingleFile=true', '--self-contained'
     }
 }
 
