@@ -217,10 +217,11 @@ def dotnetInstallerTask = tasks.register('createInstaller', Exec) {
     if (project.hasProperty("macBuild")) {
         commandLine 'dotnet', 'publish', '-c', 'Release', '-r', dotnetRuntime, '/p:PublishTrimmed=true',
                 "/p:Version=$pubVersion", "/t:BundleApp", "-p:RuntimeIdentifier=osx-x64",
-                "-p:CFBundleShortVersionString=$pubVersion", "-p:CFBundleVersion=$pubVersion"
+                "-p:CFBundleShortVersionString=$pubVersion", "-p:CFBundleVersion=$pubVersion",
+                '/p:EnableCompressionInSingleFile'
     } else {
         commandLine 'dotnet', 'publish', '-c', 'Release', '-r', dotnetRuntime, '/p:PublishSingleFile=true',
-                '/p:PublishTrimmed=true', "/p:Version=$pubVersion"
+                 "/p:Version=$pubVersion", '/p:EnableCompressionInSingleFile'
     }
 }
 
