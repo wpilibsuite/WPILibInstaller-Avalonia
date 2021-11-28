@@ -212,12 +212,11 @@ namespace WPILibInstaller.ViewModels
             return new ValueTask<string>(portableFolder);
         }
 
-        private void SetIfNotSet<T>(string key, T value, dynamic settingsJson)
+        private static void SetIfNotSet(string key, object value, JObject settingsJson)
         {
             if (!settingsJson.ContainsKey(key))
             {
-
-                settingsJson[key] = value;
+                settingsJson[key] = JToken.FromObject(value);
             }
         }
 
@@ -253,7 +252,7 @@ namespace WPILibInstaller.ViewModels
 
             }
 
-            dynamic settingsJson = new JObject();
+            JObject settingsJson = new JObject();
             if (File.Exists(settingsFile))
             {
                 settingsJson = (JObject)JsonConvert.DeserializeObject(await File.ReadAllTextAsync(settingsFile))!;
@@ -287,19 +286,20 @@ namespace WPILibInstaller.ViewModels
 
             if (!settingsJson.ContainsKey("terminal.integrated.env." + os))
             {
-                dynamic terminalProps = new JObject();
-
-                terminalProps["JAVA_HOME"] = Path.Combine(homePath, "jdk");
-                terminalProps["PATH"] = Path.Combine(homePath, "jdk", "bin") + path_seperator + "${env:PATH}";
+                JObject terminalProps = new JObject
+                {
+                    ["JAVA_HOME"] = Path.Combine(homePath, "jdk"),
+                    ["PATH"] = Path.Combine(homePath, "jdk", "bin") + path_seperator + "${env:PATH}"
+                };
 
                 settingsJson["terminal.integrated.env." + os] = terminalProps;
 
             }
             else
             {
-                dynamic terminalEnv = settingsJson["terminal.integrated.env." + os];
+                JToken terminalEnv = settingsJson["terminal.integrated.env." + os]!;
                 terminalEnv["JAVA_HOME"] = Path.Combine(homePath, "jdk");
-                string path = terminalEnv["PATH"];
+                JToken? path = terminalEnv["PATH"];
                 if (path == null)
                 {
                     terminalEnv["PATH"] = Path.Combine(homePath, "jdk", "bin") + path_seperator + "${env:PATH}";
@@ -516,7 +516,7 @@ namespace WPILibInstaller.ViewModels
             await Task.Yield();
         }
 
-        private Task<bool> RunScriptExecutable(string script, int timeoutMs, params string[] args)
+        private static Task<bool> RunScriptExecutable(string script, int timeoutMs, params string[] args)
         {
             ProcessStartInfo pstart = new ProcessStartInfo(script, string.Join(" ", args));
             var p = Process.Start(pstart);
@@ -603,10 +603,11 @@ namespace WPILibInstaller.ViewModels
                 }
             });
 
-            var availableToInstall = new List<(Extension extension, WPIVersion version, int sortOrder)>();
-
-            availableToInstall.Add((configurationProvider.VsCodeConfig.WPILibExtension,
-                new WPIVersion(configurationProvider.VsCodeConfig.WPILibExtension.Version), int.MaxValue));
+            var availableToInstall = new List<(Extension extension, WPIVersion version, int sortOrder)>
+            {
+                (configurationProvider.VsCodeConfig.WPILibExtension,
+                new WPIVersion(configurationProvider.VsCodeConfig.WPILibExtension.Version), int.MaxValue)
+            };
 
             for (int i = 0; i < configurationProvider.VsCodeConfig.ThirdPartyExtensions.Length; i++)
             {
@@ -780,7 +781,7 @@ StartupNotify=true
                     };
                     var proc = Process.Start(startInfo);
                     proc!.WaitForExit();
-                });
+                }, token);
             }
         }
     }
