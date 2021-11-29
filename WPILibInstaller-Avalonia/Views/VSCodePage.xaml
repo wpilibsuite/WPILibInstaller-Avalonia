@@ -6,18 +6,15 @@
              x:Class="WPILibInstaller.Views.VSCodePage">
   <Grid Margin="10">
     <Grid.RowDefinitions>
-      <RowDefinition Height="9*"/>
+      <RowDefinition Height="2*"/>
       <RowDefinition Height="1*"/>
       <RowDefinition Height="3*"/>
     </Grid.RowDefinitions>
     <ScrollViewer Grid.Row="0" HorizontalScrollBarVisibility="Disabled">
     <TextBlock TextWrapping="Wrap" FontSize="13">
-    For licensing reasons, VS Code cannot be included in the WPILib Installer. WPILib installs it's own copy of VS Code every year, not shared between years or a system install. If you have already installed VS Code for the current year, the Next button will be enabled and you can skip this step, otherwise choose from the following options. VS Code will be installed on this system using the installer selected here in later steps.
+    For licensing reasons, this installer must download VS Code separately. Each year gets its own install separate from the system one.
 
-    1. Download VS Code for Single Install: Use this if you don't plan on sharing the VS Code installer between systems. This will be the fastest download.
-    2. Skip installing VS Code. This will display a warning if a compatibible VS Code installation isn't detected.
-    3. Use Downloaded Offline Installer: Use this to select a installer zip file previously downloaded from this tool.
-    4. Download VS Code for Offline Install: Use this to download VS Code installers for all platforms, which can be shared between systems for offline use.
+We strongly recommend using WPILib's VS Code instead of the system one or a separate IDE.
     </TextBlock>
     </ScrollViewer>
     <TextBlock TextWrapping="Wrap" Grid.Row="1" Height="15" FontWeight="Bold" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding DoneText}"></TextBlock>
@@ -31,10 +28,10 @@
         <ColumnDefinition Width="4*"/>
         <ColumnDefinition Width="2*"/>
       </Grid.ColumnDefinitions>
-      <Button Grid.Column="0" Grid.Row="0" Margin="0,0,5,5" IsEnabled="{Binding EnableSelectionButtons}" Content="Download VS Code for Single Install" Command="{Binding DownloadSingleVsCode}"></Button>
-      <Button Grid.Column="1" Grid.Row="0" Margin="5,0,0,5" IsEnabled="{Binding EnableSelectionButtons}" Content="Skip installing VS Code" Command="{Binding SkipVsCode}"></Button>
-      <Button Grid.Column="0" Grid.Row="1" Margin="0,0,5,0" IsEnabled="{Binding EnableSelectionButtons}" Content="{Binding SelectText}" Command="{Binding SelectVsCode}"/>
-      <Button Grid.Column="1" Grid.Row="1" Margin="5,0,0,0" IsEnabled="{Binding EnableSelectionButtons}" Content="{Binding DownloadText}" Command="{Binding DownloadVsCode}"/>
+      <Button Grid.Column="0" Grid.Row="0" Margin="0,0,5,5" IsEnabled="{Binding EnableSelectionButtons}" Content="{Binding SingleDownloadText}" Command="{Binding DownloadSingleVsCode}"></Button>
+      <Button Grid.Column="1" Grid.Row="0" Margin="5,0,0,5" IsEnabled="{Binding EnableSelectionButtons}" Content="{Binding SkipVsCodeText}" Command="{Binding SkipVsCode}"></Button>
+      <Button Grid.Column="0" Grid.Row="1" Margin="0,0,5,0" IsEnabled="{Binding EnableSelectionButtons}" Content="{Binding AllDownloadText}" Command="{Binding DownloadVsCode}"/>
+      <Button Grid.Column="1" Grid.Row="1" Margin="5,0,0,0" IsEnabled="{Binding EnableSelectionButtons}" Content="{Binding SelectText}" Command="{Binding SelectVsCode}"/>
       <StackPanel Margin="5,0,0,0" Grid.Column="2" Grid.Row="0" Grid.RowSpan="2">
         <ProgressBar Value="{Binding ProgressBar1}" IsVisible="{Binding ProgressBar1Visible}" Margin="0,2,0,0" MinWidth="20" />
         <ProgressBar Value="{Binding ProgressBar2}" IsVisible="{Binding ProgressBarAllVisible}" Margin="0,2,0,0" MinWidth="20" />
