@@ -10,7 +10,8 @@ script_name = os.path.abspath(sys.argv[0])
 exe_name = os.path.splitext(script_name)[0]
 
 if platform.system() == "Linux":
-    cmd = [exe_name.lower()]
+    exe_path, exe_name = os.path.split(script_name)
+    cmd = [os.path.join(exe_path, exe_name.lower())]
 elif platform.system() == "Darwin":
     cmd = ["open", exe_name + ".app"]
 elif platform.system() == "Windows":
