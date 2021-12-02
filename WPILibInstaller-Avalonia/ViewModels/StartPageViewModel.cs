@@ -25,7 +25,7 @@ namespace WPILibInstaller.ViewModels
         private bool forwardVisible = false;
         public string VerString => verString;
 
-        private string verString = $"0.0.0";
+        private readonly string verString = $"0.0.0";
 
         private bool missingHash = false;
 
@@ -307,7 +307,7 @@ namespace WPILibInstaller.ViewModels
 
                 // Compute the hash of the file that exists.
                 string s;
-                using (SHA256 SHA256 = SHA256Managed.Create())
+                using (SHA256 SHA256 = SHA256.Create())
                 {
                     s = Convert.ToHexString(await SHA256.ComputeHashAsync(fileStream));
                 }
