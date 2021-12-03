@@ -33,6 +33,10 @@ namespace WPILibInstaller.Models
             VSCodeVersion = vscodeVersion;
         }
 
+        public bool InstallingVsCode => ToExtractArchive != null || ToExtractArchiveMacOs != null;
+
+        public bool InstallExtensions => AlreadyInstalled || InstallingVsCode;
+
         public void Dispose()
         {
             ToExtractArchive?.Dispose();

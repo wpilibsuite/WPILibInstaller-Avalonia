@@ -90,7 +90,7 @@ namespace WPILibInstaller.ViewModels
 
         private async Task ExtractJDKAndTools(CancellationToken token)
         {
-            await Task.Yield();
+            await ExtractArchive(token, new[] { configurationProvider.JdkConfig.Folder + "/", configurationProvider.UpgradeConfig.Tools.Folder + "/" });
         }
 
         private async Task InstallTools(CancellationToken token)
@@ -110,7 +110,8 @@ namespace WPILibInstaller.ViewModels
                     TextTotal = "Creating Shortcuts";
                     await RunShortcutCreator(token);
                 } while (false);
-            } catch (OperationCanceledException)
+            }
+            catch (OperationCanceledException)
             {
                 // Do nothing, we just want to ignore
             }
@@ -124,7 +125,7 @@ namespace WPILibInstaller.ViewModels
                 {
                     ProgressTotal = 0;
                     TextTotal = "Extracting";
-                    await ExtractArchive(token);
+                    await ExtractArchive(token, null);
                     if (token.IsCancellationRequested) break;
                     ProgressTotal = 11;
                     TextTotal = "Installing Gradle";
@@ -185,7 +186,6 @@ namespace WPILibInstaller.ViewModels
                 {
                     await InstallEverything(source.Token);
                 }
-              
 
                 updateSource.Cancel();
                 await updateTask;
@@ -257,8 +257,7 @@ namespace WPILibInstaller.ViewModels
 
         private async Task ConfigureVsCodeSettings()
         {
-            var vsVm = viewModelResolver.Resolve<VSCodePageViewModel>();
-            if (!toInstallProvider.Model.InstallVsCode && !vsVm.Model.AlreadyInstalled) return;
+            if (!vsInstallProvider.Model.InstallExtensions) return;
 
             var dataPath = await SetVsCodePortableMode();
 
@@ -356,7 +355,7 @@ namespace WPILibInstaller.ViewModels
 
         private async Task RunVsCodeSetup(CancellationToken token)
         {
-            if (!toInstallProvider.Model.InstallVsCode) return;
+            if (!vsInstallProvider.Model.InstallingVsCode) return;
 
             Text = "Installing Visual Studio Code";
             Progress = 0;
@@ -430,7 +429,7 @@ namespace WPILibInstaller.ViewModels
 
         }
 
-        private async Task ExtractArchive(CancellationToken token)
+        private async Task ExtractArchive(CancellationToken token, string[]? filter)
         {
             Progress = 0;
 
@@ -453,6 +452,24 @@ namespace WPILibInstaller.ViewModels
                 if (extractor.EntryIsDirectory) continue;
 
                 var entryName = extractor.EntryKey;
+                if (filter != null)
+                {
+                    bool skip = true;
+                    foreach (var keep in filter)
+                    {
+                        if (entryName.StartsWith(keep))
+                        {
+                            skip = false;
+                            break;
+                        }
+                    }
+
+                    if (skip)
+                    {
+                        continue;
+                    }
+                }
+
 
                 Text = "Installing " + entryName;
 
@@ -565,7 +582,7 @@ namespace WPILibInstaller.ViewModels
 
         private async Task RunVsCodeExtensionsSetup()
         {
-            if (!toInstallProvider.Model.InstallVsCodeExtensions) return;
+            if (!vsInstallProvider.Model.InstallExtensions) return;
 
             string codeExe;
 
@@ -678,38 +695,38 @@ namespace WPILibInstaller.ViewModels
             shortcutData.IconLocation = Path.Join(frcHomePath, configurationProvider.UpgradeConfig.PathFolder, "wpilib-256.ico");
             shortcutData.IsAdmin = toInstallProvider.Model.InstallAsAdmin;
 
-            if (toInstallProvider.Model.InstallVsCode)
+            if (vsInstallProvider.Model.InstallingVsCode)
             {
                 // Add VS Code Shortcuts
                 shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "vscode", "Code.exe"), $"{frcYear} WPILib VS Code", $"{frcYear} WPILib VS Code"));
                 shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "vscode", "Code.exe"), $"Programs/{frcYear} WPILib VS Code", $"{frcYear} WPILib VS Code"));
             }
 
-            if (toInstallProvider.Model.InstallTools)
+            // Add Tool Shortcuts
+            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "Glass.vbs"), $"{frcYear} WPILib Tools/Glass {frcYear}", $"Glass {frcYear}"));
+            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "OutlineViewer.vbs"), $"{frcYear} WPILib Tools/OutlineViewer {frcYear}", $"OutlineViewer {frcYear}"));
+            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "PathWeaver.vbs"), $"{frcYear} WPILib Tools/PathWeaver {frcYear}", $"PathWeaver {frcYear}"));
+            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "RobotBuilder.vbs"), $"{frcYear} WPILib Tools/RobotBuilder {frcYear}", $"RobotBuilder {frcYear}"));
+            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "RobotBuilder-Old.vbs"), $"{frcYear} WPILib Tools/RobotBuilder-Old {frcYear}", $"RobotBuilder for Old Command Framework {frcYear}"));
+            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "shuffleboard.vbs"), $"{frcYear} WPILib Tools/Shuffleboard {frcYear}", $"Shuffleboard {frcYear}"));
+            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "SmartDashboard.vbs"), $"{frcYear} WPILib Tools/SmartDashboard {frcYear}", $"SmartDashboard {frcYear}"));
+            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "SysId.vbs"), $"{frcYear} WPILib Tools/SysId {frcYear}", $"SysId {frcYear}"));
+
+            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "Glass.vbs"), $"Programs/{frcYear} WPILib Tools/Glass {frcYear}", $"Glass {frcYear}"));
+            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "OutlineViewer.vbs"), $"Programs/{frcYear} WPILib Tools/OutlineViewer {frcYear}", $"OutlineViewer {frcYear}"));
+            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "PathWeaver.vbs"), $"Programs/{frcYear} WPILib Tools/PathWeaver {frcYear}", $"PathWeaver {frcYear}"));
+            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "RobotBuilder.vbs"), $"Programs/{frcYear} WPILib Tools/RobotBuilder {frcYear}", $"RobotBuilder {frcYear}"));
+            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "RobotBuilder-Old.vbs"), $"Programs/{frcYear} WPILib Tools/RobotBuilder-Old {frcYear}", $"RobotBuilder for Old Command Framework {frcYear}"));
+            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "shuffleboard.vbs"), $"Programs/{frcYear} WPILib Tools/Shuffleboard {frcYear}", $"Shuffleboard {frcYear}"));
+            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "SmartDashboard.vbs"), $"Programs/{frcYear} WPILib Tools/SmartDashboard {frcYear}", $"SmartDashboard {frcYear}"));
+            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "SysId.vbs"), $"Programs/{frcYear} WPILib Tools/SysId {frcYear}", $"SysId {frcYear}"));
+
+            if (toInstallProvider.Model.InstallEverything)
             {
-                // Add Tool Shortcuts
-                shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "Glass.vbs"), $"{frcYear} WPILib Tools/Glass {frcYear}", $"Glass {frcYear}"));
-                shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "OutlineViewer.vbs"), $"{frcYear} WPILib Tools/OutlineViewer {frcYear}", $"OutlineViewer {frcYear}"));
-                shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "PathWeaver.vbs"), $"{frcYear} WPILib Tools/PathWeaver {frcYear}", $"PathWeaver {frcYear}"));
-                shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "RobotBuilder.vbs"), $"{frcYear} WPILib Tools/RobotBuilder {frcYear}", $"RobotBuilder {frcYear}"));
-                shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "RobotBuilder-Old.vbs"), $"{frcYear} WPILib Tools/RobotBuilder-Old {frcYear}", $"RobotBuilder for Old Command Framework {frcYear}"));
-                shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "shuffleboard.vbs"), $"{frcYear} WPILib Tools/Shuffleboard {frcYear}", $"Shuffleboard {frcYear}"));
-                shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "SmartDashboard.vbs"), $"{frcYear} WPILib Tools/SmartDashboard {frcYear}", $"SmartDashboard {frcYear}"));
-                shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "SysId.vbs"), $"{frcYear} WPILib Tools/SysId {frcYear}", $"SysId {frcYear}"));
-
-                shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "Glass.vbs"), $"Programs/{frcYear} WPILib Tools/Glass {frcYear}", $"Glass {frcYear}"));
-                shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "OutlineViewer.vbs"), $"Programs/{frcYear} WPILib Tools/OutlineViewer {frcYear}", $"OutlineViewer {frcYear}"));
-                shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "PathWeaver.vbs"), $"Programs/{frcYear} WPILib Tools/PathWeaver {frcYear}", $"PathWeaver {frcYear}"));
-                shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "RobotBuilder.vbs"), $"Programs/{frcYear} WPILib Tools/RobotBuilder {frcYear}", $"RobotBuilder {frcYear}"));
-                shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "RobotBuilder-Old.vbs"), $"Programs/{frcYear} WPILib Tools/RobotBuilder-Old {frcYear}", $"RobotBuilder for Old Command Framework {frcYear}"));
-                shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "shuffleboard.vbs"), $"Programs/{frcYear} WPILib Tools/Shuffleboard {frcYear}", $"Shuffleboard {frcYear}"));
-                shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "SmartDashboard.vbs"), $"Programs/{frcYear} WPILib Tools/SmartDashboard {frcYear}", $"SmartDashboard {frcYear}"));
-                shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "SysId.vbs"), $"Programs/{frcYear} WPILib Tools/SysId {frcYear}", $"SysId {frcYear}"));
+                // Add Documentation Shortcuts
+                shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "documentation", "rtd", "frc-docs-latest", "index.html"), $"{frcYear} WPILib Documentation", $"{frcYear} WPILib Documentation"));
+                shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "documentation", "rtd", "frc-docs-latest", "index.html"), $"Programs/{frcYear} WPILib Documentation", $"{frcYear} WPILib Documentation"));
             }
-
-            // Add Documentation Shortcuts
-            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "documentation", "rtd", "frc-docs-latest", "index.html"), $"{frcYear} WPILib Documentation", $"{frcYear} WPILib Documentation"));
-            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "documentation", "rtd", "frc-docs-latest", "index.html"), $"Programs/{frcYear} WPILib Documentation", $"{frcYear} WPILib Documentation"));
 
             var serializedData = JsonConvert.SerializeObject(shortcutData);
 
@@ -750,7 +767,7 @@ namespace WPILibInstaller.ViewModels
                    icon: MessageBox.Avalonia.Enums.Icon.Warning, @enum: MessageBox.Avalonia.Enums.ButtonEnum.Ok).ShowDialog(programWindow.Window);
                 }
             }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && toInstallProvider.Model.InstallVsCode)
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && vsInstallProvider.Model.InstallingVsCode)
             {
                 // Create Linux desktop shortcut
                 var desktopFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Desktop", $@"FRC VS Code {frcYear}.desktop");
