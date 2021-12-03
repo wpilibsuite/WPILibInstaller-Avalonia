@@ -26,14 +26,6 @@ def toolsJsonTask = tasks.register('toolsJson', Task) {
       item['artifact'] = artif
       item['cpp'] = false
       config << item
-
-      def file = it.file
-
-      // Place file in tools folder
-      project.copy {
-        from file
-        into '/tools'
-      }
     }
 
     def resolvedCppDeps = configurations.cppTools.resolvedConfiguration.resolvedArtifacts.toList()
@@ -51,14 +43,6 @@ def toolsJsonTask = tasks.register('toolsJson', Task) {
       item['artifact'] = artif
       item['cpp'] = true
       config << item
-
-      def file = it.file
-
-      // Place file in tools folder
-      project.copy {
-        from file
-        into '/tools'
-      }
     }
 
     def gbuilder = getGsonBuilder()
