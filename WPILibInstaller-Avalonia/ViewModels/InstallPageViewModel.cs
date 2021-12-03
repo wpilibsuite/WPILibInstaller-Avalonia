@@ -90,7 +90,10 @@ namespace WPILibInstaller.ViewModels
 
         private async Task ExtractJDKAndTools(CancellationToken token)
         {
-            await ExtractArchive(token, new[] { configurationProvider.JdkConfig.Folder + "/", configurationProvider.UpgradeConfig.Tools.Folder + "/" });
+            await ExtractArchive(token, new[] {
+                configurationProvider.JdkConfig.Folder + "/",
+                configurationProvider.UpgradeConfig.Tools.Folder + "/",
+                "installUtils/"});
         }
 
         private async Task InstallTools(CancellationToken token)
