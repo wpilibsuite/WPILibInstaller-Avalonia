@@ -88,6 +88,83 @@ namespace WPILibInstaller.ViewModels
             await runInstallTask;
         }
 
+        private async Task ExtractJDKAndTools(CancellationToken token)
+        {
+            await Task.Yield();
+        }
+
+        private async Task InstallTools(CancellationToken token)
+        {
+            try
+            {
+                do
+                {
+                    ProgressTotal = 0;
+                    TextTotal = "Extracting JDK and Tools";
+                    await ExtractJDKAndTools(token);
+                    if (token.IsCancellationRequested) break;
+                    ProgressTotal = 33;
+                    TextTotal = "Installing Tools";
+                    await RunToolSetup();
+                    ProgressTotal = 66;
+                    TextTotal = "Creating Shortcuts";
+                    await RunShortcutCreator(token);
+                } while (false);
+            } catch (OperationCanceledException)
+            {
+                // Do nothing, we just want to ignore
+            }
+        }
+
+        private async Task InstallEverything(CancellationToken token)
+        {
+            try
+            {
+                do
+                {
+                    ProgressTotal = 0;
+                    TextTotal = "Extracting";
+                    await ExtractArchive(token);
+                    if (token.IsCancellationRequested) break;
+                    ProgressTotal = 11;
+                    TextTotal = "Installing Gradle";
+                    await RunGradleSetup();
+                    if (token.IsCancellationRequested) break;
+                    ProgressTotal = 22;
+                    TextTotal = "Installing Tools";
+                    await RunToolSetup();
+                    if (token.IsCancellationRequested) break;
+                    ProgressTotal = 33;
+                    TextTotal = "Installing CPP";
+                    await RunCppSetup();
+                    if (token.IsCancellationRequested) break;
+                    ProgressTotal = 44;
+                    TextTotal = "Fixing Maven";
+                    await RunMavenMetaDataFixer();
+                    if (token.IsCancellationRequested) break;
+                    ProgressTotal = 55;
+                    TextTotal = "Installing VS Code";
+                    await RunVsCodeSetup(token);
+                    if (token.IsCancellationRequested) break;
+                    ProgressTotal = 66;
+                    TextTotal = "Configuring VS Code";
+                    await ConfigureVsCodeSettings();
+                    if (token.IsCancellationRequested) break;
+                    ProgressTotal = 77;
+                    TextTotal = "Installing VS Code Extensions";
+                    await RunVsCodeExtensionsSetup();
+                    if (token.IsCancellationRequested) break;
+                    ProgressTotal = 88;
+                    TextTotal = "Creating Shortcuts";
+                    await RunShortcutCreator(token);
+                } while (false);
+            }
+            catch (OperationCanceledException)
+            {
+                // Do nothing, we just want to ignore
+            }
+        }
+
         private async Task RunInstall()
         {
             source = new CancellationTokenSource();
@@ -100,44 +177,15 @@ namespace WPILibInstaller.ViewModels
 
             try
             {
-                do
+                if (toInstallProvider.Model.InstallTools)
                 {
-                    ProgressTotal = 0;
-                    TextTotal = "Extracting";
-                    await ExtractArchive(source.Token);
-                    if (source.IsCancellationRequested) break;
-                    ProgressTotal = 11;
-                    TextTotal = "Installing Gradle";
-                    await RunGradleSetup();
-                    if (source.IsCancellationRequested) break;
-                    ProgressTotal = 22;
-                    TextTotal = "Installing Tools";
-                    await RunToolSetup();
-                    if (source.IsCancellationRequested) break;
-                    ProgressTotal = 33;
-                    TextTotal = "Installing CPP";
-                    await RunCppSetup();
-                    if (source.IsCancellationRequested) break;
-                    ProgressTotal = 44;
-                    TextTotal = "Fixing Maven";
-                    await RunMavenMetaDataFixer();
-                    if (source.IsCancellationRequested) break;
-                    ProgressTotal = 55;
-                    TextTotal = "Installing VS Code";
-                    await RunVsCodeSetup(source.Token);
-                    if (source.IsCancellationRequested) break;
-                    ProgressTotal = 66;
-                    TextTotal = "Configuring VS Code";
-                    await ConfigureVsCodeSettings();
-                    if (source.IsCancellationRequested) break;
-                    ProgressTotal = 77;
-                    TextTotal = "Installing VS Code Extensions";
-                    await RunVsCodeExtensionsSetup();
-                    if (source.IsCancellationRequested) break;
-                    ProgressTotal = 88;
-                    TextTotal = "Creating Shortcuts";
-                    await RunShortcutCreator(source.Token);
-                } while (false);
+                    await InstallTools(source.Token);
+                }
+                else
+                {
+                    await InstallEverything(source.Token);
+                }
+              
 
                 updateSource.Cancel();
                 await updateTask;
@@ -169,19 +217,6 @@ namespace WPILibInstaller.ViewModels
             {
                 return viewModelResolver.Resolve<CanceledPageViewModel>();
             }
-        }
-
-        private List<string> GetExtractionIgnoreDirectories()
-        {
-            List<string> ignoreDirs = new List<string>();
-            var model = toInstallProvider.Model;
-            if (!model.InstallCpp) ignoreDirs.Add(configurationProvider.FullConfig.CppToolchain.Directory + "/");
-            if (!model.InstallGradle) ignoreDirs.Add(configurationProvider.FullConfig.Gradle.ZipName);
-            if (!model.InstallJDK) ignoreDirs.Add(configurationProvider.JdkConfig.Folder + "/");
-            if (!model.InstallTools) ignoreDirs.Add(configurationProvider.UpgradeConfig.Tools.Folder + "/");
-            if (!model.InstallWPILibDeps) ignoreDirs.Add(configurationProvider.UpgradeConfig.Maven.Folder + "/");
-
-            return ignoreDirs;
         }
 
         private ValueTask<string> SetVsCodePortableMode()
@@ -397,8 +432,6 @@ namespace WPILibInstaller.ViewModels
 
         private async Task ExtractArchive(CancellationToken token)
         {
-            var directoriesToIgnore = GetExtractionIgnoreDirectories();
-
             Progress = 0;
 
             var archive = configurationProvider.ZipArchive;
@@ -420,20 +453,6 @@ namespace WPILibInstaller.ViewModels
                 if (extractor.EntryIsDirectory) continue;
 
                 var entryName = extractor.EntryKey;
-                bool skip = false;
-                foreach (var ignore in directoriesToIgnore)
-                {
-                    if (entryName.StartsWith(ignore))
-                    {
-                        skip = true;
-                        break;
-                    }
-                }
-
-                if (skip)
-                {
-                    continue;
-                }
 
                 Text = "Installing " + entryName;
 
@@ -473,8 +492,6 @@ namespace WPILibInstaller.ViewModels
 
         private Task RunGradleSetup()
         {
-            if (!toInstallProvider.Model.InstallGradle || !toInstallProvider.Model.InstallWPILibDeps) return Task.CompletedTask;
-
             Text = "Configuring Gradle";
             Progress = 50;
 
@@ -508,8 +525,6 @@ namespace WPILibInstaller.ViewModels
 
         private async Task RunCppSetup()
         {
-            if (!toInstallProvider.Model.InstallCpp) return;
-
             Text = "Configuring C++";
             Progress = 50;
 
@@ -528,9 +543,6 @@ namespace WPILibInstaller.ViewModels
 
         private async Task RunToolSetup()
         {
-            if (!toInstallProvider.Model.InstallTools || !toInstallProvider.Model.InstallWPILibDeps)
-                return;
-
             Text = "Configuring Tools";
             Progress = 50;
 
@@ -541,9 +553,6 @@ namespace WPILibInstaller.ViewModels
 
         private async Task RunMavenMetaDataFixer()
         {
-            if (!toInstallProvider.Model.InstallWPILibDeps)
-                return;
-
             Text = "Fixing up maven metadata";
             Progress = 50;
 

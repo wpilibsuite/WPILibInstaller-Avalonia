@@ -347,9 +347,7 @@ namespace WPILibInstaller.ViewModels
 
         public override PageViewModelBase MoveNext()
         {
-            var configPage = viewModelResolver.Resolve<ConfigurationPageViewModel>();
-            configPage.UpdateVsSettings();
-            return configPage;
+            return viewModelResolver.Resolve<InstallPageViewModel>();
         }
     }
 }
