@@ -1,8 +1,8 @@
-﻿using ReactiveUI;
-using System.Reactive;
+﻿using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using ReactiveUI;
 using WPILibInstaller.Interfaces;
 using WPILibInstaller.Models;
 

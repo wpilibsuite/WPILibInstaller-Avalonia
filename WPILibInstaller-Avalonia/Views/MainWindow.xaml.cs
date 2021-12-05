@@ -1,9 +1,9 @@
-﻿using Autofac;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using Autofac;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using WPILibInstaller.Interfaces;
 using WPILibInstaller.ViewModels;
 

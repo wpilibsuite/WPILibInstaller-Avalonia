@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-using ReactiveUI;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -8,6 +6,8 @@ using System.Reactive;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using ReactiveUI;
 using WPILibInstaller.Interfaces;
 using WPILibInstaller.Models;
 using WPILibInstaller.Utils;

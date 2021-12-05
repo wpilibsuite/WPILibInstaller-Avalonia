@@ -1,8 +1,8 @@
-﻿using ReactiveUI;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Reactive;
 using System.Threading.Tasks;
+using ReactiveUI;
 using WPILibInstaller.Interfaces;
 
 namespace WPILibInstaller.ViewModels
@@ -20,7 +20,7 @@ namespace WPILibInstaller.ViewModels
             }
         }
 
-        private readonly Stack<PageViewModelBase> pages = new ();
+        private readonly Stack<PageViewModelBase> pages = new();
 
         public string? ForwardName => CurrentPage?.ForwardName;
 
