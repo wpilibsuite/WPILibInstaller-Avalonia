@@ -87,6 +87,16 @@ namespace WPILibInstaller.ViewModels
 
         public void Initialize()
         {
+            if (OperatingSystem.IsWindows())
+            {
+                bool isWindows10 = OperatingSystem.IsWindowsVersionAtLeast(10);
+                bool is64Bit = IntPtr.Size == 8;
+                if (!isWindows10 || !is64Bit)
+                {
+                    CurrentPage = viewModelResolver.Resolve<DeprecatedOsPageViewModel>();
+                    return;
+                }
+            }
             CurrentPage = viewModelResolver.Resolve<StartPageViewModel>();
         }
 

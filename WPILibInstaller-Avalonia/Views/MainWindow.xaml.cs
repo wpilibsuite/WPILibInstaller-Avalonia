@@ -3,6 +3,8 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
+using MessageBox.Avalonia.DTO;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using WPILibInstaller.Interfaces;
@@ -29,6 +31,7 @@ namespace WPILibInstaller.Views
             builder.RegisterType<MainWindowViewModel>().SingleInstance().AsSelf().AsImplementedInterfaces();
             builder.RegisterType<StartPageViewModel>().SingleInstance().AsSelf().AsImplementedInterfaces();
             builder.RegisterType<VSCodePageViewModel>().SingleInstance().AsSelf().AsImplementedInterfaces();
+            builder.RegisterType<DeprecatedOsPageViewModel>().SingleInstance().AsSelf().AsImplementedInterfaces();
             builder.RegisterInstance(this).AsImplementedInterfaces();
 
             Container = builder.Build();
@@ -39,6 +42,8 @@ namespace WPILibInstaller.Views
             DataContext = ViewModel;
 
             InitializeComponent();
+
+            
         }
 
         public void CloseProgram()
