@@ -1,5 +1,4 @@
-﻿using MessageBox.Avalonia.DTO;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using ReactiveUI;
 using System;
 using System.Diagnostics;

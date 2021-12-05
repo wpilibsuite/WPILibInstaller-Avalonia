@@ -1,10 +1,7 @@
 ﻿using Autofac;
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
-using MessageBox.Avalonia.DTO;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using WPILibInstaller.Interfaces;
@@ -42,8 +39,6 @@ namespace WPILibInstaller.Views
             DataContext = ViewModel;
 
             InitializeComponent();
-
-            
         }
 
         public void CloseProgram()

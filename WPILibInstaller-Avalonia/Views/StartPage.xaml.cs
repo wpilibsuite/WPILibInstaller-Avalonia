@@ -1,7 +1,5 @@
-﻿using System;
-using Avalonia.Markup.Xaml;
+﻿using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
-using MessageBox.Avalonia.DTO;
 using WPILibInstaller.ViewModels;
 
 namespace WPILibInstaller.Views
