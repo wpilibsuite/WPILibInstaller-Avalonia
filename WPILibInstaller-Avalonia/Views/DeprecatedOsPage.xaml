@@ -21,7 +21,7 @@
                HorizontalAlignment="Center"
                FontSize="20"
                VerticalAlignment="Center" />
-        <TextBlock Text="Click ""I Understand"" to continue"
+        <TextBlock Text="Click &quot;I Understand&quot; to continue"
                HorizontalAlignment="Center"
                FontSize="20"
                VerticalAlignment="Center" />
