@@ -6,9 +6,9 @@ namespace WPILibInstaller.Models
     {
         public bool IsAdmin { get; set; }
         public List<ShortcutInfo> DesktopShortcuts { get; set; } = new List<ShortcutInfo>();
+        public List<NewEnvVariable> NewEnvironmentalVariables { get; set; } = new ();
         public List<ShortcutInfo> StartMenuShortcuts { get; set; } = new List<ShortcutInfo>();
-        public List<NewEnvVariable> NewEnvironmentalVariables { get; set; } = new();
-        public List<AddedPathVariable> AddToPath { get; set; } = new();
+        public List<AddedPathVariable> AddToPath { get; set; } = new ();
 
         public string IconLocation { get; set; } = "";
     }
