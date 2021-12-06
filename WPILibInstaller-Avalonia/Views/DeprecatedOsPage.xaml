@@ -13,11 +13,11 @@
                VerticalAlignment="Center"
                TextAlignment="Center"
                TextWrapping="Wrap"/>
-        <TextBlock Text="You will not be able to install or run 2023 WPILib"
+        <TextBlock Text="You will not be able to install or run WPILib 2023"
                HorizontalAlignment="Center"
                FontSize="20"
                VerticalAlignment="Center" />
-        <TextBlock Text="Please upgrade to at least 64 Bit Windows 10"
+        <TextBlock Text="Please upgrade to at least Windows 10 64 Bit"
                HorizontalAlignment="Center"
                FontSize="20"
                VerticalAlignment="Center" />
@@ -25,5 +25,9 @@
                HorizontalAlignment="Center"
                FontSize="20"
                VerticalAlignment="Center" />
+        <TextBlock
+               HorizontalAlignment="Center"
+               VerticalAlignment="Center" 
+               Text="{Binding CurrentSystem, Mode=OneWay}" /> 
     </StackPanel>
 </UserControl>
