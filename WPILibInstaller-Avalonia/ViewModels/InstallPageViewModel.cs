@@ -470,7 +470,7 @@ namespace WPILibInstaller.ViewModels
                             }
                         }
                         return found;
-                    } 
+                    }
                     catch
                     {
                         // Do nothing. We don't want this code to break.
