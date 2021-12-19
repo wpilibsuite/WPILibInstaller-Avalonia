@@ -38,20 +38,34 @@ namespace WPILibInstaller.ViewModels
 
         private bool enableSelectionButtons = true;
 
+        public string SingleDownloadText
+        {
+            get => singleDownloadText;
+            set => this.RaiseAndSetIfChanged(ref singleDownloadText, value);
+        }
+
+        public string SkipVsCodeText
+        {
+            get => skipVsCodeText;
+            set => this.RaiseAndSetIfChanged(ref skipVsCodeText, value);
+        }
+
+        public string AllDownloadText
+        {
+            get => allDownloadText;
+            set => this.RaiseAndSetIfChanged(ref allDownloadText, value);
+        }
+
         public string SelectText
         {
             get => selectText;
             set => this.RaiseAndSetIfChanged(ref selectText, value);
         }
 
-        public string DownloadText
-        {
-            get => downloadText;
-            set => this.RaiseAndSetIfChanged(ref downloadText, value);
-        }
-
-        private string selectText = "Use Downloaded Offline Installer";
-        private string downloadText = "Download VS Code for Offline Install";
+        private string singleDownloadText = "Download for this computer only\n(fastest)";
+        private string skipVsCodeText = "Skip and don't use VS Code\n(NOT RECOMMENDED)";
+        private string allDownloadText = "Create VS Code zip to share with\nother computers/OSes for offline\ninstall";
+        private string selectText = "Select existing VS Code zip for\noffline install on this computer";
 
         public double ProgressBar1
         {
@@ -195,7 +209,7 @@ namespace WPILibInstaller.ViewModels
             catch
             {
                 await MessageBoxManager.GetMessageBoxStandardWindow("Error",
-                    "Correct VS Code not found in archive.\nYou must select a VS Code installer zip downloaded with this tool.",
+                    "Correct VS Code not found in archive.\nYou must select a VS Code zip downloaded with this tool.",
                     icon: MessageBox.Avalonia.Enums.Icon.None).ShowDialog(programWindow.Window);
                 return;
             }
