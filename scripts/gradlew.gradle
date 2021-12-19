@@ -34,7 +34,7 @@ ext.gradleZipTaskSetup = { AbstractArchiveTask zip->
 
     zip.dependsOn downloadGradle
 
-    zip.from ("$buildDir/gradle-7.3-bin.zip") {
+    zip.from ("$buildDir/gradle-7.3.2-bin.zip") {
         into '/installUtils'
     }
 }
