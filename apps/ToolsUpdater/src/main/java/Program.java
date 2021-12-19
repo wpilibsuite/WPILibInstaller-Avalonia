@@ -15,7 +15,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
 
 public class Program {
-  private static void installJavaTool(ToolConfig tool, String mavenDir, String toolsPath) {
+  private static void installJavaTool(ToolConfig tool, String toolsPath) {
     ArtifactConfig artifact = tool.artifact;
     String artifactFileName = artifact.artifactId + '-' + artifact.version;
     if (artifact.classifier != null && !artifact.classifier.isBlank()) {
@@ -23,7 +23,8 @@ public class Program {
     }
     artifactFileName += '.' + artifact.extension;
 
-    Path artifactPath = Paths.get(mavenDir, artifact.groupId.replace('.', File.separatorChar), artifact.artifactId, artifact.version, artifactFileName);
+    Path artifactPath = Paths.get(toolsPath, "artifacts", artifactFileName);
+    System.out.println(artifactPath);
     if (artifactPath.toFile().exists()) {
       try {
         Files.copy(artifactPath, Paths.get(toolsPath, tool.name + ".jar"), StandardCopyOption.REPLACE_EXISTING);
@@ -44,13 +45,13 @@ public class Program {
     }
   }
 
-  private static void installCppTool(ToolConfig tool, String mavenDir, String toolsPath) {
+  private static void installCppTool(ToolConfig tool, String toolsPath) {
     ArtifactConfig artifact = tool.artifact;
     String artifactFileName = artifact.artifactId + '-' + artifact.version;
     artifactFileName += '-' + artifact.classifier;
     artifactFileName += '.' + artifact.extension;
 
-    Path artifactPath = Paths.get(mavenDir, artifact.groupId.replace('.', File.separatorChar), artifact.artifactId, artifact.version, artifactFileName);
+    Path artifactPath = Paths.get(toolsPath, "artifacts", artifactFileName);
     if (artifactPath.toFile().exists()) {
       try {
 
@@ -78,21 +79,18 @@ public class Program {
 
     File toolsDir = new File(Program.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile();
 
-    File homeDir = toolsDir.getParentFile();
-
     String toolsPath = toolsDir.getAbsolutePath();
 
     File jsonFile = new File(toolsDir, "tools.json");
 
-    final String mavenDir = new File(homeDir, "maven").getPath();
-
     try (FileReader reader = new FileReader(jsonFile)) {
       ToolConfig[] tools = gson.fromJson(reader, ToolConfig[].class);
       Arrays.stream(tools).filter(x -> x.isValid()).forEach(tool -> {
+        System.out.println("Installing " + tool.name);
         if (tool.cpp) {
-          installCppTool(tool, mavenDir, toolsPath);
+          installCppTool(tool, toolsPath);
         } else {
-          installJavaTool(tool, mavenDir, toolsPath);
+          installJavaTool(tool, toolsPath);
         }
       });
     }

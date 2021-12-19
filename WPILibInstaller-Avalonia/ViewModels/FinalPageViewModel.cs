@@ -13,10 +13,10 @@ namespace WPILibInstaller.ViewModels
 
         public string FinishText { get; }
 
-        public FinalPageViewModel(IProgramWindow progWindow, IConfigurationProvider configurationProvider, IToInstallProvider toInstallProvider)
+        public FinalPageViewModel(IProgramWindow progWindow, IConfigurationProvider configurationProvider, IVsCodeInstallLocationProvider vsCodeProvider)
             : base("Finish", "")
         {
-            vsCodeInstalled = toInstallProvider.Model.InstallVsCode;
+            vsCodeInstalled = vsCodeProvider.Model.InstallingVsCode;
             if (vsCodeInstalled)
             {
                 if (OperatingSystem.IsMacOS())

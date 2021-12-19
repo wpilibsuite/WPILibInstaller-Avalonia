@@ -378,7 +378,7 @@ namespace WPILibInstaller.ViewModels
 
         public override PageViewModelBase MoveNext()
         {
-            return viewModelResolver.Resolve<VSCodePageViewModel>();
+            return viewModelResolver.Resolve<ConfigurationPageViewModel>();
         }
 
         public IArchiveExtractor ZipArchive { get; private set; }
