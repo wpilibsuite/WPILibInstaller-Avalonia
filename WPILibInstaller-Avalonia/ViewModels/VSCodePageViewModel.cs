@@ -1,12 +1,12 @@
-﻿using MessageBox.Avalonia;
-using ReactiveUI;
-using System;
+﻿using System;
 using System.IO;
 using System.IO.Compression;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using MessageBox.Avalonia;
+using ReactiveUI;
 using WPILibInstaller.Interfaces;
 using WPILibInstaller.Models;
 using WPILibInstaller.Utils;

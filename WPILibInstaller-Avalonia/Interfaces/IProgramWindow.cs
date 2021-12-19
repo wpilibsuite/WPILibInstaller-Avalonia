@@ -1,5 +1,5 @@
-﻿using Avalonia.Controls;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using Avalonia.Controls;
 
 namespace WPILibInstaller.Interfaces
 {

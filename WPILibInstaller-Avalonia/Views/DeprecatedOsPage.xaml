@@ -1,0 +1,33 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="640" d:DesignHeight="400"
+             x:Class="WPILibInstaller.Views.DeprecatedOsPage">
+    <StackPanel HorizontalAlignment="Center"
+              VerticalAlignment="Center">
+        <TextBlock Text="You are using an out of date Operating System or Architecture"
+               HorizontalAlignment="Center"
+               FontWeight="Bold"
+               FontSize="25"
+               VerticalAlignment="Center"
+               TextAlignment="Center"
+               TextWrapping="Wrap"/>
+        <TextBlock Text="You will not be able to install or run WPILib 2023"
+               HorizontalAlignment="Center"
+               FontSize="20"
+               VerticalAlignment="Center" />
+        <TextBlock Text="Please upgrade to at least Windows 10 64 Bit"
+               HorizontalAlignment="Center"
+               FontSize="20"
+               VerticalAlignment="Center" />
+        <TextBlock Text="Click &quot;I Understand&quot; to continue"
+               HorizontalAlignment="Center"
+               FontSize="20"
+               VerticalAlignment="Center" />
+        <TextBlock
+               HorizontalAlignment="Center"
+               VerticalAlignment="Center" 
+               Text="{Binding CurrentSystem, Mode=OneWay}" /> 
+    </StackPanel>
+</UserControl>

@@ -1,10 +1,9 @@
-﻿using Autofac;
-using Avalonia;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using Autofac;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using WPILibInstaller.Interfaces;
 using WPILibInstaller.ViewModels;
 
@@ -29,6 +28,7 @@ namespace WPILibInstaller.Views
             builder.RegisterType<MainWindowViewModel>().SingleInstance().AsSelf().AsImplementedInterfaces();
             builder.RegisterType<StartPageViewModel>().SingleInstance().AsSelf().AsImplementedInterfaces();
             builder.RegisterType<VSCodePageViewModel>().SingleInstance().AsSelf().AsImplementedInterfaces();
+            builder.RegisterType<DeprecatedOsPageViewModel>().SingleInstance().AsSelf().AsImplementedInterfaces();
             builder.RegisterInstance(this).AsImplementedInterfaces();
 
             Container = builder.Build();
