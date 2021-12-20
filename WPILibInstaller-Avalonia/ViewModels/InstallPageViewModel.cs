@@ -480,7 +480,7 @@ namespace WPILibInstaller.ViewModels
                 });
                 if (foundRunningExe)
                 {
-                    string msg = "Running JDK processes have been found. Installation cannot continue. Please restart your computer, and rerun this installer without running thing else (including VS Code)";
+                    string msg = "Running JDK processes have been found. Installation cannot continue. Please restart your computer, and rerun this installer without running anything else (including VS Code)";
                     await MessageBox.Avalonia.MessageBoxManager.GetMessageBoxStandardWindow(new MessageBox.Avalonia.DTO.MessageBoxStandardParams
                     {
                         ContentTitle = "JDKs Running",
