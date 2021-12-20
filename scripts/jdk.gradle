@@ -100,7 +100,7 @@ ext.jdkZipSetup32 = { AbstractArchiveTask zip->
   zip.from(project.zipTree(jdk32File)) {
 
     eachFile { f->
-      f.path = f.path.replace('jdk-11.0.12+7/', 'jdk/')
+      f.path = f.path.replace('jdk-11.0.13+8/', 'jdk/')
     }
 
     eachFile { f->
@@ -142,7 +142,7 @@ ext.jdkZipSetup64 = { AbstractArchiveTask zip->
   zip.from(project.zipTree(jdk64File)) {
 
     eachFile { f->
-      f.path = f.path.replace('jdk-11.0.12+7/', 'jdk/')
+      f.path = f.path.replace('jdk-11.0.13+8/', 'jdk/')
     }
 
     eachFile { f->
@@ -182,7 +182,7 @@ ext.jdkZipSetupLinux = { AbstractArchiveTask zip->
 
   zip.from(project.tarTree(project.resources.gzip(jdkLinuxFile))) {
     eachFile { f->
-      f.path = f.path.replace('jdk-11.0.12+7/', 'jdk/')
+      f.path = f.path.replace('jdk-11.0.13+8/', 'jdk/')
     }
 
     exclude '**/src.zip'
@@ -210,11 +210,11 @@ ext.jdkZipSetupMac = { AbstractArchiveTask zip->
 
   zip.from(project.tarTree(project.resources.gzip(jdkMacFile))) {
     eachFile { f ->
-      f.path = f.path.replace('jdk-11.0.12+7/Contents/Home/', 'jdk/')
+      f.path = f.path.replace('jdk-11.0.13+8/Contents/Home/', 'jdk/')
     }
 
-    exclude './jdk-11.0.12+7/Contents/MacOS/**'
-    exclude './jdk-11.0.12+7/Contents/Info.plist'
+    exclude './jdk-11.0.13+8/Contents/MacOS/**'
+    exclude './jdk-11.0.13+8/Contents/Info.plist'
 
     exclude '**/src.zip'
     exclude '**/bin/*.pdb'
