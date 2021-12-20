@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -740,35 +741,67 @@ namespace WPILibInstaller.ViewModels
                 await File.WriteAllTextAsync(tempFile, serializedData, token);
                 var shortcutCreatorPath = Path.Combine(configurationProvider.InstallDirectory, "installUtils", "WPILibShortcutCreator.exe");
 
-                var startInfo = new ProcessStartInfo(shortcutCreatorPath, $"\"{tempFile}\"")
+                do
                 {
-                    WorkingDirectory = Environment.CurrentDirectory
-                };
-                if (shortcutData.IsAdmin)
-                {
-                    startInfo.UseShellExecute = true;
-                    startInfo.Verb = "runas";
-                }
-                else
-                {
-                    startInfo.UseShellExecute = false;
-                    startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                    startInfo.CreateNoWindow = true;
-                    startInfo.RedirectStandardOutput = true;
-                }
-                var exitCode = await Task.Run(() =>
-                {
-                    var proc = Process.Start(startInfo);
-                    proc!.WaitForExit();
-                    return proc.ExitCode;
-                });
+                    var startInfo = new ProcessStartInfo(shortcutCreatorPath, $"\"{tempFile}\"")
+                    {
+                        WorkingDirectory = Environment.CurrentDirectory
+                    };
+                    if (shortcutData.IsAdmin)
+                    {
+                        startInfo.UseShellExecute = true;
+                        startInfo.Verb = "runas";
+                    }
+                    else
+                    {
+                        startInfo.UseShellExecute = false;
+                        startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                        startInfo.CreateNoWindow = true;
+                        startInfo.RedirectStandardOutput = true;
+                    }
+                    var exitCode = await Task.Run(() =>
+                    {
+                        try
+                        {
+                            var proc = Process.Start(startInfo);
+                            proc!.WaitForExit();
+                            return proc.ExitCode;
+                        }
+                        catch (Win32Exception ex)
+                        {
+                            return ex.NativeErrorCode;
+                        }
+                    });
 
-                if (exitCode != 0)
-                {
-                    var result = await MessageBox.Avalonia.MessageBoxManager.GetMessageBoxStandardWindow("Warning",
-                   "Shortcut creation failed. Error Code: " + exitCode,
-                   icon: MessageBox.Avalonia.Enums.Icon.Warning, @enum: MessageBox.Avalonia.Enums.ButtonEnum.Ok).ShowDialog(programWindow.Window);
-                }
+                    if (exitCode == 1223) // ERROR_CANCLED
+                    {
+                        var results = await MessageBox.Avalonia.MessageBoxManager.GetMessageBoxStandardWindow(new MessageBox.Avalonia.DTO.MessageBoxStandardParams
+                        {
+                            ContentTitle = "UAC Prompt Cancelled",
+                            ContentMessage = "UAC Prompt Cancelled or Timed Out. Would you like to retry?",
+                            Icon = MessageBox.Avalonia.Enums.Icon.Info,
+                            ButtonDefinitions = MessageBox.Avalonia.Enums.ButtonEnum.YesNo
+                        }).ShowDialog(programWindow.Window);
+                        if (results == MessageBox.Avalonia.Enums.ButtonResult.Yes)
+                        {
+                            continue;
+                        }
+                        break;
+                    }
+
+                    if (exitCode != 0)
+                    {
+                        await MessageBox.Avalonia.MessageBoxManager.GetMessageBoxStandardWindow(new MessageBox.Avalonia.DTO.MessageBoxStandardParams
+                        {
+                            ContentTitle = "Shortcut Creation Failed",
+                            ContentMessage = $"Shortcut creation failed with error code {exitCode}",
+                            Icon = MessageBox.Avalonia.Enums.Icon.Warning,
+                            ButtonDefinitions = MessageBox.Avalonia.Enums.ButtonEnum.Ok
+                        }).ShowDialog(programWindow.Window);
+                        break;
+                    }
+                    break;
+                } while (true);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && vsInstallProvider.Model.InstallingVsCode)
             {
