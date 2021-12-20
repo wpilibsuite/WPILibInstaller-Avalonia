@@ -1,7 +1,7 @@
 
 def vscodeFile = file("$buildDir/vscodeConfig.json")
 
-def vsCodeVersion = '1.63.0'
+def vsCodeVersion = '1.63.2'
 
 def wpilibVersion = gradleRioVersion
 
