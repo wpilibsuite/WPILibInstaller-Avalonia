@@ -20,7 +20,7 @@ namespace WPILibInstaller.ViewModels
             }
         }
 
-        private readonly Stack<PageViewModelBase> pages = new ();
+        private readonly Stack<PageViewModelBase> pages = new();
 
         public string? ForwardName => CurrentPage?.ForwardName;
 
