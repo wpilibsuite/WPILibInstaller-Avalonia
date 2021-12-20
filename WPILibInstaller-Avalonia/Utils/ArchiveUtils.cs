@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.IO.Compression;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace WPILibInstaller.Utils

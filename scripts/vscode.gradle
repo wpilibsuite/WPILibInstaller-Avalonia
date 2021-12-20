@@ -1,7 +1,7 @@
 
 def vscodeFile = file("$buildDir/vscodeConfig.json")
 
-def vsCodeVersion = '1.62.3'
+def vsCodeVersion = '1.63.2'
 
 def wpilibVersion = gradleRioVersion
 
@@ -16,13 +16,13 @@ def vscodeLinuxZipName = "Linux.tar.gz"
 def vscodeMacUrl = "https://update.code.visualstudio.com/${vsCodeVersion}/darwin/stable".toString()
 def vscodeMacZipName = "Mac.zip"
 
-def cppWindowsUrl = 'https://github.com/Microsoft/vscode-cpptools/releases/download/1.6.0/cpptools-win32.vsix'
+def cppWindowsUrl = 'https://github.com/Microsoft/vscode-cpptools/releases/download/1.7.1/cpptools-win32.vsix'
 def cppWindowsVsix = 'Cpp.vsix'
 
-def cppMacUrl = 'https://github.com/Microsoft/vscode-cpptools/releases/download/1.6.0/cpptools-osx.vsix'
+def cppMacUrl = 'https://github.com/Microsoft/vscode-cpptools/releases/download/1.7.1/cpptools-osx.vsix'
 def cppMacVsix = 'CppMac.vsix'
 
-def cppLinuxUrl = 'https://github.com/Microsoft/vscode-cpptools/releases/download/1.6.0/cpptools-linux.vsix'
+def cppLinuxUrl = 'https://github.com/Microsoft/vscode-cpptools/releases/download/1.7.1/cpptools-linux.vsix'
 def cppLinuxVsix = 'CppLinux.vsix'
 
 def wpilibExtensionUrl = "https://github.com/wpilibsuite/vscode-wpilib/releases/download/v${wpilibVersion}/vscode-wpilib-${wpilibVersion}.vsix"
@@ -37,10 +37,10 @@ def wpilibUtilLinuxZipName = 'utilitylinux.tar.gz'
 def wpilibUtilMacUrl = "https://github.com/wpilibsuite/vscode-wpilib/releases/download/v${wpilibVersion}/wpilibutility-mac.tar.gz"
 def wpilibUtilMacZipName = 'utilitymac.tar.gz'
 
-def javaDebugUrl = 'https://github.com/microsoft/vscode-java-debug/releases/download/0.35.0/vscjava.vscode-java-debug-0.35.0.vsix'
+def javaDebugUrl = 'https://github.com/microsoft/vscode-java-debug/releases/download/0.37.0/vscjava.vscode-java-debug-0.37.0.vsix'
 def javaDebugVsix = 'JavaDebug.vsix'
 
-def javaLangUrl = 'https://redhat.gallery.vsassets.io/_apis/public/gallery/publisher/redhat/extension/java/0.82.0/assetbyname/Microsoft.VisualStudio.Services.VSIXPackage'
+def javaLangUrl = 'https://github.com/redhat-developer/vscode-java/releases/download/v1.1.0/redhat.java-1.1.0.vsix'
 def javaLangVsix = "JavaLang.vsix"
 
 def javaDepUrl = 'https://github.com/microsoft/vscode-java-dependency/releases/download/0.18.8/vscjava.vscode-java-dependency-0.18.8.vsix'

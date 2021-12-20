@@ -236,7 +236,7 @@ def versionFileTask = tasks.register('writeVersionNumber', Task) {
 }
 
 // Copies the main application to build/outputs.
-def installDirectory = "$projectDir/WPILibInstaller-Avalonia/bin/Release/net6.0/$dotnetRuntime/publish"
+def installDirectory = "$projectDir/WPILibInstaller-Avalonia/bin/Release/net5.0/$dotnetRuntime/publish"
 def macIcon = "$projectDir/WPILibInstaller-Avalonia/wpilib.icns"
 def copyInstallerFiles = tasks.register('copyInstallerFiles', Copy) {
     if (!project.hasProperty("macBuild")) {
@@ -411,5 +411,5 @@ tasks.register('generateInstallers', Task) {
 }
 
 wrapper {
-    gradleVersion = '7.2'
+    gradleVersion = '7.3.2'
 }
