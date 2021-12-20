@@ -770,6 +770,7 @@ namespace WPILibInstaller.ViewModels
             shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "shuffleboard.vbs"), $"{frcYear} WPILib Tools/Shuffleboard {frcYear}", $"Shuffleboard {frcYear}"));
             shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "SmartDashboard.vbs"), $"{frcYear} WPILib Tools/SmartDashboard {frcYear}", $"SmartDashboard {frcYear}"));
             shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "SysId.vbs"), $"{frcYear} WPILib Tools/SysId {frcYear}", $"SysId {frcYear}"));
+            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "roboRIOTeamNumberSetter.vbs"), $"{frcYear} WPILib Tools/roboRIO Team Number Setter {frcYear}", $"roboRIO Team Number Setter {frcYear}"));
 
             shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "Glass.vbs"), $"Programs/{frcYear} WPILib Tools/Glass {frcYear}", $"Glass {frcYear}"));
             shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "OutlineViewer.vbs"), $"Programs/{frcYear} WPILib Tools/OutlineViewer {frcYear}", $"OutlineViewer {frcYear}"));
@@ -779,6 +780,7 @@ namespace WPILibInstaller.ViewModels
             shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "shuffleboard.vbs"), $"Programs/{frcYear} WPILib Tools/Shuffleboard {frcYear}", $"Shuffleboard {frcYear}"));
             shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "SmartDashboard.vbs"), $"Programs/{frcYear} WPILib Tools/SmartDashboard {frcYear}", $"SmartDashboard {frcYear}"));
             shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "SysId.vbs"), $"Programs/{frcYear} WPILib Tools/SysId {frcYear}", $"SysId {frcYear}"));
+            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "roboRIOTeamNumberSetter.vbs"), $"Programs/{frcYear} WPILib Tools/roboRIO Team Number Setter {frcYear}", $"roboRIO Team Number Setter {frcYear}"));
 
             if (toInstallProvider.Model.InstallEverything)
             {
