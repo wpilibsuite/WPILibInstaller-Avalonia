@@ -303,6 +303,7 @@ namespace WPILibInstaller.ViewModels
             SetIfNotSet("extensions.showRecommendationsOnlyOnDemand", false, settingsJson);
             SetIfNotSet("update.channel", "none", settingsJson);
             SetIfNotSet("update.showReleaseNotes", false, settingsJson);
+            SetIfNotSet("http.systemCertificates", false, settingsJson);
 
             string os;
             string path_seperator;
