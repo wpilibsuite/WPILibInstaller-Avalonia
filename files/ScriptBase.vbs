@@ -23,7 +23,7 @@ shellScript = """" + jdkDir + """ -jar """ + fullJarPath + """"
 
 'Create Shell Object
 Set objShell = WScript.CreateObject( "WScript.Shell" )
-dim runObject
+dim runObj
 ' Allow us to catch a script run failure
 On Error Resume Next
 Set runObj = objShell.Exec(shellScript)
@@ -77,6 +77,10 @@ If (runObj.Status <> 0) Then
 	Set fso = Nothing
 	WScript.Quit(2)
 End If
+
+Do While runObj.Status = WshRunning
+    WScript.Sleep 5000
+Loop
 
 Set runObj = Nothing
 Set objShell = Nothing
