@@ -13,7 +13,9 @@ jdk_dir = os.path.join(os.path.dirname(jar_name), "..", "jdk", "bin", "java")
 
 try:
     p = subprocess.Popen(
-        [jdk_dir, "-jar", jar_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        [jdk_dir, "-jar", jar_name],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
     )
 except:
     # Start failed. Try JAVA_HOME.
@@ -25,8 +27,8 @@ except:
     try:
         p = subprocess.Popen(
             [jdk_dir, "-jar", jar_name],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
         )
     except Exception as e:
         # Really error
