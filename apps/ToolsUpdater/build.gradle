@@ -11,8 +11,8 @@ repositories {
 }
 
 dependencies {
-  implementation 'com.google.code.gson:gson:2.8.6'
-  implementation 'net.lingala.zip4j:zip4j:2.6.4'
-  implementation 'commons-io:commons-io:2.8.0'
-  implementation 'org.apache.commons:commons-lang3:3.11'
+  implementation 'com.google.code.gson:gson:2.8.9'
+  implementation 'net.lingala.zip4j:zip4j:2.9.1'
+  implementation 'commons-io:commons-io:2.11.0'
+  implementation 'org.apache.commons:commons-lang3:3.12.0'
 }
