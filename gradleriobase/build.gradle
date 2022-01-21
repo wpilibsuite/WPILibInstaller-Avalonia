@@ -60,7 +60,11 @@ dependencies {
     nativeRelease wpi.java.vendor.jniRelease(wpi.platforms.desktop)
     simulationRelease wpi.sim.enableRelease()
 
-    testImplementation 'junit:junit:4.12'
+    testImplementation('junit:junit') {
+        version {
+            strictly '4.12'
+        }
+    }
 
     // simulation wpi.deps.sim.gui(wpi.platforms.desktop, false)
     // simulation wpi.deps.sim.gui(wpi.platforms.desktop, true)
@@ -128,11 +132,7 @@ def getConfig = { configs, deps->
                 item['extension'] = it.extension
                 def id = it.moduleVersion.id
                 item['groupId'] = id.group
-                if (id.group == 'junit') {
-                    item['version'] = '4.12'
-                } else {
-                    item['version'] = id.version
-                }
+                item['version'] = id.version
                 item['artifactId'] = id.name
                 deps << item
             }
@@ -196,11 +196,7 @@ ext.getGradleRioDependencies = {
         config.allDependencies.each {
             def item = [:];
             item['groupId'] = it.group
-            if (it.group == 'junit') {
-                item['version'] = '4.12'
-            } else {
-                item['version'] = it.version
-            }
+            item['version'] = it.version
             item['artifactId'] = it.name
             item['extension'] = 'pom'
             deps << item
