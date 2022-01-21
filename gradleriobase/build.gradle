@@ -52,7 +52,7 @@ dependencies {
     nativeRelease wpi.java.vendor.jniRelease(wpi.platforms.desktop)
     simulationRelease wpi.sim.enableRelease()
 
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.13.1'
 
     // simulation wpi.deps.sim.gui(wpi.platforms.desktop, false)
     // simulation wpi.deps.sim.gui(wpi.platforms.desktop, true)
@@ -70,6 +70,12 @@ dependencies {
         implementation "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}:x86@zip"
     } else if (project(":").ext.buildClassifier == 'Windows64') {
         implementation "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}:x64@zip"
+    }
+}
+
+configurations.all {
+    resolutionStrategy {
+        failOnVersionConflict()
     }
 }
 
