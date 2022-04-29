@@ -20,8 +20,7 @@ namespace WPILibInstaller.Models
         public string FrcYear { get; set; }
         public string InstallerType { get; set; }
 
-        public const string Windows32InstallerType = "Windows32";
-        public const string Windows64InstallerType = "Windows64";
+        public const string WindowsInstallerType = "Windows";
         public const string LinuxInstallerType = "Linux";
         public const string MacInstallerType = "Mac";
 

@@ -51,15 +51,6 @@ if (project.hasProperty('linuxBuild')) {
     project.ext.archiveType = Tar
     project.ext.isUnix = true
     project.ext.dotnetRuntime = 'osx-x64'
-} else if (project.hasProperty('windows32')) {
-    project.ext.forceNativeClassifier = 'windowsx86'
-    project.ext.forceToolsClassifier = 'win32'
-    project.ext.forceCppToolsClassifier = 'windowsx86'
-    project.ext.buildClassifier = 'Windows32'
-    offlineRepositoryRoot = "$buildDir/dependencies/win32"
-    project.ext.archiveType = Zip
-    project.ext.isUnix = false
-    project.ext.dotnetRuntime = 'win-x86'
 } else {
     project.ext.forceNativeClassifier = 'windowsx86-64'
     project.ext.forceToolsClassifier = 'win64'

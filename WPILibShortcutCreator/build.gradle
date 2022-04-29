@@ -22,7 +22,7 @@ tasks.withType(CppCompile).configureEach {
 
 // Set the target operating system and architecture for this application
 application {
-    targetMachines.add(machines.windows.x86)
+    targetMachines.add(machines.windows.x86_64)
 
     // Add support for windows resources
 binaries.whenElementFinalized { binary ->

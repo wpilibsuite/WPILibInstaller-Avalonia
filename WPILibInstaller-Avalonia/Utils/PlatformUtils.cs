@@ -4,7 +4,6 @@ namespace WPILibInstaller.Utils
 {
     public enum Platform
     {
-        Win32,
         Win64,
         Linux64,
         Mac64,
@@ -46,10 +45,6 @@ namespace WPILibInstaller.Utils
                 if (currentArch == Architecture.X64)
                 {
                     CurrentPlatform = Platform.Win64;
-                }
-                else
-                {
-                    CurrentPlatform = Platform.Win32;
                 }
                 return;
             }
