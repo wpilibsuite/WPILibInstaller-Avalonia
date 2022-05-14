@@ -173,12 +173,6 @@ def downloadNewCommands = tasks.register('downloadNewCommands', Download) {
   overwrite false
 }
 
-def downloadOldCommands = tasks.register('downloadOldCommands', Download) {
-  src 'https://raw.githubusercontent.com/wpilibsuite/allwpilib/master/wpilibOldCommands/WPILibOldCommands.json'
-  dest buildDir
-  overwrite false
-}
-
 ext.mavenZipSetup = { AbstractArchiveTask zip->
   zip.dependsOn updateOfflineRepository
   zip.inputs.dir offlineRepositoryRoot
@@ -187,14 +181,9 @@ ext.mavenZipSetup = { AbstractArchiveTask zip->
   }
 
   zip.dependsOn downloadNewCommands
-  zip.dependsOn downloadOldCommands
   zip.dependsOn downloadReadTheDocs
 
   zip.from("$buildDir/WPILibNewCommands.json") {
-    into '/vendordeps'
-  }
-
-  zip.from("$buildDir/WPILibOldCommands.json") {
     into '/vendordeps'
   }
 
