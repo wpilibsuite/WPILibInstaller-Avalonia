@@ -65,7 +65,6 @@ dependencies {
 
     // commands
     implementation "edu.wpi.first.wpilibNewCommands:wpilibNewCommands-java:${wpi.versions.wpilibVersion.get()}"
-    implementation "edu.wpi.first.wpilibOldCommands:wpilibOldCommands-java:${wpi.versions.wpilibVersion.get()}"
     if (project(":").ext.buildClassifier == 'Windows32') {
         implementation "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}:x86@zip"
     } else if (project(":").ext.buildClassifier == 'Windows64') {
