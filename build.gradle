@@ -55,8 +55,8 @@ if (project.hasProperty('linuxBuild')) {
     project.ext.forceNativeClassifier = 'windowsx86-64'
     project.ext.forceToolsClassifier = 'win64'
     project.ext.forceCppToolsClassifier = 'windowsx86-64'
-    project.ext.buildClassifier = 'Windows64'
-    offlineRepositoryRoot = "$buildDir/dependencies/win64"
+    project.ext.buildClassifier = 'Windows'
+    offlineRepositoryRoot = "$buildDir/dependencies/windows"
     project.ext.archiveType = Zip
     project.ext.isUnix = false
     project.ext.dotnetRuntime = 'win-x64'
