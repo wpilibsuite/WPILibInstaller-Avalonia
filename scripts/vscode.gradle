@@ -5,10 +5,8 @@ def vsCodeVersion = '1.66.2'
 
 def wpilibVersion = gradleRioVersion
 
-def vscode32Url = "https://update.code.visualstudio.com/${vsCodeVersion}/win32-archive/stable".toString()
-def vscode32ZipName = "Windows32.zip".toString()
-def vscode64Url = "https://update.code.visualstudio.com/${vsCodeVersion}/win32-x64-archive/stable".toString()
-def vscode64ZipName = "Windows64.zip".toString()
+def vscodeWindowsUrl = "https://update.code.visualstudio.com/${vsCodeVersion}/win32-x64-archive/stable".toString()
+def vscodeWindowsZipName = "Windows.zip".toString()
 
 def vscodeLinuxUrl = "https://update.code.visualstudio.com/${vsCodeVersion}/linux-x64/stable".toString()
 def vscodeLinuxZipName = "Linux.tar.gz"
@@ -184,10 +182,8 @@ def vscodeTask = tasks.register('vscodeConfig', Task) {
     javaDepMap['vsix'] = javaDepVsix
     getInformationOfVsix(zipTree(javaDepFile), javaDepMap)
 
-    config['VsCode32Url'] = vscode32Url
-    config['VsCode32Name'] = vscode32ZipName
-    config['VsCode64Url'] = vscode64Url
-    config['VsCode64Name'] = vscode64ZipName
+    config['VsCodeWindowsUrl'] = vscodeWindowsUrl
+    config['VsCodeWindowsName'] = vscodeWindowsZipName
     config['VsCodeMacUrl'] = vscodeMacUrl
     config['VsCodeMacName'] = vscodeMacZipName
     config['VsCodeLinuxUrl'] = vscodeLinuxUrl

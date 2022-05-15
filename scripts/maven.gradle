@@ -10,7 +10,6 @@ configurations {
   cppTools
   documentationJava
   documentationCpp
-  runtimex86
   runtimex64
 }
 
@@ -33,9 +32,7 @@ def cppToolsArtifacts = [
 dependencies {
     documentationCpp "edu.wpi.first.wpilibc:documentation:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}@zip"
     documentationJava "edu.wpi.first.wpilibj:documentation:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}@zip"
-    if (project.ext.buildClassifier == 'Windows32') {
-        runtimex86 "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}:x86@zip"
-    } else if (project.ext.buildClassifier == 'Windows64') {
+    if (project.ext.buildClassifier == 'Windows') {
         runtimex64 "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}:x64@zip"
     }
 }
@@ -86,13 +83,7 @@ def lazyEvaluator = tasks.register('lazyModelEvaluation') {
         if (dep.classifier == null) {
          offline "$dep.groupId:$dep.artifactId:$dep.version:@$dep.extension"
         } else if (dep.classifier.startsWith(project.ext.forceNativeClassifier)) {
-         // Special case win 32
-         if (project.ext.forceNativeClassifier == 'windowsx86') {
-           def cls = dep.classifier.replace('windowsx86-64', 'windowsx86')
-           offline "$dep.groupId:$dep.artifactId:$dep.version:$cls@$dep.extension"
-         } else {
-           offline "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
-         }
+         offline "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
         } else if (dep.classifier.contains('athena')) {
          offline "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
         } else if (dep.classifier.contains('headers')) {
@@ -202,11 +193,7 @@ ext.mavenZipSetup = { AbstractArchiveTask zip->
     into '/tools/artifacts'
   }
 
-  if (project.ext.buildClassifier == 'Windows32') {
-    zip.from(project.zipTree(configurations.runtimex86.resolvedConfiguration.resolvedArtifacts.first().file)) {
-      into '/tools'
-    }
-  } else if (project.ext.buildClassifier == 'Windows64') {
+  if (project.ext.buildClassifier == 'Windows') {
     zip.from(project.zipTree(configurations.runtimex64.resolvedConfiguration.resolvedArtifacts.first().file)) {
       into '/tools'
     }

@@ -20,40 +20,27 @@ def downloadMacJdk = tasks.register('downloadMacJdk', Download) {
 
 def jdkMacFile = file("$buildDir/OpenJDK11U-jdk_x64_mac_hotspot_11.0.13_8.tar.gz")
 
-def download32BitJdk = tasks.register('download32BitJdk', Download) {
-  src 'https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.13%2B8/OpenJDK11U-jdk_x86-32_windows_hotspot_11.0.13_8.zip'
-  dest buildDir
-  overwrite false
-}
-
-def jdk32File = file("$buildDir/OpenJDK11U-jdk_x86-32_windows_hotspot_11.0.13_8.zip")
-
-def download64BitJdk = tasks.register('download64BitJdk', Download) {
+def downloadWindowsJdk = tasks.register('downloadWindowsJdk', Download) {
   src 'https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.13%2B8/OpenJDK11U-jdk_x64_windows_hotspot_11.0.13_8.zip'
   dest buildDir
   overwrite false
 }
 
-def jdk64File = file("$buildDir/OpenJDK11U-jdk_x64_windows_hotspot_11.0.13_8.zip")
+def jdkWindowsFile = file("$buildDir/OpenJDK11U-jdk_x64_windows_hotspot_11.0.13_8.zip")
 
 configurations {
-  runtimex86
   runtimex64
 }
 
 dependencies {
-    if (project.ext.buildClassifier == 'Windows32') {
-        runtimex86 "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.versions.wpilibVersion}:x86@zip"
-    } else if (project.ext.buildClassifier == 'Windows64') {
+    if (project.ext.buildClassifier == 'Windows') {
         runtimex64 "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.versions.wpilibVersion}:x64@zip"
     }
 }
 
 def runtimeExtractTask = tasks.register('copyAndExtractRuntime', Copy) {
   into 'build/runtime'
-  if (project.ext.buildClassifier == 'Windows32') {
-    from(project.zipTree(configurations.runtimex86.resolvedConfiguration.resolvedArtifacts.first().file))
-  } else if (project.ext.buildClassifier == 'Windows64') {
+  if (project.ext.buildClassifier == 'Windows') {
     from(project.zipTree(configurations.runtimex64.resolvedConfiguration.resolvedArtifacts.first().file))
   }
 }
@@ -89,57 +76,15 @@ ext.jdkConfigFileSetup = { AbstractArchiveTask zip->
   }
 }
 
-ext.jdkZipSetup32 = { AbstractArchiveTask zip->
-  zip.dependsOn download32BitJdk
+ext.jdkZipSetupWindows = { AbstractArchiveTask zip->
+  zip.dependsOn downloadWindowsJdk
   zip.dependsOn jdkConfigFileTask
   zip.dependsOn runtimeExtractTask
 
-  zip.inputs.file jdk32File
+  zip.inputs.file jdkWindowsFile
   zip.inputs.file jdkConfigFile
 
-  zip.from(project.zipTree(jdk32File)) {
-
-    eachFile { f->
-      f.path = f.path.replace('jdk-11.0.13+8/', 'jdk/')
-    }
-
-    eachFile { f->
-      file('build/runtime').eachFile {
-        if (f.name.endsWith(it.name)) {
-          f.exclude()
-        }
-      }
-    }
-
-    exclude '**/src.zip'
-    exclude '**/bin/*.pdb'
-    exclude '**/bin/*.map'
-    exclude '**/bin/server/*.pdb'
-    exclude '**/bin/server/*.map'
-    exclude '**/demo/**'
-
-    includeEmptyDirs = false
-  }
-
-  zip.from (runtimeExtractTask.get()) {
-    into '/jdk/bin'
-  }
-
-  zip.from(jdkConfigFile) {
-    into '/installUtils'
-    rename {'jdkConfig.json'}
-  }
-}
-
-ext.jdkZipSetup64 = { AbstractArchiveTask zip->
-  zip.dependsOn download64BitJdk
-  zip.dependsOn jdkConfigFileTask
-  zip.dependsOn runtimeExtractTask
-
-  zip.inputs.file jdk64File
-  zip.inputs.file jdkConfigFile
-
-  zip.from(project.zipTree(jdk64File)) {
+  zip.from(project.zipTree(jdkWindowsFile)) {
 
     eachFile { f->
       f.path = f.path.replace('jdk-11.0.13+8/', 'jdk/')
@@ -237,9 +182,7 @@ ext.jdkZipSetup = { AbstractArchiveTask zip ->
     jdkZipSetupLinux(zip)
   } else if (project.hasProperty('macBuild')) {
     jdkZipSetupMac(zip)
-  } else if (project.hasProperty('windows32')) {
-    jdkZipSetup32(zip)
   } else {
-    jdkZipSetup64(zip)
+    jdkZipSetupWindows(zip)
   }
 }

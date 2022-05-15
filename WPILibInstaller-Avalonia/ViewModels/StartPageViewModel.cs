@@ -246,19 +246,9 @@ namespace WPILibInstaller.ViewModels
             // TODO Handle Arm someday
             if (OperatingSystem.IsWindows())
             {
-                if (IntPtr.Size == 8)
+                if (UpgradeConfig.InstallerType != UpgradeConfig.WindowsInstallerType)
                 {
-                    if (UpgradeConfig.InstallerType != UpgradeConfig.Windows64InstallerType)
-                    {
-                        return UpgradeConfig.Windows64InstallerType;
-                    }
-                }
-                else
-                {
-                    if (UpgradeConfig.InstallerType != UpgradeConfig.Windows32InstallerType)
-                    {
-                        return UpgradeConfig.Windows32InstallerType;
-                    }
+                    return UpgradeConfig.WindowsInstallerType;
                 }
             }
             else if (OperatingSystem.IsMacOS())
@@ -348,8 +338,7 @@ namespace WPILibInstaller.ViewModels
             get
             {
                 VsCodeModel model = new VsCodeModel(VsCodeConfig.VsCodeVersion);
-                model.Platforms.Add(Utils.Platform.Win32, new VsCodeModel.PlatformData(VsCodeConfig.VsCode32Url, VsCodeConfig.VsCode32Name));
-                model.Platforms.Add(Utils.Platform.Win64, new VsCodeModel.PlatformData(VsCodeConfig.VsCode64Url, VsCodeConfig.VsCode64Name));
+                model.Platforms.Add(Utils.Platform.Win64, new VsCodeModel.PlatformData(VsCodeConfig.VsCodeWindowsUrl, VsCodeConfig.VsCodeWindowsName));
                 model.Platforms.Add(Utils.Platform.Linux64, new VsCodeModel.PlatformData(VsCodeConfig.VsCodeLinuxUrl, VsCodeConfig.VsCodeLinuxName));
                 model.Platforms.Add(Utils.Platform.Mac64, new VsCodeModel.PlatformData(VsCodeConfig.VsCodeMacUrl, VsCodeConfig.VsCodeMacName));
                 return model;

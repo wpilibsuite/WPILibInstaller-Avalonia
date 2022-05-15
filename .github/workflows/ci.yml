@@ -17,9 +17,6 @@ jobs:
           - os: windows-latest
             artifact-name: Win64
             build-options: ""
-          - os: windows-latest
-            artifact-name: Win32
-            build-options: "-Pwindows32"
 
     name: "Build - ${{ matrix.artifact-name }}"
     runs-on: ${{ matrix.os }}
