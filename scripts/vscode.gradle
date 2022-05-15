@@ -11,7 +11,7 @@ def vscodeWindowsZipName = "Windows.zip".toString()
 def vscodeLinuxUrl = "https://update.code.visualstudio.com/${vsCodeVersion}/linux-x64/stable".toString()
 def vscodeLinuxZipName = "Linux.tar.gz"
 
-def vscodeMacUrl = "https://update.code.visualstudio.com/${vsCodeVersion}/darwin/stable".toString()
+def vscodeMacUrl = "https://update.code.visualstudio.com/${vsCodeVersion}/darwin-universal/stable".toString()
 def vscodeMacZipName = "Mac.zip"
 
 def cppWindowsUrl = 'https://github.com/Microsoft/vscode-cpptools/releases/download/1.7.1/cpptools-win32.vsix'
