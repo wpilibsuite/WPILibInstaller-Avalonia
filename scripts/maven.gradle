@@ -17,7 +17,6 @@ def toolArtifacts = [
   'edu.wpi.first.shuffleboard:shuffleboard',
   'edu.wpi.first.tools:SmartDashboard',
   'edu.wpi.first.tools:RobotBuilder',
-  'edu.wpi.first.tools:RobotBuilder-Old',
   'edu.wpi.first.tools:PathWeaver'
 ]
 
