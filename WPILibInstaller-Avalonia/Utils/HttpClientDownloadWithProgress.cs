@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace WPILibInstaller.Utils
@@ -23,25 +22,25 @@ namespace WPILibInstaller.Utils
             _destinationStream = output;
         }
 
-        public async Task<bool> StartDownload(CancellationToken token)
+        public async Task StartDownload()
         {
             _httpClient = new HttpClient { Timeout = TimeSpan.FromDays(1) };
 
             using var response = await _httpClient.GetAsync(_downloadUrl, HttpCompletionOption.ResponseHeadersRead);
-            return await DownloadFileFromHttpResponseMessage(response, token);
+            await DownloadFileFromHttpResponseMessage(response);
         }
 
-        private async Task<bool> DownloadFileFromHttpResponseMessage(HttpResponseMessage response, CancellationToken token)
+        private async Task DownloadFileFromHttpResponseMessage(HttpResponseMessage response)
         {
             response.EnsureSuccessStatusCode();
 
             var totalBytes = response.Content.Headers.ContentLength;
 
             using var contentStream = await response.Content.ReadAsStreamAsync();
-            return await ProcessContentStream(totalBytes, contentStream, token);
+            await ProcessContentStream(totalBytes, contentStream);
         }
 
-        private async Task<bool> ProcessContentStream(long? totalDownloadSize, Stream contentStream, CancellationToken token)
+        private async Task ProcessContentStream(long? totalDownloadSize, Stream contentStream)
         {
             var totalBytesRead = 0L;
             var readCount = 0L;
@@ -66,12 +65,7 @@ namespace WPILibInstaller.Utils
                 if (readCount % 100 == 0)
                     TriggerProgressChanged(totalDownloadSize, totalBytesRead);
             }
-            while (isMoreToRead && !token.IsCancellationRequested);
-            if (token.IsCancellationRequested)
-            {
-                return false;
-            }
-            return true;
+            while (isMoreToRead);
         }
 
         private void TriggerProgressChanged(long? totalDownloadSize, long totalBytesRead)

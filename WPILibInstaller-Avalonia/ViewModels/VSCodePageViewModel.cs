@@ -3,7 +3,6 @@ using System.IO;
 using System.IO.Compression;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using MessageBox.Avalonia;
 using ReactiveUI;
@@ -237,9 +236,9 @@ namespace WPILibInstaller.ViewModels
             EnableSelectionButtons = false;
             SetLocalForwardVisible(false);
 
-            var win64 = DownloadToMemoryStream(Platform.Win64, Model.Platforms[Platform.Win64].DownloadUrl, CancellationToken.None, (d) => ProgressBar2 = d);
-            var linux64 = DownloadToMemoryStream(Platform.Linux64, Model.Platforms[Platform.Linux64].DownloadUrl, CancellationToken.None, (d) => ProgressBar3 = d);
-            var mac64 = DownloadToMemoryStream(Platform.Mac64, Model.Platforms[Platform.Mac64].DownloadUrl, CancellationToken.None, (d) => ProgressBar4 = d);
+            var win64 = DownloadToMemoryStream(Platform.Win64, Model.Platforms[Platform.Win64].DownloadUrl, (d) => ProgressBar2 = d);
+            var linux64 = DownloadToMemoryStream(Platform.Linux64, Model.Platforms[Platform.Linux64].DownloadUrl, (d) => ProgressBar3 = d);
+            var mac64 = DownloadToMemoryStream(Platform.Mac64, Model.Platforms[Platform.Mac64].DownloadUrl, (d) => ProgressBar4 = d);
 
             var results = await Task.WhenAll(win64, linux64, mac64);
 
@@ -261,8 +260,6 @@ namespace WPILibInstaller.ViewModels
             MemoryStream? ms = null;
 
             DoneText = "Copying Archives. Please wait.";
-
-
             foreach (var (stream, platform) in results)
             {
                 var entry = archive.CreateEntry(Model.Platforms[platform].NameInZip);
@@ -305,46 +302,32 @@ namespace WPILibInstaller.ViewModels
             SetLocalForwardVisible(false);
             ProgressBar1Visible = true;
 
-            var (stream, platform) = await DownloadToMemoryStream(currentPlatform, url, CancellationToken.None, (d) => ProgressBar1 = d);
-            if (stream != null)
+            var (stream, platform) = await DownloadToMemoryStream(currentPlatform, url, (d) => ProgressBar1 = d);
+            Console.WriteLine("Trying to open archive");
+
+            if (OperatingSystem.IsMacOS())
             {
-                Console.WriteLine("Trying to open archive");
-
-                if (OperatingSystem.IsMacOS())
-                {
-                    Model.ToExtractArchiveMacOs = stream;
-                }
-                else
-                {
-                    Model.ToExtractArchive = OpenArchive(stream);
-                }
-
-                DoneText = "Done Downloading. Press Next to continue";
-                EnableSelectionButtons = true;
-                SetLocalForwardVisible(true);
-                refresher.RefreshForwardBackProperties();
+                Model.ToExtractArchiveMacOs = stream;
             }
             else
             {
-                Console.WriteLine("Failed");
-                EnableSelectionButtons = true;
-                if (Model.AlreadyInstalled)
-                {
-                    SetLocalForwardVisible(true);
-                }
-                ; // TODO Fail
+                Model.ToExtractArchive = OpenArchive(stream);
             }
+
+            DoneText = "Done Downloading. Press Next to continue";
+            EnableSelectionButtons = true;
+            SetLocalForwardVisible(true);
+            refresher.RefreshForwardBackProperties();
         }
 
-        private async Task<(MemoryStream? stream, Platform platform)> DownloadToMemoryStream(Platform platform, string downloadUrl, CancellationToken token, Action<double> progressChanged)
+        private async Task<(MemoryStream stream, Platform platform)> DownloadToMemoryStream(Platform platform, string downloadUrl, Action<double> progressChanged)
         {
             MemoryStream ms = new MemoryStream(100000000);
-            var successful = await DownloadForPlatform(downloadUrl, ms, token, progressChanged);
-            if (successful) return (ms, platform);
-            return (null, platform);
+            await DownloadForPlatform(downloadUrl, ms, progressChanged);
+            return (ms, platform);
         }
 
-        private async Task<bool> DownloadForPlatform(string downloadUrl, Stream outputStream, CancellationToken token, Action<double> progressChanged)
+        private async Task DownloadForPlatform(string downloadUrl, Stream outputStream, Action<double> progressChanged)
         {
             using var client = new HttpClientDownloadWithProgress(downloadUrl, outputStream);
             client.ProgressChanged += (totalFileSize, totalBytesDownloaded, progressPercentage) =>
@@ -355,7 +338,7 @@ namespace WPILibInstaller.ViewModels
                 }
             };
 
-            return await client.StartDownload(token);
+            await client.StartDownload();
         }
 
         public override PageViewModelBase MoveNext()
