@@ -336,7 +336,7 @@ def linuxCreateImageTask = tasks.register('createLinuxImage', Tar) {
     dependsOn copyInstallerFiles
     dependsOn generateConfigFiles
 
-    extension = 'tar.gz'
+    archiveExtension = 'tar.gz'
     compression = Compression.GZIP
 
     inputs.dir "$buildDir/outputs"
