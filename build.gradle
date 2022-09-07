@@ -62,7 +62,7 @@ if (project.hasProperty('linuxBuild')) {
     project.ext.dotnetRuntime = 'win-x64'
 }
 
-ext.frcYear = '2022'
+ext.frcYear = '2023'
 
 apply from: 'scripts/gradlew.gradle'
 apply from: 'scripts/installer.gradle'
