@@ -5,28 +5,28 @@ apply plugin: 'de.undercouch.download'
 
 
 def downloadLinuxJdk = tasks.register('downloadLinuxJdk', Download) {
-  src 'https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.13%2B8/OpenJDK11U-jdk_x64_linux_hotspot_11.0.13_8.tar.gz'
+  src 'https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.4.1%2B1/OpenJDK17U-jdk_x64_linux_hotspot_17.0.4.1_1.tar.gz'
   dest buildDir
   overwrite false
 }
 
-def jdkLinuxFile = file("$buildDir/OpenJDK11U-jdk_x64_linux_hotspot_11.0.13_8.tar.gz")
+def jdkLinuxFile = file("$buildDir/OpenJDK17U-jdk_x64_linux_hotspot_17.0.4.1_1.tar.gz")
 
 def downloadMacJdk = tasks.register('downloadMacJdk', Download) {
-  src 'https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.13%2B8/OpenJDK11U-jdk_x64_mac_hotspot_11.0.13_8.tar.gz'
+  src 'https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.4.1%2B1/OpenJDK17U-jdk_x64_mac_hotspot_17.0.4.1_1.tar.gz'
   dest buildDir
   overwrite false
 }
 
-def jdkMacFile = file("$buildDir/OpenJDK11U-jdk_x64_mac_hotspot_11.0.13_8.tar.gz")
+def jdkMacFile = file("$buildDir/OpenJDK17U-jdk_x64_mac_hotspot_17.0.4.1_1.tar.gz")
 
 def downloadWindowsJdk = tasks.register('downloadWindowsJdk', Download) {
-  src 'https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.13%2B8/OpenJDK11U-jdk_x64_windows_hotspot_11.0.13_8.zip'
+  src 'https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.4.1%2B1/OpenJDK17U-jdk_x64_windows_hotspot_17.0.4.1_1.zip'
   dest buildDir
   overwrite false
 }
 
-def jdkWindowsFile = file("$buildDir/OpenJDK11U-jdk_x64_windows_hotspot_11.0.13_8.zip")
+def jdkWindowsFile = file("$buildDir/OpenJDK17U-jdk_x64_windows_hotspot_17.0.4.1_1.zip")
 
 configurations {
   runtimex64
@@ -87,7 +87,7 @@ ext.jdkZipSetupWindows = { AbstractArchiveTask zip->
   zip.from(project.zipTree(jdkWindowsFile)) {
 
     eachFile { f->
-      f.path = f.path.replace('jdk-11.0.13+8/', 'jdk/')
+      f.path = f.path.replace('jdk-17.0.4.1+1/', 'jdk/')
     }
 
     eachFile { f->
@@ -127,7 +127,7 @@ ext.jdkZipSetupLinux = { AbstractArchiveTask zip->
 
   zip.from(project.tarTree(project.resources.gzip(jdkLinuxFile))) {
     eachFile { f->
-      f.path = f.path.replace('jdk-11.0.13+8/', 'jdk/')
+      f.path = f.path.replace('jdk-17.0.4.1+1/', 'jdk/')
     }
 
     exclude '**/src.zip'
@@ -155,11 +155,11 @@ ext.jdkZipSetupMac = { AbstractArchiveTask zip->
 
   zip.from(project.tarTree(project.resources.gzip(jdkMacFile))) {
     eachFile { f ->
-      f.path = f.path.replace('jdk-11.0.13+8/Contents/Home/', 'jdk/')
+      f.path = f.path.replace('jdk-17.0.4.1+1/Contents/Home/', 'jdk/')
     }
 
-    exclude './jdk-11.0.13+8/Contents/MacOS/**'
-    exclude './jdk-11.0.13+8/Contents/Info.plist'
+    exclude './jdk-17.0.4.1+1/Contents/MacOS/**'
+    exclude './jdk-17.0.4.1+1/Contents/Info.plist'
 
     exclude '**/src.zip'
     exclude '**/bin/*.pdb'
