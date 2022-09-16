@@ -57,7 +57,7 @@ def utilityFile
 if (project.hasProperty('linuxBuild')) {
   cppFile = file("$buildDir/$cppLinuxVsix")
   utilityFile = file("$buildDir/$wpilibUtilLinuxZipName")
-} else if (project.hasProperty('macBuild')) {
+} else if (project.hasProperty('macBuild') || project.hasProperty('macBuildArm')) {
   cppFile = file("$buildDir/$cppMacVsix")
   utilityFile = file("$buildDir/$wpilibUtilMacZipName")
 } else {
@@ -96,7 +96,7 @@ if (project.hasProperty('standaloneLoc')) {
 
     if (project.hasProperty('linuxBuild')) {
       src wpilibUtilLinuxUrl
-    } else if (project.hasProperty('macBuild')) {
+    } else if (project.hasProperty('macBuild') || project.hasProperty('macBuildArm')) {
       src wpilibUtilMacUrl
     } else {
       src wpilibUtilWinUrl
@@ -235,7 +235,7 @@ ext.vscodeZipSetup = { AbstractArchiveTask zip->
       into '/utility'
       includeEmptyDirs = false
     }
-  } else if (project.hasProperty('macBuild')) {
+  } else if (project.hasProperty('macBuild') || project.hasProperty('macBuildArm')) {
     // Mac
     // Cannot extract, otherwise mac borks
     zip.from (utilityFile) {

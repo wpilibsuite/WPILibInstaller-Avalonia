@@ -7,6 +7,7 @@ namespace WPILibInstaller.Utils
         Win64,
         Linux64,
         Mac64,
+        MacArm64,
         Invalid
     }
 
@@ -17,7 +18,7 @@ namespace WPILibInstaller.Utils
             CurrentPlatform = Platform.Invalid;
 
             var currentArch = RuntimeInformation.OSArchitecture;
-            if (currentArch != Architecture.X64 && currentArch != Architecture.X86)
+            if (currentArch != Architecture.X64 && currentArch != Architecture.Arm64)
             {
                 return;
             }
@@ -36,6 +37,10 @@ namespace WPILibInstaller.Utils
                 if (currentArch == Architecture.X64)
                 {
                     CurrentPlatform = Platform.Mac64;
+                }
+                else
+                {
+                    CurrentPlatform = Platform.MacArm64;
                 }
                 return;
             }

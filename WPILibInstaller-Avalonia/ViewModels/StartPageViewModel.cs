@@ -253,10 +253,21 @@ namespace WPILibInstaller.ViewModels
             }
             else if (OperatingSystem.IsMacOS())
             {
-                if (UpgradeConfig.InstallerType != UpgradeConfig.MacInstallerType)
+                if (PlatformUtils.CurrentPlatform == Platform.MacArm64)
                 {
-                    return UpgradeConfig.MacInstallerType;
+                    if (UpgradeConfig.InstallerType != UpgradeConfig.MacArmInstallerType)
+                    {
+                        return UpgradeConfig.MacArmInstallerType;
+                    }
                 }
+                else
+                {
+                    if (UpgradeConfig.InstallerType != UpgradeConfig.MacInstallerType)
+                    {
+                        return UpgradeConfig.MacInstallerType;
+                    }
+                }
+
             }
             else if (OperatingSystem.IsLinux())
             {
@@ -341,6 +352,7 @@ namespace WPILibInstaller.ViewModels
                 model.Platforms.Add(Utils.Platform.Win64, new VsCodeModel.PlatformData(VsCodeConfig.VsCodeWindowsUrl, VsCodeConfig.VsCodeWindowsName));
                 model.Platforms.Add(Utils.Platform.Linux64, new VsCodeModel.PlatformData(VsCodeConfig.VsCodeLinuxUrl, VsCodeConfig.VsCodeLinuxName));
                 model.Platforms.Add(Utils.Platform.Mac64, new VsCodeModel.PlatformData(VsCodeConfig.VsCodeMacUrl, VsCodeConfig.VsCodeMacName));
+                model.Platforms.Add(Utils.Platform.MacArm64, new VsCodeModel.PlatformData(VsCodeConfig.VsCodeMacUrl, VsCodeConfig.VsCodeMacName));
                 return model;
             }
         }
