@@ -34,6 +34,7 @@ println pubVersion
 project.ext.setProperty('toolchain-optional-roboRio', '')
 
 if (project.hasProperty('linuxBuild')) {
+    project.ext.forcePlatform = 'linuxx86'
     project.ext.forceNativeClassifier = 'linuxx86-64'
     project.ext.forceToolsClassifier = 'linux64'
     project.ext.forceCppToolsClassifier = 'linuxx86-64'
@@ -43,6 +44,7 @@ if (project.hasProperty('linuxBuild')) {
     project.ext.isUnix = true
     project.ext.dotnetRuntime = 'linux-x64'
 } else if (project.hasProperty('macBuild')) {
+    project.ext.forcePlatform = 'osx'
     project.ext.forceNativeClassifier = 'osxx86-64'
     project.ext.forceToolsClassifier = 'mac64'
     project.ext.forceCppToolsClassifier = 'osxx86-64'
@@ -52,7 +54,7 @@ if (project.hasProperty('linuxBuild')) {
     project.ext.isUnix = true
     project.ext.dotnetRuntime = 'osx-x64'
 } else if (project.hasProperty('macBuildArm')) {
-    println "Building For Mac Arm"
+    project.ext.forcePlatform = 'osx'
     project.ext.forceNativeClassifier = 'osxaarch64'
     project.ext.forceToolsClassifier = 'mac64'
     project.ext.forceCppToolsClassifier = 'osxaarch64'
@@ -62,6 +64,7 @@ if (project.hasProperty('linuxBuild')) {
     project.ext.isUnix = true
     project.ext.dotnetRuntime = 'osx-arm64'
 } else {
+    project.ext.forcePlatform = 'windows'
     project.ext.forceNativeClassifier = 'windowsx86-64'
     project.ext.forceToolsClassifier = 'win64'
     project.ext.forceCppToolsClassifier = 'windowsx86-64'
