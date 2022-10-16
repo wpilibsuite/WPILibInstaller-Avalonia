@@ -35,8 +35,7 @@ dependencies {
     documentationCpp "edu.wpi.first.wpilibc:documentation:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}@zip"
     documentationJava "edu.wpi.first.wpilibj:documentation:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}@zip"
     if (project.ext.buildClassifier == 'Windows') {
-        //runtimex64 "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}:x64@zip"
-        runtimex64 "edu.wpi.first.msvc:runtime:2022.4.1:x64@zip"
+        runtimex64 "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}:x64@zip"
     }
 }
 
