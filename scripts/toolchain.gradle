@@ -8,12 +8,12 @@ def fileNameWindows = "cortexa9_vfpv3-roborio-academic-2023-x86_64-w64-mingw32-T
 def downloadUrlWindows = baseUrl + fileNameWindows
 def fileWindows = file("$buildDir/$fileNameWindows")
 
-def fileNameMac = "cortexa9_vfpv3-roborio-academic-2023-x86_64-apple-darwin-Toolchain-${gccVersion}.zip"
+def fileNameMac = "cortexa9_vfpv3-roborio-academic-2023-x86_64-apple-darwin-Toolchain-${gccVersion}.tgz"
 
 def downloadUrlMac = baseUrl + fileNameMac
 def fileMac = file("$buildDir/$fileNameMac")
 
-def fileNameLinux = "cortexa9_vfpv3-roborio-academic-2023-x86_64-linux-gnu-Toolchain-${gccVersion}.zip"
+def fileNameLinux = "cortexa9_vfpv3-roborio-academic-2023-x86_64-linux-gnu-Toolchain-${gccVersion}.tgz"
 
 def downloadUrlLinux = baseUrl + fileNameLinux
 def fileLinux = file("$buildDir/$fileNameLinux")
