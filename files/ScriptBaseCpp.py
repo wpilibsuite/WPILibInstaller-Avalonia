@@ -13,7 +13,7 @@ if platform.system() == "Linux":
     exe_path, exe_name = os.path.split(exe_name)
     cmd = [os.path.join(exe_path, exe_name.lower())]
 elif platform.system() == "Darwin":
-    cmd = ["open", exe_name + ".app"]
+    cmd = ["open", exe_name + ".app", "--args"]
 elif platform.system() == "Windows":
     cmd = [exe_name + ".exe"]
 else:
