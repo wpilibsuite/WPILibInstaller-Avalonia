@@ -13,6 +13,11 @@ def fileNameMac = "cortexa9_vfpv3-roborio-academic-2023-x86_64-apple-darwin-Tool
 def downloadUrlMac = baseUrl + fileNameMac
 def fileMac = file("$buildDir/$fileNameMac")
 
+def fileNameMacArm = "cortexa9_vfpv3-roborio-academic-2023-arm64-apple-darwin-Toolchain-${gccVersion}.tgz"
+
+def downloadUrlMacArm = baseUrl + fileNameMacArm
+def fileMacArm = file("$buildDir/$fileNameMacArm")
+
 def fileNameLinux = "cortexa9_vfpv3-roborio-academic-2023-x86_64-linux-gnu-Toolchain-${gccVersion}.tgz"
 
 def downloadUrlLinux = baseUrl + fileNameLinux
@@ -28,6 +33,12 @@ def downloadTaskWindows = tasks.register('downloadToolchainWindows', Download) {
 
 def downloadTaskMac = tasks.register('downloadToolchainMac', Download) {
   src downloadUrlMac
+  dest buildDir
+  overwrite false
+}
+
+def downloadTaskMacArm = tasks.register('downloadToolchainMacArm', Download) {
+  src downloadUrlMacArm
   dest buildDir
   overwrite false
 }
@@ -66,12 +77,25 @@ ext.toolchainZipSetup = { AbstractArchiveTask zip->
       includeEmptyDirs = false
     }
 
-  } else if (project.hasProperty('macBuild') || project.hasProperty('macBuildArm')) {
+  } else if (project.hasProperty('macBuild')) {
     zip.dependsOn downloadTaskMac
 
     zip.inputs.file fileMac
 
     zip.from(project.tarTree(project.resources.gzip(fileMac))) {
+
+      eachFile { f->
+        f.path = f.path.replace('roborio-academic/', 'roborio/')
+      }
+
+      includeEmptyDirs = false
+    }
+  } else if (project.hasProperty('macBuildArm')) {
+    zip.dependsOn downloadTaskMacArm
+
+    zip.inputs.file fileMacArm
+
+    zip.from(project.tarTree(project.resources.gzip(fileMacArm))) {
 
       eachFile { f->
         f.path = f.path.replace('roborio-academic/', 'roborio/')
