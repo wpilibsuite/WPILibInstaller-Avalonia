@@ -398,11 +398,15 @@ def macCreateImageTask = tasks.register('createMacImage', Task) {
 
         // Create disk image.
         println "Creating disk image..."
+        def diskArch = "macOS-Intel"
+        if (project.hasProperty('macBuildArm')) {
+            diskArch = "macOS-Arm64"
+        }
         exec { commandLine "mkdir", "-p", "$buildDir/pubOutputs" }
         exec {
             commandLine "hdiutil", "create", "-volname", "WPILibInstaller",
                     "-srcfolder", "$buildDir/outputs/", "-format", "UDRO",
-                    "WPILib_macOS-${pubVersion}.dmg"
+                    "WPILib_${diskArch}-${pubVersion}.dmg"
 
             workingDir "$buildDir/pubOutputs"
         }
