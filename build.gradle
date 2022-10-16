@@ -55,9 +55,9 @@ if (project.hasProperty('linuxBuild')) {
     project.ext.dotnetRuntime = 'osx-x64'
 } else if (project.hasProperty('macBuildArm')) {
     project.ext.forcePlatform = 'osx'
-    project.ext.forceNativeClassifier = 'osxaarch64'
+    project.ext.forceNativeClassifier = 'osxarm64'
     project.ext.forceToolsClassifier = 'macarm64'
-    project.ext.forceCppToolsClassifier = 'osxaarch64'
+    project.ext.forceCppToolsClassifier = 'osxarm64'
     project.ext.buildClassifier = 'MacArm'
     offlineRepositoryRoot = "$buildDir/dependencies/mac"
     project.ext.archiveType = Tar
