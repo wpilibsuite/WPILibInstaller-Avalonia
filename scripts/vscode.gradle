@@ -7,7 +7,7 @@ def javaExtVersion = '1.9.0'
 def javaDebugVersion = '0.43.0'
 def javaDependencyVersion = '0.21.0'
 
-def wpilibVersion = gradleRioVersion
+def wpilibVersion = '2023.0.0-alpha-1' // TODO revert this line to gradleRioVersion
 
 def vscodeWindowsUrl = "https://update.code.visualstudio.com/${vsCodeVersion}/win32-x64-archive/stable".toString()
 def vscodeWindowsZipName = "Windows.zip".toString()
