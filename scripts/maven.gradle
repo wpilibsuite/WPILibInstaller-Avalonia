@@ -22,7 +22,6 @@ def toolArtifacts = [
 def cppToolsArtifacts = [
   'edu.wpi.first.tools:Glass',
   'edu.wpi.first.tools:OutlineViewer',
-  'edu.wpi.first.tools:SysId',
   'edu.wpi.first.tools:roboRIOTeamNumberSetter',
   'edu.wpi.first.tools:DataLogTool'
 ]
