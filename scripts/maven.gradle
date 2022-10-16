@@ -26,6 +26,11 @@ def cppToolsArtifacts = [
   'edu.wpi.first.tools:DataLogTool'
 ]
 
+def skipTools = [
+  'edu.wpi.first.tools:SmartDashboard',
+  'edu.wpi.first.tools:SysId',
+]
+
 dependencies {
     documentationCpp "edu.wpi.first.wpilibc:documentation:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}@zip"
     documentationJava "edu.wpi.first.wpilibj:documentation:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}@zip"
@@ -47,6 +52,15 @@ def lazyEvaluator = tasks.register('lazyModelEvaluation') {
             def depString = "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
             cppTools depString
             println depString
+            foundTool = true
+            return
+          }
+        }
+
+        skipTools.each { tool->
+          if ("$dep.groupId:$dep.artifactId" == tool) {
+            def depString = "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
+            println "Skipping " + depString
             foundTool = true
             return
           }
