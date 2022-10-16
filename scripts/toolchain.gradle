@@ -1,19 +1,19 @@
-def gitTag = 'v2022-1'
-def baseUrl = "https://github.com/wpilibsuite/roborio-toolchain/releases/download/$gitTag/"
+def gitTag = 'v2023-4'
+def baseUrl = "https://github.com/wpilibsuite/opensdk/releases/download/$gitTag/"
 
-def gccVersion = '7.3.0'
+def gccVersion = '12.1.0'
 
-def fileNameWindows = 'FRC-2022-Windows64-Toolchain-7.3.0.zip'
+def fileNameWindows = "cortexa9_vfpv3-roborio-academic-2023-x86_64-w64-mingw32-Toolchain-${gccVersion}.zip"
 
 def downloadUrlWindows = baseUrl + fileNameWindows
 def fileWindows = file("$buildDir/$fileNameWindows")
 
-def fileNameMac = 'FRC-2022-Mac-Toolchain-7.3.0.tar.gz'
+def fileNameMac = "cortexa9_vfpv3-roborio-academic-2023-x86_64-apple-darwin-Toolchain-${gccVersion}.tgz"
 
 def downloadUrlMac = baseUrl + fileNameMac
 def fileMac = file("$buildDir/$fileNameMac")
 
-def fileNameLinux = 'FRC-2022-Linux-Toolchain-7.3.0.tar.gz'
+def fileNameLinux = "cortexa9_vfpv3-roborio-academic-2023-x86_64-linux-gnu-Toolchain-${gccVersion}.tgz"
 
 def downloadUrlLinux = baseUrl + fileNameLinux
 def fileLinux = file("$buildDir/$fileNameLinux")
@@ -60,7 +60,7 @@ ext.toolchainZipSetup = { AbstractArchiveTask zip->
     zip.from(project.tarTree(project.resources.gzip(fileLinux))) {
 
       eachFile { f->
-        f.path = f.path.replace('frc2022/roborio/', 'roborio/')
+        f.path = f.path.replace('roborio-academic/', 'roborio/')
       }
 
       includeEmptyDirs = false
@@ -74,7 +74,7 @@ ext.toolchainZipSetup = { AbstractArchiveTask zip->
     zip.from(project.tarTree(project.resources.gzip(fileMac))) {
 
       eachFile { f->
-        f.path = f.path.replace('frc2022/roborio/', 'roborio/')
+        f.path = f.path.replace('roborio-academic/', 'roborio/')
       }
 
       includeEmptyDirs = false
@@ -87,7 +87,7 @@ ext.toolchainZipSetup = { AbstractArchiveTask zip->
     zip.from(project.zipTree(fileWindows)) {
 
       eachFile { f->
-        f.path = f.path.replace('frc2022/roborio/', 'roborio/')
+        f.path = f.path.replace('roborio-academic/', 'roborio/')
       }
 
       includeEmptyDirs = false
