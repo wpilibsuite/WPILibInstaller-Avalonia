@@ -1,10 +1,10 @@
 
 def vscodeFile = file("$buildDir/vscodeConfig.json")
 
-def vsCodeVersion = '1.69.2'
-def cppToolsVersion = '1.11.4'
-def javaExtVersion = '1.9.0'
-def javaDebugVersion = '0.43.0'
+def vsCodeVersion = '1.72.1'
+def cppToolsVersion = '1.12.4'
+def javaExtVersion = '1.11.0'
+def javaDebugVersion = '0.45.0'
 def javaDependencyVersion = '0.21.0'
 
 def wpilibVersion = '2023.0.0-alpha-1' // TODO revert this line to gradleRioVersion
