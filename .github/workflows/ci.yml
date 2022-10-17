@@ -14,6 +14,9 @@ jobs:
           - os: macos-latest
             artifact-name: macOS
             build-options: "-PmacBuild"
+          - os: macos-latest
+            artifact-name: macOSArm
+            build-options: "-PmacBuildArm"
           - os: windows-latest
             artifact-name: Win64
             build-options: ""

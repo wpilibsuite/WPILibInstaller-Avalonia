@@ -20,6 +20,14 @@ def downloadMacJdk = tasks.register('downloadMacJdk', Download) {
 
 def jdkMacFile = file("$buildDir/OpenJDK17U-jdk_x64_mac_hotspot_17.0.4.1_1.tar.gz")
 
+def downloadMacArmJdk = tasks.register('downloadMacArmJdk', Download) {
+  src 'https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.4.1%2B1/OpenJDK17U-jdk_aarch64_mac_hotspot_17.0.4.1_1.tar.gz'
+  dest buildDir
+  overwrite false
+}
+
+def jdkMacArmFile = file("$buildDir/OpenJDK17U-jdk_aarch64_mac_hotspot_17.0.4.1_1.tar.gz")
+
 def downloadWindowsJdk = tasks.register('downloadWindowsJdk', Download) {
   src 'https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.4.1%2B1/OpenJDK17U-jdk_x64_windows_hotspot_17.0.4.1_1.zip'
   dest buildDir
@@ -177,11 +185,44 @@ ext.jdkZipSetupMac = { AbstractArchiveTask zip->
   }
 }
 
+ext.jdkZipSetupMacArm = { AbstractArchiveTask zip->
+  zip.dependsOn downloadMacArmJdk
+  zip.dependsOn jdkConfigFileTask
+
+  zip.inputs.file jdkMacArmFile
+  zip.inputs.file jdkConfigFile
+
+  zip.from(project.tarTree(project.resources.gzip(jdkMacArmFile))) {
+    eachFile { f ->
+      f.path = f.path.replace('jdk-17.0.4.1+1/Contents/Home/', 'jdk/')
+    }
+
+    exclude './jdk-17.0.4.1+1/Contents/MacOS/**'
+    exclude './jdk-17.0.4.1+1/Contents/Info.plist'
+
+    exclude '**/src.zip'
+    exclude '**/bin/*.pdb'
+    exclude '**/bin/*.map'
+    exclude '**/bin/server/*.pdb'
+    exclude '**/bin/server/*.map'
+    exclude '**/demo/**'
+
+    includeEmptyDirs = false
+  }
+
+    zip.from(jdkConfigFile) {
+    into '/installUtils'
+    rename {'jdkConfig.json'}
+  }
+}
+
 ext.jdkZipSetup = { AbstractArchiveTask zip ->
   if (project.hasProperty('linuxBuild')) {
     jdkZipSetupLinux(zip)
   } else if (project.hasProperty('macBuild')) {
     jdkZipSetupMac(zip)
+  } else if (project.hasProperty('macBuildArm')) {
+    jdkZipSetupMacArm(zip)
   } else {
     jdkZipSetupWindows(zip)
   }
