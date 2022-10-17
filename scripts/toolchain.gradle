@@ -61,7 +61,7 @@ ext.toolchainZipSetup = { AbstractArchiveTask zip->
   if (project.hasProperty('linuxBuild')) {
     zip.dependsOn downloadTaskLinux
 
-    zip.inputs.file downloadTaskLinux.get().outputFiles.first()
+    zip.inputs.files downloadTaskLinux.get().outputFiles
 
     zip.from(project.tarTree(project.resources.gzip(downloadTaskLinux.get().outputFiles.first()))) {
 
@@ -75,7 +75,7 @@ ext.toolchainZipSetup = { AbstractArchiveTask zip->
   } else if (project.hasProperty('macBuild')) {
     zip.dependsOn downloadTaskMac
 
-    zip.inputs.file downloadTaskMac.get().outputFiles.first()
+    zip.inputs.files downloadTaskMac.get().outputFiles
 
     zip.from(project.tarTree(project.resources.gzip(downloadTaskMac.get().outputFiles.first()))) {
 
@@ -88,7 +88,7 @@ ext.toolchainZipSetup = { AbstractArchiveTask zip->
   } else if (project.hasProperty('macBuildArm')) {
     zip.dependsOn downloadTaskMacArm
 
-    zip.inputs.file downloadTaskMacArm.get().outputFiles.first()
+    zip.inputs.files downloadTaskMacArm.get().outputFiles
 
     zip.from(project.tarTree(project.resources.gzip(downloadTaskMacArm.get().outputFiles.first()))) {
 
@@ -101,7 +101,7 @@ ext.toolchainZipSetup = { AbstractArchiveTask zip->
   } else {
     zip.dependsOn downloadTaskWindows
 
-    zip.inputs.file downloadTaskWindows.get().outputFiles.first()
+    zip.inputs.files downloadTaskWindows.get().outputFiles
 
     zip.from(project.zipTree(downloadTaskWindows.get().outputFiles.first())) {
 

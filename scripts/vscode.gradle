@@ -112,11 +112,11 @@ def vscodeTask = tasks.register('vscodeConfig', Task) {
   dependsOn javaDebugExtensionDownload
   dependsOn javaDepExtensionDownload
 
-  inputs.file wpilibExtensionDownload.get().outputFiles.first()
-  inputs.file cppDownloadTask.get().outputFiles.first()
-  inputs.file javaLangExtensionDownload.get().outputFiles.first()
-  inputs.file javaDebugExtensionDownload.get().outputFiles.first()
-  inputs.file javaDepExtensionDownload.get().outputFiles.first()
+  inputs.files wpilibExtensionDownload.get().outputFiles
+  inputs.files cppDownloadTask.get().outputFiles
+  inputs.files javaLangExtensionDownload.get().outputFiles
+  inputs.files javaDebugExtensionDownload.get().outputFiles
+  inputs.files javaDepExtensionDownload.get().outputFiles
 
   doLast {
     def config = [:]

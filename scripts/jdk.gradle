@@ -84,7 +84,7 @@ ext.jdkZipSetupWindows = { AbstractArchiveTask zip->
   zip.dependsOn jdkConfigFileTask
   zip.dependsOn runtimeExtractTask
 
-  zip.inputs.file downloadWindowsJdk.get().outputFiles.first()
+  zip.inputs.files downloadWindowsJdk.get().outputFiles
   zip.inputs.file jdkConfigFile
 
   zip.from(project.zipTree(downloadWindowsJdk.get().outputFiles.first())) {
@@ -125,7 +125,7 @@ ext.jdkZipSetupLinux = { AbstractArchiveTask zip->
   zip.dependsOn downloadLinuxJdk
   zip.dependsOn jdkConfigFileTask
 
-  zip.inputs.file downloadLinuxJdk.get().outputFiles.first()
+  zip.inputs.files downloadLinuxJdk.get().outputFiles
   zip.inputs.file jdkConfigFile
 
   zip.from(project.tarTree(project.resources.gzip(downloadLinuxJdk.get().outputFiles.first()))) {
@@ -153,7 +153,7 @@ ext.jdkZipSetupMac = { AbstractArchiveTask zip->
   zip.dependsOn downloadMacJdk
   zip.dependsOn jdkConfigFileTask
 
-  zip.inputs.file downloadMacJdk.get().outputFiles.first()
+  zip.inputs.files downloadMacJdk.get().outputFiles
   zip.inputs.file jdkConfigFile
 
   zip.from(project.tarTree(project.resources.gzip(downloadMacJdk.get().outputFiles.first()))) {
@@ -184,7 +184,7 @@ ext.jdkZipSetupMacArm = { AbstractArchiveTask zip->
   zip.dependsOn downloadMacArmJdk
   zip.dependsOn jdkConfigFileTask
 
-  zip.inputs.file downloadMacArmJdk.get().outputFiles.first()
+  zip.inputs.files downloadMacArmJdk.get().outputFiles
   zip.inputs.file jdkConfigFile
 
   zip.from(project.tarTree(project.resources.gzip(downloadMacArmJdk.get().outputFiles.first()))) {
