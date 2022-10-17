@@ -22,25 +22,25 @@ apply plugin: 'de.undercouch.download'
 
 def downloadTaskWindows = tasks.register('downloadToolchainWindows', Download) {
   src downloadUrlWindows
-  dest buildDir
+  dest "$buildDir/downloads"
   overwrite false
 }
 
 def downloadTaskMac = tasks.register('downloadToolchainMac', Download) {
   src downloadUrlMac
-  dest buildDir
+  dest "$buildDir/downloads"
   overwrite false
 }
 
 def downloadTaskMacArm = tasks.register('downloadToolchainMacArm', Download) {
   src downloadUrlMacArm
-  dest buildDir
+  dest "$buildDir/downloads"
   overwrite false
 }
 
 def downloadTaskLinux = tasks.register('downloadToolchainLinux', Download) {
   src downloadUrlLinux
-  dest buildDir
+  dest "$buildDir/downloads"
   overwrite false
 }
 
