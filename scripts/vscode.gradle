@@ -34,7 +34,7 @@ def javaDepUrl = "https://github.com/microsoft/vscode-java-dependency/releases/d
 
 def wpilibExtensionDownload = tasks.register("wpilibExtensionDownload", Download) {
   src wpilibExtensionUrl
-  dest "$buildDir/downloads"
+  dest "$buildDir/downloads/wpilibExt"
   overwrite false
 }
 
@@ -47,45 +47,45 @@ def standaloneDownload = tasks.register("standaloneDownload", Download) {
   } else {
     src wpilibUtilWinUrl
   }
-  dest "$buildDir/downloads"
+  dest "$buildDir/downloads/standalone"
   overwrite false
 }
 
 def cppExtensionDownload = tasks.register("cppExtensionDownload", Download) {
   src cppWindowsUrl
-  dest "$buildDir/downloads"
+  dest "$buildDir/downloads/cppWindows"
   overwrite false
 }
 
 def cppMacExtensionDownload = tasks.register("cppMacExtensionDownload", Download) {
   src cppMacUrl
-  dest "$buildDir/downloads"
+  dest "$buildDir/downloads/cppMac"
   overwrite false
 }
 
 def cppLinuxExtensionDownload = tasks.register("cppLinuxExtensionDownload", Download) {
   src cppLinuxUrl
-  dest "$buildDir/downloads"
+  dest "$buildDir/downloads/cppLinux"
   overwrite false
 }
 
 
 def javaLangExtensionDownload = tasks.register("javaLangExtensionDownload", Download) {
   src javaLangUrl
-  dest "$buildDir/downloads"
+  dest "$buildDir/downloads/javaLang"
   overwrite false
 }
 
 
 def javaDebugExtensionDownload = tasks.register("javaDebugExtensionDownload", Download) {
   src javaDebugUrl
-  dest "$buildDir/downloads"
+  dest "$buildDir/downloads/javaDebug"
   overwrite false
 }
 
 def javaDepExtensionDownload = tasks.register("javaDepExtensionDownload", Download) {
   src javaDepUrl
-  dest "$buildDir/downloads"
+  dest "$buildDir/downloads/javaDep"
   overwrite false
 }
 

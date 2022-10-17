@@ -26,7 +26,7 @@ apply plugin: 'de.undercouch.download'
 
 def downloadGradle = tasks.register('downloadGradle', Download) {
   src gradleWrapperUrl
-  dest "$buildDir/downloads"
+  dest "$buildDir/downloads/gradlew"
   overwrite false
 }
 
