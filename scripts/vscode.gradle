@@ -1,147 +1,101 @@
+apply from: 'scripts/versions.gradle'
 
 def vscodeFile = file("$buildDir/vscodeConfig.json")
 
-def vsCodeVersion = '1.72.1'
-def cppToolsVersion = '1.12.4'
-def javaExtVersion = '1.11.0'
-def javaDebugVersion = '0.45.0'
-def javaDependencyVersion = '0.21.0'
-
-def wpilibVersion = gradleRioVersion
-
-def vscodeWindowsUrl = "https://update.code.visualstudio.com/${vsCodeVersion}/win32-x64-archive/stable".toString()
-def vscodeWindowsZipName = "Windows.zip".toString()
-
-def vscodeLinuxUrl = "https://update.code.visualstudio.com/${vsCodeVersion}/linux-x64/stable".toString()
+def vscodeWindowsZipName = "Windows.zip"
 def vscodeLinuxZipName = "Linux.tar.gz"
-
-def vscodeMacUrl = "https://update.code.visualstudio.com/${vsCodeVersion}/darwin-universal/stable".toString()
 def vscodeMacZipName = "Mac.zip"
 
+def vscodeWindowsUrl = "https://update.code.visualstudio.com/${vsCodeVersion}/win32-x64-archive/stable".toString()
+
+def vscodeLinuxUrl = "https://update.code.visualstudio.com/${vsCodeVersion}/linux-x64/stable".toString()
+
+def vscodeMacUrl = "https://update.code.visualstudio.com/${vsCodeVersion}/darwin-universal/stable".toString()
+
 def cppWindowsUrl = "https://github.com/Microsoft/vscode-cpptools/releases/download/v${cppToolsVersion}/cpptools-win64.vsix"
-def cppWindowsVsix = 'Cpp.vsix'
 
 def cppMacUrl = "https://github.com/Microsoft/vscode-cpptools/releases/download/v${cppToolsVersion}/cpptools-osx.vsix"
-def cppMacVsix = 'CppMac.vsix'
 
 def cppLinuxUrl = "https://github.com/Microsoft/vscode-cpptools/releases/download/v${cppToolsVersion}/cpptools-linux.vsix"
-def cppLinuxVsix = 'CppLinux.vsix'
 
 def wpilibExtensionUrl = "https://github.com/wpilibsuite/vscode-wpilib/releases/download/v${wpilibVersion}/vscode-wpilib-${wpilibVersion}.vsix"
-def wpilibExtensionVsix = 'WPILib.vsix'
 
 def wpilibUtilWinUrl = "https://github.com/wpilibsuite/vscode-wpilib/releases/download/v${wpilibVersion}/wpilibutility-windows.zip"
-def wpilibUtilWinZipName = 'utilitywin.zip'
 
 def wpilibUtilLinuxUrl = "https://github.com/wpilibsuite/vscode-wpilib/releases/download/v${wpilibVersion}/wpilibutility-linux.tar.gz"
-def wpilibUtilLinuxZipName = 'utilitylinux.tar.gz'
 
 def wpilibUtilMacUrl = "https://github.com/wpilibsuite/vscode-wpilib/releases/download/v${wpilibVersion}/wpilibutility-mac.tar.gz"
-def wpilibUtilMacZipName = 'utilitymac.tar.gz'
 
 def javaDebugUrl = "https://github.com/microsoft/vscode-java-debug/releases/download/${javaDebugVersion}/vscjava.vscode-java-debug-${javaDebugVersion}.vsix"
-def javaDebugVsix = 'JavaDebug.vsix'
 
 def javaLangUrl = "https://github.com/redhat-developer/vscode-java/releases/download/v${javaExtVersion}/java-${javaExtVersion}.vsix"
-def javaLangVsix = "JavaLang.vsix"
 
 def javaDepUrl = "https://github.com/microsoft/vscode-java-dependency/releases/download/${javaDependencyVersion}/vscjava.vscode-java-dependency-${javaDependencyVersion}.vsix"
-def javaDepVsix = "JavaDeps.vsix"
 
-def javaLangFile = file("$buildDir/$javaLangVsix")
-def javaDebugFile = file("$buildDir/$javaDebugVsix")
-def javaDepFile = file("$buildDir/$javaDepVsix")
-
-def cppFile
-def utilityFile
-if (project.hasProperty('linuxBuild')) {
-  cppFile = file("$buildDir/$cppLinuxVsix")
-  utilityFile = file("$buildDir/$wpilibUtilLinuxZipName")
-} else if (project.hasProperty('macBuild') || project.hasProperty('macBuildArm')) {
-  cppFile = file("$buildDir/$cppMacVsix")
-  utilityFile = file("$buildDir/$wpilibUtilMacZipName")
-} else {
-  cppFile = file("$buildDir/$cppWindowsVsix")
-  utilityFile = file("$buildDir/$wpilibUtilWinZipName")
+def wpilibExtensionDownload = tasks.register("wpilibExtensionDownload", Download) {
+  src wpilibExtensionUrl
+  dest buildDir
+  overwrite false
 }
 
-def wpilibFile
-def wpilibExtensionDownload
+def standaloneDownload = tasks.register("standaloneDownload", Download) {
 
-if (project.hasProperty('vscodeLoc')) {
-  wpilibFile = file(vscodeLoc)
-
-  wpilibExtensionDownload = tasks.register('wpilibExtensionDownload') {
-
+  if (project.hasProperty('linuxBuild')) {
+    src wpilibUtilLinuxUrl
+  } else if (project.hasProperty('macBuild') || project.hasProperty('macBuildArm')) {
+    src wpilibUtilMacUrl
+  } else {
+    src wpilibUtilWinUrl
   }
-} else {
-  wpilibFile = file("$buildDir/$wpilibExtensionVsix")
-
-  wpilibExtensionDownload = tasks.register("wpilibExtensionDownload", Download) {
-    src wpilibExtensionUrl
-    dest file("$buildDir/$wpilibExtensionVsix")
-    overwrite false
-  }
-}
-
-def standaloneDownload
-
-if (project.hasProperty('standaloneLoc')) {
-  utilityFile = file(standaloneLoc)
-  standaloneDownload = tasks.register('standaloneDownload') {
-
-  }
-} else {
-  standaloneDownload = tasks.register("standaloneDownload", Download) {
-
-    if (project.hasProperty('linuxBuild')) {
-      src wpilibUtilLinuxUrl
-    } else if (project.hasProperty('macBuild') || project.hasProperty('macBuildArm')) {
-      src wpilibUtilMacUrl
-    } else {
-      src wpilibUtilWinUrl
-    }
-    dest utilityFile
-    overwrite false
-  }
+  dest buildDir
+  overwrite false
 }
 
 def cppExtensionDownload = tasks.register("cppExtensionDownload", Download) {
   src cppWindowsUrl
-  dest file("$buildDir/$cppWindowsVsix")
+  dest buildDir
   overwrite false
 }
 
 def cppMacExtensionDownload = tasks.register("cppMacExtensionDownload", Download) {
   src cppMacUrl
-  dest file("$buildDir/$cppMacVsix")
+  dest buildDir
   overwrite false
 }
 
 def cppLinuxExtensionDownload = tasks.register("cppLinuxExtensionDownload", Download) {
   src cppLinuxUrl
-  dest file("$buildDir/$cppLinuxVsix")
+  dest buildDir
   overwrite false
 }
 
 
 def javaLangExtensionDownload = tasks.register("javaLangExtensionDownload", Download) {
   src javaLangUrl
-  dest file("$buildDir/$javaLangVsix")
+  dest buildDir
   overwrite false
 }
 
 
 def javaDebugExtensionDownload = tasks.register("javaDebugExtensionDownload", Download) {
   src javaDebugUrl
-  dest file("$buildDir/$javaDebugVsix")
+  dest buildDir
   overwrite false
 }
 
 def javaDepExtensionDownload = tasks.register("javaDepExtensionDownload", Download) {
   src javaDepUrl
-  dest file("$buildDir/$javaDepVsix")
+  dest buildDir
   overwrite false
+}
+
+def cppDownloadTask
+if (project.hasProperty('linuxBuild')) {
+  cppDownloadTask = cppLinuxExtensionDownload
+} else if (project.hasProperty('macBuild') || project.hasProperty('macBuildArm')) {
+  cppDownloadTask = cppMacExtensionDownload
+} else {
+  cppDownloadTask = cppExtensionDownload
 }
 
 def getInformationOfVsix = { vsix, map->
@@ -153,38 +107,36 @@ def getInformationOfVsix = { vsix, map->
 
 def vscodeTask = tasks.register('vscodeConfig', Task) {
   dependsOn wpilibExtensionDownload
-  dependsOn cppExtensionDownload
-  dependsOn cppMacExtensionDownload
-  dependsOn cppLinuxExtensionDownload
+  dependsOn cppDownloadTask
   dependsOn javaLangExtensionDownload
   dependsOn javaDebugExtensionDownload
   dependsOn javaDepExtensionDownload
 
-  inputs.file javaLangFile
-  inputs.file javaDebugFile
-  inputs.file cppFile
-  inputs.file wpilibFile
-  inputs.file javaDepFile
+  inputs.file wpilibExtensionDownload.get().outputFiles.first()
+  inputs.file cppDownloadTask.get().outputFiles.first()
+  inputs.file javaLangExtensionDownload.get().outputFiles.first()
+  inputs.file javaDebugExtensionDownload.get().outputFiles.first()
+  inputs.file javaDepExtensionDownload.get().outputFiles.first()
 
   doLast {
     def config = [:]
 
     def wpilibMap = [:]
-    wpilibMap['vsix'] = wpilibExtensionVsix
-    getInformationOfVsix(zipTree(wpilibFile), wpilibMap)
+    wpilibMap['vsix'] = wpilibExtensionDownload.get().outputFiles.first().name
+    getInformationOfVsix(zipTree(wpilibExtensionDownload.get().outputFiles.first()), wpilibMap)
     def cppMap = [:]
-    cppMap['vsix'] = cppWindowsVsix
-    getInformationOfVsix(zipTree(cppFile), cppMap)
+    cppMap['vsix'] = cppDownloadTask.get().outputFiles.first().name
+    getInformationOfVsix(zipTree(cppDownloadTask.get().outputFiles.first()), cppMap)
     def javaLangMap = [:]
-    javaLangMap['vsix'] = javaLangVsix
-    getInformationOfVsix(zipTree(javaLangFile), javaLangMap)
+    javaLangMap['vsix'] = javaLangExtensionDownload.get().outputFiles.first().name
+    getInformationOfVsix(zipTree(javaLangExtensionDownload.get().outputFiles.first()), javaLangMap)
     def javaDebugMap = [:]
-    javaDebugMap['vsix'] = javaDebugVsix
-    getInformationOfVsix(zipTree(javaDebugFile), javaDebugMap)
+    javaDebugMap['vsix'] = javaDebugExtensionDownload.get().outputFiles.first().name
+    getInformationOfVsix(zipTree(javaDebugExtensionDownload.get().outputFiles.first()), javaDebugMap)
 
     def javaDepMap = [:]
-    javaDepMap['vsix'] = javaDepVsix
-    getInformationOfVsix(zipTree(javaDepFile), javaDepMap)
+    javaDepMap['vsix'] = javaDepExtensionDownload.get().outputFiles.first().name
+    getInformationOfVsix(zipTree(javaDepExtensionDownload.get().outputFiles.first()), javaDepMap)
 
     config['VsCodeWindowsUrl'] = vscodeWindowsUrl
     config['VsCodeWindowsName'] = vscodeWindowsZipName
@@ -231,19 +183,19 @@ ext.vscodeZipSetup = { AbstractArchiveTask zip->
 
   if (project.hasProperty('linuxBuild')) {
     // Linux
-    zip.from(project.tarTree(project.resources.gzip(utilityFile))) {
+    zip.from(project.tarTree(project.resources.gzip(standaloneDownload.get().outputFiles.first()))) {
       into '/utility'
       includeEmptyDirs = false
     }
   } else if (project.hasProperty('macBuild') || project.hasProperty('macBuildArm')) {
     // Mac
     // Cannot extract, otherwise mac borks
-    zip.from (utilityFile) {
+    zip.from (standaloneDownload.get().outputFiles.first()) {
       into '/utility'
     }
   } else {
     // Windows
-    zip.from(project.zipTree(utilityFile)) {
+    zip.from(project.zipTree(standaloneDownload.get().outputFiles.first())) {
       into '/utility'
 
       includeEmptyDirs = false
@@ -254,20 +206,19 @@ ext.vscodeZipSetup = { AbstractArchiveTask zip->
     into '/installUtils'
   }
 
-  zip.from (javaLangFile) {
+  zip.from (javaLangExtensionDownload.get().outputFiles.first()) {
     into '/vsCodeExtensions'
   }
-  zip.from (javaDebugFile) {
+  zip.from (javaDebugExtensionDownload.get().outputFiles.first()) {
     into '/vsCodeExtensions'
   }
-  zip.from (cppFile) {
-    into '/vsCodeExtensions'
-    rename {cppWindowsVsix}
-  }
-  zip.from (wpilibFile) {
+  zip.from (cppDownloadTask.get().outputFiles.first()) {
     into '/vsCodeExtensions'
   }
-  zip.from (javaDepFile) {
+  zip.from (wpilibExtensionDownload.get().outputFiles.first()) {
+    into '/vsCodeExtensions'
+  }
+  zip.from (javaDepExtensionDownload.get().outputFiles.first()) {
     into '/vsCodeExtensions'
   }
 }

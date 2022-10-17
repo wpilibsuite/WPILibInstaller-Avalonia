@@ -1,20 +1,20 @@
 import java.security.MessageDigest
 
-def props = new Properties()
-def propsFile = file("distwrapper/gradle-wrapper.properties")
-propsFile.withInputStream { props.load(it) }
+apply from: 'scripts/versions.gradle'
+
+def gradleWrapperUrl = "https://services.gradle.org/distributions/gradle-${gradleWrapperVersion}-bin.zip"
 
 ext.gradleConfigTaskSetup = {
 
   def wrapperTask = tasks.named('wrapper').get()
   return new Tuple2({ Task task ->
-    task.inputs.file propsFile
+    task.inputs.property 'wrapperUrl', gradleWrapperUrl
   }, { config ->
-    def distributionHash = new BigInteger(1, MessageDigest.getInstance("MD5").digest(props.distributionUrl.getBytes())).toString(36)
+    def distributionHash = new BigInteger(1, MessageDigest.getInstance("MD5").digest(gradleWrapperUrl.getBytes())).toString(36)
 
     def gradleCfg = [
         Hash: distributionHash,
-        ZipName: new File(props.distributionUrl).name,
+        ZipName: new File(gradleWrapperUrl).name,
         ExtractLocations: ['wrapper/dists', 'permwrapper/dists']
     ]
 
@@ -34,7 +34,7 @@ ext.gradleZipTaskSetup = { AbstractArchiveTask zip->
 
     zip.dependsOn downloadGradle
 
-    zip.from ("$buildDir/gradle-7.5.1-bin.zip") {
+    zip.from (downloadGradle.get().outputFiles.first()) {
         into '/installUtils'
     }
 }

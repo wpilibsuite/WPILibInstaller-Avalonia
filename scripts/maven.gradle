@@ -173,8 +173,6 @@ def downloadReadTheDocs = tasks.register('downloadReadTheDocs', Download) {
   overwrite false
 }
 
-def rtdFile = file("$buildDir/frc-docs.zip")
-
 def downloadNewCommands = tasks.register('downloadNewCommands', Download) {
   src 'https://raw.githubusercontent.com/wpilibsuite/allwpilib/master/wpilibNewCommands/WPILibNewCommands.json'
   dest buildDir
@@ -191,7 +189,7 @@ ext.mavenZipSetup = { AbstractArchiveTask zip->
   zip.dependsOn downloadNewCommands
   zip.dependsOn downloadReadTheDocs
 
-  zip.from("$buildDir/WPILibNewCommands.json") {
+  zip.from(downloadNewCommands.get().outputFiles.first()) {
     into '/vendordeps'
   }
 
@@ -216,7 +214,7 @@ ext.mavenZipSetup = { AbstractArchiveTask zip->
     }
   }
 
-  zip.from(project.zipTree(rtdFile)) {
+  zip.from(project.zipTree(downloadReadTheDocs.get().outputFiles.first())) {
     into '/documentation/rtd'
   }
 }

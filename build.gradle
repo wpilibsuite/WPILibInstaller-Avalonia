@@ -75,7 +75,7 @@ if (project.hasProperty('linuxBuild')) {
     project.ext.dotnetRuntime = 'win-x64'
 }
 
-ext.frcYear = '2023'
+apply from: 'scripts/versions.gradle'
 
 apply from: 'scripts/gradlew.gradle'
 apply from: 'scripts/installer.gradle'
@@ -218,14 +218,14 @@ def generateFullResourcesTask = tasks.register('generateFullResources', project.
 def dotnetInstallerTask = tasks.register('createInstaller', Exec) {
     workingDir = "$projectDir/WPILibInstaller-Avalonia"
 
-    if (project.hasProperty("macBuild")) {
+    def macRuntimeId = "osx-x64"
+    if (project.hasProperty("macBuildArm")) {
+        macRuntimeId = "osx-arm64"
+    }
+
+    if (project.hasProperty("macBuild") || project.hasProperty("macBuildArm")) {
         commandLine 'dotnet', 'publish', '-c', 'Release', '-r', dotnetRuntime, '--self-contained',
-                "/p:Version=$pubVersion", "/t:BundleApp", "-p:RuntimeIdentifier=osx-x64",
-                "-p:CFBundleShortVersionString=$pubVersion", "-p:CFBundleVersion=$pubVersion",
-                '/p:EnableCompressionInSingleFile=true'
-    } else if (project.hasProperty("macBuildArm")) {
-        commandLine 'dotnet', 'publish', '-c', 'Release', '-r', dotnetRuntime, '--self-contained',
-                "/p:Version=$pubVersion", "/t:BundleApp", "-p:RuntimeIdentifier=osx-arm64",
+                "/p:Version=$pubVersion", "/t:BundleApp", "-p:RuntimeIdentifier=${macRuntimeId}",
                 "-p:CFBundleShortVersionString=$pubVersion", "-p:CFBundleVersion=$pubVersion",
                 '/p:EnableCompressionInSingleFile=true'
     } else {
@@ -245,8 +245,12 @@ def versionFileTask = tasks.register('writeVersionNumber', Task) {
     }
 }
 
+def installerProj = new XmlParser().parse("$projectDir/WPILibInstaller-Avalonia/WPILibInstaller-Avalonia.csproj")
+
+def dotnetVersion = installerProj.PropertyGroup.TargetFramework.text()
+
 // Copies the main application to build/outputs.
-def installDirectory = "$projectDir/WPILibInstaller-Avalonia/bin/Release/net6.0/$dotnetRuntime/publish"
+def installDirectory = "$projectDir/WPILibInstaller-Avalonia/bin/Release/$dotnetVersion/$dotnetRuntime/publish"
 def macIcon = "$projectDir/WPILibInstaller-Avalonia/wpilib.icns"
 def copyInstallerFiles = tasks.register('copyInstallerFiles', Copy) {
     if (!project.hasProperty("macBuild") && !project.hasProperty("macBuildArm")) {

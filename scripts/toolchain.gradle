@@ -1,27 +1,22 @@
-def gitTag = 'v2023-4'
-def baseUrl = "https://github.com/wpilibsuite/opensdk/releases/download/$gitTag/"
+apply from: 'scripts/versions.gradle'
 
-def gccVersion = '12.1.0'
+def baseUrl = "https://github.com/wpilibsuite/opensdk/releases/download/$toolchainGitTag/"
 
 def fileNameWindows = "cortexa9_vfpv3-roborio-academic-2023-x86_64-w64-mingw32-Toolchain-${gccVersion}.zip"
 
 def downloadUrlWindows = baseUrl + fileNameWindows
-def fileWindows = file("$buildDir/$fileNameWindows")
 
 def fileNameMac = "cortexa9_vfpv3-roborio-academic-2023-x86_64-apple-darwin-Toolchain-${gccVersion}.tgz"
 
 def downloadUrlMac = baseUrl + fileNameMac
-def fileMac = file("$buildDir/$fileNameMac")
 
 def fileNameMacArm = "cortexa9_vfpv3-roborio-academic-2023-arm64-apple-darwin-Toolchain-${gccVersion}.tgz"
 
 def downloadUrlMacArm = baseUrl + fileNameMacArm
-def fileMacArm = file("$buildDir/$fileNameMacArm")
 
 def fileNameLinux = "cortexa9_vfpv3-roborio-academic-2023-x86_64-linux-gnu-Toolchain-${gccVersion}.tgz"
 
 def downloadUrlLinux = baseUrl + fileNameLinux
-def fileLinux = file("$buildDir/$fileNameLinux")
 
 apply plugin: 'de.undercouch.download'
 
@@ -66,9 +61,9 @@ ext.toolchainZipSetup = { AbstractArchiveTask zip->
   if (project.hasProperty('linuxBuild')) {
     zip.dependsOn downloadTaskLinux
 
-    zip.inputs.file fileLinux
+    zip.inputs.file downloadTaskLinux.get().outputFiles.first()
 
-    zip.from(project.tarTree(project.resources.gzip(fileLinux))) {
+    zip.from(project.tarTree(project.resources.gzip(downloadTaskLinux.get().outputFiles.first()))) {
 
       eachFile { f->
         f.path = f.path.replace('roborio-academic/', 'roborio/')
@@ -80,9 +75,9 @@ ext.toolchainZipSetup = { AbstractArchiveTask zip->
   } else if (project.hasProperty('macBuild')) {
     zip.dependsOn downloadTaskMac
 
-    zip.inputs.file fileMac
+    zip.inputs.file downloadTaskMac.get().outputFiles.first()
 
-    zip.from(project.tarTree(project.resources.gzip(fileMac))) {
+    zip.from(project.tarTree(project.resources.gzip(downloadTaskMac.get().outputFiles.first()))) {
 
       eachFile { f->
         f.path = f.path.replace('roborio-academic/', 'roborio/')
@@ -93,9 +88,9 @@ ext.toolchainZipSetup = { AbstractArchiveTask zip->
   } else if (project.hasProperty('macBuildArm')) {
     zip.dependsOn downloadTaskMacArm
 
-    zip.inputs.file fileMacArm
+    zip.inputs.file downloadTaskMacArm.get().outputFiles.first()
 
-    zip.from(project.tarTree(project.resources.gzip(fileMacArm))) {
+    zip.from(project.tarTree(project.resources.gzip(downloadTaskMacArm.get().outputFiles.first()))) {
 
       eachFile { f->
         f.path = f.path.replace('roborio-academic/', 'roborio/')
@@ -106,9 +101,9 @@ ext.toolchainZipSetup = { AbstractArchiveTask zip->
   } else {
     zip.dependsOn downloadTaskWindows
 
-    zip.inputs.file fileWindows
+    zip.inputs.file downloadTaskWindows.get().outputFiles.first()
 
-    zip.from(project.zipTree(fileWindows)) {
+    zip.from(project.zipTree(downloadTaskWindows.get().outputFiles.first())) {
 
       eachFile { f->
         f.path = f.path.replace('roborio-academic/', 'roborio/')

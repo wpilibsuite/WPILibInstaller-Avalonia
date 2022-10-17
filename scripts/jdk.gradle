@@ -2,39 +2,34 @@
 evaluationDependsOn(':gradleriobase')
 
 apply plugin: 'de.undercouch.download'
+apply from: 'scripts/versions.gradle'
 
+def jdkVersionUnderscore = jdkVersion.replace('+', '_')
+def jdkVersionEscaped = jdkVersion.replace('+', '%2B')
 
 def downloadLinuxJdk = tasks.register('downloadLinuxJdk', Download) {
-  src 'https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.4.1%2B1/OpenJDK17U-jdk_x64_linux_hotspot_17.0.4.1_1.tar.gz'
+  src "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-$jdkVersionEscaped/OpenJDK17U-jdk_x64_linux_hotspot_${jdkVersionUnderscore}.tar.gz"
   dest buildDir
   overwrite false
 }
-
-def jdkLinuxFile = file("$buildDir/OpenJDK17U-jdk_x64_linux_hotspot_17.0.4.1_1.tar.gz")
 
 def downloadMacJdk = tasks.register('downloadMacJdk', Download) {
-  src 'https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.4.1%2B1/OpenJDK17U-jdk_x64_mac_hotspot_17.0.4.1_1.tar.gz'
+  src "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-$jdkVersionEscaped/OpenJDK17U-jdk_x64_mac_hotspot_${jdkVersionUnderscore}.tar.gz"
   dest buildDir
   overwrite false
 }
-
-def jdkMacFile = file("$buildDir/OpenJDK17U-jdk_x64_mac_hotspot_17.0.4.1_1.tar.gz")
 
 def downloadMacArmJdk = tasks.register('downloadMacArmJdk', Download) {
-  src 'https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.4.1%2B1/OpenJDK17U-jdk_aarch64_mac_hotspot_17.0.4.1_1.tar.gz'
+  src "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-$jdkVersionEscaped/OpenJDK17U-jdk_aarch64_mac_hotspot_${jdkVersionUnderscore}.tar.gz"
   dest buildDir
   overwrite false
 }
-
-def jdkMacArmFile = file("$buildDir/OpenJDK17U-jdk_aarch64_mac_hotspot_17.0.4.1_1.tar.gz")
 
 def downloadWindowsJdk = tasks.register('downloadWindowsJdk', Download) {
-  src 'https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.4.1%2B1/OpenJDK17U-jdk_x64_windows_hotspot_17.0.4.1_1.zip'
+  src "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-$jdkVersionEscaped/OpenJDK17U-jdk_x64_windows_hotspot_${jdkVersionUnderscore}.zip"
   dest buildDir
   overwrite false
 }
-
-def jdkWindowsFile = file("$buildDir/OpenJDK17U-jdk_x64_windows_hotspot_17.0.4.1_1.zip")
 
 configurations {
   runtimex64
@@ -89,13 +84,13 @@ ext.jdkZipSetupWindows = { AbstractArchiveTask zip->
   zip.dependsOn jdkConfigFileTask
   zip.dependsOn runtimeExtractTask
 
-  zip.inputs.file jdkWindowsFile
+  zip.inputs.file downloadWindowsJdk.get().outputFiles.first()
   zip.inputs.file jdkConfigFile
 
-  zip.from(project.zipTree(jdkWindowsFile)) {
+  zip.from(project.zipTree(downloadWindowsJdk.get().outputFiles.first())) {
 
     eachFile { f->
-      f.path = f.path.replace('jdk-17.0.4.1+1/', 'jdk/')
+      f.path = f.path.replace("jdk-${jdkVersion}/", 'jdk/')
     }
 
     eachFile { f->
@@ -130,12 +125,12 @@ ext.jdkZipSetupLinux = { AbstractArchiveTask zip->
   zip.dependsOn downloadLinuxJdk
   zip.dependsOn jdkConfigFileTask
 
-  zip.inputs.file jdkLinuxFile
+  zip.inputs.file downloadLinuxJdk.get().outputFiles.first()
   zip.inputs.file jdkConfigFile
 
-  zip.from(project.tarTree(project.resources.gzip(jdkLinuxFile))) {
+  zip.from(project.tarTree(project.resources.gzip(downloadLinuxJdk.get().outputFiles.first()))) {
     eachFile { f->
-      f.path = f.path.replace('jdk-17.0.4.1+1/', 'jdk/')
+      f.path = f.path.replace("jdk-${jdkVersion}/", 'jdk/')
     }
 
     exclude '**/src.zip'
@@ -158,16 +153,16 @@ ext.jdkZipSetupMac = { AbstractArchiveTask zip->
   zip.dependsOn downloadMacJdk
   zip.dependsOn jdkConfigFileTask
 
-  zip.inputs.file jdkMacFile
+  zip.inputs.file downloadMacJdk.get().outputFiles.first()
   zip.inputs.file jdkConfigFile
 
-  zip.from(project.tarTree(project.resources.gzip(jdkMacFile))) {
+  zip.from(project.tarTree(project.resources.gzip(downloadMacJdk.get().outputFiles.first()))) {
     eachFile { f ->
-      f.path = f.path.replace('jdk-17.0.4.1+1/Contents/Home/', 'jdk/')
+      f.path = f.path.replace("jdk-${jdkVersion}/Contents/Home/", 'jdk/')
     }
 
-    exclude './jdk-17.0.4.1+1/Contents/MacOS/**'
-    exclude './jdk-17.0.4.1+1/Contents/Info.plist'
+    exclude "./jdk-${jdkVersion}/Contents/MacOS/**"
+    exclude "./jdk-${jdkVersion}/Contents/Info.plist"
 
     exclude '**/src.zip'
     exclude '**/bin/*.pdb'
@@ -189,16 +184,16 @@ ext.jdkZipSetupMacArm = { AbstractArchiveTask zip->
   zip.dependsOn downloadMacArmJdk
   zip.dependsOn jdkConfigFileTask
 
-  zip.inputs.file jdkMacArmFile
+  zip.inputs.file downloadMacArmJdk.get().outputFiles.first()
   zip.inputs.file jdkConfigFile
 
-  zip.from(project.tarTree(project.resources.gzip(jdkMacArmFile))) {
+  zip.from(project.tarTree(project.resources.gzip(downloadMacArmJdk.get().outputFiles.first()))) {
     eachFile { f ->
-      f.path = f.path.replace('jdk-17.0.4.1+1/Contents/Home/', 'jdk/')
+      f.path = f.path.replace("jdk-${jdkVersion}/Contents/Home/", 'jdk/')
     }
 
-    exclude './jdk-17.0.4.1+1/Contents/MacOS/**'
-    exclude './jdk-17.0.4.1+1/Contents/Info.plist'
+    exclude "./jdk-${jdkVersion}/Contents/MacOS/**"
+    exclude "./jdk-${jdkVersion}/Contents/Info.plist"
 
     exclude '**/src.zip'
     exclude '**/bin/*.pdb'
