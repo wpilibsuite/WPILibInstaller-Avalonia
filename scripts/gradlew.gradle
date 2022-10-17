@@ -25,7 +25,7 @@ ext.gradleConfigTaskSetup = {
 apply plugin: 'de.undercouch.download'
 
 def downloadGradle = tasks.register('downloadGradle', Download) {
-  src props.distributionUrl
+  src gradleWrapperUrl
   dest buildDir
   overwrite false
 }
