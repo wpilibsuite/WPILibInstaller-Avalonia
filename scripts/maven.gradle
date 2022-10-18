@@ -169,13 +169,15 @@ ext.mavenConfigSetup = {
 
 def downloadReadTheDocs = tasks.register('downloadReadTheDocs', Download) {
   src 'https://buildmedia.readthedocs.org/media/htmlzip/frc-docs/latest/frc-docs.zip'
-  dest "$buildDir/downloads/rtd"
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
   overwrite false
 }
 
 def downloadNewCommands = tasks.register('downloadNewCommands', Download) {
   src 'https://raw.githubusercontent.com/wpilibsuite/allwpilib/master/wpilibNewCommands/WPILibNewCommands.json'
-  dest "$buildDir/downloads/newCommands"
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
   overwrite false
 }
 
