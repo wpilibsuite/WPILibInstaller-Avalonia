@@ -9,25 +9,29 @@ def jdkVersionEscaped = jdkVersion.replace('+', '%2B')
 
 def downloadLinuxJdk = tasks.register('downloadLinuxJdk', Download) {
   src "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-$jdkVersionEscaped/OpenJDK17U-jdk_x64_linux_hotspot_${jdkVersionUnderscore}.tar.gz"
-  dest "$buildDir/downloads/jdkLinux"
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
   overwrite false
 }
 
 def downloadMacJdk = tasks.register('downloadMacJdk', Download) {
   src "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-$jdkVersionEscaped/OpenJDK17U-jdk_x64_mac_hotspot_${jdkVersionUnderscore}.tar.gz"
-  dest "$buildDir/downloads/jdkMac"
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
   overwrite false
 }
 
 def downloadMacArmJdk = tasks.register('downloadMacArmJdk', Download) {
   src "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-$jdkVersionEscaped/OpenJDK17U-jdk_aarch64_mac_hotspot_${jdkVersionUnderscore}.tar.gz"
-  dest "$buildDir/downloads/jdkMacArm"
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
   overwrite false
 }
 
 def downloadWindowsJdk = tasks.register('downloadWindowsJdk', Download) {
   src "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-$jdkVersionEscaped/OpenJDK17U-jdk_x64_windows_hotspot_${jdkVersionUnderscore}.zip"
-  dest "$buildDir/downloads/jdkWindows"
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
   overwrite false
 }
 
