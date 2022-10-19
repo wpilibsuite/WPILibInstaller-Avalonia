@@ -43,7 +43,7 @@ def verifyWindows = tasks.register("verifyVscodeWindowsDownload", Verify) {
   inputs.files vscodeWindowsDownload.get().outputFiles.first()
   inputs.property 'hash', vscodeWindowsHash
   src vscodeWindowsDownload.get().outputFiles.first()
-  algorithm 'SHA256'
+  algorithm 'SHA-256'
   checksum vscodeWindowsHash
 }
 
@@ -58,7 +58,7 @@ def verifyMac = tasks.register("verifyVscodeMacDownload", Verify) {
   inputs.files vscodeMacDownload.get().outputFiles.first()
   inputs.property 'hash', vscodeMacHash
   src vscodeMacDownload.get().outputFiles.first()
-  algorithm 'SHA256'
+  algorithm 'SHA-256'
   checksum vscodeMacHash
 }
 
@@ -73,7 +73,7 @@ def verifyLinux = tasks.register("verifyVscodeLinuxDownload", Verify) {
   inputs.files vscodeLinuxDownload.get().outputFiles.first()
   inputs.property 'hash', vscodeLinuxHash
   src vscodeLinuxDownload.get().outputFiles.first()
-  algorithm 'SHA256'
+  algorithm 'SHA-256'
   checksum vscodeLinuxHash
 }
 
