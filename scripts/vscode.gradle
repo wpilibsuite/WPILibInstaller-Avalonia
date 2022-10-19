@@ -32,6 +32,51 @@ def javaLangUrl = "https://github.com/redhat-developer/vscode-java/releases/down
 
 def javaDepUrl = "https://github.com/microsoft/vscode-java-dependency/releases/download/${javaDependencyVersion}/vscjava.vscode-java-dependency-${javaDependencyVersion}.vsix"
 
+def vscodeWindowsDownload = tasks.register("vscodeWindowsDownload", Download) {
+  src vscodeWindowsUrl
+  dest "$buildDir/downloads/$vscodeWindowsZipName"
+  overwrite false
+}
+
+def verifyWindows = tasks.register("verifyVscodeWindowsDownload", Verify) {
+  dependsOn vscodeWindowsDownload
+  inputs.files vscodeWindowsDownload.get().outputFiles.first()
+  inputs.property 'hash', vscodeWindowsHash
+  src vscodeWindowsDownload.get().outputFiles.first()
+  algorithm 'SHA256'
+  checksum vscodeWindowsHash
+}
+
+def vscodeMacDownload = tasks.register("vscodeMacDownload", Download) {
+  src vscodeMacUrl
+  dest "$buildDir/downloads/$vscodeMacZipName"
+  overwrite false
+}
+
+def verifyMac = tasks.register("verifyVscodeMacDownload", Verify) {
+  dependsOn vscodeMacDownload
+  inputs.files vscodeMacDownload.get().outputFiles.first()
+  inputs.property 'hash', vscodeMacHash
+  src vscodeMacDownload.get().outputFiles.first()
+  algorithm 'SHA256'
+  checksum vscodeMacHash
+}
+
+def vscodeLinuxDownload = tasks.register("vscodeLinuxDownload", Download) {
+  src vscodeLinuxUrl
+  dest "$buildDir/downloads/$vscodeLinuxZipName"
+  overwrite false
+}
+
+def verifyLinux = tasks.register("verifyVscodeLinuxDownload", Verify) {
+  dependsOn vscodeLinuxDownload
+  inputs.files vscodeLinuxDownload.get().outputFiles.first()
+  inputs.property 'hash', vscodeLinuxHash
+  src vscodeLinuxDownload.get().outputFiles.first()
+  algorithm 'SHA256'
+  checksum vscodeLinuxHash
+}
+
 def wpilibExtensionDownload = tasks.register("wpilibExtensionDownload", Download) {
   src wpilibExtensionUrl
   def fileName = file(src.file).name
@@ -119,12 +164,19 @@ def vscodeTask = tasks.register('vscodeConfig', Task) {
   dependsOn javaLangExtensionDownload
   dependsOn javaDebugExtensionDownload
   dependsOn javaDepExtensionDownload
+  dependsOn verifyVscodeLinuxDownload
+  dependsOn verifyVscodeWindowsDownload
+  dependsOn verifyVscodeMacDownload
 
   inputs.files wpilibExtensionDownload.get().outputFiles
   inputs.files cppDownloadTask.get().outputFiles
   inputs.files javaLangExtensionDownload.get().outputFiles
   inputs.files javaDebugExtensionDownload.get().outputFiles
   inputs.files javaDepExtensionDownload.get().outputFiles
+
+  inputs.property 'linuxhash' vscodeLinuxHash
+  inputs.property 'machash' vscodeMacHash
+  inputs.property 'winhash', vscodeWindowsHash
 
   doLast {
     def config = [:]
@@ -148,10 +200,13 @@ def vscodeTask = tasks.register('vscodeConfig', Task) {
 
     config['VsCodeWindowsUrl'] = vscodeWindowsUrl
     config['VsCodeWindowsName'] = vscodeWindowsZipName
+    config['VsCodeWindowsHash'] = vscodeWindowsHash
     config['VsCodeMacUrl'] = vscodeMacUrl
     config['VsCodeMacName'] = vscodeMacZipName
+    config['VsCodeMacHash'] = vscodeMacHash
     config['VsCodeLinuxUrl'] = vscodeLinuxUrl
     config['VsCodeLinuxName'] = vscodeLinuxZipName
+    config['VsCodeLinuxHash'] = vscodeLinuxHash
     config['VsCodeVersion'] = vsCodeVersion
 
     config['wpilibExtension'] = wpilibMap
