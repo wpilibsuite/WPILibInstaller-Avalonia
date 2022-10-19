@@ -236,11 +236,12 @@ namespace WPILibInstaller.ViewModels
             EnableSelectionButtons = false;
             SetLocalForwardVisible(false);
 
+            var macArm = DownloadToMemoryStream(Platform.MacArm64, Model.Platforms[Platform.MacArm64].DownloadUrl, (d) => ProgressBar1 = d);
             var win64 = DownloadToMemoryStream(Platform.Win64, Model.Platforms[Platform.Win64].DownloadUrl, (d) => ProgressBar2 = d);
             var linux64 = DownloadToMemoryStream(Platform.Linux64, Model.Platforms[Platform.Linux64].DownloadUrl, (d) => ProgressBar3 = d);
             var mac64 = DownloadToMemoryStream(Platform.Mac64, Model.Platforms[Platform.Mac64].DownloadUrl, (d) => ProgressBar4 = d);
 
-            var results = await Task.WhenAll(win64, linux64, mac64);
+            var results = await Task.WhenAll(macArm, win64, linux64, mac64);
 
             string vscodeFileName = $"WPILib-VSCode-{Model.VSCodeVersion}.zip";
 
