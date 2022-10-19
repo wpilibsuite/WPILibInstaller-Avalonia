@@ -174,8 +174,8 @@ def vscodeTask = tasks.register('vscodeConfig', Task) {
   inputs.files javaDebugExtensionDownload.get().outputFiles
   inputs.files javaDepExtensionDownload.get().outputFiles
 
-  inputs.property 'linuxhash' vscodeLinuxHash
-  inputs.property 'machash' vscodeMacHash
+  inputs.property 'linuxhash', vscodeLinuxHash
+  inputs.property 'machash', vscodeMacHash
   inputs.property 'winhash', vscodeWindowsHash
 
   doLast {
