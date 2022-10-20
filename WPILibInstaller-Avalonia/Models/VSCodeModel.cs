@@ -9,13 +9,16 @@ namespace WPILibInstaller.Models
     {
         public class PlatformData
         {
-            public string DownloadUrl { get; set; }
-            public string NameInZip { get; set; }
+            public string DownloadUrl { get; }
+            public string NameInZip { get; }
+            private readonly byte[] hash;
+            public ReadOnlySpan<byte> Sha256Hash => hash;
 
-            public PlatformData(string downloadUrl, string nameInZip)
+            public PlatformData(string downloadUrl, string nameInZip, string sha256Hash)
             {
                 this.DownloadUrl = downloadUrl;
                 this.NameInZip = nameInZip;
+                this.hash = Convert.FromHexString(sha256Hash);
             }
         }
 

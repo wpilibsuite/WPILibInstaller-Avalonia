@@ -3,6 +3,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using MessageBox.Avalonia;
 using ReactiveUI;
@@ -195,6 +196,21 @@ namespace WPILibInstaller.ViewModels
                 var entry = archive.GetEntry(Model.Platforms[currentPlatform].NameInZip);
                 MemoryStream ms = new MemoryStream(100000000);
                 await entry!.Open().CopyToAsync(ms);
+                ms.Seek(0, SeekOrigin.Begin);
+
+                using var sha = SHA256.Create();
+                var hash = await sha.ComputeHashAsync(ms);
+
+                if (!hash.AsSpan().SequenceEqual(Model.Platforms[currentPlatform].Sha256Hash))
+                {
+                    bool cont = await CheckIncorrectHash($"VS Code for {currentPlatform}", Convert.ToHexString(Model.Platforms[currentPlatform].Sha256Hash), Convert.ToHexString(hash));
+                    if (!cont)
+                    {
+                        throw new InvalidDataException("Invalid hash");
+                    }
+                }
+
+                ms.Seek(0, SeekOrigin.Begin);
 
                 if (OperatingSystem.IsMacOS())
                 {
@@ -216,6 +232,19 @@ namespace WPILibInstaller.ViewModels
             DoneText = "Valid VS Code Selected. Press Next to continue";
             EnableSelectionButtons = false;
             SetLocalForwardVisible(true);
+        }
+
+        private async Task<bool> CheckIncorrectHash(string name, string expected, string actual)
+        {
+            string msg = $"Invalid Hash for {name}\nExpected: {expected}\nActual: {actual}\nOK to ignore, Abort to cancel.\nIf cancelled, problems may occur";
+            var res = await MessageBox.Avalonia.MessageBoxManager.GetMessageBoxStandardWindow(new MessageBox.Avalonia.DTO.MessageBoxStandardParams
+            {
+                ContentTitle = "Invalid Hash",
+                ContentMessage = msg,
+                Icon = MessageBox.Avalonia.Enums.Icon.Error,
+                ButtonDefinitions = MessageBox.Avalonia.Enums.ButtonEnum.OkAbort
+            }).ShowDialog(programWindow.Window);
+            return res == MessageBox.Avalonia.Enums.ButtonResult.Ok;
         }
 
         private async Task DownloadVsCodeFunc()
@@ -261,8 +290,17 @@ namespace WPILibInstaller.ViewModels
             MemoryStream? ms = null;
 
             DoneText = "Copying Archives. Please wait.";
-            foreach (var (stream, platform) in results)
+            foreach (var (stream, platform, hash) in results)
             {
+                if (!hash.AsSpan().SequenceEqual(Model.Platforms[platform].Sha256Hash))
+                {
+                    bool cont = await CheckIncorrectHash($"VS Code for {platform}", Convert.ToHexString(Model.Platforms[platform].Sha256Hash), Convert.ToHexString(hash));
+                    if (!cont)
+                    {
+                        throw new InvalidDataException("Invalid hash");
+                    }
+                }
+
                 var entry = archive.CreateEntry(Model.Platforms[platform].NameInZip);
                 using var toWriteStream = entry.Open();
                 stream.Seek(0, SeekOrigin.Begin);
@@ -303,7 +341,16 @@ namespace WPILibInstaller.ViewModels
             SetLocalForwardVisible(false);
             ProgressBar1Visible = true;
 
-            var (stream, platform) = await DownloadToMemoryStream(currentPlatform, url, (d) => ProgressBar1 = d);
+            var (stream, platform, hash) = await DownloadToMemoryStream(currentPlatform, url, (d) => ProgressBar1 = d);
+
+            if (!hash.AsSpan().SequenceEqual(Model.Platforms[platform].Sha256Hash))
+            {
+                bool cont = await CheckIncorrectHash($"VS Code for {platform}", Convert.ToHexString(Model.Platforms[platform].Sha256Hash), Convert.ToHexString(hash));
+                if (!cont)
+                {
+                    throw new InvalidDataException("Invalid hash");
+                }
+            }
             Console.WriteLine("Trying to open archive");
 
             if (OperatingSystem.IsMacOS())
@@ -321,11 +368,14 @@ namespace WPILibInstaller.ViewModels
             refresher.RefreshForwardBackProperties();
         }
 
-        private async Task<(MemoryStream stream, Platform platform)> DownloadToMemoryStream(Platform platform, string downloadUrl, Action<double> progressChanged)
+        private async Task<(MemoryStream stream, Platform platform, byte[] hash)> DownloadToMemoryStream(Platform platform, string downloadUrl, Action<double> progressChanged)
         {
             MemoryStream ms = new MemoryStream(100000000);
             await DownloadForPlatform(downloadUrl, ms, progressChanged);
-            return (ms, platform);
+            ms.Seek(0, SeekOrigin.Begin);
+            using var sha = SHA256.Create();
+            var hash = await sha.ComputeHashAsync(ms);
+            return (ms, platform, hash);
         }
 
         private async Task DownloadForPlatform(string downloadUrl, Stream outputStream, Action<double> progressChanged)
