@@ -201,9 +201,9 @@ namespace WPILibInstaller.ViewModels
                 using var sha = SHA256.Create();
                 var hash = await sha.ComputeHashAsync(ms);
 
-                if (!hash.AsSpan().SequenceEqual(Model.Platforms[currentPlatform].Md5Hash))
+                if (!hash.AsSpan().SequenceEqual(Model.Platforms[currentPlatform].Sha256Hash))
                 {
-                    bool cont = await CheckIncorrectHash($"VS Code for {currentPlatform}", Convert.ToHexString(Model.Platforms[currentPlatform].Md5Hash), Convert.ToHexString(hash));
+                    bool cont = await CheckIncorrectHash($"VS Code for {currentPlatform}", Convert.ToHexString(Model.Platforms[currentPlatform].Sha256Hash), Convert.ToHexString(hash));
                     if (!cont)
                     {
                         throw new InvalidDataException("Invalid hash");
@@ -292,9 +292,9 @@ namespace WPILibInstaller.ViewModels
             DoneText = "Copying Archives. Please wait.";
             foreach (var (stream, platform, hash) in results)
             {
-                if (!hash.AsSpan().SequenceEqual(Model.Platforms[platform].Md5Hash))
+                if (!hash.AsSpan().SequenceEqual(Model.Platforms[platform].Sha256Hash))
                 {
-                    bool cont = await CheckIncorrectHash($"VS Code for {platform}", Convert.ToHexString(Model.Platforms[platform].Md5Hash), Convert.ToHexString(hash));
+                    bool cont = await CheckIncorrectHash($"VS Code for {platform}", Convert.ToHexString(Model.Platforms[platform].Sha256Hash), Convert.ToHexString(hash));
                     if (!cont)
                     {
                         throw new InvalidDataException("Invalid hash");
@@ -343,9 +343,9 @@ namespace WPILibInstaller.ViewModels
 
             var (stream, platform, hash) = await DownloadToMemoryStream(currentPlatform, url, (d) => ProgressBar1 = d);
 
-            if (!hash.AsSpan().SequenceEqual(Model.Platforms[platform].Md5Hash))
+            if (!hash.AsSpan().SequenceEqual(Model.Platforms[platform].Sha256Hash))
             {
-                bool cont = await CheckIncorrectHash($"VS Code for {platform}", Convert.ToHexString(Model.Platforms[platform].Md5Hash), Convert.ToHexString(hash));
+                bool cont = await CheckIncorrectHash($"VS Code for {platform}", Convert.ToHexString(Model.Platforms[platform].Sha256Hash), Convert.ToHexString(hash));
                 if (!cont)
                 {
                     throw new InvalidDataException("Invalid hash");
