@@ -107,14 +107,6 @@ namespace WPILibInstaller.ViewModels
 
         private double progressBar3 = 0;
 
-        public double ProgressBar4
-        {
-            get => progressBar4;
-            set => this.RaiseAndSetIfChanged(ref progressBar4, value);
-        }
-
-        private double progressBar4 = 0;
-
         public string DoneText
         {
             get => doneText;
@@ -265,9 +257,9 @@ namespace WPILibInstaller.ViewModels
             EnableSelectionButtons = false;
             SetLocalForwardVisible(false);
 
-            var win64 = DownloadToMemoryStream(Platform.Win64, Model.Platforms[Platform.Win64].DownloadUrl, (d) => ProgressBar2 = d);
-            var linux64 = DownloadToMemoryStream(Platform.Linux64, Model.Platforms[Platform.Linux64].DownloadUrl, (d) => ProgressBar3 = d);
-            var mac64 = DownloadToMemoryStream(Platform.Mac64, Model.Platforms[Platform.Mac64].DownloadUrl, (d) => ProgressBar4 = d);
+            var win64 = DownloadToMemoryStream(Platform.Win64, Model.Platforms[Platform.Win64].DownloadUrl, (d) => ProgressBar1 = d);
+            var linux64 = DownloadToMemoryStream(Platform.Linux64, Model.Platforms[Platform.Linux64].DownloadUrl, (d) => ProgressBar2 = d);
+            var mac64 = DownloadToMemoryStream(Platform.Mac64, Model.Platforms[Platform.Mac64].DownloadUrl, (d) => ProgressBar3 = d);
 
             var results = await Task.WhenAll(win64, linux64, mac64);
 
