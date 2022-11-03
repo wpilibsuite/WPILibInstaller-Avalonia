@@ -95,8 +95,8 @@ def lazyEvaluator = tasks.register('lazyModelEvaluation') {
          offline "$dep.groupId:$dep.artifactId:$dep.version:@$dep.extension"
         } else if (dep.classifier.startsWith(project.ext.forcePlatform)) {
           // Special case mac arm
-          if (project.ext.forceNativeClassifier == 'osxaarch64') {
-            def cls = dep.classifier.replace('osxx86-64', 'osxaarch64')
+          if (project.ext.forceNativeClassifier == 'osxarm64') {
+            def cls = dep.classifier.replace('osxx86-64', 'osxarm64')
             offline "$dep.groupId:$dep.artifactId:$dep.version:$cls@$dep.extension"
           } else {
             offline "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
