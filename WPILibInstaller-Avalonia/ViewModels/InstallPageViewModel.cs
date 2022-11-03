@@ -423,12 +423,10 @@ namespace WPILibInstaller.ViewModels
                     await extractor.CopyToStreamAsync(writer);
                 }
 
-                if (extractor.EntryIsExecutable)
+                if (extractor.EntryIsExecutable && !OperatingSystem.IsWindows())
                 {
-                    new Mono.Unix.UnixFileInfo(fullZipToPath).FileAccessPermissions |=
-                        (Mono.Unix.FileAccessPermissions.GroupExecute |
-                         Mono.Unix.FileAccessPermissions.UserExecute |
-                         Mono.Unix.FileAccessPermissions.OtherExecute);
+                    var currentMode = File.GetUnixFileMode(fullZipToPath);
+                    File.SetUnixFileMode(fullZipToPath, currentMode | UnixFileMode.GroupExecute | UnixFileMode.UserExecute | UnixFileMode.OtherExecute);
                 }
             }
 
@@ -557,12 +555,10 @@ namespace WPILibInstaller.ViewModels
                     await extractor.CopyToStreamAsync(writer);
                 }
 
-                if (extractor.EntryIsExecutable)
+                if (extractor.EntryIsExecutable && !OperatingSystem.IsWindows())
                 {
-                    new Mono.Unix.UnixFileInfo(fullZipToPath).FileAccessPermissions |=
-                        (Mono.Unix.FileAccessPermissions.GroupExecute |
-                         Mono.Unix.FileAccessPermissions.UserExecute |
-                         Mono.Unix.FileAccessPermissions.OtherExecute);
+                    var currentMode = File.GetUnixFileMode(fullZipToPath);
+                    File.SetUnixFileMode(fullZipToPath, currentMode | UnixFileMode.GroupExecute | UnixFileMode.UserExecute | UnixFileMode.OtherExecute);
                 }
             }
         }
