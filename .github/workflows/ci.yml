@@ -8,7 +8,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-22.04
             artifact-name: Linux
             build-options: "-PlinuxBuild"
           - os: macos-latest
