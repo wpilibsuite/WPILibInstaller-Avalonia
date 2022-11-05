@@ -40,7 +40,7 @@ jobs:
 
       - name: Build Installer (PR)
         shell: bash
-        run: ./gradlew generateInstallers -PjenkinsBuild ${{ matrix.build-options }}
+        run: ./gradlew generateInstallers -PjenkinsBuild ${{ matrix.build-options }} --info
         if: |
           github.repository_owner != 'wpilibsuite' ||
           (github.event_name != 'push' && github.event_name != 'workflow_dispatch')
@@ -48,7 +48,7 @@ jobs:
       - name: Build Installer (Main)
         shell: bash
         run: |
-          ./gradlew generateInstallers -PjenkinsBuild ${{ matrix.build-options }}
+          ./gradlew generateInstallers -PjenkinsBuild ${{ matrix.build-options }} --info
         if: |
           github.repository_owner == 'wpilibsuite' &&
           (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
