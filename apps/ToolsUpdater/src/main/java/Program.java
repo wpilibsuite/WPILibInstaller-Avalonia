@@ -37,12 +37,28 @@ public class Program {
     }
   }
 
-  private static String getPlatformPath() {
-    if (SystemUtils.IS_OS_WINDOWS) {
-      return System.getProperty("os.arch").equals("amd64") ? "windows\\x86-64" : "windows\\x86";
-    } else {
-      return SystemUtils.IS_OS_MAC ? "osx/x86-64" : "linux/x86-64";
+  private static final String arm32arch = "arm32";
+  private static final String arm64arch = "arm64";
+  private static final String x64arch = "x86-64";
+  private static final String x86arch = "x86";
+
+  private static String desktopArch() {
+    String arch = System.getProperty("os.arch");
+    if (arch.equals("arm64") || arch.equals("aarch64")) {
+      return arm64arch;
     }
+    if (arch.equals("arm32") || arch.equals("arm")) {
+      return arm32arch;
+    }
+    return (arch.equals("amd64") || arch.equals("x86_64")) ? x64arch : x86arch;
+  }
+
+  private static String desktopOS() {
+    return SystemUtils.IS_OS_WINDOWS ? "windows" : SystemUtils.IS_OS_MAC ? "osx" : "linux";
+  }
+
+  private static String getPlatformPath() {
+    return desktopOS() + "/" + desktopArch();
   }
 
   private static void installCppTool(ToolConfig tool, String toolsPath) {
