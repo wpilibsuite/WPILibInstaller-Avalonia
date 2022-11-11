@@ -34,6 +34,24 @@ jobs:
           java-version: 11
           distribution: temurin
 
+      - name: Import Developer ID Certificate
+        uses: wpilibsuite/import-signing-certificate@v1
+        with:
+          certificate-data: ${{ secrets.APPLE_CERTIFICATE_DATA }}
+          certificate-passphrase: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          keychain-password: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
+        if: |
+          (matrix.artifact-name == 'macOS' || matrix.artifact-name == 'macOSArm') &&
+          github.repository_owner == 'wpilibsuite' &&
+          (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+
+      - name: Set Keychain Lock Timeout
+        run: security set-keychain-settings -lut 2700
+        if: |
+          (matrix.artifact-name == 'macOS' || matrix.artifact-name == 'macOSArm') &&
+          github.repository_owner == 'wpilibsuite' &&
+          (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+
       - name: Install roboRIO Toolchain
         shell: bash
         run: ./gradlew installRoboRioToolchain
@@ -48,7 +66,10 @@ jobs:
       - name: Build Installer (Main)
         shell: bash
         run: |
-          ./gradlew generateInstallers -PjenkinsBuild ${{ matrix.build-options }}
+          ./gradlew generateInstallers -PjenkinsBuild ${{ matrix.build-options }} \
+          -PdeveloperID=${{ secrets.APPLE_DEVELOPER_ID }} \
+          -Pnotarization-username=${{ secrets.APPLE_NOTARIZATION_USERNAME }} \
+          -Pnotarization-password=${{ secrets.APPLE_NOTARIZATION_PASSWORD }}
         if: |
           github.repository_owner == 'wpilibsuite' &&
           (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
