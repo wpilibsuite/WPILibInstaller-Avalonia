@@ -41,13 +41,15 @@ jobs:
           certificate-passphrase: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
           keychain-password: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
         if: |
-          matrix.artifact-name == 'macOS' && github.repository_owner == 'wpilibsuite' &&
+          (matrix.artifact-name == 'macOS' || matrix.artifact-name == 'macOSArm') &&
+          github.repository_owner == 'wpilibsuite' &&
           (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
 
       - name: Set Keychain Lock Timeout
         run: security set-keychain-settings -lut 2700
         if: |
-          matrix.artifact-name == 'macOS' && github.repository_owner == 'wpilibsuite' &&
+          (matrix.artifact-name == 'macOS' || matrix.artifact-name == 'macOSArm') &&
+          github.repository_owner == 'wpilibsuite' &&
           (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
 
       - name: Install roboRIO Toolchain
