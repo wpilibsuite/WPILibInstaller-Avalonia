@@ -52,7 +52,12 @@ dependencies {
     nativeRelease wpi.java.vendor.jniRelease(wpi.platforms.desktop)
     simulationRelease wpi.sim.enableRelease()
 
+    // Keep including junit 4 for compatibility reasons
     testImplementation 'junit:junit:4.13.1'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.4.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.4.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.4.2'
 
     // simulation wpi.deps.sim.gui(wpi.platforms.desktop, false)
     // simulation wpi.deps.sim.gui(wpi.platforms.desktop, true)
@@ -68,6 +73,11 @@ dependencies {
     if (project(":").ext.buildClassifier == 'Windows') {
         implementation "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}:x64@zip"
     }
+}
+
+test {
+    useJUnitPlatform()
+    systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
 }
 
 configurations.all {
