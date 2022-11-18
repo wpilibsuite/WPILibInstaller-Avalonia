@@ -8,6 +8,8 @@
     <TextBlock FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center">
       Finished installing! Press finish to exit.
     </TextBlock>
+  <Button FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" Content="Open Known Issues" Command="{Binding OpenKnownIssues}"></Button>
+  <Button FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" Content="Open Changelog" Command="{Binding OpenChangelog}"></Button>
   <TextBlock FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding FinishText}">
   </TextBlock>
   </StackPanel>
