@@ -12,7 +12,7 @@ ext.javaDependencyVersion = '0.21.1'
 ext.wpilibVersion = gradleRioVersion
 
 ext.gccVersion = '12.1.0'
-ext.toolchainGitTag = 'v2023-6'
+ext.toolchainGitTag = 'v2023-5'
 
 ext.jdkVersion = '17.0.5+8'
 
