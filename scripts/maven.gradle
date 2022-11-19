@@ -73,7 +73,7 @@ def lazyEvaluator = tasks.register('lazyModelEvaluation') {
           skipMacArmTools.each { tool->
             if ("$dep.groupId:$dep.artifactId" == tool) {
               def depString = "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
-              println "Skipping " + depString
+              println "Skipping because arm " + depString
               foundTool = true
               return
             }
