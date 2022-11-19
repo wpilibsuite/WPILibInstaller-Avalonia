@@ -26,9 +26,12 @@ def cppToolsArtifacts = [
   'edu.wpi.first.tools:DataLogTool'
 ]
 
+def skipMacArmTools = [
+  'edu.wpi.first.tools:SmartDashboard'
+]
+
 def skipTools = [
-  'edu.wpi.first.tools:SmartDashboard',
-  'edu.wpi.first.tools:SysId',
+  'edu.wpi.first.tools:SysId'
 ]
 
 dependencies {
@@ -63,6 +66,17 @@ def lazyEvaluator = tasks.register('lazyModelEvaluation') {
             println "Skipping " + depString
             foundTool = true
             return
+          }
+        }
+
+        if (project.hasProperty('macBuildArm')) {
+          skipMacArmTools.each { tool->
+            if ("$dep.groupId:$dep.artifactId" == tool) {
+              def depString = "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
+              println "Skipping " + depString
+              foundTool = true
+              return
+            }
           }
         }
 
