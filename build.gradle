@@ -45,9 +45,9 @@ if (project.hasProperty('linuxBuild')) {
     project.ext.dotnetRuntime = 'linux-x64'
 } else if (project.hasProperty('macBuild')) {
     project.ext.forcePlatform = 'osx'
-    project.ext.forceNativeClassifier = 'osxx86-64'
+    project.ext.forceNativeClassifier = 'osxuniversal'
     project.ext.forceToolsClassifier = 'macx64'
-    project.ext.forceCppToolsClassifier = 'osxx86-64'
+    project.ext.forceCppToolsClassifier = 'osxuniversal'
     project.ext.buildClassifier = 'Mac'
     offlineRepositoryRoot = "$buildDir/dependencies/mac"
     project.ext.archiveType = Tar
@@ -55,9 +55,9 @@ if (project.hasProperty('linuxBuild')) {
     project.ext.dotnetRuntime = 'osx-x64'
 } else if (project.hasProperty('macBuildArm')) {
     project.ext.forcePlatform = 'osx'
-    project.ext.forceNativeClassifier = 'osxarm64'
+    project.ext.forceNativeClassifier = 'osxuniversal'
     project.ext.forceToolsClassifier = 'macarm64'
-    project.ext.forceCppToolsClassifier = 'osxarm64'
+    project.ext.forceCppToolsClassifier = 'osxuniversal'
     project.ext.buildClassifier = 'MacArm'
     offlineRepositoryRoot = "$buildDir/dependencies/mac"
     project.ext.archiveType = Tar
