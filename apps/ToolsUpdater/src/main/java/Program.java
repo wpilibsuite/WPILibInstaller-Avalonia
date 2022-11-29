@@ -43,6 +43,9 @@ public class Program {
   private static final String x86arch = "x86";
 
   private static String desktopArch() {
+    if (SystemUtils.IS_OS_MAC) {
+      return "universal";
+    }
     String arch = System.getProperty("os.arch");
     if (arch.equals("arm64") || arch.equals("aarch64")) {
       return arm64arch;
