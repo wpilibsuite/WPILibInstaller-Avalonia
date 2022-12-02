@@ -339,6 +339,7 @@ ext.vscodeZipSetup = { AbstractArchiveTask zip->
     zip.from (standaloneDownload.get().outputFiles.first()) {
       into '/utility'
     }
+  } else if (project.hasProperty('macBuildArm') || project.hasProperty('linuxBuildArm32') || project.hasProperty('linuxBuildArm64')) {
   } else {
     // Windows
     zip.from(project.zipTree(standaloneDownload.get().outputFiles.first())) {
