@@ -33,8 +33,16 @@ println pubVersion
 
 project.ext.setProperty('toolchain-optional-roboRio', '')
 
+if (OperatingSystem.current().isWindows()) {
+    project.ext.currentClassifier = 'windowsx86-64'
+} else if (OperatingSystem.current().isMacOsX()) {
+    project.ext.currentClassifier = 'osxuniversal'
+} else {
+    project.ext.currentClassifier = 'linuxx86-64'
+}
+
 if (project.hasProperty('linuxBuild')) {
-    project.ext.forcePlatform = 'linuxx86'
+    project.ext.forcePlatform = 'linuxx86-64'
     project.ext.forceNativeClassifier = 'linuxx86-64'
     project.ext.forceToolsClassifier = 'linuxx64'
     project.ext.forceCppToolsClassifier = 'linuxx86-64'
@@ -43,6 +51,26 @@ if (project.hasProperty('linuxBuild')) {
     project.ext.archiveType = Tar
     project.ext.isUnix = true
     project.ext.dotnetRuntime = 'linux-x64'
+} else if (project.hasProperty('linuxBuildArm32')) {
+    project.ext.forcePlatform = 'linuxarm32'
+    project.ext.forceNativeClassifier = 'linuxarm32'
+    project.ext.forceToolsClassifier = 'linuxarm32'
+    project.ext.forceCppToolsClassifier = 'linuxarm32'
+    project.ext.buildClassifier = 'Linux'
+    offlineRepositoryRoot = "$buildDir/dependencies/linuxarm32"
+    project.ext.archiveType = Tar
+    project.ext.isUnix = true
+    project.ext.dotnetRuntime = 'linux-arm'
+} else if (project.hasProperty('linuxBuildArm64')) {
+    project.ext.forcePlatform = 'linuxarm64'
+    project.ext.forceNativeClassifier = 'linuxarm64'
+    project.ext.forceToolsClassifier = 'linuxarm64'
+    project.ext.forceCppToolsClassifier = 'linuxarm64'
+    project.ext.buildClassifier = 'Linux'
+    offlineRepositoryRoot = "$buildDir/dependencies/linuxarm64"
+    project.ext.archiveType = Tar
+    project.ext.isUnix = true
+    project.ext.dotnetRuntime = 'linux-arm64'
 } else if (project.hasProperty('macBuild')) {
     project.ext.forcePlatform = 'osx'
     project.ext.forceNativeClassifier = 'osxuniversal'

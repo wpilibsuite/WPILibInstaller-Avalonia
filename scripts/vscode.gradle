@@ -4,11 +4,17 @@ def vscodeFile = file("$buildDir/vscodeConfig.json")
 
 def vscodeWindowsZipName = "Windows.zip"
 def vscodeLinuxZipName = "Linux.tar.gz"
+def vscodeLinuxArm32ZipName = "LinuxArm32.tar.gz"
+def vscodeLinuxArm64ZipName = "LinuxArm64.tar.gz"
 def vscodeMacZipName = "Mac.zip"
 
 def vscodeWindowsUrl = "https://update.code.visualstudio.com/${vsCodeVersion}/win32-x64-archive/stable".toString()
 
 def vscodeLinuxUrl = "https://update.code.visualstudio.com/${vsCodeVersion}/linux-x64/stable".toString()
+
+def vscodeLinuxArm32Url = "https://update.code.visualstudio.com/${vsCodeVersion}/linux-armhf/stable".toString()
+
+def vscodeLinuxArm64Url = "https://update.code.visualstudio.com/${vsCodeVersion}/linux-arm64/stable".toString()
 
 def vscodeMacUrl = "https://update.code.visualstudio.com/${vsCodeVersion}/darwin-universal/stable".toString()
 
@@ -19,6 +25,10 @@ def cppMacUrl = "https://github.com/Microsoft/vscode-cpptools/releases/download/
 def cppMacArmUrl = "https://github.com/Microsoft/vscode-cpptools/releases/download/v${cppToolsVersion}/cpptools-osx-arm64.vsix"
 
 def cppLinuxUrl = "https://github.com/Microsoft/vscode-cpptools/releases/download/v${cppToolsVersion}/cpptools-linux.vsix"
+
+def cppLinuxArm32Url = "https://github.com/Microsoft/vscode-cpptools/releases/download/v${cppToolsVersion}/cpptools-linux-armhf.vsix"
+
+def cppLinuxArm64Url = "https://github.com/Microsoft/vscode-cpptools/releases/download/v${cppToolsVersion}/cpptools-linux-aarch64.vsix"
 
 def wpilibExtensionUrl = "https://github.com/wpilibsuite/vscode-wpilib/releases/download/v${wpilibVersion}/vscode-wpilib-${wpilibVersion}.vsix"
 
@@ -79,6 +89,36 @@ def verifyLinux = tasks.register("verifyVscodeLinuxDownload", Verify) {
   checksum vscodeLinuxHash
 }
 
+def vscodeLinuxArm32Download = tasks.register("vscodeLinuxArm32Download", Download) {
+  src vscodeLinuxArm32Url
+  dest "$buildDir/downloads/$vscodeLinuxArm32ZipName"
+  overwrite false
+}
+
+def verifyLinuxArm32 = tasks.register("verifyVscodeLinuxArm32Download", Verify) {
+  dependsOn vscodeLinuxArm32Download
+  inputs.files vscodeLinuxArm32Download.get().outputFiles.first()
+  inputs.property 'hash', vscodeLinuxArm32Hash
+  src vscodeLinuxArm32Download.get().outputFiles.first()
+  algorithm 'SHA-256'
+  checksum vscodeLinuxArm32Hash
+}
+
+def vscodeLinuxArm64Download = tasks.register("vscodeLinuxArm64Download", Download) {
+  src vscodeLinuxArm64Url
+  dest "$buildDir/downloads/$vscodeLinuxArm64ZipName"
+  overwrite false
+}
+
+def verifyLinuxArm64 = tasks.register("verifyVscodeLinuxArm64Download", Verify) {
+  dependsOn vscodeLinuxArm64Download
+  inputs.files vscodeLinuxArm64Download.get().outputFiles.first()
+  inputs.property 'hash', vscodeLinuxArm64Hash
+  src vscodeLinuxArm64Download.get().outputFiles.first()
+  algorithm 'SHA-256'
+  checksum vscodeLinuxArm64Hash
+}
+
 def wpilibExtensionDownload = tasks.register("wpilibExtensionDownload", Download) {
   src wpilibExtensionUrl
   def fileName = file(src.file).name
@@ -129,6 +169,20 @@ def cppLinuxExtensionDownload = tasks.register("cppLinuxExtensionDownload", Down
   overwrite false
 }
 
+def cppLinuxArm32ExtensionDownload = tasks.register("cppLinuxArm32ExtensionDownload", Download) {
+  src cppLinuxArm32Url
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite false
+}
+
+def cppLinuxArm64ExtensionDownload = tasks.register("cppLinuxArm64ExtensionDownload", Download) {
+  src cppLinuxArm64Url
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite false
+}
+
 
 def javaLangExtensionDownload = tasks.register("javaLangExtensionDownload", Download) {
   src javaLangUrl
@@ -155,6 +209,10 @@ def javaDepExtensionDownload = tasks.register("javaDepExtensionDownload", Downlo
 def cppDownloadTask
 if (project.hasProperty('linuxBuild')) {
   cppDownloadTask = cppLinuxExtensionDownload
+} else if (project.hasProperty('linuxBuildArm32')) {
+  cppDownloadTask = cppLinuxArm32ExtensionDownload
+} else if (project.hasProperty('linuxBuildArm64')) {
+  cppDownloadTask = cppLinuxArm64ExtensionDownload
 } else if (project.hasProperty('macBuild')) {
   cppDownloadTask = cppMacExtensionDownload
 } else if (project.hasProperty('macBuildArm')) {
@@ -177,6 +235,8 @@ def vscodeTask = tasks.register('vscodeConfig', Task) {
   dependsOn javaDebugExtensionDownload
   dependsOn javaDepExtensionDownload
   dependsOn verifyVscodeLinuxDownload
+  dependsOn verifyVscodeLinuxArm32Download
+  dependsOn verifyVscodeLinuxArm64Download
   dependsOn verifyVscodeWindowsDownload
   dependsOn verifyVscodeMacDownload
 
@@ -187,6 +247,8 @@ def vscodeTask = tasks.register('vscodeConfig', Task) {
   inputs.files javaDepExtensionDownload.get().outputFiles
 
   inputs.property 'linuxhash', vscodeLinuxHash
+  inputs.property 'linuxarm32hash', vscodeLinuxArm32Hash
+  inputs.property 'linuxarm64hash', vscodeLinuxArm64Hash
   inputs.property 'machash', vscodeMacHash
   inputs.property 'winhash', vscodeWindowsHash
 
@@ -219,6 +281,15 @@ def vscodeTask = tasks.register('vscodeConfig', Task) {
     config['VsCodeLinuxUrl'] = vscodeLinuxUrl
     config['VsCodeLinuxName'] = vscodeLinuxZipName
     config['VsCodeLinuxHash'] = vscodeLinuxHash
+
+    config['VsCodeLinuxArm32Url'] = vscodeLinuxArm32Url
+    config['VsCodeLinuxArm32Name'] = vscodeLinuxArm32ZipName
+    config['VsCodeLinuxArm32Hash'] = vscodeLinuxArm32Hash
+
+    config['VsCodeLinuxArm64Url'] = vscodeLinuxArm64Url
+    config['VsCodeLinuxArm64Name'] = vscodeLinuxArm64ZipName
+    config['VsCodeLinuxArm64Hash'] = vscodeLinuxArm64Hash
+
     config['VsCodeVersion'] = vsCodeVersion
 
     config['wpilibExtension'] = wpilibMap
@@ -262,7 +333,7 @@ ext.vscodeZipSetup = { AbstractArchiveTask zip->
       into '/utility'
       includeEmptyDirs = false
     }
-  } else if (project.hasProperty('macBuild') || project.hasProperty('macBuildArm')) {
+  } else if (project.hasProperty('macBuild')) {
     // Mac
     // Cannot extract, otherwise mac borks
     zip.from (standaloneDownload.get().outputFiles.first()) {

@@ -18,6 +18,14 @@ def fileNameLinux = "cortexa9_vfpv3-roborio-academic-2023-x86_64-linux-gnu-Toolc
 
 def downloadUrlLinux = baseUrl + fileNameLinux
 
+def fileNameLinuxArm32 = "cortexa9_vfpv3-roborio-academic-2023-armv6-bullseye-linux-gnueabihf-Toolchain-${gccVersion}.tgz"
+
+def downloadUrlLinuxArm32 = baseUrl + fileNameLinuxArm32
+
+def fileNameLinuxArm64 = "cortexa9_vfpv3-roborio-academic-2023-aarch64-bullseye-linux-gnu-Toolchain-${gccVersion}.tgz"
+
+def downloadUrlLinuxArm64 = baseUrl + fileNameLinuxArm64
+
 apply plugin: 'de.undercouch.download'
 
 def downloadTaskWindows = tasks.register('downloadToolchainWindows', Download) {
@@ -48,6 +56,20 @@ def downloadTaskLinux = tasks.register('downloadToolchainLinux', Download) {
   overwrite false
 }
 
+def downloadTaskLinuxArm32 = tasks.register('downloadToolchainLinuxArm32', Download) {
+  src downloadUrlLinuxArm32
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite false
+}
+
+def downloadTaskLinuxArm64 = tasks.register('downloadToolchainLinuxArm64', Download) {
+  src downloadUrlLinuxArm64
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite false
+}
+
 ext.toolchainConfigTaskSetup = {
   return new Tuple2({ task->
     task.inputs.property 'toolchainName', fileNameWindows
@@ -61,13 +83,22 @@ ext.toolchainConfigTaskSetup = {
   });
 }
 
+def actualLinuxTask = null
+if (project.hasProperty('linuxBuild')) {
+  actualLinuxTask = downloadTaskLinux
+} else if (project.hasProperty('linuxBuildArm32')) {
+  actualLinuxTask = downloadTaskLinuxArm32
+} else if (project.hasProperty('linuxBuildArm64')) {
+  actualLinuxTask = downloadTaskLinuxArm64
+}
+
 ext.toolchainZipSetup = { AbstractArchiveTask zip->
-  if (project.hasProperty('linuxBuild')) {
-    zip.dependsOn downloadTaskLinux
+  if (actualLinuxTask != null) {
+    zip.dependsOn actualLinuxTask
 
-    zip.inputs.files downloadTaskLinux.get().outputFiles
+    zip.inputs.files actualLinuxTask.get().outputFiles
 
-    zip.from(project.tarTree(project.resources.gzip(downloadTaskLinux.get().outputFiles.first()))) {
+    zip.from(project.tarTree(project.resources.gzip(actualLinuxTask.get().outputFiles.first()))) {
 
       eachFile { f->
         f.path = f.path.replace('roborio-academic/', 'roborio/')

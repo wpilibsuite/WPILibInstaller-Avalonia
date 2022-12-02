@@ -26,7 +26,7 @@ def cppToolsArtifacts = [
   'edu.wpi.first.tools:DataLogTool'
 ]
 
-def skipMacArmTools = [
+def skipNewPlatformTools = [
   'edu.wpi.first.tools:SmartDashboard'
 ]
 
@@ -69,8 +69,8 @@ def lazyEvaluator = tasks.register('lazyModelEvaluation') {
           }
         }
 
-        if (project.hasProperty('macBuildArm')) {
-          skipMacArmTools.each { tool->
+        if (project.hasProperty('macBuildArm') || project.hasProperty('linuxBuildArm32') || project.hasProperty('linuxBuildArm64')) {
+          skipNewPlatformTools.each { tool->
             if ("$dep.groupId:$dep.artifactId" == tool) {
               def depString = "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
               println "Skipping because arm " + depString
@@ -107,8 +107,9 @@ def lazyEvaluator = tasks.register('lazyModelEvaluation') {
         println dep
         if (dep.classifier == null) {
          offline "$dep.groupId:$dep.artifactId:$dep.version:@$dep.extension"
-        } else if (dep.classifier.startsWith(project.ext.forcePlatform)) {
-          offline "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
+        } else if (dep.classifier.startsWith(project.ext.currentClassifier)) {
+          def newClassifier = dep.classifier.replace(project.ext.currentClassifier, project.ext.forceNativeClassifier)
+          offline "$dep.groupId:$dep.artifactId:$dep.version:$newClassifier@$dep.extension"
         } else if (dep.classifier.contains('athena')) {
          offline "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
         } else if (dep.classifier.contains('headers')) {
