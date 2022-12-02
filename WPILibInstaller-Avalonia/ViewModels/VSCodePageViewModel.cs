@@ -107,6 +107,22 @@ namespace WPILibInstaller.ViewModels
 
         private double progressBar3 = 0;
 
+        public double ProgressBar4
+        {
+            get => progressBar4;
+            set => this.RaiseAndSetIfChanged(ref progressBar4, value);
+        }
+
+        private double progressBar4 = 0;
+
+        public double ProgressBar5
+        {
+            get => progressBar5;
+            set => this.RaiseAndSetIfChanged(ref progressBar5, value);
+        }
+
+        private double progressBar5 = 0;
+
         public string DoneText
         {
             get => doneText;
@@ -259,9 +275,11 @@ namespace WPILibInstaller.ViewModels
 
             var win64 = DownloadToMemoryStream(Platform.Win64, Model.Platforms[Platform.Win64].DownloadUrl, (d) => ProgressBar1 = d);
             var linux64 = DownloadToMemoryStream(Platform.Linux64, Model.Platforms[Platform.Linux64].DownloadUrl, (d) => ProgressBar2 = d);
-            var mac64 = DownloadToMemoryStream(Platform.Mac64, Model.Platforms[Platform.Mac64].DownloadUrl, (d) => ProgressBar3 = d);
+            var linuxArm64 = DownloadToMemoryStream(Platform.Linux64, Model.Platforms[Platform.Linux64].DownloadUrl, (d) => ProgressBar3 = d);
+            var linuxArm32 = DownloadToMemoryStream(Platform.Linux64, Model.Platforms[Platform.Linux64].DownloadUrl, (d) => ProgressBar4 = d);
+            var mac64 = DownloadToMemoryStream(Platform.Mac64, Model.Platforms[Platform.Mac64].DownloadUrl, (d) => ProgressBar5 = d);
 
-            var results = await Task.WhenAll(win64, linux64, mac64);
+            var results = await Task.WhenAll(win64, linux64, linuxArm32, linuxArm64, mac64);
 
             string vscodeFileName = $"WPILib-VSCode-{Model.VSCodeVersion}.zip";
 

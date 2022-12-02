@@ -6,6 +6,8 @@ namespace WPILibInstaller.Utils
     {
         Win64,
         Linux64,
+        LinuxArm64,
+        LinuxArm32,
         Mac64,
         MacArm64,
         Invalid
@@ -28,6 +30,14 @@ namespace WPILibInstaller.Utils
                 if (currentArch == Architecture.X64)
                 {
                     CurrentPlatform = Platform.Linux64;
+                }
+                else if (currentArch == Architecture.Arm64)
+                {
+                    CurrentPlatform = Platform.LinuxArm64;
+                }
+                else if (currentArch == Architecture.Arm)
+                {
+                    CurrentPlatform = Platform.LinuxArm32;
                 }
                 return;
             }
