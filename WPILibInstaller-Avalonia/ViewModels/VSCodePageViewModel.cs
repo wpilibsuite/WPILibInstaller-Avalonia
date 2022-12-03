@@ -275,8 +275,8 @@ namespace WPILibInstaller.ViewModels
 
             var win64 = DownloadToMemoryStream(Platform.Win64, Model.Platforms[Platform.Win64].DownloadUrl, (d) => ProgressBar1 = d);
             var linux64 = DownloadToMemoryStream(Platform.Linux64, Model.Platforms[Platform.Linux64].DownloadUrl, (d) => ProgressBar2 = d);
-            var linuxArm64 = DownloadToMemoryStream(Platform.Linux64, Model.Platforms[Platform.Linux64].DownloadUrl, (d) => ProgressBar3 = d);
-            var linuxArm32 = DownloadToMemoryStream(Platform.Linux64, Model.Platforms[Platform.Linux64].DownloadUrl, (d) => ProgressBar4 = d);
+            var linuxArm64 = DownloadToMemoryStream(Platform.LinuxArm64, Model.Platforms[Platform.LinuxArm64].DownloadUrl, (d) => ProgressBar3 = d);
+            var linuxArm32 = DownloadToMemoryStream(Platform.LinuxArm32, Model.Platforms[Platform.LinuxArm32].DownloadUrl, (d) => ProgressBar4 = d);
             var mac64 = DownloadToMemoryStream(Platform.Mac64, Model.Platforms[Platform.Mac64].DownloadUrl, (d) => ProgressBar5 = d);
 
             var results = await Task.WhenAll(win64, linux64, linuxArm32, linuxArm64, mac64);

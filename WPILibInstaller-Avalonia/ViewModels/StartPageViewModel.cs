@@ -171,13 +171,9 @@ namespace WPILibInstaller.ViewModels
 
         private async Task<bool> SelectResourceFilesWithFile(string file)
         {
-            Console.WriteLine("Initial");
-
             var zipArchive = ZipFile.OpenRead(file);
 
             var entry = zipArchive.GetEntry("vscodeConfig.json");
-
-            Console.WriteLine($"Entry {entry}");
 
             if (entry == null)
             {
@@ -193,8 +189,6 @@ namespace WPILibInstaller.ViewModels
                 }) ?? throw new InvalidOperationException("Not Valid");
             }
 
-            Console.WriteLine($"Read vsCode");
-
             entry = zipArchive.GetEntry("jdkConfig.json");
 
             using (StreamReader reader = new StreamReader(entry!.Open()))
@@ -205,8 +199,6 @@ namespace WPILibInstaller.ViewModels
                     MissingMemberHandling = MissingMemberHandling.Error
                 }) ?? throw new InvalidOperationException("Not Valid");
             }
-
-            Console.WriteLine($"Read Jdk");
 
             entry = zipArchive.GetEntry("fullConfig.json");
 
@@ -219,8 +211,6 @@ namespace WPILibInstaller.ViewModels
                 }) ?? throw new InvalidOperationException("Not Valid");
             }
 
-            Console.WriteLine($"Read Full");
-
             entry = zipArchive.GetEntry("upgradeConfig.json");
 
             using (StreamReader reader = new StreamReader(entry!.Open()))
@@ -231,8 +221,6 @@ namespace WPILibInstaller.ViewModels
                     MissingMemberHandling = MissingMemberHandling.Error
                 }) ?? throw new InvalidOperationException("Not Valid");
             }
-
-            Console.WriteLine($"Read Upgrade");
 
             string? neededInstaller = CheckInstallerType();
             if (neededInstaller == null)
