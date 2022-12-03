@@ -8,7 +8,7 @@ namespace WPILibInstaller.Utils
     {
         bool MoveToNextEntry();
 
-        int TotalUncompressSize { get; }
+        long TotalUncompressSize { get; }
 
         string EntryKey { get; }
 

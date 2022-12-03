@@ -18,7 +18,7 @@ namespace WPILibInstaller.Utils
             entries = archive.Entries.GetEnumerator();
         }
 
-        public int TotalUncompressSize { get; }
+        public long TotalUncompressSize { get; }
 
         public string EntryKey => entries.Current.FullName;
 
