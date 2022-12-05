@@ -52,15 +52,6 @@ def lazyEvaluator = tasks.register('lazyModelEvaluation') {
     dependencies {
       gradleRioDeps.deps.each { dep->
         def foundTool = false
-        cppToolsArtifacts.each { tool->
-          if ("$dep.groupId:$dep.artifactId" == tool) {
-            def depString = "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
-            cppTools depString
-            println depString
-            foundTool = true
-            return
-          }
-        }
 
         skipTools.each { tool->
           if ("$dep.groupId:$dep.artifactId" == tool) {
@@ -69,6 +60,10 @@ def lazyEvaluator = tasks.register('lazyModelEvaluation') {
             foundTool = true
             return
           }
+        }
+
+        if (foundTool) {
+          return
         }
 
         if (project.hasProperty('macBuildArm')) {
@@ -80,6 +75,24 @@ def lazyEvaluator = tasks.register('lazyModelEvaluation') {
               return
             }
           }
+        }
+
+        if (foundTool) {
+          return
+        }
+
+        cppToolsArtifacts.each { tool->
+          if ("$dep.groupId:$dep.artifactId" == tool) {
+            def depString = "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
+            cppTools depString
+            println depString
+            foundTool = true
+            return
+          }
+        }
+
+        if (foundTool) {
+          return
         }
 
         toolArtifacts.each { tool->
