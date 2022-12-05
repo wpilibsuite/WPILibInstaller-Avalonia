@@ -16,14 +16,16 @@ configurations {
 def toolArtifacts = [
   'edu.wpi.first.tools:Shuffleboard',
   'edu.wpi.first.tools:RobotBuilder',
-  'edu.wpi.first.tools:PathWeaver'
+  'edu.wpi.first.tools:PathWeaver',
+  'edu.wpi.first.tools:SmartDashboard'
 ]
 
 def cppToolsArtifacts = [
   'edu.wpi.first.tools:Glass',
   'edu.wpi.first.tools:OutlineViewer',
   'edu.wpi.first.tools:roboRIOTeamNumberSetter',
-  'edu.wpi.first.tools:DataLogTool'
+  'edu.wpi.first.tools:DataLogTool',
+  'edu.wpi.first.tools:SysId'
 ]
 
 def skipMacArmTools = [
