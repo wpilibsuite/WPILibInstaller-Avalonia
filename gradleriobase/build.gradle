@@ -94,6 +94,22 @@ wpi.sim.addWebsocketsClient().defaultEnabled = true
 deployJavaArtifact.jarTask = jar
 wpi.java.configureExecutableTasks(jar)
 
+def wpilibFoundVersion = wpi.versions.wpilibVersion.get()
+
+nativeUtils {
+    nativeDependencyContainer {
+        wpilibnewcommands(getNativeDependencyTypeClass('WPISharedMavenDependency')) {
+            groupId = "edu.wpi.first.wpilibNewCommands"
+            artifactId = "wpilibNewCommands-cpp"
+            headerClassifier = "headers"
+            sourceClassifier = "sources"
+            ext = "zip"
+            version = wpilibFoundVersion
+            targetPlatforms.addAll(nativeUtils.wpi.platforms.allPlatforms)
+        }
+    }
+}
+
 model {
     components {
         frcUserProgram(NativeExecutableSpec) {
@@ -107,7 +123,7 @@ model {
             wpi.cpp.deps.wpilib(it)
             wpi.cpp.deps.googleTest(it)
 
-            wpi.cpp.deps.useLibrary(it, 'wpilib_new_commands_shared')
+            wpi.cpp.deps.useLibrary(it, 'wpilibnewcommands')
         }
         // frcUserProgramStatic(NativeExecutableSpec) {
         //     targetPlatform wpi.platforms.roborio
