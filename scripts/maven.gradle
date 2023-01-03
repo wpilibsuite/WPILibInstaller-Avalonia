@@ -32,9 +32,7 @@ def skipMacArmTools = [
   'edu.wpi.first.tools:SmartDashboard'
 ]
 
-def skipTools = [
-  'edu.wpi.first.tools:SysId'
-]
+def skipTools = []
 
 dependencies {
     documentationCpp "edu.wpi.first.wpilibc:documentation:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}@zip"
