@@ -97,7 +97,9 @@ namespace WPILibInstaller.ViewModels
                     return;
                 }
             }
-            CurrentPage = viewModelResolver.Resolve<StartPageViewModel>();
+            var startPage = viewModelResolver.Resolve<StartPageViewModel>();
+            CurrentPage = startPage;
+            startPage.Initialize();
         }
 
         private void HandleStateChange()
