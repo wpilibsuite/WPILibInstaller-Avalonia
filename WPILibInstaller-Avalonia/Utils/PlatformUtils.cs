@@ -47,7 +47,11 @@ namespace WPILibInstaller.Utils
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                if (currentArch == Architecture.X64)
+                // Since this program ships with an x64 .NET runtime, if it is running on ARM64
+                // we can safely assume that x64 emulation is available and working. This means
+                // everything else (except kernel drivers) can run as x64 ("Win64" in the local
+                // Platform enum).
+                if (currentArch == Architecture.X64 || currentArch == Architecture.Arm64)
                 {
                     CurrentPlatform = Platform.Win64;
                 }
