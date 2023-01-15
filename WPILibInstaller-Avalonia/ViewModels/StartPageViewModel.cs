@@ -319,7 +319,7 @@ namespace WPILibInstaller.ViewModels
                 // Make sure they match.
                 if (!s.Equals(hash.ToUpper()))
                 {
-                    viewModelResolver.ResolveMainWindow().HandleException(new Exception("The artifacts file was damaged.\nThis is either caused by a bad download,\n or on macOS you originally download the wrong dmg\nand its still mounted. Make sure to unmount\nall dmg's and try again (And maybe reboot)."));
+                    viewModelResolver.ResolveMainWindow().HandleException(new Exception("The artifacts file was damaged.\nThis is either caused by a bad download,\nor on macOS you originally download the wrong dmg\nand its still mounted. Make sure to eject\nall dmg's and try again (And maybe reboot)."));
                     return false;
                 }
                 MissingHash = false;
