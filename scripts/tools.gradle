@@ -61,11 +61,7 @@ ext.toolsConfig = {
   }, { config->
     def tools = [:]
     tools['Folder'] = toolsFolder
-    if (project.ext.isUnix == true) {
-      tools['UpdaterExe'] = 'ToolsUpdater.py'
-    } else {
-      tools['UpdaterExe'] = 'ToolsUpdater.bat'
-    }
+    tools['UpdaterJar'] = 'ToolsUpdater.jar'
     config['Tools'] = tools
   })
 }

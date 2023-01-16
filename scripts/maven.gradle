@@ -179,12 +179,7 @@ ext.mavenConfigSetup = {
   }, { config->
     config['Maven'] = [:]
     config['Maven']['Folder'] = 'maven'
-
-    if (project.ext.isUnix == true) {
-      config['Maven']['MetaDataFixerExe'] = 'MavenMetaDataFixer.py'
-    } else {
-      config['Maven']['MetaDataFixerExe'] = 'MavenMetaDataFixer.bat'
-    }
+    config['Maven']['MetaDataFixerJar'] = 'MavenMetaDataFixer.jar'
   })
 }
 

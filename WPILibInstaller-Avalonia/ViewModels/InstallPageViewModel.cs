@@ -604,6 +604,20 @@ namespace WPILibInstaller.ViewModels
             await Task.Yield();
         }
 
+        private static Task<bool> RunJavaJar(string installDir, string jar, int timeoutMs)
+        {
+            string java = Path.Join(installDir, "jdk", "bin", "java");
+            if (OperatingSystem.IsWindows()) {
+                java += ".exe";
+            }
+            ProcessStartInfo pstart = new ProcessStartInfo(java, $"-jar \"{jar}\"");
+            var p = Process.Start(pstart);
+            return Task.Run(() =>
+            {
+                return p!.WaitForExit(timeoutMs);
+            });
+        }
+
         private static Task<bool> RunScriptExecutable(string script, int timeoutMs, params string[] args)
         {
             ProcessStartInfo pstart = new ProcessStartInfo(script, string.Join(" ", args));
@@ -619,9 +633,10 @@ namespace WPILibInstaller.ViewModels
             Text = "Configuring Tools";
             Progress = 50;
 
-            await RunScriptExecutable(Path.Combine(configurationProvider.InstallDirectory,
+            await RunJavaJar(configurationProvider.InstallDirectory,
+                Path.Combine(configurationProvider.InstallDirectory,
                 configurationProvider.UpgradeConfig.Tools.Folder,
-                configurationProvider.UpgradeConfig.Tools.UpdaterExe), 5000, "silent");
+                configurationProvider.UpgradeConfig.Tools.UpdaterJar), 20000);
         }
 
         private async Task RunMavenMetaDataFixer()
@@ -629,12 +644,11 @@ namespace WPILibInstaller.ViewModels
             Text = "Fixing up maven metadata";
             Progress = 50;
 
-            await RunScriptExecutable(Path.Combine(configurationProvider.InstallDirectory,
+            await RunJavaJar(configurationProvider.InstallDirectory,
+                Path.Combine(configurationProvider.InstallDirectory,
                 configurationProvider.UpgradeConfig.Maven.Folder,
-                configurationProvider.UpgradeConfig.Maven.MetaDataFixerExe), 5000, "silent");
+                configurationProvider.UpgradeConfig.Maven.MetaDataFixerJar), 20000);
         }
-
-
 
         private async Task RunVsCodeExtensionsSetup()
         {
