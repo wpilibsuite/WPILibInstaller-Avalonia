@@ -607,7 +607,8 @@ namespace WPILibInstaller.ViewModels
         private static Task<bool> RunJavaJar(string installDir, string jar, int timeoutMs)
         {
             string java = Path.Join(installDir, "jdk", "bin", "java");
-            if (OperatingSystem.IsWindows()) {
+            if (OperatingSystem.IsWindows())
+            {
                 java += ".exe";
             }
             ProcessStartInfo pstart = new ProcessStartInfo(java, $"-jar \"{jar}\"");
