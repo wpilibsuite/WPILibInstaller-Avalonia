@@ -30,7 +30,7 @@ def wpilibUtilMacUrl = "https://github.com/wpilibsuite/vscode-wpilib/releases/do
 
 def javaDebugUrl = "https://github.com/microsoft/vscode-java-debug/releases/download/${javaDebugVersion}/vscjava.vscode-java-debug-${javaDebugVersion}.vsix"
 
-def javaLangUrl = "https://github.com/redhat-developer/vscode-java/releases/download/v${javaExtVersion}/redhat.java@${javaExtVersion}.vsix"
+def javaLangUrl = "https://github.com/redhat-developer/vscode-java/releases/download/v${javaExtVersion}/redhat.java-${javaExtVersion}.vsix"
 
 def javaDepUrl = "https://github.com/microsoft/vscode-java-dependency/releases/download/${javaDependencyVersion}/vscjava.vscode-java-dependency-${javaDependencyVersion}.vsix"
 
