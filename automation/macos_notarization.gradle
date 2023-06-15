@@ -9,70 +9,19 @@ ext.notarize = { File application, String id, String username, String password -
     println "Submitting application to notarization service..."
     def stdout = new ByteArrayOutputStream()
     def result = exec {
-        commandLine "xcrun", "altool", "--output-format", "json", "--notarize-app", "-f", "/tmp/archive.zip",
-                "--primary-bundle-id", id, "-u", username, "-p", password
+        commandLine "xcrun", "notarytool", "submit", "/tmp/archive.zip", 
+                "--apple-id", username, "--password", password,
+                "--output-format", "json", "--no-progress", "--wait", "--timeout", "20m"
         standardOutput = stdout
         ignoreExitValue(true)
     }
 
     if (result.exitValue != 0) {
         println stdout.toString()
-        return
+        throw new GradleException("The notarization failed!")
     }
 
-    // Step 3: process the request UUID.
-    def parser = new JsonSlurper()
-    def object = parser.parseText(stdout.toString())
-    def uuid = object["notarization-upload"]["RequestUUID"] as String
-    println "Submitted application with UUID: $uuid"
-
-    // Step 4: wait until notarization is complete.
-    def success = false
-    String[] args = ["xcrun", "altool", "--output-format", "json", "--notarization-info", uuid,
-                     "-u", username, "-p", password]
-
-    for (int i = 0; i < 40; i++) {
-        stdout = new ByteArrayOutputStream()
-        result = exec {
-            commandLine args
-            standardOutput = stdout
-            ignoreExitValue(true)
-        }
-
-        if (result.exitValue != 0) {
-            println stdout.toString()
-            return
-        }
-
-        def response = parser.parseText(stdout.toString())["notarization-info"]
-        def exit = false
-
-        switch (response["Status"] as String) {
-            case "in progress":
-                println "Notarization is in progress..."
-                break
-            case "invalid":
-                exit = true
-                println "Notarization was invalid: ${response["Status Message"] as String}"
-                break
-            case "success":
-                exit = true
-                success = true
-                println "Notarization succeeded!"
-                break
-            default:
-                exit = true
-                println "Unknown status"
-                break
-        }
-
-        if (exit) break
-        Thread.sleep(30000)
-    }
-
-    if (!success) throw new GradleException("The notarization failed!")
-
-    // Step 5: staple the notarization ticket.
+    // Step 3: staple the notarization ticket.
     println "Stapling notarization ticket..."
     exec { commandLine "xcrun", "stapler", "staple", "-v", application.getAbsolutePath() }
 }
