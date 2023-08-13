@@ -2,9 +2,9 @@ apply from: 'scripts/versions.gradle'
 
 def vscodeFile = file("$buildDir/vscodeConfig.json")
 
-def vscodeWindowsZipName = "Windows.zip"
-def vscodeLinuxZipName = "Linux.tar.gz"
-def vscodeMacZipName = "Mac.zip"
+def vscodeWindowsZipName = "VSCode-${vsCodeVersion}-Windows.zip".toString()
+def vscodeLinuxZipName = "VSCode-${vsCodeVersion}-Linux.tar.gz".toString()
+def vscodeMacZipName = "VSCode-${vsCodeVersion}-Mac.zip".toString()
 
 def vscodeWindowsUrl = "https://update.code.visualstudio.com/${vsCodeVersion}/win32-x64-archive/stable".toString()
 

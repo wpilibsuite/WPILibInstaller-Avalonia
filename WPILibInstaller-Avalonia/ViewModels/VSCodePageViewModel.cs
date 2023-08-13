@@ -64,8 +64,8 @@ namespace WPILibInstaller.ViewModels
 
         private string singleDownloadText = "Download for this computer only\n(fastest)";
         private string skipVsCodeText = "Skip and don't use VS Code\n(NOT RECOMMENDED)";
-        private string allDownloadText = "Create VS Code zip to share with\nother computers/OSes for offline\ninstall";
-        private string selectText = "Select existing VS Code zip for\noffline install on this computer";
+        private string allDownloadText = "Download VS Code archives to share with\nother computers/OSes for offline\ninstall";
+        private string selectText = "Select existing VS Code archive for\noffline install on this computer";
 
         public double ProgressBar1
         {
@@ -174,7 +174,18 @@ namespace WPILibInstaller.ViewModels
 
         private async Task SelectVsCodeFunc()
         {
-            var file = await programWindow.ShowFilePicker("Select VS Code Installer ZIP", "zip");
+            var currentPlatform = PlatformUtils.CurrentPlatform;
+            String extension;
+
+            if (currentPlatform == Platform.Linux64)
+            {
+                extension = "tar.gz";
+            }
+            else
+            {
+                extension = "zip";
+            }
+            var file = await programWindow.ShowFilePicker("Select VS Code Installer ZIP", extension);
             if (file == null)
             {
                 // No need to error, user explicitly canceled.
@@ -183,11 +194,8 @@ namespace WPILibInstaller.ViewModels
             try
             {
                 FileStream fs = new FileStream(file, FileMode.Open);
-                using System.IO.Compression.ZipArchive archive = new System.IO.Compression.ZipArchive(fs);
-                var currentPlatform = PlatformUtils.CurrentPlatform;
-                var entry = archive.GetEntry(Model.Platforms[currentPlatform].NameInZip);
                 MemoryStream ms = new MemoryStream(100000000);
-                await entry!.Open().CopyToAsync(ms);
+                await fs.CopyToAsync(ms);
                 ms.Seek(0, SeekOrigin.Begin);
 
                 using var sha = SHA256.Create();
@@ -195,7 +203,7 @@ namespace WPILibInstaller.ViewModels
 
                 if (!hash.AsSpan().SequenceEqual(Model.Platforms[currentPlatform].Sha256Hash))
                 {
-                    bool cont = await CheckIncorrectHash($"VS Code for {currentPlatform}", Convert.ToHexString(Model.Platforms[currentPlatform].Sha256Hash), Convert.ToHexString(hash));
+                    bool cont = await CheckIncorrectHash($"VS Code for {currentPlatform}. File Location {file}", Convert.ToHexString(Model.Platforms[currentPlatform].Sha256Hash), Convert.ToHexString(hash));
                     if (!cont)
                     {
                         throw new InvalidDataException("Invalid hash");
@@ -216,7 +224,7 @@ namespace WPILibInstaller.ViewModels
             catch
             {
                 await MessageBoxManager.GetMessageBoxStandardWindow("Error",
-                    "Correct VS Code not found in archive.\nYou must select a VS Code zip downloaded with this tool.",
+                    "You must select a VS Code zip downloaded with this tool.",
                     icon: MessageBox.Avalonia.Enums.Icon.None).ShowDialog(programWindow.Window);
                 return;
             }
@@ -263,20 +271,16 @@ namespace WPILibInstaller.ViewModels
 
             var results = await Task.WhenAll(win64, linux64, mac64);
 
-            string vscodeFileName = $"WPILib-VSCode-{Model.VSCodeVersion}.zip";
-
-            string vscodeName = Path.Join(file, vscodeFileName);
-
             try
             {
-                File.Delete(vscodeName);
+                File.Delete(Path.Join(file, Model.Platforms[Platform.Win64].NameInZip));
+                File.Delete(Path.Join(file, Model.Platforms[Platform.Linux64].NameInZip));
+                File.Delete(Path.Join(file, Model.Platforms[Platform.Mac64].NameInZip));
             }
             catch
             {
 
             }
-
-            using var archive = ZipFile.Open(vscodeName, ZipArchiveMode.Create);
 
             MemoryStream? ms = null;
 
@@ -292,8 +296,7 @@ namespace WPILibInstaller.ViewModels
                     }
                 }
 
-                var entry = archive.CreateEntry(Model.Platforms[platform].NameInZip);
-                using var toWriteStream = entry.Open();
+                using var toWriteStream = new FileStream(Path.Join(file, Model.Platforms[platform].NameInZip), FileMode.OpenOrCreate);
                 stream.Seek(0, SeekOrigin.Begin);
                 await stream.CopyToAsync(toWriteStream);
                 if (platform == currentPlatform)
@@ -315,7 +318,7 @@ namespace WPILibInstaller.ViewModels
                     Model.ToExtractArchive = OpenArchive(ms);
                 }
 
-                DoneText = $"Done Downloading. File is named {vscodeFileName} Press Next to continue";
+                DoneText = $"Done Downloading. Press Next to continue";
                 EnableSelectionButtons = true;
                 SetLocalForwardVisible(true);
             }
