@@ -318,7 +318,8 @@ namespace WPILibInstaller.ViewModels
                     Model.ToExtractArchive = OpenArchive(ms);
                 }
 
-                DoneText = $"Done Downloading. Press Next to continue";
+                DoneText = "Done Downloading. Press Next to continue";
+
                 EnableSelectionButtons = true;
                 SetLocalForwardVisible(true);
             }
