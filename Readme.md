@@ -20,6 +20,8 @@ gradlew generateInstallers -PXmx3072m -PlinuxBuild -PjenkinsBuild
 ``-PlinuxBuild`` can be replaced with the OS of your choice to build.
 
 - ``-PlinuxBuild``
+- ``-PlinuxBuildArm32``
+- ``-PlinuxBuildArm64``
 - ``-PmacBuild``
 - ``-PmacBuildArm``
 - ``-PwindowsBuild``
