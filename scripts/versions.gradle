@@ -6,7 +6,7 @@ ext.vscodeWindowsHash = 'ee16984f65afc817ded76e8e8b874e058e4b62dc1804d3089735182
 
 ext.cppToolsVersion = '1.17.3'
 ext.javaExtVersion = '1.21.0'
-ext.javaDebugVersion = '0.53.0'
+ext.javaDebugVersion = '0.52.0'
 ext.javaDependencyVersion = '0.23.1'
 
 ext.wpilibVersion = gradleRioVersion
