@@ -177,7 +177,6 @@ ext.jdkZipSetupLinuxArm32 = { AbstractArchiveTask zip->
       f.path = f.path.replace("jdk-${jdkVersion}/", 'jdk/')
     }
 
-    exclude '**/src.zip'
     exclude '**/bin/*.pdb'
     exclude '**/bin/*.map'
     exclude '**/bin/server/*.pdb'
@@ -205,7 +204,6 @@ ext.jdkZipSetupLinuxArm64 = { AbstractArchiveTask zip->
       f.path = f.path.replace("jdk-${jdkVersion}/", 'jdk/')
     }
 
-    exclude '**/src.zip'
     exclude '**/bin/*.pdb'
     exclude '**/bin/*.map'
     exclude '**/bin/server/*.pdb'
