@@ -2,11 +2,11 @@ apply from: 'scripts/versions.gradle'
 
 def vscodeFile = file("$buildDir/vscodeConfig.json")
 
-def vscodeWindowsZipName = "Windows.zip"
-def vscodeLinuxZipName = "Linux.tar.gz"
-def vscodeLinuxArm32ZipName = "LinuxArm32.tar.gz"
-def vscodeLinuxArm64ZipName = "LinuxArm64.tar.gz"
-def vscodeMacZipName = "Mac.zip"
+def vscodeWindowsZipName = "VSCode-${vsCodeVersion}-Windows.zip".toString()
+def vscodeLinuxZipName = "VSCode-${vsCodeVersion}-Linux.tar.gz".toString()
+def vscodeLinuxArm32ZipName = "VSCode-${vsCodeVersion}-LinuxArm32.tar.gz".toString()
+def vscodeLinuxArm64ZipName = "VSCode-${vsCodeVersion}-LinuxArm64.tar.gz".toString()
+def vscodeMacZipName = "VSCode-${vsCodeVersion}-Mac.zip".toString()
 
 def vscodeWindowsUrl = "https://update.code.visualstudio.com/${vsCodeVersion}/win32-x64-archive/stable".toString()
 
@@ -40,7 +40,7 @@ def wpilibUtilMacUrl = "https://github.com/wpilibsuite/vscode-wpilib/releases/do
 
 def javaDebugUrl = "https://github.com/microsoft/vscode-java-debug/releases/download/${javaDebugVersion}/vscjava.vscode-java-debug-${javaDebugVersion}.vsix"
 
-def javaLangUrl = "https://github.com/redhat-developer/vscode-java/releases/download/v${javaExtVersion}/java-${javaExtVersion}.vsix"
+def javaLangUrl = "https://github.com/redhat-developer/vscode-java/releases/download/v${javaExtVersion}/redhat.java-${javaExtVersion}.vsix"
 
 def javaDepUrl = "https://github.com/microsoft/vscode-java-dependency/releases/download/${javaDependencyVersion}/vscjava.vscode-java-dependency-${javaDependencyVersion}.vsix"
 

@@ -119,7 +119,6 @@ ext.jdkZipSetupWindows = { AbstractArchiveTask zip->
       }
     }
 
-    exclude '**/src.zip'
     exclude '**/bin/*.pdb'
     exclude '**/bin/*.map'
     exclude '**/bin/server/*.pdb'
@@ -151,7 +150,6 @@ ext.jdkZipSetupLinux = { AbstractArchiveTask zip->
       f.path = f.path.replace("jdk-${jdkVersion}/", 'jdk/')
     }
 
-    exclude '**/src.zip'
     exclude '**/bin/*.pdb'
     exclude '**/bin/*.map'
     exclude '**/bin/server/*.pdb'
@@ -238,7 +236,6 @@ ext.jdkZipSetupMac = { AbstractArchiveTask zip->
     exclude "./jdk-${jdkVersion}/Contents/MacOS/**"
     exclude "./jdk-${jdkVersion}/Contents/Info.plist"
 
-    exclude '**/src.zip'
     exclude '**/bin/*.pdb'
     exclude '**/bin/*.map'
     exclude '**/bin/server/*.pdb'
@@ -269,7 +266,6 @@ ext.jdkZipSetupMacArm = { AbstractArchiveTask zip->
     exclude "./jdk-${jdkVersion}/Contents/MacOS/**"
     exclude "./jdk-${jdkVersion}/Contents/Info.plist"
 
-    exclude '**/src.zip'
     exclude '**/bin/*.pdb'
     exclude '**/bin/*.map'
     exclude '**/bin/server/*.pdb'

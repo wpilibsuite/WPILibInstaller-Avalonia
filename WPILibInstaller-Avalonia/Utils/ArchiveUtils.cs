@@ -26,11 +26,11 @@ namespace WPILibInstaller.Utils
             {
                 // Seek to end, grab size
                 stream.Seek(-4, SeekOrigin.End);
-                Span<int> intSpan = stackalloc int[1];
+                Span<uint> intSpan = stackalloc uint[1];
 
                 stream.Read(MemoryMarshal.AsBytes(intSpan));
 
-                int uncompressedSize = intSpan[0];
+                uint uncompressedSize = intSpan[0];
 
                 stream.Seek(0, SeekOrigin.Begin);
 

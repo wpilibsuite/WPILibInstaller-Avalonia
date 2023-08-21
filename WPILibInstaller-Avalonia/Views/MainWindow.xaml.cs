@@ -34,9 +34,8 @@ namespace WPILibInstaller.Views
             Container = builder.Build();
 
             ViewModel = Container.Resolve<MainWindowViewModel>();
-            ViewModel.Initialize();
-
             DataContext = ViewModel;
+            ViewModel.Initialize();
 
             InitializeComponent();
         }

@@ -6,13 +6,13 @@ namespace WPILibInstaller.Models
     public class MavenConfig
     {
         public string Folder { get; set; }
-        public string MetaDataFixerExe { get; set; }
+        public string MetaDataFixerJar { get; set; }
     }
 
     public class ToolsConfig
     {
         public string Folder { get; set; }
-        public string UpdaterExe { get; set; }
+        public string UpdaterJar { get; set; }
     }
 
     public class UpgradeConfig
