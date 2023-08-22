@@ -182,7 +182,7 @@ def generateFullResourcesTask = tasks.register('generateFullResources', project.
     duplicatesStrategy 'exclude'
 
     if (project.ext.isUnix) {
-        extension = 'tar.gz'
+        archiveExtension = 'tar.gz'
         compression = Compression.GZIP
     }
 
