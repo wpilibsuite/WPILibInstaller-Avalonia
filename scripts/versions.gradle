@@ -16,6 +16,6 @@ ext.toolchainGitTag = 'v2023-7'
 
 ext.jdkVersion = '17.0.8+7'
 
-ext.frcYear = '2023'
+ext.frcYear = '2024'
 
-ext.gradleWrapperVersion = '7.5.1'
+ext.gradleWrapperVersion = '8.1'
