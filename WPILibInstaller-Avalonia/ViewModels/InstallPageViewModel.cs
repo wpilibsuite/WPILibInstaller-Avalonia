@@ -296,12 +296,11 @@ namespace WPILibInstaller.ViewModels
                 settingsJson = (JObject)JsonConvert.DeserializeObject(await File.ReadAllTextAsync(settingsFile))!;
             }
 
-            SetIfNotSet("java.home", Path.Combine(homePath, "jdk"), settingsJson);
+            SetIfNotSet("java.jdt.ls.java.home", Path.Combine(homePath, "jdk"), settingsJson);
             SetIfNotSet("extensions.autoUpdate", false, settingsJson);
             SetIfNotSet("extensions.autoCheckUpdates", false, settingsJson);
             SetIfNotSet("extensions.ignoreRecommendations", true, settingsJson);
-            SetIfNotSet("extensions.showRecommendationsOnlyOnDemand", false, settingsJson);
-            SetIfNotSet("update.channel", "none", settingsJson);
+            SetIfNotSet("update.mode", "none", settingsJson);
             SetIfNotSet("update.showReleaseNotes", false, settingsJson);
             SetIfNotSet("http.systemCertificates", false, settingsJson);
 
