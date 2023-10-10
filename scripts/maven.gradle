@@ -191,7 +191,21 @@ def downloadReadTheDocs = tasks.register('downloadReadTheDocs', Download) {
 }
 
 def downloadNewCommands = tasks.register('downloadNewCommands', Download) {
-  src 'https://raw.githubusercontent.com/wpilibsuite/allwpilib/master/wpilibNewCommands/WPILibNewCommands.json'
+  src 'https://raw.githubusercontent.com/wpilibsuite/allwpilib/main/wpilibNewCommands/WPILibNewCommands.json'
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite false
+}
+
+def downloadRomiVendor = tasks.register('downloadRomiVendor', Download) {
+  src 'https://raw.githubusercontent.com/wpilibsuite/allwpilib/main/romiVendordep/RomiVendordep.json'
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite false
+}
+
+def downloadXrpVendor = tasks.register('downloadXrpVendor', Download) {
+  src 'https://raw.githubusercontent.com/wpilibsuite/allwpilib/main/xrpVendordep/XRPVendordep.json'
   def fileName = file(src.file).name
   dest "$buildDir/downloads/$fileName"
   overwrite false
@@ -208,6 +222,14 @@ ext.mavenZipSetup = { AbstractArchiveTask zip->
   zip.dependsOn downloadReadTheDocs
 
   zip.from(downloadNewCommands.get().outputFiles.first()) {
+    into '/vendordeps'
+  }
+
+  zip.from(downloadRomiVendor.get().outputFiles.first()) {
+    into '/vendordeps'
+  }
+
+  zip.from(downloadXrpVendor.get().outputFiles.first()) {
     into '/vendordeps'
   }
 
