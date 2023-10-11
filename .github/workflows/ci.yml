@@ -89,6 +89,17 @@ jobs:
         run: |
           md5sum **/*
           sha256sum **/*
+      - uses: jfrog/setup-jfrog-cli@v2
+        if: |
+          github.repository_owner == 'wpilibsuite' &&
+          startsWith(github.ref, 'refs/tags/v')
+        env:
+          JF_ARTIFACTORY_1: ${{ secrets.ARTIFACTORY_CLI_SECRET }}
+      - name: Upload to Artifactory
+        if: |
+          github.repository_owner == 'wpilibsuite' &&
+          startsWith(github.ref, 'refs/tags/v')
+        run: jfrog rt u "**/*" "installer/${GITHUB_REF#refs/tags/}/"
       - name: Upload to GitHub wpilibsuite/allwpilib
         if: |
           github.repository_owner == 'wpilibsuite' &&
