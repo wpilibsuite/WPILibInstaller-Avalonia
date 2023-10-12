@@ -1,21 +1,21 @@
-ext.vsCodeVersion = '1.81.1'
+ext.vsCodeVersion = '1.83.0'
 
-ext.vscodeLinuxHash = '4ea6b0aaed22474027dc2678c774461b4bc3df1fcfbd0c918554e173a4af7448'
-ext.vscodeMacHash = 'eb30358431d3446daa47a4c140a03886d9790f7387c7b1582a9701c45a943bc1'
-ext.vscodeWindowsHash = 'ee16984f65afc817ded76e8e8b874e058e4b62dc1804d3089735182c8cc0b07f'
+ext.vscodeLinuxHash = 'c90bb63bc0a94ec8a8da938464a32550d41a2c8c2a91c35ce59bb936a403cbab'
+ext.vscodeMacHash = '973ee7f811966d2759b2bd8239532015f5427101e089302bfc9a1459464803f3'
+ext.vscodeWindowsHash = '1ace9488c7d8c39157ef6760e8b2561dc1c9883e1227efab4e85644835ac0194'
 
-ext.cppToolsVersion = '1.17.3'
-ext.javaExtVersion = '1.21.0'
-ext.javaDebugVersion = '0.52.0'
-ext.javaDependencyVersion = '0.23.0'
+ext.cppToolsVersion = '1.17.5'
+ext.javaExtVersion = '1.23.0'
+ext.javaDebugVersion = '0.54.0'
+ext.javaDependencyVersion = '0.23.1'
 
 ext.wpilibVersion = gradleRioVersion
 
 ext.gccVersion = '12.1.0'
-ext.toolchainGitTag = 'v2023-7'
+ext.toolchainGitTag = 'v2024-1'
 
-ext.jdkVersion = '17.0.8+7'
+ext.jdkVersion = '17.0.8.1+1'
 
 ext.frcYear = '2024'
 
-ext.gradleWrapperVersion = '8.1'
+ext.gradleWrapperVersion = '8.4'
