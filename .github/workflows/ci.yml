@@ -100,19 +100,6 @@ jobs:
           github.repository_owner == 'wpilibsuite' &&
           startsWith(github.ref, 'refs/tags/v')
         run: jfrog rt u "**/*" "installer/${GITHUB_REF#refs/tags/}/"
-      - name: Upload to GitHub wpilibsuite/allwpilib
-        if: |
-          github.repository_owner == 'wpilibsuite' &&
-          startsWith(github.ref, 'refs/tags/v')
-        run: |
-          if ( gh -R wpilibsuite/allwpilib release view "${GITHUB_REF#refs/tags/}" 1> /dev/null ) ; then
-            gh -R wpilibsuite/allwpilib release upload --clobber "${GITHUB_REF#refs/tags/}" **/*
-          else
-            gh -R wpilibsuite/allwpilib release create -d "${GITHUB_REF#refs/tags/}" **/*
-          fi
-        env:
-          GITHUB_TOKEN: ${{secrets.GH_ADMIN_TOKEN}}
-
 
   format:
     runs-on: ubuntu-latest
