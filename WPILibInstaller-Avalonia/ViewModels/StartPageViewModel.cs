@@ -373,7 +373,7 @@ namespace WPILibInstaller.ViewModels
                     }
                     else
                     {
-                        publicFolder = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+                        publicFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
                     }
                 }
                 return Path.Combine(publicFolder, "wpilib", UpgradeConfig.FrcYear);
