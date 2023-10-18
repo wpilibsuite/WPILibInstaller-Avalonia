@@ -7,16 +7,13 @@ ext.notarize = { File application, String id, String username, String password -
 
     // Step 2: submit application for notarization.
     println "Submitting application to notarization service..."
-    def stdout = new ByteArrayOutputStream()
     def result = exec {
         commandLine "xcrun", "notarytool", "submit", "/tmp/archive.zip", "--wait",
                 "--apple-id", username, "--password", password
-        standardOutput = stdout
         ignoreExitValue(true)
     }
 
     if (result.exitValue != 0) {
-        println stdout.toString()
         throw new GradleException("The notarization failed!")
     }
 
