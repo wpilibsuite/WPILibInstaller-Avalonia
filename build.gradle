@@ -84,6 +84,8 @@ apply from: 'scripts/toolchain.gradle'
 apply from: 'scripts/jdk.gradle'
 apply from: 'scripts/maven.gradle'
 
+apply from: 'scripts/advantagescope.gradle'
+
 // Tools must happen after maven
 apply from: 'scripts/tools.gradle'
 apply from: 'scripts/vscode.gradle'
@@ -200,6 +202,8 @@ def generateFullResourcesTask = tasks.register('generateFullResources', project.
 
     jdkZipSetup(it)
 
+    advantageScopeZipSetup(it)
+
     if (OperatingSystem.current().isWindows()) {
         def task = it
         // Grab release shortcut creator
@@ -302,6 +306,8 @@ def generateConfigFiles = tasks.register('generateCommonResources', Zip) {
     zip.from(upgradeConfigFile)
 
     jdkConfigFileSetup(zip)
+
+    advantageScopeConfigFileSetup(zip)
 
     vscodeConfigZipSetup(zip)
 }

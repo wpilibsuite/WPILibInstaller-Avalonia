@@ -1,0 +1,121 @@
+apply from: 'scripts/versions.gradle'
+
+def baseUrl = "https://github.com/Mechanical-Advantage/AdvantageScope/releases/download/$advantagescopeGitTag/"
+
+def fileNameWindows = "advantagescope-wpilib-win-x64.zip"
+
+def downloadUrlWindows = baseUrl + fileNameWindows
+
+def fileNameMac = "advantagescope-wpilib-mac-x64.zip"
+
+def downloadUrlMac = baseUrl + fileNameMac
+
+def fileNameMacArm = "advantagescope-wpilib-mac-arm64.zip"
+
+def downloadUrlMacArm = baseUrl + fileNameMacArm
+
+def fileNameLinux = "advantagescope-wpilib-linux-x64.zip"
+
+def downloadUrlLinux = baseUrl + fileNameLinux
+
+apply plugin: 'de.undercouch.download'
+
+def downloadTaskWindows = tasks.register('downloadAdvantageScopeWindows', Download) {
+  src downloadUrlWindows
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite true
+}
+
+def downloadTaskMac = tasks.register('downloadAdvantageScopeMac', Download) {
+  src downloadUrlMac
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite true
+}
+
+def downloadTaskMacArm = tasks.register('downloadAdvantageScopeMacArm', Download) {
+  src downloadUrlMacArm
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite true
+}
+
+def downloadTaskLinux = tasks.register('downloadAdvantageScopeLinux', Download) {
+  src downloadUrlLinux
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite true
+}
+
+def advantageScopeConfigFile = file("$buildDir/advantageScopeConfig.json")
+
+def advantageScopeConfigFileTask = tasks.register("advantageScopeConfigFile") {
+  it.outputs.file advantageScopeConfigFile
+
+  doLast {
+
+    def config = [:]
+    config['folder'] = 'advantagescope'
+    config['zipFile'] = 'advantagescope.zip'
+
+    def gbuilder = getGsonBuilder()
+
+    gbuilder.setPrettyPrinting()
+    def json = gbuilder.create().toJson(config)
+
+    advantageScopeConfigFile.parentFile.mkdirs()
+
+    advantageScopeConfigFile.text = json
+  }
+}
+
+ext.advantageScopeConfigFileSetup = { AbstractArchiveTask zip->
+  zip.dependsOn advantageScopeConfigFileTask
+  zip.inputs.file advantageScopeConfigFile
+
+  zip.from(advantageScopeConfigFile) {
+    rename {'advantageScopeConfig.json'}
+  }
+}
+
+ext.advantageScopeZipSetup = { AbstractArchiveTask zip->
+  if (project.hasProperty('linuxBuild')) {
+    zip.dependsOn downloadTaskLinux
+
+    zip.inputs.files downloadTaskLinux.get().outputFiles
+
+    zip.from(project.zipTree(downloadTaskLinux.get().outputFiles.first())) {
+
+      includeEmptyDirs = false
+    }
+
+  } else if (project.hasProperty('macBuild')) {
+    zip.dependsOn downloadTaskMac
+
+    zip.inputs.files downloadTaskMac.get().outputFiles
+
+    zip.from(project.zipTree(downloadTaskMac.get().outputFiles.first())) {
+
+      includeEmptyDirs = false
+    }
+  } else if (project.hasProperty('macBuildArm')) {
+    zip.dependsOn downloadTaskMacArm
+
+    zip.inputs.files downloadTaskMacArm.get().outputFiles
+
+    zip.from(project.zipTree(downloadTaskMacArm.get().outputFiles.first())) {
+
+      includeEmptyDirs = false
+    }
+  } else {
+    zip.dependsOn downloadTaskWindows
+
+    zip.inputs.files downloadTaskWindows.get().outputFiles
+
+    zip.from(project.zipTree(downloadTaskWindows.get().outputFiles.first())) {
+
+      includeEmptyDirs = false
+    }
+  }
+}

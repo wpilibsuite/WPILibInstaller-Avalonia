@@ -94,6 +94,7 @@ namespace WPILibInstaller.ViewModels
             await ExtractArchive(token, new[] {
                 configurationProvider.JdkConfig.Folder + "/",
                 configurationProvider.UpgradeConfig.Tools.Folder + "/",
+                configurationProvider.AdvantageScopeConfig.Folder + "/",
                 "installUtils/"});
         }
 
