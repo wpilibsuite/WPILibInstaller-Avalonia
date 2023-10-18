@@ -8,8 +8,8 @@ ext.notarize = { File application, String id, String username, String password -
     // Step 2: submit application for notarization.
     println "Submitting application to notarization service..."
     def result = exec {
-        commandLine "xcrun", "notarytool", "submit", "/tmp/archive.zip", "--wait",
-                "--apple-id", username, "--password", password
+        commandLine "xcrun", "notarytool", "submit", "--wait",
+                "--apple-id", username, "--password", password, "/tmp/archive.zip"
         ignoreExitValue(true)
     }
 
