@@ -69,6 +69,7 @@ jobs:
           ./gradlew generateInstallers -PjenkinsBuild ${{ matrix.build-options }} \
           -PdeveloperID=${{ secrets.APPLE_DEVELOPER_ID }} \
           -Pnotarization-username=${{ secrets.APPLE_NOTARIZATION_USERNAME }} \
+          -Pnotarization-teamid=${{ secrets.APPLE_NOTARIZATION_TEAMID }} \
           -Pnotarization-password=${{ secrets.APPLE_NOTARIZATION_PASSWORD }}
         if: |
           github.repository_owner == 'wpilibsuite' &&
