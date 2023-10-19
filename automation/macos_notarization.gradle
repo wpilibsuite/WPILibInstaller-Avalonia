@@ -1,6 +1,6 @@
 import groovy.json.JsonSlurper
 
-ext.notarize = { File application, String id, String username, String password ->
+ext.notarize = { File application, String id, String username, String teamid, String password ->
     // Step 1: archive the application.
     println "Archiving application..."
     exec { commandLine "ditto", "-c", "-k", "--keepParent", application.getAbsolutePath(), "/tmp/archive.zip" }
@@ -9,7 +9,7 @@ ext.notarize = { File application, String id, String username, String password -
     println "Submitting application to notarization service..."
     def result = exec {
         commandLine "xcrun", "notarytool", "submit", "--wait",
-                "--apple-id", username, "--password", password, "/tmp/archive.zip"
+                "--apple-id", username, "--team-id", teamid, "--password", password, "/tmp/archive.zip"
         ignoreExitValue(true)
     }
 
