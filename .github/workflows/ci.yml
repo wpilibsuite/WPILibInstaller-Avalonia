@@ -123,7 +123,7 @@ jobs:
           github.repository_owner == 'wpilibsuite' &&
           startsWith(github.ref, 'refs/tags/v')
         run: |
-          if ( gh release view "${GITHUB_REF#refs/tags/}" 1> /dev/null ) ; then
+          if ( gh -R wpilibsuite/allwpilib release view "${GITHUB_REF#refs/tags/}" 1> /dev/null ) ; then
             gh -R wpilibsuite/allwpilib release upload --clobber "${GITHUB_REF#refs/tags/}" zipfiles/*
           else
             gh -R wpilibsuite/allwpilib release create -d "${GITHUB_REF#refs/tags/}" zipfiles/*
