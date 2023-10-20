@@ -106,10 +106,10 @@ jobs:
           startsWith(github.ref, 'refs/tags/v')
         run: |
           mkdir zipfiles
-          zip -0 -s 1500m -j "zipfiles/WPILib_Linux-${GITHUB_REF#refs/tags/v}" Linux/*
-          zip -0 -s 1500m -j "zipfiles/WPILib_Windows-${GITHUB_REF#refs/tags/v}" Win64/*
-          zip -0 -s 1500m -j "zipfiles/WPILib_macOS-Intel-${GITHUB_REF#refs/tags/v}" macOS/*
-          zip -0 -s 1500m -j "zipfiles/WPILib_macOS-Arm64-${GITHUB_REF#refs/tags/v}" macOSArm/*
+          zip -0 -s 1500m -j "zipfiles/WPILib_Linux-${GITHUB_REF#refs/tags/v}.zip" Linux/*
+          zip -0 -s 1500m -j "zipfiles/WPILib_Windows-${GITHUB_REF#refs/tags/v}.zip" Win64/*
+          zip -0 -s 1500m -j "zipfiles/WPILib_macOS-Intel-${GITHUB_REF#refs/tags/v}.zip" macOS/*
+          zip -0 -s 1500m -j "zipfiles/WPILib_macOS-Arm64-${GITHUB_REF#refs/tags/v}.zip" macOSArm/*
       - name: Print Zip Checksums
         run: |
           md5sum zipfiles/*
