@@ -103,6 +103,7 @@ jobs:
         run: jfrog rt u "**/*" "installer/${GITHUB_REF#refs/tags/}/"
       - name: Zip and split for GitHub
         if: |
+          github.repository_owner == 'wpilibsuite' &&
           startsWith(github.ref, 'refs/tags/v')
         run: |
           mkdir zipfiles
@@ -111,18 +112,24 @@ jobs:
           zip -0 -s 1500m -j "zipfiles/WPILib_macOS-Intel-${GITHUB_REF#refs/tags/v}.zip" macOS/*
           zip -0 -s 1500m -j "zipfiles/WPILib_macOS-Arm64-${GITHUB_REF#refs/tags/v}.zip" macOSArm/*
       - name: Print Zip Checksums
+        if: |
+          github.repository_owner == 'wpilibsuite' &&
+          startsWith(github.ref, 'refs/tags/v')
         run: |
           md5sum zipfiles/*
           sha256sum zipfiles/*
       - name: Upload to GitHub
         if: |
+          github.repository_owner == 'wpilibsuite' &&
           startsWith(github.ref, 'refs/tags/v')
         run: |
           if ( gh release view "${GITHUB_REF#refs/tags/}" 1> /dev/null ) ; then
-            gh release upload --clobber "${GITHUB_REF#refs/tags/}" zipfiles/*
+            gh -R wpilibsuite/allwpilib release upload --clobber "${GITHUB_REF#refs/tags/}" zipfiles/*
           else
-            gh release create -d "${GITHUB_REF#refs/tags/}" zipfiles/*
+            gh -R wpilibsuite/allwpilib release create -d "${GITHUB_REF#refs/tags/}" zipfiles/*
           fi
+        env:
+          GITHUB_TOKEN: ${{secrets.GH_ADMIN_TOKEN}}
 
   format:
     runs-on: ubuntu-latest
