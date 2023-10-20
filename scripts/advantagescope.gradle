@@ -86,7 +86,7 @@ ext.advantageScopeZipSetup = { AbstractArchiveTask zip->
     zip.inputs.files downloadTaskLinux.get().outputFiles
 
     zip.from(project.zipTree(downloadTaskLinux.get().outputFiles.first())) {
-
+      into '/advantagescope'
       includeEmptyDirs = false
     }
 
@@ -96,7 +96,7 @@ ext.advantageScopeZipSetup = { AbstractArchiveTask zip->
     zip.inputs.files downloadTaskMac.get().outputFiles
 
     zip.from(project.zipTree(downloadTaskMac.get().outputFiles.first())) {
-
+      into '/advantagescope'
       includeEmptyDirs = false
     }
   } else if (project.hasProperty('macBuildArm')) {
@@ -105,7 +105,7 @@ ext.advantageScopeZipSetup = { AbstractArchiveTask zip->
     zip.inputs.files downloadTaskMacArm.get().outputFiles
 
     zip.from(project.zipTree(downloadTaskMacArm.get().outputFiles.first())) {
-
+      into '/advantagescope'
       includeEmptyDirs = false
     }
   } else {
@@ -114,7 +114,7 @@ ext.advantageScopeZipSetup = { AbstractArchiveTask zip->
     zip.inputs.files downloadTaskWindows.get().outputFiles
 
     zip.from(project.zipTree(downloadTaskWindows.get().outputFiles.first())) {
-
+      into '/advantagescope'
       includeEmptyDirs = false
     }
   }
