@@ -6,11 +6,11 @@ def fileNameWindows = "advantagescope-wpilib-win-x64.zip"
 
 def downloadUrlWindows = baseUrl + fileNameWindows
 
-def fileNameMac = "advantagescope-wpilib-mac-x64.zip"
+def fileNameMac = "advantagescope-wpilib-mac-x64.tar.gz"
 
 def downloadUrlMac = baseUrl + fileNameMac
 
-def fileNameMacArm = "advantagescope-wpilib-mac-arm64.zip"
+def fileNameMacArm = "advantagescope-wpilib-mac-arm64.tar.gz"
 
 def downloadUrlMacArm = baseUrl + fileNameMacArm
 
@@ -95,7 +95,7 @@ ext.advantageScopeZipSetup = { AbstractArchiveTask zip->
 
     zip.inputs.files downloadTaskMac.get().outputFiles
 
-    zip.from(project.zipTree(downloadTaskMac.get().outputFiles.first())) {
+    zip.from(project.tarTree(project.resources.gzip(downloadTaskMac.get().outputFiles.first()))) {
       into '/advantagescope'
       includeEmptyDirs = false
     }
@@ -104,7 +104,7 @@ ext.advantageScopeZipSetup = { AbstractArchiveTask zip->
 
     zip.inputs.files downloadTaskMacArm.get().outputFiles
 
-    zip.from(project.zipTree(downloadTaskMacArm.get().outputFiles.first())) {
+    zip.from(project.tarTree(project.resources.gzip(downloadTaskMacArm.get().outputFiles.first()))) {
       into '/advantagescope'
       includeEmptyDirs = false
     }
