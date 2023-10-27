@@ -95,18 +95,18 @@ ext.advantageScopeZipSetup = { AbstractArchiveTask zip->
 
     zip.inputs.files downloadTaskMac.get().outputFiles
 
-    zip.from(project.tarTree(project.resources.gzip(downloadTaskMac.get().outputFiles.first()))) {
+    // Cannot extract, otherwise breaks mac
+    zip.from(downloadTaskMac.get().outputFiles.first()) {
       into '/advantagescope'
-      includeEmptyDirs = false
     }
   } else if (project.hasProperty('macBuildArm')) {
     zip.dependsOn downloadTaskMacArm
 
     zip.inputs.files downloadTaskMacArm.get().outputFiles
 
-    zip.from(project.tarTree(project.resources.gzip(downloadTaskMacArm.get().outputFiles.first()))) {
+    // Cannot extract, otherwise breaks mac
+    zip.from(downloadTaskMacArm.get().outputFiles.first()) {
       into '/advantagescope'
-      includeEmptyDirs = false
     }
   } else {
     zip.dependsOn downloadTaskWindows
