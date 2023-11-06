@@ -71,7 +71,7 @@ dependencies {
     // commands
     implementation "edu.wpi.first.wpilibNewCommands:wpilibNewCommands-java:${wpi.versions.wpilibVersion.get()}"
     implementation "edu.wpi.first.xrpVendordep:xrpVendordep-java:${wpi.versions.wpilibVersion.get()}"
-	implementation "edu.wpi.first.romiVendordep:romiVendordep-java:${wpi.versions.wpilibVersion.get()}"
+    implementation "edu.wpi.first.romiVendordep:romiVendordep-java:${wpi.versions.wpilibVersion.get()}"
     if (project(":").ext.buildClassifier == 'Windows') {
         implementation "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}:x64@zip"
     }
@@ -92,6 +92,7 @@ wpi.sim.addGui()
 wpi.sim.addDriverstation()
 wpi.sim.addWebsocketsServer().defaultEnabled = true
 wpi.sim.addWebsocketsClient().defaultEnabled = true
+wpi.sim.addXRPClient().defaultEnabled = true
 
 deployJavaArtifact.jarTask = jar
 wpi.java.configureExecutableTasks(jar)
