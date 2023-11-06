@@ -70,6 +70,8 @@ dependencies {
 
     // commands
     implementation "edu.wpi.first.wpilibNewCommands:wpilibNewCommands-java:${wpi.versions.wpilibVersion.get()}"
+    implementation "edu.wpi.first.xrpVendordep:xrpVendordep-java:${wpi.versions.wpilibVersion.get()}"
+	implementation "edu.wpi.first.romiVendordep:romiVendordep-java:${wpi.versions.wpilibVersion.get()}"
     if (project(":").ext.buildClassifier == 'Windows') {
         implementation "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}:x64@zip"
     }
@@ -110,6 +112,34 @@ nativeUtils {
     }
 }
 
+nativeUtils {
+    nativeDependencyContainer {
+        xrpvendordep(getNativeDependencyTypeClass('WPISharedMavenDependency')) {
+            groupId = "edu.wpi.first.xrpVendordep"
+            artifactId = "xrpVendordep-cpp"
+            headerClassifier = "headers"
+            sourceClassifier = "sources"
+            ext = "zip"
+            version = wpilibFoundVersion
+            targetPlatforms.addAll(nativeUtils.wpi.platforms.allPlatforms)
+        }
+    }
+}
+
+nativeUtils {
+    nativeDependencyContainer {
+        romivendordep(getNativeDependencyTypeClass('WPISharedMavenDependency')) {
+            groupId = "edu.wpi.first.romiVendordep"
+            artifactId = "romiVendordep-cpp"
+            headerClassifier = "headers"
+            sourceClassifier = "sources"
+            ext = "zip"
+            version = wpilibFoundVersion
+            targetPlatforms.addAll(nativeUtils.wpi.platforms.allPlatforms)
+        }
+    }
+}
+
 model {
     components {
         frcUserProgram(NativeExecutableSpec) {
@@ -124,6 +154,8 @@ model {
             wpi.cpp.deps.googleTest(it)
 
             wpi.cpp.deps.useLibrary(it, 'wpilibnewcommands')
+            wpi.cpp.deps.useLibrary(it, 'xrpvendordep')
+            wpi.cpp.deps.useLibrary(it, 'romivendordep')
         }
         // frcUserProgramStatic(NativeExecutableSpec) {
         //     targetPlatform wpi.platforms.roborio
