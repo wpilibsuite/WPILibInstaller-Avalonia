@@ -26,7 +26,7 @@ def pylanceUrl = "https://marketplace.visualstudio.com/_apis/public/gallery/publ
 
 def isortUrl = "https://marketplace.visualstudio.com/_apis/public/gallery/publishers/ms-python/vsextensions/isort/${isortVersion}/vspackage"
 
-def autopep8Url = "https://marketplace.visualstudio.com/_apis/public/gallery/publishers/ms-python/vsextensions/autopep8/${autopep8Version}/vspackage"
+def blackUrl = "https://marketplace.visualstudio.com/_apis/public/gallery/publishers/ms-python/vsextensions/black-formatter/${blackVersion}/vspackage"
 
 def wpilibExtensionUrl = "https://github.com/wpilibsuite/vscode-wpilib/releases/download/v${wpilibVersion}/vscode-wpilib-${wpilibVersion}.vsix"
 
@@ -185,8 +185,8 @@ def isortExtensionDownload = tasks.register("isortExtensionDownload", Download) 
 }
 
 
-def autopep8ExtensionDownload = tasks.register("autopep8ExtensionDownload", Download) {
-  src autopep8Url
+def blackExtensionDownload = tasks.register("blackExtensionDownload", Download) {
+  src blackUrl
   def fileName = file(src.file).name
   dest "$buildDir/downloads/$fileName"
   overwrite false
@@ -219,7 +219,7 @@ def vscodeTask = tasks.register('vscodeConfig', Task) {
   dependsOn pythonExtensionDownload
   dependsOn pylanceExtensionDownload
   dependsOn isortExtensionDownload
-  dependsOn autopep8ExtensionDownload
+  dependsOn blackExtensionDownload
   dependsOn verifyVscodeLinuxDownload
   dependsOn verifyVscodeWindowsDownload
   dependsOn verifyVscodeMacDownload
@@ -232,7 +232,7 @@ def vscodeTask = tasks.register('vscodeConfig', Task) {
   inputs.files pythonExtensionDownload.get().outputFiles
   inputs.files pylanceExtensionDownload.get().outputFiles
   inputs.files isortExtensionDownload.get().outputFiles
-  inputs.files autopep8ExtensionDownload.get().outputFiles
+  inputs.files blackExtensionDownload.get().outputFiles
 
   inputs.property 'linuxhash', vscodeLinuxHash
   inputs.property 'machash', vscodeMacHash
@@ -265,9 +265,9 @@ def vscodeTask = tasks.register('vscodeConfig', Task) {
     def isortMap = [:]
     isortMap['vsix'] = isortExtensionDownload.get().outputFiles.first().name
     getInformationOfVsix(zipTree(isortExtensionDownload.get().outputFiles.first()), isortMap)
-    def autopep8Map = [:]
-    autopep8Map['vsix'] = autopep8ExtensionDownload.get().outputFiles.first().name
-    getInformationOfVsix(zipTree(autopep8ExtensionDownload.get().outputFiles.first()), autopep8Map)
+    def blackMap = [:]
+    blackMap['vsix'] = blackExtensionDownload.get().outputFiles.first().name
+    getInformationOfVsix(zipTree(blackExtensionDownload.get().outputFiles.first()), blackMap)
 
     config['VsCodeWindowsUrl'] = vscodeWindowsUrl
     config['VsCodeWindowsName'] = vscodeWindowsZipName
@@ -290,7 +290,7 @@ def vscodeTask = tasks.register('vscodeConfig', Task) {
       pythonMap,
       pylanceMap,
       isortMap,
-      autopep8Map
+      blackMap
     ]
 
 
@@ -368,7 +368,7 @@ ext.vscodeZipSetup = { AbstractArchiveTask zip->
   zip.from (isortExtensionDownload.get().outputFiles.first()) {
     into '/vsCodeExtensions'
   }
-  zip.from (autopep8ExtensionDownload.get().outputFiles.first()) {
+  zip.from (blackExtensionDownload.get().outputFiles.first()) {
     into '/vsCodeExtensions'
   }
 }

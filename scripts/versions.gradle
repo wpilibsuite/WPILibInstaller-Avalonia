@@ -11,7 +11,7 @@ ext.javaDependencyVersion = '0.23.2023120100'
 ext.pythonExtVersion = '2023.21.13351006'
 ext.pylanceVersion = '2023.11.102'
 ext.isortVersion = '2023.11.13191009'
-ext.autopep8Version = '2023.9.13201008'
+ext.blackVersion = '2023.7.13351006'
 
 ext.wpilibVersion = gradleRioVersion
 
