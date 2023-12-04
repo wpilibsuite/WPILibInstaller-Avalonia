@@ -8,6 +8,10 @@ ext.cppToolsVersion = '1.19.1'
 ext.javaExtVersion = '1.26.2023120808'
 ext.javaDebugVersion = '0.55.0'
 ext.javaDependencyVersion = '0.23.2023120100'
+ext.pythonExtVersion = '2023.21.13351006'
+ext.pylanceVersion = '2023.11.102'
+ext.isortVersion = '2023.11.13191009'
+ext.autopep8Version = '2023.9.13201008'
 
 ext.wpilibVersion = gradleRioVersion
 
