@@ -12,13 +12,13 @@ def vscodeLinuxUrl = "https://update.code.visualstudio.com/${vsCodeVersion}/linu
 
 def vscodeMacUrl = "https://update.code.visualstudio.com/${vsCodeVersion}/darwin-universal/stable".toString()
 
-def cppWindowsUrl = "https://github.com/Microsoft/vscode-cpptools/releases/download/v${cppToolsVersion}/cpptools-win64.vsix"
+def cppWindowsUrl = "https://frcmaven.wpi.edu/api/download/vscode-extensions/ms-vscode/cpptools/ms-vscode.cpptools-${cppToolsVersion}@win32-x64.vsix"
 
-def cppMacUrl = "https://github.com/Microsoft/vscode-cpptools/releases/download/v${cppToolsVersion}/cpptools-osx.vsix"
+def cppMacUrl = "https://frcmaven.wpi.edu/api/download/vscode-extensions/ms-vscode/cpptools/ms-vscode.cpptools-${cppToolsVersion}@darwin-x64.vsix"
 
-def cppMacArmUrl = "https://github.com/Microsoft/vscode-cpptools/releases/download/v${cppToolsVersion}/cpptools-osx-arm64.vsix"
+def cppMacArmUrl = "https://frcmaven.wpi.edu/api/download/vscode-extensions/ms-vscode/cpptools/ms-vscode.cpptools-${cppToolsVersion}@darwin-arm64.vsix"
 
-def cppLinuxUrl = "https://github.com/Microsoft/vscode-cpptools/releases/download/v${cppToolsVersion}/cpptools-linux.vsix"
+def cppLinuxUrl = "https://frcmaven.wpi.edu/api/download/vscode-extensions/ms-vscode/cpptools/ms-vscode.cpptools-${cppToolsVersion}@linux-x64.vsix"
 
 def wpilibExtensionUrl = "https://github.com/wpilibsuite/vscode-wpilib/releases/download/v${wpilibVersion}/vscode-wpilib-${wpilibVersion}.vsix"
 
@@ -28,11 +28,11 @@ def wpilibUtilLinuxUrl = "https://github.com/wpilibsuite/vscode-wpilib/releases/
 
 def wpilibUtilMacUrl = "https://github.com/wpilibsuite/vscode-wpilib/releases/download/v${wpilibVersion}/wpilibutility-mac.tar.gz"
 
-def javaDebugUrl = "https://github.com/microsoft/vscode-java-debug/releases/download/${javaDebugVersion}/vscjava.vscode-java-debug-${javaDebugVersion}.vsix"
+def javaDebugUrl = "https://frcmaven.wpi.edu/api/download/vscode-extensions/vscjava/vscode-java-debug/vscjava.vscode-java-debug-${javaDebugVersion}.vsix"
 
-def javaLangUrl = "https://github.com/redhat-developer/vscode-java/releases/download/v${javaExtVersion}/java-${javaExtVersion}.vsix"
+def javaLangUrl = "https://frcmaven.wpi.edu/api/download/vscode-extensions/redhat/java/redhat.java-${javaExtVersion}.vsix"
 
-def javaDepUrl = "https://github.com/microsoft/vscode-java-dependency/releases/download/${javaDependencyVersion}/vscjava.vscode-java-dependency-${javaDependencyVersion}.vsix"
+def javaDepUrl = "https://frcmaven.wpi.edu/api/download/vscode-extensions/vscjava/vscode-java-dependency/vscjava.vscode-java-dependency-${javaDependencyVersion}.vsix"
 
 def vscodeWindowsDownload = tasks.register("vscodeWindowsDownload", Download) {
   src vscodeWindowsUrl
