@@ -20,13 +20,13 @@ def cppMacArmUrl = "https://frcmaven.wpi.edu/api/download/vscode-extensions/ms-v
 
 def cppLinuxUrl = "https://frcmaven.wpi.edu/api/download/vscode-extensions/ms-vscode/cpptools/ms-vscode.cpptools-${cppToolsVersion}@linux-x64.vsix"
 
-def pythonExtUrl = "https://marketplace.visualstudio.com/_apis/public/gallery/publishers/ms-python/vsextensions/python/${pythonExtVersion}/vspackage"
+def pythonExtUrl = "https://frcmaven.wpi.edu/artifactory/vscode-extensions/ms-python/python/ms-python.python-${pythonExtVersion}.vsix"
 
-def pylanceUrl = "https://marketplace.visualstudio.com/_apis/public/gallery/publishers/ms-python/vsextensions/vscode-pylance/${pylanceVersion}/vspackage"
+def pylanceUrl = "https://frcmaven.wpi.edu/artifactory/vscode-extensions/ms-python/vscode-pylance/ms-python.vscode-pylance-${pylanceVersion}.vsix"
 
-def isortUrl = "https://marketplace.visualstudio.com/_apis/public/gallery/publishers/ms-python/vsextensions/isort/${isortVersion}/vspackage"
+def isortUrl = "https://frcmaven.wpi.edu/artifactory/vscode-extensions/ms-python/isort/ms-python.isort-${isortVersion}.vsix"
 
-def blackUrl = "https://marketplace.visualstudio.com/_apis/public/gallery/publishers/ms-python/vsextensions/black-formatter/${blackVersion}/vspackage"
+def blackUrl = "https://frcmaven.wpi.edu/artifactory/vscode-extensions/ms-python/black-formatter/ms-python.black-formatter-${blackVersion}.vsix"
 
 def wpilibExtensionUrl = "https://github.com/wpilibsuite/vscode-wpilib/releases/download/v${wpilibVersion}/vscode-wpilib-${wpilibVersion}.vsix"
 
