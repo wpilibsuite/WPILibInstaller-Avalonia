@@ -93,6 +93,27 @@ public class Program {
     }
   }
 
+  private static void installAdvantageScope(String toolsPath) {
+    if (SystemUtils.IS_OS_MAC) {
+      String arch = System.getProperty("os.arch");
+      boolean isArm = arch.equals("arm64") || arch.equals("aarch64");
+      String archiveFileName = "advantagescope-wpilib-mac-" +
+          (isArm ? "arm64" : "x64") +
+          ".tar.gz";
+      String advantageScopeFolder = Paths.get(new File(toolsPath).getParent(), "advantagescope").toString();
+      Path archivePath = Paths.get(advantageScopeFolder, archiveFileName);
+
+      try {
+        Runtime.getRuntime().exec(new String[] {
+            "tar", "-xzf", archivePath.toString(), "-C", advantageScopeFolder
+        }).waitFor();
+      } catch (IOException | InterruptedException e) {
+        System.out.println(e.toString());
+        e.printStackTrace();
+      }
+    }
+  }
+
   public static void main(String[] args) throws URISyntaxException, IOException {
     Gson gson = new Gson();
 
@@ -106,10 +127,14 @@ public class Program {
       ToolConfig[] tools = gson.fromJson(reader, ToolConfig[].class);
       Arrays.stream(tools).filter(x -> x.isValid()).forEach(tool -> {
         System.out.println("Installing " + tool.name);
-        if (tool.cpp) {
-          installCppTool(tool, toolsPath);
-        } else {
-          installJavaTool(tool, toolsPath);
+        if (tool.name.equals("AdvantageScope")) {
+          installAdvantageScope(toolsPath);
+        } else if (tool.artifact != null) {
+          if (tool.cpp) {
+            installCppTool(tool, toolsPath);
+          } else {
+            installJavaTool(tool, toolsPath);
+          }
         }
       });
     }
