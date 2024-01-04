@@ -5,7 +5,6 @@ import os
 import platform
 import subprocess
 import sys
-import json
 
 script_name = os.path.abspath(sys.argv[0])
 tools_folder = os.path.dirname(script_name)
@@ -18,8 +17,11 @@ elif platform.system() == "Darwin":
 elif platform.system() == "Windows":
     cmd = [year_folder + "\\advantagescope\\AdvantageScope (WPILib).exe"]
 
+env = os.environ.copy()
+del env["ELECTRON_RUN_AS_NODE"]
+
 try:
-    subprocess.Popen(cmd)
+    subprocess.Popen(cmd, env=env)
 except Exception as e:
     print("Error launching tool:")
     print(e)

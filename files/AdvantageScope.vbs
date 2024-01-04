@@ -4,13 +4,20 @@ Set fso = WScript.CreateObject("Scripting.FileSystemObject")
 'Get the folder of this script
 toolsFolder = fso.GetParentFolderName(WScript.ScriptFullName)
 
+'Get the AdvantageScope folder
+toolsFolder = fso.GetParentFolderName(WScript.ScriptFullName)
+yearFolder = fso.GetParentFolderName(toolsFolder)
+advantageScopeFolder = fso.BuildPath(yearFolder, "advantagescope")
+
 'Get the full path to the exe
-fullExeName = fso.BuildPath(fso.GetParentFolderName(toolsFolder), "advantagescope", "AdvantageScope (WPILib).exe")
+fullExeName = fso.BuildPath(advantageScopeFolder, "AdvantageScope (WPILib).exe")
 
 shellScript = fullExeName
 
 'Create Shell Object
 Set objShell = WScript.CreateObject( "WScript.Shell" )
+Set objEnv = objShell.Environment("PROCESS")
+objEnv.Remove("ELECTRON_RUN_AS_NODE")
 If (WScript.Arguments.Count > 0) Then
 	If (WScript.Arguments(0) = "silent") Then
 		For I = 1 To WScript.Arguments.Count - 1
