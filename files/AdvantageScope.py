@@ -21,8 +21,6 @@ elif platform.system() == "Windows":
 try:
     subprocess.Popen(cmd)
 except Exception as e:
-    with open("/Users/jonah/wpilib/2024/test_err.txt", "w") as test:
-        test.write(str(e))
     print("Error launching tool:")
     print(e)
     exit(1)
