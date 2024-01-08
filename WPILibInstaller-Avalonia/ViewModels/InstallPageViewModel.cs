@@ -241,9 +241,6 @@ namespace WPILibInstaller.ViewModels
                 case Platform.Linux64:
                     portableFolder = Path.Combine(portableFolder, "VSCode-linux-x64", "data");
                     break;
-                case Platform.LinuxArm32:
-                    portableFolder = Path.Combine(portableFolder, "VSCode-linux-armhf", "data");
-                    break;
                 case Platform.LinuxArm64:
                     portableFolder = Path.Combine(portableFolder, "VSCode-linux-arm64", "data");
                     break;
@@ -680,9 +677,6 @@ namespace WPILibInstaller.ViewModels
                     break;
                 case Platform.Linux64:
                     codeExe = Path.Combine(configurationProvider.InstallDirectory, "vscode", "VSCode-linux-x64", "bin", "code");
-                    break;
-                case Platform.LinuxArm32:
-                    codeExe = Path.Combine(configurationProvider.InstallDirectory, "vscode", "VSCode-linux-armhf", "bin", "code");
                     break;
                 case Platform.LinuxArm64:
                     codeExe = Path.Combine(configurationProvider.InstallDirectory, "vscode", "VSCode-linux-arm64", "bin", "code");

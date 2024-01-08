@@ -289,13 +289,6 @@ namespace WPILibInstaller.ViewModels
                         return UpgradeConfig.LinuxArm64InstallerType;
                     }
                 }
-                else if (PlatformUtils.CurrentPlatform == Platform.LinuxArm32)
-                {
-                    if (UpgradeConfig.InstallerType != UpgradeConfig.LinuxArm32InstallerType)
-                    {
-                        return UpgradeConfig.LinuxArm32InstallerType;
-                    }
-                }
                 else
                 {
                     if (UpgradeConfig.InstallerType != UpgradeConfig.LinuxInstallerType)
@@ -380,7 +373,6 @@ namespace WPILibInstaller.ViewModels
                 model.Platforms.Add(Utils.Platform.Win64, new VsCodeModel.PlatformData(VsCodeConfig.VsCodeWindowsUrl, VsCodeConfig.VsCodeWindowsName, VsCodeConfig.VsCodeWindowsHash));
                 model.Platforms.Add(Utils.Platform.Linux64, new VsCodeModel.PlatformData(VsCodeConfig.VsCodeLinuxUrl, VsCodeConfig.VsCodeLinuxName, VsCodeConfig.VsCodeLinuxHash));
                 model.Platforms.Add(Utils.Platform.LinuxArm64, new VsCodeModel.PlatformData(VsCodeConfig.VsCodeLinuxArm64Url, VsCodeConfig.VsCodeLinuxArm64Name, VsCodeConfig.VsCodeLinuxArm64Hash));
-                model.Platforms.Add(Utils.Platform.LinuxArm32, new VsCodeModel.PlatformData(VsCodeConfig.VsCodeLinuxArm32Url, VsCodeConfig.VsCodeLinuxArm32Name, VsCodeConfig.VsCodeLinuxArm32Hash));
                 model.Platforms.Add(Utils.Platform.Mac64, new VsCodeModel.PlatformData(VsCodeConfig.VsCodeMacUrl, VsCodeConfig.VsCodeMacName, VsCodeConfig.VsCodeMacHash));
                 model.Platforms.Add(Utils.Platform.MacArm64, new VsCodeModel.PlatformData(VsCodeConfig.VsCodeMacUrl, VsCodeConfig.VsCodeMacName, VsCodeConfig.VsCodeMacHash));
                 return model;

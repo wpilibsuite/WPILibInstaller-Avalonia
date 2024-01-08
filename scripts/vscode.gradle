@@ -4,15 +4,12 @@ def vscodeFile = file("$buildDir/vscodeConfig.json")
 
 def vscodeWindowsZipName = "VSCode-${vsCodeVersion}-Windows.zip".toString()
 def vscodeLinuxZipName = "VSCode-${vsCodeVersion}-Linux.tar.gz".toString()
-def vscodeLinuxArm32ZipName = "VSCode-${vsCodeVersion}-LinuxArm32.tar.gz".toString()
 def vscodeLinuxArm64ZipName = "VSCode-${vsCodeVersion}-LinuxArm64.tar.gz".toString()
 def vscodeMacZipName = "VSCode-${vsCodeVersion}-Mac.zip".toString()
 
 def vscodeWindowsUrl = "https://update.code.visualstudio.com/${vsCodeVersion}/win32-x64-archive/stable".toString()
 
 def vscodeLinuxUrl = "https://update.code.visualstudio.com/${vsCodeVersion}/linux-x64/stable".toString()
-
-def vscodeLinuxArm32Url = "https://update.code.visualstudio.com/${vsCodeVersion}/linux-armhf/stable".toString()
 
 def vscodeLinuxArm64Url = "https://update.code.visualstudio.com/${vsCodeVersion}/linux-arm64/stable".toString()
 
@@ -33,8 +30,6 @@ def pylanceUrl = "https://frcmaven.wpi.edu/artifactory/vscode-extensions/ms-pyth
 def isortUrl = "https://frcmaven.wpi.edu/artifactory/vscode-extensions/ms-python/isort/ms-python.isort-${isortVersion}.vsix"
 
 def blackUrl = "https://frcmaven.wpi.edu/artifactory/vscode-extensions/ms-python/black-formatter/ms-python.black-formatter-${blackVersion}.vsix"
-
-def cppLinuxArm32Url = "https://github.com/Microsoft/vscode-cpptools/releases/download/v${cppToolsVersion}/cpptools-linux-armhf.vsix"
 
 def cppLinuxArm64Url = "https://github.com/Microsoft/vscode-cpptools/releases/download/v${cppToolsVersion}/cpptools-linux-aarch64.vsix"
 
@@ -97,21 +92,6 @@ def verifyLinux = tasks.register("verifyVscodeLinuxDownload", Verify) {
   checksum vscodeLinuxHash
 }
 
-def vscodeLinuxArm32Download = tasks.register("vscodeLinuxArm32Download", Download) {
-  src vscodeLinuxArm32Url
-  dest "$buildDir/downloads/$vscodeLinuxArm32ZipName"
-  overwrite false
-}
-
-def verifyLinuxArm32 = tasks.register("verifyVscodeLinuxArm32Download", Verify) {
-  dependsOn vscodeLinuxArm32Download
-  inputs.files vscodeLinuxArm32Download.get().outputFiles.first()
-  inputs.property 'hash', vscodeLinuxArm32Hash
-  src vscodeLinuxArm32Download.get().outputFiles.first()
-  algorithm 'SHA-256'
-  checksum vscodeLinuxArm32Hash
-}
-
 def vscodeLinuxArm64Download = tasks.register("vscodeLinuxArm64Download", Download) {
   src vscodeLinuxArm64Url
   dest "$buildDir/downloads/$vscodeLinuxArm64ZipName"
@@ -172,13 +152,6 @@ def cppMacArmExtensionDownload = tasks.register("cppMacArmExtensionDownload", Do
 
 def cppLinuxExtensionDownload = tasks.register("cppLinuxExtensionDownload", Download) {
   src cppLinuxUrl
-  def fileName = file(src.file).name
-  dest "$buildDir/downloads/$fileName"
-  overwrite false
-}
-
-def cppLinuxArm32ExtensionDownload = tasks.register("cppLinuxArm32ExtensionDownload", Download) {
-  src cppLinuxArm32Url
   def fileName = file(src.file).name
   dest "$buildDir/downloads/$fileName"
   overwrite false
@@ -249,8 +222,6 @@ def blackExtensionDownload = tasks.register("blackExtensionDownload", Download) 
 def cppDownloadTask
 if (project.hasProperty('linuxBuild')) {
   cppDownloadTask = cppLinuxExtensionDownload
-} else if (project.hasProperty('linuxBuildArm32')) {
-  cppDownloadTask = cppLinuxArm32ExtensionDownload
 } else if (project.hasProperty('linuxBuildArm64')) {
   cppDownloadTask = cppLinuxArm64ExtensionDownload
 } else if (project.hasProperty('macBuild')) {
@@ -279,7 +250,6 @@ def vscodeTask = tasks.register('vscodeConfig', Task) {
   dependsOn isortExtensionDownload
   dependsOn blackExtensionDownload
   dependsOn verifyVscodeLinuxDownload
-  dependsOn verifyVscodeLinuxArm32Download
   dependsOn verifyVscodeLinuxArm64Download
   dependsOn verifyVscodeWindowsDownload
   dependsOn verifyVscodeMacDownload
@@ -295,7 +265,6 @@ def vscodeTask = tasks.register('vscodeConfig', Task) {
   inputs.files blackExtensionDownload.get().outputFiles
 
   inputs.property 'linuxhash', vscodeLinuxHash
-  inputs.property 'linuxarm32hash', vscodeLinuxArm32Hash
   inputs.property 'linuxarm64hash', vscodeLinuxArm64Hash
   inputs.property 'machash', vscodeMacHash
   inputs.property 'winhash', vscodeWindowsHash
@@ -340,10 +309,6 @@ def vscodeTask = tasks.register('vscodeConfig', Task) {
     config['VsCodeLinuxUrl'] = vscodeLinuxUrl
     config['VsCodeLinuxName'] = vscodeLinuxZipName
     config['VsCodeLinuxHash'] = vscodeLinuxHash
-
-    config['VsCodeLinuxArm32Url'] = vscodeLinuxArm32Url
-    config['VsCodeLinuxArm32Name'] = vscodeLinuxArm32ZipName
-    config['VsCodeLinuxArm32Hash'] = vscodeLinuxArm32Hash
 
     config['VsCodeLinuxArm64Url'] = vscodeLinuxArm64Url
     config['VsCodeLinuxArm64Name'] = vscodeLinuxArm64ZipName
@@ -402,7 +367,7 @@ ext.vscodeZipSetup = { AbstractArchiveTask zip->
     zip.from (standaloneDownload.get().outputFiles.first()) {
       into '/utility'
     }
-  } else if (project.hasProperty('macBuildArm') || project.hasProperty('linuxBuildArm32') || project.hasProperty('linuxBuildArm64')) {
+  } else if (project.hasProperty('macBuildArm') || project.hasProperty('linuxBuildArm64')) {
   } else {
     // Windows
     zip.from(project.zipTree(standaloneDownload.get().outputFiles.first())) {

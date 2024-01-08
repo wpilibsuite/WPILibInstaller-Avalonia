@@ -51,16 +51,6 @@ if (project.hasProperty('linuxBuild')) {
     project.ext.archiveType = Tar
     project.ext.isUnix = true
     project.ext.dotnetRuntime = 'linux-x64'
-} else if (project.hasProperty('linuxBuildArm32')) {
-    project.ext.forcePlatform = 'linuxarm32'
-    project.ext.forceNativeClassifier = 'linuxarm32'
-    project.ext.forceToolsClassifier = 'linuxarm32'
-    project.ext.forceCppToolsClassifier = 'linuxarm32'
-    project.ext.buildClassifier = 'LinuxArm32'
-    offlineRepositoryRoot = "$buildDir/dependencies/linuxarm32"
-    project.ext.archiveType = Tar
-    project.ext.isUnix = true
-    project.ext.dotnetRuntime = 'linux-arm'
 } else if (project.hasProperty('linuxBuildArm64')) {
     project.ext.forcePlatform = 'linuxarm64'
     project.ext.forceNativeClassifier = 'linuxarm64'

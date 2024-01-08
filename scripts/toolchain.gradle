@@ -18,11 +18,7 @@ def fileNameLinux = "cortexa9_vfpv3-roborio-academic-2024-x86_64-linux-gnu-Toolc
 
 def downloadUrlLinux = baseUrl + fileNameLinux
 
-def fileNameLinuxArm32 = "cortexa9_vfpv3-roborio-academic-2023-armv6-bullseye-linux-gnueabihf-Toolchain-${gccVersion}.tgz"
-
-def downloadUrlLinuxArm32 = baseUrl + fileNameLinuxArm32
-
-def fileNameLinuxArm64 = "cortexa9_vfpv3-roborio-academic-2023-aarch64-bullseye-linux-gnu-Toolchain-${gccVersion}.tgz"
+def fileNameLinuxArm64 = "cortexa9_vfpv3-roborio-academic-2024-aarch64-bullseye-linux-gnu-Toolchain-${gccVersion}.tgz"
 
 def downloadUrlLinuxArm64 = baseUrl + fileNameLinuxArm64
 
@@ -56,13 +52,6 @@ def downloadTaskLinux = tasks.register('downloadToolchainLinux', Download) {
   overwrite false
 }
 
-def downloadTaskLinuxArm32 = tasks.register('downloadToolchainLinuxArm32', Download) {
-  src downloadUrlLinuxArm32
-  def fileName = file(src.file).name
-  dest "$buildDir/downloads/$fileName"
-  overwrite false
-}
-
 def downloadTaskLinuxArm64 = tasks.register('downloadToolchainLinuxArm64', Download) {
   src downloadUrlLinuxArm64
   def fileName = file(src.file).name
@@ -86,8 +75,6 @@ ext.toolchainConfigTaskSetup = {
 def actualLinuxTask = null
 if (project.hasProperty('linuxBuild')) {
   actualLinuxTask = downloadTaskLinux
-} else if (project.hasProperty('linuxBuildArm32')) {
-  actualLinuxTask = downloadTaskLinuxArm32
 } else if (project.hasProperty('linuxBuildArm64')) {
   actualLinuxTask = downloadTaskLinuxArm64
 }

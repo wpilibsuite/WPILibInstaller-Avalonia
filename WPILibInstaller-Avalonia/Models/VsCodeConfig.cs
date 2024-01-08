@@ -28,10 +28,6 @@ namespace WPILibInstaller.Models
         public string VsCodeLinuxName { get; set; }
         public string VsCodeLinuxHash { get; set; }
 
-        public string VsCodeLinuxArm32Url { get; set; }
-        public string VsCodeLinuxArm32Name { get; set; }
-        public string VsCodeLinuxArm32Hash { get; set; }
-
         public string VsCodeLinuxArm64Url { get; set; }
         public string VsCodeLinuxArm64Name { get; set; }
         public string VsCodeLinuxArm64Hash { get; set; }
