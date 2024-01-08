@@ -212,7 +212,7 @@ def downloadXrpVendor = tasks.register('downloadXrpVendor', Download) {
 }
 
 def downloadJunitBomModule = tasks.register('downloadJunitBomModule', Download) {
-  src 'https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.10.1/junit-bom-5.10.1.module'
+  src 'https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter/5.10.1/junit-jupiter-5.10.1.module'
   def fileName = file(src.file).name
   dest "$buildDir/downloads/$fileName"
   overwrite false
