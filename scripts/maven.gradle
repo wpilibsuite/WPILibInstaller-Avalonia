@@ -212,6 +212,13 @@ def downloadXrpVendor = tasks.register('downloadXrpVendor', Download) {
 }
 
 def downloadJunitBomModule = tasks.register('downloadJunitBomModule', Download) {
+  src 'https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.10.1/junit-bom-5.10.1.module'
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite false
+}
+
+def downloadJunitJupiterModule = tasks.register('downloadJunitJupiterModule', Download) {
   src 'https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter/5.10.1/junit-jupiter-5.10.1.module'
   def fileName = file(src.file).name
   dest "$buildDir/downloads/$fileName"
@@ -230,9 +237,14 @@ ext.mavenZipSetup = { AbstractArchiveTask zip->
   zip.dependsOn downloadRomiVendor
   zip.dependsOn downloadXrpVendor
   zip.dependsOn downloadJunitBomModule
+  zip.dependsOn downloadJunitJupiterModule
 
   zip.from(downloadJunitBomModule.get().outputFiles.first()) {
     into '/maven/org/junit/junit-bom/5.10.1'
+  }
+
+  zip.from(downloadJunitJupiterModule.get().outputFiles.first()) {
+    into '/maven/org/junit/jupiter/junit-jupiter/5.10.1'
   }
 
   zip.from(downloadNewCommands.get().outputFiles.first()) {
