@@ -203,6 +203,17 @@ namespace WPILibInstaller.ViewModels
                 }) ?? throw new InvalidOperationException("Not Valid");
             }
 
+            entry = zipArchive.GetEntry("advantageScopeConfig.json");
+
+            using (StreamReader reader = new StreamReader(entry!.Open()))
+            {
+                var configStr = await reader.ReadToEndAsync();
+                AdvantageScopeConfig = JsonConvert.DeserializeObject<AdvantageScopeConfig>(configStr, new JsonSerializerSettings
+                {
+                    MissingMemberHandling = MissingMemberHandling.Error
+                }) ?? throw new InvalidOperationException("Not Valid");
+            }
+
             entry = zipArchive.GetEntry("fullConfig.json");
 
             using (StreamReader reader = new StreamReader(entry!.Open()))
@@ -389,7 +400,7 @@ namespace WPILibInstaller.ViewModels
                     }
                     else
                     {
-                        publicFolder = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+                        publicFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
                     }
                 }
                 return Path.Combine(publicFolder, "wpilib", UpgradeConfig.FrcYear);
@@ -408,6 +419,8 @@ namespace WPILibInstaller.ViewModels
         public FullConfig FullConfig { get; private set; } = null!;
 
         public JdkConfig JdkConfig { get; private set; } = null!;
+
+        public AdvantageScopeConfig AdvantageScopeConfig { get; private set; } = null!;
 
         public VsCodeConfig VsCodeConfig { get; private set; } = null!;
 

@@ -14,6 +14,8 @@ namespace WPILibInstaller.Interfaces
 
         JdkConfig JdkConfig { get; }
 
+        AdvantageScopeConfig AdvantageScopeConfig { get; }
+
         VsCodeConfig VsCodeConfig { get; }
 
         string InstallDirectory { get; }

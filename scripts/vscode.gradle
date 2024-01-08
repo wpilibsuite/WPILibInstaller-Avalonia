@@ -18,13 +18,21 @@ def vscodeLinuxArm64Url = "https://update.code.visualstudio.com/${vsCodeVersion}
 
 def vscodeMacUrl = "https://update.code.visualstudio.com/${vsCodeVersion}/darwin-universal/stable".toString()
 
-def cppWindowsUrl = "https://github.com/Microsoft/vscode-cpptools/releases/download/v${cppToolsVersion}/cpptools-win64.vsix"
+def cppWindowsUrl = "https://frcmaven.wpi.edu/api/download/vscode-extensions/ms-vscode/cpptools/ms-vscode.cpptools-${cppToolsVersion}@win32-x64.vsix"
 
-def cppMacUrl = "https://github.com/Microsoft/vscode-cpptools/releases/download/v${cppToolsVersion}/cpptools-osx.vsix"
+def cppMacUrl = "https://frcmaven.wpi.edu/api/download/vscode-extensions/ms-vscode/cpptools/ms-vscode.cpptools-${cppToolsVersion}@darwin-x64.vsix"
 
-def cppMacArmUrl = "https://github.com/Microsoft/vscode-cpptools/releases/download/v${cppToolsVersion}/cpptools-osx-arm64.vsix"
+def cppMacArmUrl = "https://frcmaven.wpi.edu/api/download/vscode-extensions/ms-vscode/cpptools/ms-vscode.cpptools-${cppToolsVersion}@darwin-arm64.vsix"
 
-def cppLinuxUrl = "https://github.com/Microsoft/vscode-cpptools/releases/download/v${cppToolsVersion}/cpptools-linux.vsix"
+def cppLinuxUrl = "https://frcmaven.wpi.edu/api/download/vscode-extensions/ms-vscode/cpptools/ms-vscode.cpptools-${cppToolsVersion}@linux-x64.vsix"
+
+def pythonExtUrl = "https://frcmaven.wpi.edu/artifactory/vscode-extensions/ms-python/python/ms-python.python-${pythonExtVersion}.vsix"
+
+def pylanceUrl = "https://frcmaven.wpi.edu/artifactory/vscode-extensions/ms-python/vscode-pylance/ms-python.vscode-pylance-${pylanceVersion}.vsix"
+
+def isortUrl = "https://frcmaven.wpi.edu/artifactory/vscode-extensions/ms-python/isort/ms-python.isort-${isortVersion}.vsix"
+
+def blackUrl = "https://frcmaven.wpi.edu/artifactory/vscode-extensions/ms-python/black-formatter/ms-python.black-formatter-${blackVersion}.vsix"
 
 def cppLinuxArm32Url = "https://github.com/Microsoft/vscode-cpptools/releases/download/v${cppToolsVersion}/cpptools-linux-armhf.vsix"
 
@@ -38,11 +46,11 @@ def wpilibUtilLinuxUrl = "https://github.com/wpilibsuite/vscode-wpilib/releases/
 
 def wpilibUtilMacUrl = "https://github.com/wpilibsuite/vscode-wpilib/releases/download/v${wpilibVersion}/wpilibutility-mac.tar.gz"
 
-def javaDebugUrl = "https://github.com/microsoft/vscode-java-debug/releases/download/${javaDebugVersion}/vscjava.vscode-java-debug-${javaDebugVersion}.vsix"
+def javaDebugUrl = "https://frcmaven.wpi.edu/api/download/vscode-extensions/vscjava/vscode-java-debug/vscjava.vscode-java-debug-${javaDebugVersion}.vsix"
 
-def javaLangUrl = "https://github.com/redhat-developer/vscode-java/releases/download/v${javaExtVersion}/redhat.java-${javaExtVersion}.vsix"
+def javaLangUrl = "https://frcmaven.wpi.edu/api/download/vscode-extensions/redhat/java/redhat.java-${javaExtVersion}.vsix"
 
-def javaDepUrl = "https://github.com/microsoft/vscode-java-dependency/releases/download/${javaDependencyVersion}/vscjava.vscode-java-dependency-${javaDependencyVersion}.vsix"
+def javaDepUrl = "https://frcmaven.wpi.edu/api/download/vscode-extensions/vscjava/vscode-java-dependency/vscjava.vscode-java-dependency-${javaDependencyVersion}.vsix"
 
 def vscodeWindowsDownload = tasks.register("vscodeWindowsDownload", Download) {
   src vscodeWindowsUrl
@@ -206,6 +214,38 @@ def javaDepExtensionDownload = tasks.register("javaDepExtensionDownload", Downlo
   overwrite false
 }
 
+
+def pythonExtensionDownload = tasks.register("pythonExtensionDownload", Download) {
+  src pythonExtUrl
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite false
+}
+
+
+def pylanceExtensionDownload = tasks.register("pylanceExtensionDownload", Download) {
+  src pylanceUrl
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite false
+}
+
+
+def isortExtensionDownload = tasks.register("isortExtensionDownload", Download) {
+  src isortUrl
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite false
+}
+
+
+def blackExtensionDownload = tasks.register("blackExtensionDownload", Download) {
+  src blackUrl
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite false
+}
+
 def cppDownloadTask
 if (project.hasProperty('linuxBuild')) {
   cppDownloadTask = cppLinuxExtensionDownload
@@ -234,6 +274,10 @@ def vscodeTask = tasks.register('vscodeConfig', Task) {
   dependsOn javaLangExtensionDownload
   dependsOn javaDebugExtensionDownload
   dependsOn javaDepExtensionDownload
+  dependsOn pythonExtensionDownload
+  dependsOn pylanceExtensionDownload
+  dependsOn isortExtensionDownload
+  dependsOn blackExtensionDownload
   dependsOn verifyVscodeLinuxDownload
   dependsOn verifyVscodeLinuxArm32Download
   dependsOn verifyVscodeLinuxArm64Download
@@ -245,6 +289,10 @@ def vscodeTask = tasks.register('vscodeConfig', Task) {
   inputs.files javaLangExtensionDownload.get().outputFiles
   inputs.files javaDebugExtensionDownload.get().outputFiles
   inputs.files javaDepExtensionDownload.get().outputFiles
+  inputs.files pythonExtensionDownload.get().outputFiles
+  inputs.files pylanceExtensionDownload.get().outputFiles
+  inputs.files isortExtensionDownload.get().outputFiles
+  inputs.files blackExtensionDownload.get().outputFiles
 
   inputs.property 'linuxhash', vscodeLinuxHash
   inputs.property 'linuxarm32hash', vscodeLinuxArm32Hash
@@ -267,10 +315,21 @@ def vscodeTask = tasks.register('vscodeConfig', Task) {
     def javaDebugMap = [:]
     javaDebugMap['vsix'] = javaDebugExtensionDownload.get().outputFiles.first().name
     getInformationOfVsix(zipTree(javaDebugExtensionDownload.get().outputFiles.first()), javaDebugMap)
-
     def javaDepMap = [:]
     javaDepMap['vsix'] = javaDepExtensionDownload.get().outputFiles.first().name
     getInformationOfVsix(zipTree(javaDepExtensionDownload.get().outputFiles.first()), javaDepMap)
+    def pythonMap = [:]
+    pythonMap['vsix'] = pythonExtensionDownload.get().outputFiles.first().name
+    getInformationOfVsix(zipTree(pythonExtensionDownload.get().outputFiles.first()), pythonMap)
+    def pylanceMap = [:]
+    pylanceMap['vsix'] = pylanceExtensionDownload.get().outputFiles.first().name
+    getInformationOfVsix(zipTree(pylanceExtensionDownload.get().outputFiles.first()), pylanceMap)
+    def isortMap = [:]
+    isortMap['vsix'] = isortExtensionDownload.get().outputFiles.first().name
+    getInformationOfVsix(zipTree(isortExtensionDownload.get().outputFiles.first()), isortMap)
+    def blackMap = [:]
+    blackMap['vsix'] = blackExtensionDownload.get().outputFiles.first().name
+    getInformationOfVsix(zipTree(blackExtensionDownload.get().outputFiles.first()), blackMap)
 
     config['VsCodeWindowsUrl'] = vscodeWindowsUrl
     config['VsCodeWindowsName'] = vscodeWindowsZipName
@@ -298,7 +357,11 @@ def vscodeTask = tasks.register('vscodeConfig', Task) {
       cppMap,
       javaLangMap,
       javaDebugMap,
-      javaDepMap
+      javaDepMap,
+      pythonMap,
+      pylanceMap,
+      isortMap,
+      blackMap
     ]
 
 
@@ -366,6 +429,18 @@ ext.vscodeZipSetup = { AbstractArchiveTask zip->
     into '/vsCodeExtensions'
   }
   zip.from (javaDepExtensionDownload.get().outputFiles.first()) {
+    into '/vsCodeExtensions'
+  }
+  zip.from (pythonExtensionDownload.get().outputFiles.first()) {
+    into '/vsCodeExtensions'
+  }
+  zip.from (pylanceExtensionDownload.get().outputFiles.first()) {
+    into '/vsCodeExtensions'
+  }
+  zip.from (isortExtensionDownload.get().outputFiles.first()) {
+    into '/vsCodeExtensions'
+  }
+  zip.from (blackExtensionDownload.get().outputFiles.first()) {
     into '/vsCodeExtensions'
   }
 }

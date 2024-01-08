@@ -5,6 +5,9 @@ def scriptBaseUnixFile = file("files/ScriptBase.py")
 def scriptBaseCppFile = file("files/ScriptBaseCpp.vbs")
 def scriptBaseCppUnixFile = file("files/ScriptBaseCpp.py")
 
+def advantageScopeScriptFile = file("files/AdvantageScope.vbs")
+def advantageScopeScriptUnixFile = file("files/AdvantageScope.py")
+
 def toolsJsonTask = tasks.register('toolsJson', Task) {
 
   dependsOn tasks.named('lazyModelEvaluation')
@@ -44,6 +47,11 @@ def toolsJsonTask = tasks.register('toolsJson', Task) {
       item['cpp'] = true
       config << item
     }
+
+    def advantageScopeItem = [:]
+    advantageScopeItem['name'] = "AdvantageScope"
+    advantageScopeItem['version'] = advantagescopeGitTag
+    config << advantageScopeItem
 
     def gbuilder = getGsonBuilder()
     gbuilder.setPrettyPrinting()
@@ -85,11 +93,20 @@ ext.toolsSetup = { AbstractArchiveTask zip->
     fileMode 0755
   }
 
-    zip.from (scriptBaseCppFile) {
+  zip.from (scriptBaseCppFile) {
     into '/tools'
   }
 
   zip.from (scriptBaseCppUnixFile) {
+    into '/tools'
+    fileMode 0755
+  }
+
+  zip.from (advantageScopeScriptFile) {
+    into '/tools'
+  }
+
+  zip.from (advantageScopeScriptUnixFile) {
     into '/tools'
     fileMode 0755
   }

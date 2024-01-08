@@ -112,6 +112,8 @@ apply from: 'scripts/toolchain.gradle'
 apply from: 'scripts/jdk.gradle'
 apply from: 'scripts/maven.gradle'
 
+apply from: 'scripts/advantagescope.gradle'
+
 // Tools must happen after maven
 apply from: 'scripts/tools.gradle'
 apply from: 'scripts/vscode.gradle'
@@ -210,7 +212,7 @@ def generateFullResourcesTask = tasks.register('generateFullResources', project.
     duplicatesStrategy 'exclude'
 
     if (project.ext.isUnix) {
-        extension = 'tar.gz'
+        archiveExtension = 'tar.gz'
         compression = Compression.GZIP
     }
 
@@ -227,6 +229,8 @@ def generateFullResourcesTask = tasks.register('generateFullResources', project.
     toolchainZipSetup(it)
 
     jdkZipSetup(it)
+
+    advantageScopeZipSetup(it)
 
     if (OperatingSystem.current().isWindows()) {
         def task = it
@@ -331,6 +335,8 @@ def generateConfigFiles = tasks.register('generateCommonResources', Zip) {
 
     jdkConfigFileSetup(zip)
 
+    advantageScopeConfigFileSetup(zip)
+
     vscodeConfigZipSetup(zip)
 }
 
@@ -421,10 +427,11 @@ def macCreateImageTask = tasks.register('createMacImage', Task) {
         }
 
         // Notarize the application.
-        if (project.hasProperty("notarization-username") && project.hasProperty("notarization-password")) {
+        if (project.hasProperty("notarization-username") && project.hasProperty("notarization-teamid") && project.hasProperty("notarization-password")) {
             println "Received an App Store Connect username and password -- notarizing the application..."
             notarize(file("$buildDir/outputs/WPILibInstaller.app"), "WPILibInstaller-${pubVersion}",
                     project.property("notarization-username") as String,
+                    project.property("notarization-teamid") as String,
                     project.property("notarization-password") as String)
         }
 
@@ -457,5 +464,5 @@ tasks.register('generateInstallers', Task) {
 }
 
 wrapper {
-    gradleVersion = '7.5.1'
+    gradleVersion = '8.5'
 }

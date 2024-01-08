@@ -55,9 +55,8 @@ dependencies {
     // Keep including junit 4 for compatibility reasons
     testImplementation 'junit:junit:4.13.1'
 
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
-    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.8.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     // simulation wpi.deps.sim.gui(wpi.platforms.desktop, false)
     // simulation wpi.deps.sim.gui(wpi.platforms.desktop, true)
@@ -70,6 +69,8 @@ dependencies {
 
     // commands
     implementation "edu.wpi.first.wpilibNewCommands:wpilibNewCommands-java:${wpi.versions.wpilibVersion.get()}"
+    implementation "edu.wpi.first.xrpVendordep:xrpVendordep-java:${wpi.versions.wpilibVersion.get()}"
+    implementation "edu.wpi.first.romiVendordep:romiVendordep-java:${wpi.versions.wpilibVersion.get()}"
     if (project(":").ext.buildClassifier == 'Windows') {
         implementation "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}:x64@zip"
     }
@@ -90,6 +91,7 @@ wpi.sim.addGui()
 wpi.sim.addDriverstation()
 wpi.sim.addWebsocketsServer().defaultEnabled = true
 wpi.sim.addWebsocketsClient().defaultEnabled = true
+wpi.sim.addXRPClient().defaultEnabled = true
 
 deployJavaArtifact.jarTask = jar
 wpi.java.configureExecutableTasks(jar)
@@ -101,6 +103,34 @@ nativeUtils {
         wpilibnewcommands(getNativeDependencyTypeClass('WPISharedMavenDependency')) {
             groupId = "edu.wpi.first.wpilibNewCommands"
             artifactId = "wpilibNewCommands-cpp"
+            headerClassifier = "headers"
+            sourceClassifier = "sources"
+            ext = "zip"
+            version = wpilibFoundVersion
+            targetPlatforms.addAll(nativeUtils.wpi.platforms.allPlatforms)
+        }
+    }
+}
+
+nativeUtils {
+    nativeDependencyContainer {
+        xrpvendordep(getNativeDependencyTypeClass('WPISharedMavenDependency')) {
+            groupId = "edu.wpi.first.xrpVendordep"
+            artifactId = "xrpVendordep-cpp"
+            headerClassifier = "headers"
+            sourceClassifier = "sources"
+            ext = "zip"
+            version = wpilibFoundVersion
+            targetPlatforms.addAll(nativeUtils.wpi.platforms.allPlatforms)
+        }
+    }
+}
+
+nativeUtils {
+    nativeDependencyContainer {
+        romivendordep(getNativeDependencyTypeClass('WPISharedMavenDependency')) {
+            groupId = "edu.wpi.first.romiVendordep"
+            artifactId = "romiVendordep-cpp"
             headerClassifier = "headers"
             sourceClassifier = "sources"
             ext = "zip"
@@ -124,6 +154,8 @@ model {
             wpi.cpp.deps.googleTest(it)
 
             wpi.cpp.deps.useLibrary(it, 'wpilibnewcommands')
+            wpi.cpp.deps.useLibrary(it, 'xrpvendordep')
+            wpi.cpp.deps.useLibrary(it, 'romivendordep')
         }
         // frcUserProgramStatic(NativeExecutableSpec) {
         //     targetPlatform wpi.platforms.roborio

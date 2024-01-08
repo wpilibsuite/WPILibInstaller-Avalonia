@@ -94,6 +94,7 @@ namespace WPILibInstaller.ViewModels
             await ExtractArchive(token, new[] {
                 configurationProvider.JdkConfig.Folder + "/",
                 configurationProvider.UpgradeConfig.Tools.Folder + "/",
+                configurationProvider.AdvantageScopeConfig.Folder + "/",
                 "installUtils/"});
         }
 
@@ -307,12 +308,11 @@ namespace WPILibInstaller.ViewModels
                 settingsJson = (JObject)JsonConvert.DeserializeObject(await File.ReadAllTextAsync(settingsFile))!;
             }
 
-            SetIfNotSet("java.home", Path.Combine(homePath, "jdk"), settingsJson);
+            SetIfNotSet("java.jdt.ls.java.home", Path.Combine(homePath, "jdk"), settingsJson);
             SetIfNotSet("extensions.autoUpdate", false, settingsJson);
             SetIfNotSet("extensions.autoCheckUpdates", false, settingsJson);
             SetIfNotSet("extensions.ignoreRecommendations", true, settingsJson);
-            SetIfNotSet("extensions.showRecommendationsOnlyOnDemand", false, settingsJson);
-            SetIfNotSet("update.channel", "none", settingsJson);
+            SetIfNotSet("update.mode", "none", settingsJson);
             SetIfNotSet("update.showReleaseNotes", false, settingsJson);
             SetIfNotSet("http.systemCertificates", false, settingsJson);
 
@@ -804,6 +804,7 @@ namespace WPILibInstaller.ViewModels
             shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "SysId.vbs"), $"{frcYear} WPILib Tools/SysId {frcYear}", $"SysId {frcYear}"));
             shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "roboRIOTeamNumberSetter.vbs"), $"{frcYear} WPILib Tools/roboRIO Team Number Setter {frcYear}", $"roboRIO Team Number Setter {frcYear}"));
             shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "DataLogTool.vbs"), $"{frcYear} WPILib Tools/Data Log Tool {frcYear}", $"Data Log Tool {frcYear}"));
+            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "advantagescope", "AdvantageScope (WPILib).exe"), $"{frcYear} WPILib Tools/AdvantageScope (WPILib) {frcYear}", $"AdvantageScope (WPILib) {frcYear}"));
 
             shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "Glass.vbs"), $"Programs/{frcYear} WPILib Tools/Glass {frcYear}", $"Glass {frcYear}"));
             shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "OutlineViewer.vbs"), $"Programs/{frcYear} WPILib Tools/OutlineViewer {frcYear}", $"OutlineViewer {frcYear}"));
@@ -814,6 +815,7 @@ namespace WPILibInstaller.ViewModels
             shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "SysId.vbs"), $"Programs/{frcYear} WPILib Tools/SysId {frcYear}", $"SysId {frcYear}"));
             shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "roboRIOTeamNumberSetter.vbs"), $"Programs/{frcYear} WPILib Tools/roboRIO Team Number Setter {frcYear}", $"roboRIO Team Number Setter {frcYear}"));
             shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "DataLogTool.vbs"), $"Programs/{frcYear} WPILib Tools/Data Log Tool {frcYear}", $"Data Log Tool {frcYear}"));
+            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "advantagescope", "AdvantageScope (WPILib).exe"), $"Programs/{frcYear} WPILib Tools/AdvantageScope (WPILib) {frcYear}", $"AdvantageScope (WPILib) {frcYear}"));
 
             if (toInstallProvider.Model.InstallEverything)
             {

@@ -5,6 +5,6 @@ public class ToolConfig {
   public Boolean cpp;
 
   public boolean isValid() {
-    return name != null && version != null && artifact != null;
+    return name != null && version != null;
   }
 }
