@@ -211,6 +211,13 @@ def downloadXrpVendor = tasks.register('downloadXrpVendor', Download) {
   overwrite false
 }
 
+def downloadJunitBomModule = tasks.register('downloadJunitBomModule', Download) {
+  src 'https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.10.1/junit-bom-5.10.1.module'
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite false
+}
+
 ext.mavenZipSetup = { AbstractArchiveTask zip->
   zip.dependsOn updateOfflineRepository
   zip.inputs.dir offlineRepositoryRoot
@@ -220,6 +227,13 @@ ext.mavenZipSetup = { AbstractArchiveTask zip->
 
   zip.dependsOn downloadNewCommands
   zip.dependsOn downloadReadTheDocs
+  zip.dependsOn downloadRomiVendor
+  zip.dependsOn downloadXrpVendor
+  zip.dependsOn downloadJunitBomModule
+
+  zip.from(downloadJunitBomModule.get().outputFiles.first()) {
+    into '/maven/org/junit/junit-bom/5.10.1'
+  }
 
   zip.from(downloadNewCommands.get().outputFiles.first()) {
     into '/vendordeps'
