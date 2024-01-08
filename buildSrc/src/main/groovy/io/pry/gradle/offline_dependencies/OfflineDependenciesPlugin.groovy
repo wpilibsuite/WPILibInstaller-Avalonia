@@ -27,6 +27,12 @@ class OfflineDependenciesPlugin implements Plugin<Project> {
 
     def extension = project.extensions.create(EXTENSION_NAME, OfflineDependenciesExtension, repositoryHandler)
 
+    project.dependencies {
+      components {
+        all(io.pry.gradle.offline_dependencies.maven.DirectMetadataAccessVariantRule)
+      }
+    }
+
     project.logger.info("Offline dependencies root configured at '${project.ext.offlineRepositoryRoot}'")
 
     project.task('updateOfflineRepository', type: UpdateOfflineRepositoryTask) {
