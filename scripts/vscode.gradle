@@ -23,7 +23,7 @@ def cppMacArmUrl = "https://frcmaven.wpi.edu/api/download/vscode-extensions/ms-v
 
 def cppLinuxUrl = "https://frcmaven.wpi.edu/api/download/vscode-extensions/ms-vscode/cpptools/ms-vscode.cpptools-${cppToolsVersion}@linux-x64.vsix"
 
-def cppLinuxArm64Url = "https://frcmaven.wpi.edu/api/download/vscode-extensions/ms-vscode/cpptools/ms-vscode.cpptools-${cppToolsVersion}@linux-aarch64.vsix"
+def cppLinuxArm64Url = "https://frcmaven.wpi.edu/api/download/vscode-extensions/ms-vscode/cpptools/ms-vscode.cpptools-${cppToolsVersion}@linux-arm64.vsix"
 
 def pythonExtUrl = "https://frcmaven.wpi.edu/artifactory/vscode-extensions/ms-python/python/ms-python.python-${pythonExtVersion}.vsix"
 
