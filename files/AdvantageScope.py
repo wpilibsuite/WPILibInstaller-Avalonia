@@ -18,7 +18,8 @@ elif platform.system() == "Windows":
     cmd = [year_folder + "\\advantagescope\\AdvantageScope (WPILib).exe"]
 
 env = os.environ.copy()
-del env["ELECTRON_RUN_AS_NODE"]
+if "ELECTRON_RUN_AS_NODE" in env.keys():
+    del env["ELECTRON_RUN_AS_NODE"]
 
 try:
     subprocess.Popen(cmd, env=env)
