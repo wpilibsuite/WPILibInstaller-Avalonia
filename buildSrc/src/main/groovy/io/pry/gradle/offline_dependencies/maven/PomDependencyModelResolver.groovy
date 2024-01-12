@@ -10,16 +10,23 @@ import org.apache.maven.model.resolution.UnresolvableModelException
 import org.gradle.api.artifacts.result.UnresolvedArtifactResult
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
 import org.gradle.api.Project
+import org.gradle.api.attributes.DocsType
+import org.gradle.api.model.ObjectFactory
 import org.gradle.internal.component.external.model.DefaultModuleComponentIdentifier
 import org.gradle.api.internal.artifacts.DefaultModuleVersionIdentifier
 import org.gradle.maven.MavenModule
 import org.gradle.maven.MavenPomArtifact
+import org.gradle.api.artifacts.Dependency
 
 class PomDependencyModelResolver implements ModelResolver {
 
+  def EMPTY_DEPENDENCIES_ARRAY = new Dependency[0]
+
   private Project project
   private Map<String, FileModelSource> pomCache = [:]
+  private Map<String, FileModelSource> moduleCache = [:]
   private Map<ModuleComponentIdentifier, File> componentCache = [:]
+  private Map<ModuleComponentIdentifier, File> moduleComponentCache = [:]
 
   public PomDependencyModelResolver(Project project) {
     this.project = project
@@ -33,6 +40,26 @@ class PomDependencyModelResolver implements ModelResolver {
   @Override
   ModelSource resolveModel(String groupId, String artifactId, String version) throws UnresolvableModelException {
     def id = "$groupId:$artifactId:$version"
+
+    if (!moduleCache.containsKey(id)) {
+      def dep = project.dependencies.create(id)
+      def cfg = project.configurations.detachedConfiguration([dep].toArray(EMPTY_DEPENDENCIES_ARRAY))
+
+      def view = cfg.incoming.artifactView {
+          withVariantReselection()
+        lenient = true
+        attributes {
+          attribute(DocsType.DOCS_TYPE_ATTRIBUTE, project.objects.named(DocsType, "modules"))
+        }
+      }
+
+      view.artifacts.each {
+        def moduleFile = it.file
+        def module = new FileModelSource(moduleFile)
+        moduleCache[id] = module
+        moduleComponentCache[it.variant.owner] = moduleFile
+      }
+    }
 
     if (!pomCache.containsKey(id)) {
       def mavenArtifacts = project.dependencies.createArtifactResolutionQuery()
@@ -79,5 +106,9 @@ class PomDependencyModelResolver implements ModelResolver {
 
   public componentCache() {
     return this.componentCache
+  }
+
+  public moduleComponentCache() {
+    return this.moduleComponentCache
   }
 }
