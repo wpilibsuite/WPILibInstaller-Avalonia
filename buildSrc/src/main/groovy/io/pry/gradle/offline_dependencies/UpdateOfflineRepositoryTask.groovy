@@ -15,6 +15,8 @@ import org.gradle.api.artifacts.UnknownConfigurationException
 import org.gradle.api.artifacts.component.ComponentIdentifier
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
 import org.gradle.api.artifacts.result.UnresolvedArtifactResult
+import org.gradle.api.attributes.DocsType
+import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.InputFiles
@@ -33,6 +35,8 @@ import org.gradle.util.GFileUtils
 import static io.pry.gradle.offline_dependencies.Utils.addToMultimap
 
 class UpdateOfflineRepositoryTask extends DefaultTask {
+  @javax.inject.Inject
+  ObjectFactory getObjects() { }
 
   @Internal
   def EMPTY_DEPENDENCIES_ARRAY = new Dependency[0]
@@ -189,6 +193,27 @@ class UpdateOfflineRepositoryTask extends DefaultTask {
   private void collectPoms(Set<ComponentIdentifier> componentIds, Map<ComponentIdentifier, Set<File>> repositoryFiles) {
     logger.trace("Collecting pom files")
 
+    def deps = []
+
+    componentIds.each {
+      def dep = project.dependencies.create("${it.group}:${it.module}:${it.version}")
+      deps << dep
+    }
+
+    def cfg = project.configurations.detachedConfiguration(deps.toArray(EMPTY_DEPENDENCIES_ARRAY))
+
+    def view = cfg.incoming.artifactView {
+        withVariantReselection()
+      lenient = true
+      attributes {
+        attribute(DocsType.DOCS_TYPE_ATTRIBUTE, this.objects.named(DocsType, "modules"))
+      }
+    }
+
+    view.artifacts.each {
+      addToMultimap(repositoryFiles, it.variant.owner, it.file)
+    }
+
     def mavenArtifacts = project.dependencies.createArtifactResolutionQuery()
         .forComponents(componentIds)
         .withArtifacts(MavenModule, MavenPomArtifact)
@@ -218,6 +243,10 @@ class UpdateOfflineRepositoryTask extends DefaultTask {
 
     pomModelResolver.componentCache().each { componentId, pomFile ->
       addToMultimap(repositoryFiles, componentId, pomFile)
+    }
+
+    pomModelResolver.moduleComponentCache().each { componentId, moduleFile ->
+      addToMultimap(repositoryFiles, componentId, moduleFile)
     }
   }
 
@@ -317,4 +346,3 @@ class UpdateOfflineRepositoryTask extends DefaultTask {
     new File("${getRoot()}".toString(), "${ci.group.tokenize(".").join("/")}/${ci.module}/${ci.version}")
   }
 }
-
