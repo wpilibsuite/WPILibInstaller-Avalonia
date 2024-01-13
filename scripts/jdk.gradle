@@ -14,6 +14,13 @@ def downloadLinuxJdk = tasks.register('downloadLinuxJdk', Download) {
   overwrite false
 }
 
+def downloadLinuxArm64Jdk = tasks.register('downloadLinuxJdkArm64', Download) {
+  src "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-$jdkVersionEscaped/OpenJDK17U-jdk_aarch64_linux_hotspot_${jdkVersionUnderscore}.tar.gz"
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite false
+}
+
 def downloadMacJdk = tasks.register('downloadMacJdk', Download) {
   src "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-$jdkVersionEscaped/OpenJDK17U-jdk_x64_mac_hotspot_${jdkVersionUnderscore}.tar.gz"
   def fileName = file(src.file).name
@@ -151,6 +158,33 @@ ext.jdkZipSetupLinux = { AbstractArchiveTask zip->
   }
 }
 
+ext.jdkZipSetupLinuxArm64 = { AbstractArchiveTask zip->
+  zip.dependsOn downloadLinuxArm64Jdk
+  zip.dependsOn jdkConfigFileTask
+
+  zip.inputs.files downloadLinuxArm64Jdk.get().outputFiles
+  zip.inputs.file jdkConfigFile
+
+  zip.from(project.tarTree(project.resources.gzip(downloadLinuxArm64Jdk.get().outputFiles.first()))) {
+    eachFile { f->
+      f.path = f.path.replace("jdk-${jdkVersion}/", 'jdk/')
+    }
+
+    exclude '**/bin/*.pdb'
+    exclude '**/bin/*.map'
+    exclude '**/bin/server/*.pdb'
+    exclude '**/bin/server/*.map'
+    exclude '**/demo/**'
+
+    includeEmptyDirs = false
+  }
+
+  zip.from(jdkConfigFile) {
+    into '/installUtils'
+    rename {'jdkConfig.json'}
+  }
+}
+
 ext.jdkZipSetupMac = { AbstractArchiveTask zip->
   zip.dependsOn downloadMacJdk
   zip.dependsOn jdkConfigFileTask
@@ -214,6 +248,8 @@ ext.jdkZipSetupMacArm = { AbstractArchiveTask zip->
 ext.jdkZipSetup = { AbstractArchiveTask zip ->
   if (project.hasProperty('linuxBuild')) {
     jdkZipSetupLinux(zip)
+  } else if (project.hasProperty('linuxBuildArm64')) {
+    jdkZipSetupLinuxArm64(zip)
   } else if (project.hasProperty('macBuild')) {
     jdkZipSetupMac(zip)
   } else if (project.hasProperty('macBuildArm')) {

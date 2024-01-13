@@ -227,17 +227,25 @@ namespace WPILibInstaller.ViewModels
         private ValueTask<string> SetVsCodePortableMode()
         {
             string portableFolder = Path.Combine(configurationProvider.InstallDirectory, "vscode");
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+
+            var currentPlatform = PlatformUtils.CurrentPlatform;
+            switch (currentPlatform)
             {
-                portableFolder = Path.Combine(portableFolder, "VSCode-linux-x64", "data");
-            }
-            else if (OperatingSystem.IsMacOS())
-            {
-                portableFolder = Path.Combine(portableFolder, "code-portable-data");
-            }
-            else
-            {
-                portableFolder = Path.Combine(portableFolder, "data");
+                case Platform.Win64:
+                    portableFolder = Path.Combine(portableFolder, "data");
+                    break;
+                case Platform.MacArm64:
+                case Platform.Mac64:
+                    portableFolder = Path.Combine(portableFolder, "code-portable-data");
+                    break;
+                case Platform.Linux64:
+                    portableFolder = Path.Combine(portableFolder, "VSCode-linux-x64", "data");
+                    break;
+                case Platform.LinuxArm64:
+                    portableFolder = Path.Combine(portableFolder, "VSCode-linux-arm64", "data");
+                    break;
+                default:
+                    throw new PlatformNotSupportedException("Invalid platform");
             }
 
             try
@@ -657,17 +665,24 @@ namespace WPILibInstaller.ViewModels
 
             string codeExe;
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            var currentPlatform = PlatformUtils.CurrentPlatform;
+            switch (currentPlatform)
             {
-                codeExe = Path.Combine(configurationProvider.InstallDirectory, "vscode", "bin", "code.cmd");
-            }
-            else if (OperatingSystem.IsMacOS())
-            {
-                codeExe = Path.Combine(configurationProvider.InstallDirectory, "vscode", "Visual Studio Code.app", "Contents", "Resources", "app", "bin", "code");
-            }
-            else
-            {
-                codeExe = Path.Combine(configurationProvider.InstallDirectory, "vscode", "VSCode-linux-x64", "bin", "code");
+                case Platform.Win64:
+                    codeExe = Path.Combine(configurationProvider.InstallDirectory, "vscode", "bin", "code.cmd");
+                    break;
+                case Platform.MacArm64:
+                case Platform.Mac64:
+                    codeExe = Path.Combine(configurationProvider.InstallDirectory, "vscode", "Visual Studio Code.app", "Contents", "Resources", "app", "bin", "code");
+                    break;
+                case Platform.Linux64:
+                    codeExe = Path.Combine(configurationProvider.InstallDirectory, "vscode", "VSCode-linux-x64", "bin", "code");
+                    break;
+                case Platform.LinuxArm64:
+                    codeExe = Path.Combine(configurationProvider.InstallDirectory, "vscode", "VSCode-linux-arm64", "bin", "code");
+                    break;
+                default:
+                    throw new PlatformNotSupportedException("Invalid platform");
             }
 
             // Load existing extensions

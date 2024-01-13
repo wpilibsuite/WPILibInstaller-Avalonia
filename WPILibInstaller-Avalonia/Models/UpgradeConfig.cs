@@ -22,6 +22,7 @@ namespace WPILibInstaller.Models
 
         public const string WindowsInstallerType = "Windows";
         public const string LinuxInstallerType = "Linux";
+        public const string LinuxArm64InstallerType = "LinuxArm64";
         public const string MacInstallerType = "Mac";
         public const string MacArmInstallerType = "MacArm";
 

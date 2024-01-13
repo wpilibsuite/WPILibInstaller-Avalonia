@@ -225,7 +225,6 @@ namespace WPILibInstaller.ViewModels
                 }) ?? throw new InvalidOperationException("Not Valid");
             }
 
-
             entry = zipArchive.GetEntry("upgradeConfig.json");
 
             using (StreamReader reader = new StreamReader(entry!.Open()))
@@ -256,7 +255,6 @@ namespace WPILibInstaller.ViewModels
 
         private string? CheckInstallerType()
         {
-            // TODO Handle Arm someday
             if (OperatingSystem.IsWindows())
             {
                 if (UpgradeConfig.InstallerType != UpgradeConfig.WindowsInstallerType)
@@ -284,9 +282,19 @@ namespace WPILibInstaller.ViewModels
             }
             else if (OperatingSystem.IsLinux())
             {
-                if (UpgradeConfig.InstallerType != UpgradeConfig.LinuxInstallerType)
+                if (PlatformUtils.CurrentPlatform == Platform.LinuxArm64)
                 {
-                    return UpgradeConfig.LinuxInstallerType;
+                    if (UpgradeConfig.InstallerType != UpgradeConfig.LinuxArm64InstallerType)
+                    {
+                        return UpgradeConfig.LinuxArm64InstallerType;
+                    }
+                }
+                else
+                {
+                    if (UpgradeConfig.InstallerType != UpgradeConfig.LinuxInstallerType)
+                    {
+                        return UpgradeConfig.LinuxInstallerType;
+                    }
                 }
             }
             else
@@ -364,6 +372,7 @@ namespace WPILibInstaller.ViewModels
                 VsCodeModel model = new VsCodeModel(VsCodeConfig.VsCodeVersion);
                 model.Platforms.Add(Utils.Platform.Win64, new VsCodeModel.PlatformData(VsCodeConfig.VsCodeWindowsUrl, VsCodeConfig.VsCodeWindowsName, VsCodeConfig.VsCodeWindowsHash));
                 model.Platforms.Add(Utils.Platform.Linux64, new VsCodeModel.PlatformData(VsCodeConfig.VsCodeLinuxUrl, VsCodeConfig.VsCodeLinuxName, VsCodeConfig.VsCodeLinuxHash));
+                model.Platforms.Add(Utils.Platform.LinuxArm64, new VsCodeModel.PlatformData(VsCodeConfig.VsCodeLinuxArm64Url, VsCodeConfig.VsCodeLinuxArm64Name, VsCodeConfig.VsCodeLinuxArm64Hash));
                 model.Platforms.Add(Utils.Platform.Mac64, new VsCodeModel.PlatformData(VsCodeConfig.VsCodeMacUrl, VsCodeConfig.VsCodeMacName, VsCodeConfig.VsCodeMacHash));
                 model.Platforms.Add(Utils.Platform.MacArm64, new VsCodeModel.PlatformData(VsCodeConfig.VsCodeMacUrl, VsCodeConfig.VsCodeMacName, VsCodeConfig.VsCodeMacHash));
                 return model;

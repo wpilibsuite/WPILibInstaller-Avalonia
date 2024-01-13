@@ -37,7 +37,6 @@ public class Program {
     }
   }
 
-  private static final String arm32arch = "arm32";
   private static final String arm64arch = "arm64";
   private static final String x64arch = "x86-64";
   private static final String x86arch = "x86";
@@ -49,9 +48,6 @@ public class Program {
     String arch = System.getProperty("os.arch");
     if (arch.equals("arm64") || arch.equals("aarch64")) {
       return arm64arch;
-    }
-    if (arch.equals("arm32") || arch.equals("arm")) {
-      return arm32arch;
     }
     return (arch.equals("amd64") || arch.equals("x86_64")) ? x64arch : x86arch;
   }
