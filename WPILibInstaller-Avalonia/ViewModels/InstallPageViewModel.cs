@@ -312,6 +312,7 @@ namespace WPILibInstaller.ViewModels
             SetIfNotSet("update.mode", "none", settingsJson);
             SetIfNotSet("update.showReleaseNotes", false, settingsJson);
             SetIfNotSet("http.systemCertificates", false, settingsJson);
+            SetIfNotSet("java.completion.matchCase", "off", settingsJson);
 
             string os;
             string path_seperator;
