@@ -193,7 +193,7 @@ def downloadReadTheDocs = tasks.register('downloadReadTheDocs', Download) {
 
 def downloadPythonAPI = tasks.register('downloadPythonAPI', Download) {
   src 'https://robotpy.readthedocs.io/_/downloads/robotpy/en/stable/htmlzip/'
-  def fileName = file(src.file).name
+  def fileName = "PythonAPI.zip"
   dest "$buildDir/downloads/$fileName"
   overwrite false
 }
