@@ -191,6 +191,13 @@ def downloadReadTheDocs = tasks.register('downloadReadTheDocs', Download) {
   overwrite false
 }
 
+def downloadPythonAPI = tasks.register('downloadPythonAPI', Download) {
+  src 'https://robotpy.readthedocs.io/_/downloads/robotpy/en/stable/htmlzip/'
+  def fileName = "PythonAPI.zip"
+  dest "$buildDir/downloads/$fileName"
+  overwrite false
+}
+
 def downloadNewCommands = tasks.register('downloadNewCommands', Download) {
   src 'https://raw.githubusercontent.com/wpilibsuite/allwpilib/main/wpilibNewCommands/WPILibNewCommands.json'
   def fileName = file(src.file).name
@@ -221,6 +228,7 @@ ext.mavenZipSetup = { AbstractArchiveTask zip->
 
   zip.dependsOn downloadNewCommands
   zip.dependsOn downloadReadTheDocs
+  zip.dependsOn downloadPythonAPI
 
   zip.from(downloadNewCommands.get().outputFiles.first()) {
     into '/vendordeps'
@@ -257,5 +265,9 @@ ext.mavenZipSetup = { AbstractArchiveTask zip->
 
   zip.from(project.zipTree(downloadReadTheDocs.get().outputFiles.first())) {
     into '/documentation/rtd'
+  }
+
+  zip.from(project.zipTree(downloadPythonAPI.get().outputFiles.first())) {
+    into '/documentation/python'
   }
 }
