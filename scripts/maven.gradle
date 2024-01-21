@@ -228,7 +228,7 @@ ext.mavenZipSetup = { AbstractArchiveTask zip->
 
   zip.dependsOn downloadNewCommands
   zip.dependsOn downloadReadTheDocs
-  zip.dependsON downloadPythonAPI
+  zip.dependsOn downloadPythonAPI
 
   zip.from(downloadNewCommands.get().outputFiles.first()) {
     into '/vendordeps'
