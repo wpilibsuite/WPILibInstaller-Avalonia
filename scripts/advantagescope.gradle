@@ -18,6 +18,10 @@ def fileNameLinux = "advantagescope-wpilib-linux-x64.zip"
 
 def downloadUrlLinux = baseUrl + fileNameLinux
 
+def fileNameLinuxArm64 = "advantagescope-wpilib-linux-arm64.zip"
+
+def downloadUrlLinuxArm64 = baseUrl + fileNameLinuxArm64
+
 apply plugin: 'de.undercouch.download'
 
 def downloadTaskWindows = tasks.register('downloadAdvantageScopeWindows', Download) {
@@ -43,6 +47,13 @@ def downloadTaskMacArm = tasks.register('downloadAdvantageScopeMacArm', Download
 
 def downloadTaskLinux = tasks.register('downloadAdvantageScopeLinux', Download) {
   src downloadUrlLinux
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite true
+}
+
+def downloadTaskLinuxArm64 = tasks.register('downloadAdvantageScopeLinuxArm64', Download) {
+  src downloadUrlLinuxArm64
   def fileName = file(src.file).name
   dest "$buildDir/downloads/$fileName"
   overwrite true
@@ -89,7 +100,15 @@ ext.advantageScopeZipSetup = { AbstractArchiveTask zip->
       into '/advantagescope'
       includeEmptyDirs = false
     }
+  } else if (project.hasProperty('linuxBuildArm64')) {
+    zip.dependsOn downloadTaskLinuxArm64
 
+    zip.inputs.files downloadTaskLinuxArm64.get().outputFiles
+
+    zip.from(project.zipTree(downloadTaskLinuxArm64.get().outputFiles.first())) {
+      into '/advantagescope'
+      includeEmptyDirs = false
+    }
   } else if (project.hasProperty('macBuild')) {
     zip.dependsOn downloadTaskMac
 
