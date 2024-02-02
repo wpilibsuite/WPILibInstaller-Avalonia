@@ -18,21 +18,6 @@ shellScript = fullExeName
 Set objShell = WScript.CreateObject( "WScript.Shell" )
 Set objEnv = objShell.Environment("PROCESS")
 objEnv.Remove("ELECTRON_RUN_AS_NODE")
-If (WScript.Arguments.Count > 0) Then
-	If (WScript.Arguments(0) = "silent") Then
-		For I = 1 To WScript.Arguments.Count - 1
-			spacedArg = " """ & WScript.Arguments(I)
-			spacedArg = spacedArg & """"
-			shellScript = shellScript & spacedArg
-		Next
-	Else
-		For I = 0 To WScript.Arguments.Count - 1
-			spacedArg = " """ & WScript.Arguments(I)
-			spacedArg = spacedArg & """"
-			shellScript = shellScript & spacedArg
-		Next
-	End If
-End If
 dim runObject
 ' Allow us to catch a script run failure
 On Error Resume Next
