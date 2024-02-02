@@ -311,7 +311,7 @@ namespace WPILibInstaller.ViewModels
             SetIfNotSet("extensions.ignoreRecommendations", true, settingsJson);
             SetIfNotSet("update.mode", "none", settingsJson);
             SetIfNotSet("update.showReleaseNotes", false, settingsJson);
-            SetIfNotSet("http.systemCertificates", false, settingsJson);
+            SetIfNotSet("http.systemCertificates", true, settingsJson);
             SetIfNotSet("java.completion.matchCase", "off", settingsJson);
 
             string os;
