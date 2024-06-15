@@ -28,6 +28,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+      - uses: gradle/actions/wrapper-validation@v3
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.x
