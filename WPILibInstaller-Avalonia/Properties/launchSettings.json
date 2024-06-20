@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "WPILibInstaller-Avalonia": {
+      "commandName": "Project",
+      "commandLineArgs": "--help"
+    }
+  }
+}
