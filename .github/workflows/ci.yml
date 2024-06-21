@@ -39,7 +39,7 @@ jobs:
           distribution: temurin
 
       - name: Import Developer ID Certificate
-        uses: wpilibsuite/import-signing-certificate@v1
+        uses: wpilibsuite/import-signing-certificate@v2
         with:
           certificate-data: ${{ secrets.APPLE_CERTIFICATE_DATA }}
           certificate-passphrase: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
@@ -127,7 +127,7 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.x
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: 3.8
 
