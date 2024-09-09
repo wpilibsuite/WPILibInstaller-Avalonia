@@ -905,6 +905,7 @@ Exec={configurationProvider.InstallDirectory}/frccode/frccode{frcYear}
 Icon={configurationProvider.InstallDirectory}/frccode/wpilib-256.ico
 Terminal=false
 StartupNotify=true
+StartupWMClass=Code
 ";
 
                 var desktopPath = Path.GetDirectoryName(desktopFile);
