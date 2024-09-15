@@ -1,7 +1,7 @@
 #!/bin/sh
 
-SCRIPT_PATH="$(dirname "$(realpath -s "$0")")"
-SCRIPT_NAME="$(basename "$(realpath -s "$0")")"
+SCRIPT_PATH="$(dirname "$(realpath "$0")")"
+SCRIPT_NAME="$(basename "$(realpath "$0")")"
 SCRIPT_BASE="$(basename -s .sh "$SCRIPT_NAME")"
 OS_NAME="$(uname -s)"
 AS_PATH="$(realpath "$SCRIPT_PATH/../advantagescope")"
