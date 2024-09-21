@@ -4,7 +4,8 @@ def varsfilesh = file("files/frcvars.sh")
 def codefile = file("files/frccode")
 def codefileCmd = file("files/frccode.cmd")
 def icoFile = file("files/wpilib-256.ico")
-def appArmorFile = file("files/frccode.AppArmor")
+def codeAppArmorFile = file("files/frccode.AppArmor")
+def utilAppArmorFile = file("files/wpilibutility.AppArmor")
 
 def pathfolder = 'frccode'
 
@@ -23,7 +24,8 @@ ext.varsZipSetup = { AbstractArchiveTask zip->
   zip.inputs.file icoFile
   zip.inputs.file codefile
   zip.inputs.file codefileCmd
-  zip.inputs.file appArmorFile
+  zip.inputs.file codeAppArmorFile
+  zip.inputs.file utilAppArmorFile
 
   zip.from (varsfile) {
     into "/$pathfolder"
@@ -64,10 +66,17 @@ ext.varsZipSetup = { AbstractArchiveTask zip->
     into "/$pathfolder"
   }
 
-  zip.from (appArmorFile) {
+  zip.from (codeAppArmorFile) {
     into "/$pathfolder/AppArmor"
     rename {
       "frccode"
+    }
+  }
+
+  zip.from (utilAppArmorFile) {
+    into "/$pathfolder/AppArmor"
+    rename {
+      "wpilibutility"
     }
   }
 }
