@@ -9,6 +9,7 @@ struct ShortcutInfo {
     std::wstring path;
     std::wstring name;
     std::wstring description;
+    std::wstring iconLocation;
 };
 
 struct NewEnvVariable {
@@ -26,7 +27,6 @@ struct ShortcutData {
     std::vector<ShortcutInfo> startMenuShortcuts;
     std::vector<NewEnvVariable> newEnvironmentalVariables;
     std::vector<AddedPathVariable> addToPath;
-    std::wstring iconLocation;
 };
 
 void from_json(const nlohmann::json& j, ShortcutInfo& s);
