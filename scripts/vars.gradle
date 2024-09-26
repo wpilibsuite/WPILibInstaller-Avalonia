@@ -6,6 +6,7 @@ def codefileCmd = file("files/frccode.cmd")
 def icoFile = file("files/wpilib-256.ico")
 def codeAppArmorFile = file("files/frccode.AppArmor")
 def utilAppArmorFile = file("files/wpilibutility.AppArmor")
+def advantagescopeAppArmorFile = file("files/advantagescope.AppArmor")
 
 def pathfolder = 'frccode'
 
@@ -77,6 +78,13 @@ ext.varsZipSetup = { AbstractArchiveTask zip->
     into "/$pathfolder/AppArmor"
     rename {
       "wpilibutility"
+    }
+  }
+
+  zip.from (advantagescopeAppArmorFile) {
+    into "/$pathfolder/AppArmor"
+    rename {
+      "advantagescope"
     }
   }
 }
