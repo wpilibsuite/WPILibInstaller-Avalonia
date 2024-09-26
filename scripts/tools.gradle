@@ -84,30 +84,32 @@ ext.toolsSetup = { AbstractArchiveTask zip->
     into '/tools'
   }
 
-  zip.from (scriptBaseFile) {
-    into '/tools'
-  }
+  if (project.ext.buildClassifier == 'Windows') {
+    zip.from (scriptBaseFile) {
+      into '/tools'
+    }
 
-  zip.from (scriptBaseUnixFile) {
-    into '/tools'
-    fileMode 0755
-  }
+    zip.from (scriptBaseCppFile) {
+      into '/tools'
+    }
 
-  zip.from (scriptBaseCppFile) {
-    into '/tools'
-  }
+    zip.from (advantageScopeScriptFile) {
+      into '/tools'
+    }
+  } else {
+    zip.from (scriptBaseUnixFile) {
+      into '/tools'
+      fileMode 0755
+    }
 
-  zip.from (scriptBaseCppUnixFile) {
-    into '/tools'
-    fileMode 0755
-  }
+    zip.from (scriptBaseCppUnixFile) {
+      into '/tools'
+      fileMode 0755
+    }
 
-  zip.from (advantageScopeScriptFile) {
-    into '/tools'
-  }
-
-  zip.from (advantageScopeScriptUnixFile) {
-    into '/tools'
-    fileMode 0755
+    zip.from (advantageScopeScriptUnixFile) {
+      into '/tools'
+      fileMode 0755
+    }
   }
 }
