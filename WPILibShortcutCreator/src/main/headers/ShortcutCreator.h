@@ -15,10 +15,9 @@ class ShortcutCreator {
 public:
   ShortcutCreator();
 
-  bool CreateShortcuts(std::vector<ShortcutInfo>& toCreate, const std::wstring& icon, const std::wstring& dest) const;
+  bool CreateShortcuts(std::vector<ShortcutInfo>& toCreate, const std::wstring& dest) const;
 
-
-  bool CreateShortcut(const std::wstring& destination, const std::wstring& icon, const ShortcutInfo& shortcutInfo) const;
+  bool CreateShortcut(const std::wstring& destination, const ShortcutInfo& shortcutInfo) const;
   bool CreateFolder(const std::wstring& path) const;
 
   std::optional<std::wstring> GetLocalStartMenuFolder() const;

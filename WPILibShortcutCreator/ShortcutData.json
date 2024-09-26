@@ -4,7 +4,8 @@
     {
       "Path": "C:\\Users\\Public\\wpilib\\2023\\vscode\\Code.exe",
       "Name": "FRC 2023\\FRC VS Code 2023",
-      "Description": "Shortcut for FRC VS Code"
+      "Description": "Shortcut for FRC VS Code",
+      "IconLocation": "C:\\Users\\Public\\wpilib\\2023\\frccode\\wpilib-256.ico"
     }
   ],
   "StartMenuShortcuts": [
@@ -14,6 +15,5 @@
   ],
   "AddToPath": [
 
-  ],
-  "IconLocation": "C:\\Users\\Public\\wpilib\\2023\\frccode\\wpilib-256.ico"
+  ]
 }
