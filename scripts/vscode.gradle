@@ -197,7 +197,7 @@ def javaDepExtensionDownload = tasks.register("javaDepExtensionDownload", Downlo
 
 
 def pythonExtensionDownload = tasks.register("pythonExtensionDownload", Download) {
-  src cppWindowsUrl
+  src pythonWindowsUrl
   def fileName = file(src.file).name
   dest "$buildDir/downloads/$fileName"
   overwrite false
