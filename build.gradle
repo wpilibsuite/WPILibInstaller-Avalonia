@@ -454,5 +454,5 @@ tasks.register('generateInstallers', Task) {
 }
 
 wrapper {
-    gradleVersion = '8.5'
+    gradleVersion = '8.10.1'
 }
