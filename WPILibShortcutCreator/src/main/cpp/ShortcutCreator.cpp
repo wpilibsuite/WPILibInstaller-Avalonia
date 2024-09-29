@@ -18,7 +18,7 @@ ShortcutCreator::ShortcutCreator() {
   m_hr = CoGetClassObject(CLSID_ShellLink, CLSCTX_INPROC_SERVER, NULL, IID_PPV_ARGS(shellLinkFactory.GetAddressOf()));
 }
 
-bool ShortcutCreator::CreateShortcut(const std::wstring& destination, const std::wstring& icon, const ShortcutInfo& shortcutInfo) const {
+bool ShortcutCreator::CreateShortcut(const std::wstring& destination, const ShortcutInfo& shortcutInfo) const {
   HRESULT hres;
   com::ComPtr<IShellLink> shellLink;
 
@@ -34,7 +34,9 @@ bool ShortcutCreator::CreateShortcut(const std::wstring& destination, const std:
 
   shellLink->SetDescription(shortcutInfo.description.c_str());
 
-  shellLink->SetIconLocation(icon.c_str(), 0);
+  if (!shortcutInfo.iconLocation.empty()) {
+    shellLink->SetIconLocation(shortcutInfo.iconLocation.c_str(), 0);
+  }
 
   std::wstring finalPath = destination + L'\\' + shortcutInfo.name + L".lnk";
 
@@ -103,11 +105,11 @@ bool ShortcutCreator::CreateFolder(const std::wstring& path) const {
   return ret == 0;
 }
 
-bool ShortcutCreator::CreateShortcuts(std::vector<ShortcutInfo>& toCreate, const std::wstring& icon, const std::wstring& dest) const {
+bool ShortcutCreator::CreateShortcuts(std::vector<ShortcutInfo>& toCreate, const std::wstring& dest) const {
   bool allCompleted = true;
 
   for (auto&& info : toCreate) {
-    if (!CreateShortcut(dest, icon, info)) {
+    if (!CreateShortcut(dest, info)) {
       allCompleted = false;
     }
   }

@@ -11,7 +11,7 @@ tools_folder = os.path.dirname(script_name)
 year_folder = os.path.dirname(tools_folder)
 
 if platform.system() == "Linux":
-    cmd = [year_folder + "/advantagescope/AdvantageScope (WPILib).AppImage"]
+    cmd = [year_folder + "/advantagescope/advantagescope-wpilib"]
 elif platform.system() == "Darwin":
     cmd = ["open", year_folder + "/advantagescope/AdvantageScope (WPILib).app"]
 elif platform.system() == "Windows":

@@ -32,6 +32,7 @@ void from_json(const json& j, ShortcutInfo& s) {
     s.path = ToWideString(j.at("Path").get<std::string>());
     s.name = ToWideString(j.at("Name").get<std::string>());
     s.description = ToWideString(j.at("Description").get<std::string>());
+    s.iconLocation = ToWideString(j.at("IconLocation").get<std::string>());
 }
 
 void from_json(const nlohmann::json& j, NewEnvVariable& s) {
@@ -49,5 +50,4 @@ void from_json(const json& j, ShortcutData& s) {
     j.at("StartMenuShortcuts").get_to(s.startMenuShortcuts);
     j.at("NewEnvironmentalVariables").get_to(s.newEnvironmentalVariables);
     j.at("AddToPath").get_to(s.addToPath);
-    s.iconLocation = ToWideString(j.at("IconLocation").get<std::string>());
 }
