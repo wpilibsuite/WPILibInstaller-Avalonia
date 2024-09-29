@@ -13,11 +13,11 @@ echo "AS_PATH: $AS_PATH"
 echo "OSTYPE: $OS_NAME"
 
 if [ "$OS_NAME" = "Linux" ]; then
-    EXE_NAME="AdvantageScope (WPILib).AppImage"
+    EXE_NAME="advantagescope-wpilib"
 elif [ "$OS_NAME" = "Darwin" ]; then
     EXE_NAME="AdvantageScope (WPILib).app"
 else
-    EXE_NAME="AdvantageScope (WPILib).AppImage"
+    EXE_NAME="advantagescope-wpilib"
 fi
 
 unset ELECTRON_RUN_AS_NODE
