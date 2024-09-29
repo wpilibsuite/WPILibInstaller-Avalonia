@@ -9,14 +9,11 @@ echo "SCRIPT_PATH: $SCRIPT_PATH"
 echo "SCRIPT_NAME: $SCRIPT_NAME"
 echo "SCRIPT_BASE: $SCRIPT_BASE"
 echo "OSTYPE: $OS_NAME"
-
-if [ "$OS_NAME" = "Darwin" ]; then
-    EXE_NAME="open $SCRIPT_PATH/$SCRIPT_BASE.app --args"
-else
-    EXE_NAME="$SCRIPT_PATH/$(echo "$SCRIPT_BASE" | tr '[:upper:]' '[:lower:]')"
-fi
-
-echo "EXE_NAME: $EXE_NAME"
 echo "ARGUMENTS: $*"
 
-exec "$EXE_NAME" "$*"
+if [ "$OS_NAME" = "Darwin" ]; then
+    open "$SCRIPT_PATH/$SCRIPT_BASE.app" --args
+else
+    exec "$SCRIPT_PATH/$(echo "$SCRIPT_BASE" | tr '[:upper:]' '[:lower:]')" "$*"
+fi
+

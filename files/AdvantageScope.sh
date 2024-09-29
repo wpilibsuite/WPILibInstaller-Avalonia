@@ -12,17 +12,14 @@ echo "SCRIPT_BASE: $SCRIPT_BASE"
 echo "AS_PATH: $AS_PATH"
 echo "OSTYPE: $OS_NAME"
 
-if [ "$OS_NAME" = "Linux" ]; then
-    EXE_NAME="exec $AS_PATH/advantagescope-wpilib"
-elif [ "$OS_NAME" = "Darwin" ]; then
-    EXE_NAME="open AdvantageScope (WPILib).app"
-else
-    EXE_NAME="exec $AS_PATH/advantagescope-wpilib"
-fi
-
-echo "EXE_NAME: $EXE_NAME"
-
 unset ELECTRON_RUN_AS_NODE
 
-"$EXE_NAME"
+if [ "$OS_NAME" = "Linux" ]; then
+    exec "$AS_PATH/advantagescope-wpilib"
+elif [ "$OS_NAME" = "Darwin" ]; then
+    open "AdvantageScope (WPILib).app"
+else
+    exec "$AS_PATH/advantagescope-wpilib"
+fi
+
 
