@@ -1,12 +1,15 @@
 def toolsJson = file("$buildDir/tools.json")
 def scriptBaseFile = file("files/ScriptBase.vbs")
-def scriptBaseUnixFile = file("files/ScriptBase.py")
+def scriptBasePythonFile = file("files/ScriptBase.py")
+def scriptBaseUnixFile = file("files/ScriptBase.sh")
 
 def scriptBaseCppFile = file("files/ScriptBaseCpp.vbs")
-def scriptBaseCppUnixFile = file("files/ScriptBaseCpp.py")
+def scriptBaseCppPythonFile = file("files/ScriptBaseCpp.py")
+def scriptBaseCppUnixFile = file("files/ScriptBaseCpp.sh")
 
 def advantageScopeScriptFile = file("files/AdvantageScope.vbs")
-def advantageScopeScriptUnixFile = file("files/AdvantageScope.py")
+def advantageScopeScriptPythonFile = file("files/AdvantageScope.py")
+def advantageScopeScriptUnixFile = file("files/AdvantageScope.sh")
 
 def toolsJsonTask = tasks.register('toolsJson', Task) {
 
@@ -79,6 +82,7 @@ ext.toolsSetup = { AbstractArchiveTask zip->
   zip.inputs.file toolsJson
   zip.inputs.file scriptBaseFile
   zip.inputs.file scriptBaseUnixFile
+  zip.inputs.file scriptBasePythonFile
 
   zip.from (toolsJson) {
     into '/tools'
@@ -102,7 +106,17 @@ ext.toolsSetup = { AbstractArchiveTask zip->
       fileMode 0755
     }
 
+    zip.from (scriptBasePythonFile) {
+      into '/tools'
+      fileMode 0755
+    }
+
     zip.from (scriptBaseCppUnixFile) {
+      into '/tools'
+      fileMode 0755
+    }
+
+    zip.from (scriptBaseCppPythonFile) {
       into '/tools'
       fileMode 0755
     }
@@ -111,5 +125,11 @@ ext.toolsSetup = { AbstractArchiveTask zip->
       into '/tools'
       fileMode 0755
     }
+
+    zip.from (advantageScopeScriptPythonFile) {
+      into '/tools'
+      fileMode 0755
+    }
   }
+
 }

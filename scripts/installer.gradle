@@ -5,9 +5,11 @@ evaluationDependsOn(':apps:MavenMetaDataFixer')
 evaluationDependsOn(':apps:ToolsUpdater')
 
 def metaDataScriptBatch = file("$rootDir/files/MavenMetaDataFixer.bat")
-def metaDataScriptSh = file("$rootDir/files/MavenMetaDataFixer.py")
+def metaDataScriptPy = file("$rootDir/files/MavenMetaDataFixer.py")
+def metaDataScriptSh = file("$rootDir/files/MavenMetaDataFixer.sh")
 def toolsUpdaterBatch = file("$rootDir/files/ToolsUpdater.bat")
-def toolsUpdaterSh = file("$rootDir/files/ToolsUpdater.py")
+def toolsUpdaterPy = file("$rootDir/files/ToolsUpdater.py")
+def toolsUpdaterSh = file("$rootDir/files/ToolsUpdater.sh")
 
 ext.msBuildExtraSetup = { AbstractArchiveTask zip->
   //zip.dependsOn msbuild
@@ -15,8 +17,10 @@ ext.msBuildExtraSetup = { AbstractArchiveTask zip->
   zip.inputs.file project(':apps:ToolsUpdater').shadowJar.archivePath
   zip.inputs.file metaDataScriptBatch
   zip.inputs.file metaDataScriptSh
+  zip.inputs.file metaDataScriptPy
   zip.inputs.file toolsUpdaterBatch
   zip.inputs.file toolsUpdaterSh
+  zip.inputs.file toolsUpdaterPy
 
   zip.dependsOn project(':apps:MavenMetaDataFixer').shadowJar
   zip.dependsOn project(':apps:ToolsUpdater').shadowJar
@@ -28,6 +32,10 @@ ext.msBuildExtraSetup = { AbstractArchiveTask zip->
 
   if (project.ext.isUnix == true) {
     zip.from(metaDataScriptSh) {
+      into '/maven'
+      fileMode 0755
+    }
+    zip.from(metaDataScriptPy) {
       into '/maven'
       fileMode 0755
     }
@@ -44,6 +52,10 @@ ext.msBuildExtraSetup = { AbstractArchiveTask zip->
 
   if (project.ext.isUnix == true) {
     zip.from(toolsUpdaterSh) {
+      into '/tools'
+      fileMode 0755
+    }
+    zip.from(toolsUpdaterPy) {
       into '/tools'
       fileMode 0755
     }
