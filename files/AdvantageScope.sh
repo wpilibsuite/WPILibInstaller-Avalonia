@@ -15,5 +15,3 @@ elif [ "$OS_NAME" = "Darwin" ]; then
 else
     exec "$AS_PATH/advantagescope-wpilib"
 fi
-
-

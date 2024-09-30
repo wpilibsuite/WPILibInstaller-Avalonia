@@ -10,4 +10,3 @@ if [ "$OS_NAME" = "Darwin" ]; then
 else
     exec "$SCRIPT_PATH/$(echo "$SCRIPT_BASE" | tr '[:upper:]' '[:lower:]')" "$*"
 fi
-

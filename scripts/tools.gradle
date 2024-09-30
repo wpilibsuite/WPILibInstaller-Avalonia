@@ -92,7 +92,7 @@ ext.toolsSetup = { AbstractArchiveTask zip->
     zip.from (scriptBaseFile) {
       into '/tools'
     }
-    
+
     zip.from (scriptBaseCppFile) {
       into '/tools'
     }
@@ -105,7 +105,7 @@ ext.toolsSetup = { AbstractArchiveTask zip->
       into '/tools'
       fileMode 0755
     }
-    
+
     zip.from (scriptBasePythonFile) {
       into '/tools'
       fileMode 0755
@@ -115,7 +115,7 @@ ext.toolsSetup = { AbstractArchiveTask zip->
       into '/tools'
       fileMode 0755
     }
-    
+
     zip.from (scriptBaseCppPythonFile) {
       into '/tools'
       fileMode 0755
@@ -125,12 +125,11 @@ ext.toolsSetup = { AbstractArchiveTask zip->
       into '/tools'
       fileMode 0755
     }
-    
+
     zip.from (advantageScopeScriptPythonFile) {
       into '/tools'
       fileMode 0755
     }
   }
-  
 
 }

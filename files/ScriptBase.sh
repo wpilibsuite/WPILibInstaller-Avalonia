@@ -11,7 +11,7 @@ if ! "$JDK_DIR" -jar "$SCRIPT_PATH/$JAR_NAME"; then
     if ! "$JAVA_HOME/bin/java" -jar "$SCRIPT_PATH/$JAR_NAME"; then
         echo "ERROR launching $SCRIPT_PATH/$JAR_NAME using $JAVA_HOME"
         if ! java -jar "$SCRIPT_PATH/$JAR_NAME"; then
-		echo "ERROR launching $SCRIPT_PATH/$JAR_NAME using java from path: $(which java)"
+            echo "ERROR launching $SCRIPT_PATH/$JAR_NAME using java from path: $(which java)"
         fi
     fi
 fi
