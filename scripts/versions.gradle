@@ -19,7 +19,7 @@ ext.wpilibVersion = gradleRioVersion
 ext.gccVersion = '12.1.0'
 ext.toolchainGitTag = 'v2024-1'
 
-ext.jdkVersion = '17.0.8.1+1'
+ext.jdkVersion = '17.0.12+7'
 
 ext.advantagescopeGitTag = 'v4.0.0-beta-1'
 
