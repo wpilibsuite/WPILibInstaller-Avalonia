@@ -214,6 +214,17 @@ namespace WPILibInstaller.ViewModels
                 }) ?? throw new InvalidOperationException("Not Valid");
             }
 
+            entry = zipArchive.GetEntry("choreoConfig.json");
+
+            using (StreamReader reader = new StreamReader(entry!.Open()))
+            {
+                var configStr = await reader.ReadToEndAsync();
+                ChoreoConfig = JsonConvert.DeserializeObject<ChoreoConfig>(configStr, new JsonSerializerSettings
+                {
+                    MissingMemberHandling = MissingMemberHandling.Error
+                }) ?? throw new InvalidOperationException("Not Valid");
+            }
+
             entry = zipArchive.GetEntry("fullConfig.json");
 
             using (StreamReader reader = new StreamReader(entry!.Open()))
@@ -413,6 +424,8 @@ namespace WPILibInstaller.ViewModels
         public JdkConfig JdkConfig { get; private set; } = null!;
 
         public AdvantageScopeConfig AdvantageScopeConfig { get; private set; } = null!;
+
+        public ChoreoConfig ChoreoConfig { get; private set; } = null!;
 
         public VsCodeConfig VsCodeConfig { get; private set; } = null!;
 
