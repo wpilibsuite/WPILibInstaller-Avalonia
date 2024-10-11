@@ -25,4 +25,4 @@ ext.advantagescopeGitTag = 'v4.0.0-beta-1'
 
 ext.frcYear = '2025'
 
-ext.gradleWrapperVersion = '8.10.1'
+ext.gradleWrapperVersion = '8.10.2'
