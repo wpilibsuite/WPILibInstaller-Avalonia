@@ -22,7 +22,9 @@ namespace WPILibInstaller.ViewModels
 
         public ReactiveCommand<Unit, Unit> OpenChangelog { get; }
 
-        public ReactiveCommand<Unit, Unit> OpenBeta { get; }
+        public ReactiveCommand<Unit, Unit> OpenBetaSite { get; }
+
+        public ReactiveCommand<Unit, Unit> OpenBetaDocs { get; }
 
         public FinalPageViewModel(IProgramWindow progWindow, IConfigurationProvider configurationProvider, IVsCodeInstallLocationProvider vsCodeProvider,
                 ICatchableButtonFactory buttonFactory)
@@ -47,7 +49,8 @@ namespace WPILibInstaller.ViewModels
 
             OpenKnownIssues = buttonFactory.CreateCatchableButton(OpenKnownIssuesFunc);
             OpenChangelog = buttonFactory.CreateCatchableButton(OpenChangelogFunc);
-            OpenBeta = buttonFactory.CreateCatchableButton(OpenBetaFunc);
+            OpenBetaDocs = buttonFactory.CreateCatchableButton(OpenBetaDocsFunc);
+            OpenBetaSite = buttonFactory.CreateCatchableButton(OpenBetaSiteFunc);
 
             this.progWindow = progWindow;
             this.configurationProvider = configurationProvider;
@@ -59,9 +62,15 @@ namespace WPILibInstaller.ViewModels
             return Task.CompletedTask;
         }
 
-        public Task OpenBetaFunc()
+        public Task OpenBetaDocsFunc()
         {
             OpenBrowser("https://docs.wpilib.org/en/latest/docs/beta/beta-getting-started/welcome.html");
+            return Task.CompletedTask;
+        }
+
+        public Task OpenBetaSiteFunc()
+        {
+            OpenBrowser("https://github.com/wpilibsuite/2025Beta");
             return Task.CompletedTask;
         }
 
