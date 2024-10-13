@@ -22,6 +22,8 @@ namespace WPILibInstaller.ViewModels
 
         public ReactiveCommand<Unit, Unit> OpenChangelog { get; }
 
+        public ReactiveCommand<Unit, Unit> OpenBeta { get; }
+
         public FinalPageViewModel(IProgramWindow progWindow, IConfigurationProvider configurationProvider, IVsCodeInstallLocationProvider vsCodeProvider,
                 ICatchableButtonFactory buttonFactory)
             : base("Finish", "")
@@ -45,6 +47,7 @@ namespace WPILibInstaller.ViewModels
 
             OpenKnownIssues = buttonFactory.CreateCatchableButton(OpenKnownIssuesFunc);
             OpenChangelog = buttonFactory.CreateCatchableButton(OpenChangelogFunc);
+            OpenBeta = buttonFactory.CreateCatchableButton(OpenBetaFunc);
 
             this.progWindow = progWindow;
             this.configurationProvider = configurationProvider;
@@ -53,6 +56,12 @@ namespace WPILibInstaller.ViewModels
         public Task OpenKnownIssuesFunc()
         {
             OpenBrowser("https://docs.wpilib.org/en/stable/docs/yearly-overview/known-issues.html");
+            return Task.CompletedTask;
+        }
+
+        public Task OpenBetaFunc()
+        {
+            OpenBrowser("https://docs.wpilib.org/en/latest/docs/beta/beta-getting-started/welcome.html");
             return Task.CompletedTask;
         }
 
