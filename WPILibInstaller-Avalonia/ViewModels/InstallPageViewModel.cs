@@ -354,7 +354,7 @@ namespace WPILibInstaller.ViewModels
                 else
                 {
                     var binPath = Path.Combine(homePath, "jdk", "bin");
-                    if (!path.Contains(binPath))
+                    if (!path.ToString().Contains(binPath))
                     {
                         path = binPath + path_seperator + path;
                         terminalEnv["PATH"] = path;
