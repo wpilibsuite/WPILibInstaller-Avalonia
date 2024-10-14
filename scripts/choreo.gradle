@@ -86,16 +86,14 @@ ext.choreoZipSetup = { AbstractArchiveTask zip->
 
     zip.inputs.files downloadTaskLinux.get().outputFiles
 
-    zip.from(project.zipTree(downloadTaskLinux.get().outputFiles.first())) {
+    zip.from(downloadTaskLinux.get().outputFiles.first()) {
       into '/choreo'
-      includeEmptyDirs = false
     }
   } else if (project.hasProperty('macBuild')) {
     zip.dependsOn downloadTaskMac
 
     zip.inputs.files downloadTaskMac.get().outputFiles
 
-    // Cannot extract, otherwise breaks mac
     zip.from(downloadTaskMac.get().outputFiles.first()) {
       into '/choreo'
     }
@@ -104,7 +102,6 @@ ext.choreoZipSetup = { AbstractArchiveTask zip->
 
     zip.inputs.files downloadTaskMacArm.get().outputFiles
 
-    // Cannot extract, otherwise breaks mac
     zip.from(downloadTaskMacArm.get().outputFiles.first()) {
       into '/choreo'
     }
@@ -113,9 +110,8 @@ ext.choreoZipSetup = { AbstractArchiveTask zip->
 
     zip.inputs.files downloadTaskWindows.get().outputFiles
 
-    zip.from(project.zipTree(downloadTaskWindows.get().outputFiles.first())) {
+    zip.from(downloadTaskWindows.get().outputFiles.first()) {
       into '/choreo'
-      includeEmptyDirs = false
     }
   }
 }
