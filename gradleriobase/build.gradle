@@ -75,6 +75,9 @@ dependencies {
     if (project(":").ext.buildClassifier == 'Windows') {
         implementation "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}:x64@zip"
     }
+
+    // choreo
+    implementation "choreo:ChoreoLib-java:$choreoGitTag"
 }
 
 test {
@@ -104,6 +107,20 @@ nativeUtils {
         wpilibnewcommands(getNativeDependencyTypeClass('WPISharedMavenDependency')) {
             groupId = "edu.wpi.first.wpilibNewCommands"
             artifactId = "wpilibNewCommands-cpp"
+            headerClassifier = "headers"
+            sourceClassifier = "sources"
+            ext = "zip"
+            version = wpilibFoundVersion
+            targetPlatforms.addAll(nativeUtils.wpi.platforms.allPlatforms)
+        }
+    }
+}
+
+nativeUtils {
+    nativeDependencyContainer {
+        wpilibnewcommands(getNativeDependencyTypeClass('WPISharedMavenDependency')) {
+            groupId = "choreo"
+            artifactId = "ChoreoLib-cpp"
             headerClassifier = "headers"
             sourceClassifier = "sources"
             ext = "zip"
