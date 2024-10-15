@@ -133,7 +133,7 @@ nativeUtils {
             headerClassifier = "headers"
             sourceClassifier = "sources"
             ext = "zip"
-            version = wpilibFoundVersion
+            version = choreoVersion
             targetPlatforms.addAll(nativeUtils.wpi.platforms.allPlatforms)
         }
     }
@@ -181,6 +181,7 @@ model {
             wpi.cpp.deps.googleTest(it)
 
             wpi.cpp.deps.useLibrary(it, 'wpilibnewcommands')
+            wpi.cpp.deps.useLibrary(it, 'choreo')
             wpi.cpp.deps.useLibrary(it, 'xrpvendordep')
             wpi.cpp.deps.useLibrary(it, 'romivendordep')
         }
