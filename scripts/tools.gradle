@@ -11,6 +11,9 @@ def advantageScopeScriptFile = file("files/AdvantageScope.vbs")
 def advantageScopeScriptPythonFile = file("files/AdvantageScope.py")
 def advantageScopeScriptUnixFile = file("files/AdvantageScope.sh")
 
+def choreoScriptFile = file("files/Choreo.vbs")
+def choreoScriptUnixFile = file("files/Choreo.sh")
+
 def toolsJsonTask = tasks.register('toolsJson', Task) {
 
   dependsOn tasks.named('lazyModelEvaluation')
@@ -105,6 +108,10 @@ ext.toolsSetup = { AbstractArchiveTask zip->
     zip.from (advantageScopeScriptFile) {
       into '/tools'
     }
+
+    zip.from (choreoScriptFile) {
+      into '/tools'
+    }
   } else {
     zip.from (scriptBaseUnixFile) {
       into '/tools'
@@ -132,6 +139,11 @@ ext.toolsSetup = { AbstractArchiveTask zip->
     }
 
     zip.from (advantageScopeScriptPythonFile) {
+      into '/tools'
+      fileMode 0755
+    }
+
+    zip.from (choreoScriptUnixFile) {
       into '/tools'
       fileMode 0755
     }
