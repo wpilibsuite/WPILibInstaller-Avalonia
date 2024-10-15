@@ -10,7 +10,7 @@ yearFolder = fso.GetParentFolderName(toolsFolder)
 choreoFolder = fso.BuildPath(yearFolder, "choreo")
 
 'Get the full path to the exe
-fullExeName = fso.BuildPath(choreoFolder, "Choreo.exe")
+fullExeName = fso.BuildPath(choreoFolder, "choreo.exe")
 
 shellScript = fullExeName
 
