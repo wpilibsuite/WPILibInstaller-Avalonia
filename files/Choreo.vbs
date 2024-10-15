@@ -7,10 +7,10 @@ toolsFolder = fso.GetParentFolderName(WScript.ScriptFullName)
 'Get the Choreo folder
 toolsFolder = fso.GetParentFolderName(WScript.ScriptFullName)
 yearFolder = fso.GetParentFolderName(toolsFolder)
-advantageScopeFolder = fso.BuildPath(yearFolder, "choreo")
+choreoFolder = fso.BuildPath(yearFolder, "choreo")
 
 'Get the full path to the exe
-fullExeName = fso.BuildPath(advantageScopeFolder, "Choreo.exe")
+fullExeName = fso.BuildPath(choreoFolder, "Choreo.exe")
 
 shellScript = fullExeName
 
