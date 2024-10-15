@@ -103,6 +103,7 @@ apply from: 'scripts/jdk.gradle'
 apply from: 'scripts/maven.gradle'
 
 apply from: 'scripts/advantagescope.gradle'
+apply from: 'scripts/choreo.gradle'
 
 // Tools must happen after maven
 apply from: 'scripts/tools.gradle'
@@ -221,6 +222,7 @@ def generateFullResourcesTask = tasks.register('generateFullResources', project.
     jdkZipSetup(it)
 
     advantageScopeZipSetup(it)
+    choreoZipSetup(it)
 
     if (OperatingSystem.current().isWindows()) {
         def task = it
@@ -326,6 +328,7 @@ def generateConfigFiles = tasks.register('generateCommonResources', Zip) {
     jdkConfigFileSetup(zip)
 
     advantageScopeConfigFileSetup(zip)
+    choreoConfigFileSetup(zip)
 
     vscodeConfigZipSetup(zip)
 }

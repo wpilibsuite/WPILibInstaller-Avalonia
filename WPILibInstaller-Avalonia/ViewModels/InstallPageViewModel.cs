@@ -95,6 +95,7 @@ namespace WPILibInstaller.ViewModels
                 configurationProvider.JdkConfig.Folder + "/",
                 configurationProvider.UpgradeConfig.Tools.Folder + "/",
                 configurationProvider.AdvantageScopeConfig.Folder + "/",
+                configurationProvider.ChoreoConfig.Folder + "/",
                 "installUtils/"});
         }
 

@@ -56,6 +56,11 @@ def toolsJsonTask = tasks.register('toolsJson', Task) {
     advantageScopeItem['version'] = advantagescopeGitTag
     config << advantageScopeItem
 
+    def choreoItem = [:]
+    choreoItem['name'] = "Choreo"
+    choreoItem['version'] = choreoGitTag
+    config << choreoItem
+
     def gbuilder = getGsonBuilder()
     gbuilder.setPrettyPrinting()
     def json = gbuilder.create().toJson(config)

@@ -16,6 +16,8 @@ namespace WPILibInstaller.Interfaces
 
         AdvantageScopeConfig AdvantageScopeConfig { get; }
 
+        ChoreoConfig ChoreoConfig { get; }
+
         VsCodeConfig VsCodeConfig { get; }
 
         string InstallDirectory { get; }

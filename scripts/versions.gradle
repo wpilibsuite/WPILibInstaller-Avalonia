@@ -23,6 +23,8 @@ ext.jdkVersion = '17.0.12+7'
 
 ext.advantagescopeGitTag = 'v4.0.0-beta-1'
 
+ext.choreoGitTag = 'v2025.0.0-beta-4'
+
 ext.frcYear = '2025'
 
 ext.gradleWrapperVersion = '8.10.2'

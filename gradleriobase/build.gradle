@@ -6,6 +6,13 @@ plugins {
     id "edu.wpi.first.GradleRIO"
 }
 
+repositories {
+    mavenCentral()
+    maven {
+        url = uri("https://SleipnirGroup.github.io/ChoreoLib/dep")
+    }
+}
+
 deploy {
     targets {
         roborio(getTargetTypeClass('RoboRIO')) {
@@ -33,6 +40,8 @@ def deployJavaArtifact = deploy.targets.roborio.artifacts.frcJava
 def deployCppArtifact = deploy.targets.roborio.artifacts.frcCpp
 
 wpi.java.debugJni = false
+
+def choreoVersion = "$choreoGitTag".substring(1)
 
 dependencies {
     annotationProcessor wpi.java.deps.wpilibAnnotations()
@@ -75,6 +84,9 @@ dependencies {
     if (project(":").ext.buildClassifier == 'Windows') {
         implementation "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}:x64@zip"
     }
+
+    // choreo
+    implementation "choreo:ChoreoLib-java:$choreoVersion"
 }
 
 test {
@@ -108,6 +120,20 @@ nativeUtils {
             sourceClassifier = "sources"
             ext = "zip"
             version = wpilibFoundVersion
+            targetPlatforms.addAll(nativeUtils.wpi.platforms.allPlatforms)
+        }
+    }
+}
+
+nativeUtils {
+    nativeDependencyContainer {
+        choreo(getNativeDependencyTypeClass('WPISharedMavenDependency')) {
+            groupId = "choreo"
+            artifactId = "ChoreoLib-cpp"
+            headerClassifier = "headers"
+            sourceClassifier = "sources"
+            ext = "zip"
+            version = choreoVersion
             targetPlatforms.addAll(nativeUtils.wpi.platforms.allPlatforms)
         }
     }
@@ -155,6 +181,7 @@ model {
             wpi.cpp.deps.googleTest(it)
 
             wpi.cpp.deps.useLibrary(it, 'wpilibnewcommands')
+            wpi.cpp.deps.useLibrary(it, 'choreo')
             wpi.cpp.deps.useLibrary(it, 'xrpvendordep')
             wpi.cpp.deps.useLibrary(it, 'romivendordep')
         }
