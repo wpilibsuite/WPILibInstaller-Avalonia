@@ -2,19 +2,19 @@ apply from: 'scripts/versions.gradle'
 
 def baseUrl = "https://github.com/SleipnirGroup/Choreo/releases/download/$choreoGitTag/"
 
-def fileNameWindows = "Choreo-$choreoGitTag-Windows-x86_64.exe"
+def fileNameWindows = "Choreo-$choreoGitTag-Windows-x86_64-standalone.zip"
 
 def downloadUrlWindows = baseUrl + fileNameWindows
 
-def fileNameMac = "Choreo-$choreoGitTag-macOS-x86_64"
+def fileNameMac = "Choreo-$choreoGitTag-macOS-x86_64-standalone.zip"
 
 def downloadUrlMac = baseUrl + fileNameMac
 
-def fileNameMacArm = "Choreo-$choreoGitTag-macOS-aarch64"
+def fileNameMacArm = "Choreo-$choreoGitTag-macOS-aarch64-standalone.zip"
 
 def downloadUrlMacArm = baseUrl + fileNameMacArm
 
-def fileNameLinux = "Choreo-$choreoGitTag-Linux-x86_64"
+def fileNameLinux = "Choreo-$choreoGitTag-Linux-x86_64-standalone.zip"
 
 def downloadUrlLinux = baseUrl + fileNameLinux
 
@@ -86,32 +86,36 @@ ext.choreoZipSetup = { AbstractArchiveTask zip->
 
     zip.inputs.files downloadTaskLinux.get().outputFiles
 
-    zip.from(downloadTaskLinux.get().outputFiles.first()) {
+    zip.from(project.zipTree(downloadTaskLinux.get().outputFiles.first())) {
       into '/choreo'
+      includeEmptyDirs = false
     }
   } else if (project.hasProperty('macBuild')) {
     zip.dependsOn downloadTaskMac
 
     zip.inputs.files downloadTaskMac.get().outputFiles
 
-    zip.from(downloadTaskMac.get().outputFiles.first()) {
+    zip.from(project.zipTree(downloadTaskMac.get().outputFiles.first())) {
       into '/choreo'
+      includeEmptyDirs = false
     }
   } else if (project.hasProperty('macBuildArm')) {
     zip.dependsOn downloadTaskMacArm
 
     zip.inputs.files downloadTaskMacArm.get().outputFiles
 
-    zip.from(downloadTaskMacArm.get().outputFiles.first()) {
+    zip.from(project.zipTree(downloadTaskMacArm.get().outputFiles.first())) {
       into '/choreo'
+      includeEmptyDirs = false
     }
   } else {
     zip.dependsOn downloadTaskWindows
 
     zip.inputs.files downloadTaskWindows.get().outputFiles
 
-    zip.from(downloadTaskWindows.get().outputFiles.first()) {
+    zip.from(project.zipTree(downloadTaskWindows.get().outputFiles.first())) {
       into '/choreo'
+      includeEmptyDirs = false
     }
   }
 }
