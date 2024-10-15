@@ -118,7 +118,7 @@ nativeUtils {
 
 nativeUtils {
     nativeDependencyContainer {
-        wpilibnewcommands(getNativeDependencyTypeClass('WPISharedMavenDependency')) {
+        choreo(getNativeDependencyTypeClass('WPISharedMavenDependency')) {
             groupId = "choreo"
             artifactId = "ChoreoLib-cpp"
             headerClassifier = "headers"
