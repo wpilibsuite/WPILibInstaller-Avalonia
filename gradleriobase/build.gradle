@@ -6,6 +6,13 @@ plugins {
     id "edu.wpi.first.GradleRIO"
 }
 
+repositories {
+    mavenCentral()
+    maven {
+        url = uri("https://SleipnirGroup.githun.io/ChoreoLib/dep")
+    }
+}
+
 deploy {
     targets {
         roborio(getTargetTypeClass('RoboRIO')) {
