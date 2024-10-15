@@ -41,6 +41,8 @@ def deployCppArtifact = deploy.targets.roborio.artifacts.frcCpp
 
 wpi.java.debugJni = false
 
+def choreoVersion = "$choreoGitTag".substring(1)
+
 dependencies {
     annotationProcessor wpi.java.deps.wpilibAnnotations()
     implementation wpi.java.deps.wpilib()
@@ -84,7 +86,7 @@ dependencies {
     }
 
     // choreo
-    implementation "choreo:ChoreoLib-java:$choreoGitTag"
+    implementation "choreo:ChoreoLib-java:$choreoVersion"
 }
 
 test {
