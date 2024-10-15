@@ -10,7 +10,7 @@ yearFolder = fso.GetParentFolderName(toolsFolder)
 advantageScopeFolder = fso.BuildPath(yearFolder, "choreo")
 
 'Get the full path to the exe
-fullExeName = fso.BuildPath(advantageScopeFolder, "Choreo-v2025.0.0-beta-4-Windows-x86_64-setup.exe")
+fullExeName = fso.BuildPath(advantageScopeFolder, "Choreo.exe")
 
 shellScript = fullExeName
 
