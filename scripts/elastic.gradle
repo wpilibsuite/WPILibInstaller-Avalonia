@@ -10,6 +10,10 @@ def fileNameMac = 'Elastic-WPILib-macOS.zip'
 
 def downloadUrlMac = baseUrl + fileNameMac
 
+def fineNameMacArm = 'Elastic-WPILib-macOS.zip'
+
+def downloadUrlMacArm = baseUrl + fileNameMacArm
+
 def fileNameLinux = 'Elastic-WPILib-Linux'
 
 def downloadUrlLinux = baseUrl + fileNameLinux
@@ -25,6 +29,13 @@ def downloadTaskWindows = tasks.register('downloadElasticWindows', Download) {
 
 def downloadTaskMac = tasks.register('downloadElasticMac', Download) {
   src downloadUrlMac
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite true
+}
+
+def downloadTaskMacArm = tasks.register('downloadElasticMacArm', Download) {
+  src downloadUrlMacArm
   def fileName = file(src.file).name
   dest "$buildDir/downloads/$fileName"
   overwrite true
@@ -83,6 +94,15 @@ ext.elasticZipSetup = { AbstractArchiveTask zip->
     zip.inputs.files downloadTaskMac.get().outputFiles
 
     zip.from(project.zipTree(downloadTaskMac.get().outputFiles.first())) {
+      into '/elastic'
+      includeEmptyDirs = false
+    }
+  } else if (project.hasProperty('macBuildArm')) {
+    zip.dependsOn downloadTaskMacArm
+
+    zip.inputs.files downloadTaskMacArm.get().outputFiles
+
+    zip.from(project.zipTree(downloadTaskMacArm.get().outputFiles.first())) {
       into '/elastic'
       includeEmptyDirs = false
     }

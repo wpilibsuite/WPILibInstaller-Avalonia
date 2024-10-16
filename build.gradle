@@ -224,6 +224,7 @@ def generateFullResourcesTask = tasks.register('generateFullResources', project.
 
     advantageScopeZipSetup(it)
     choreoZipSetup(it)
+    elasticZipSetup(it)
 
     if (OperatingSystem.current().isWindows()) {
         def task = it
@@ -330,6 +331,7 @@ def generateConfigFiles = tasks.register('generateCommonResources', Zip) {
 
     advantageScopeConfigFileSetup(zip)
     choreoConfigFileSetup(zip)
+    elasticConfigFileSetup(zip)
 
     vscodeConfigZipSetup(zip)
 }
