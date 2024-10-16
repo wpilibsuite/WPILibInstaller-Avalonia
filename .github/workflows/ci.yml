@@ -95,6 +95,8 @@ jobs:
           md5sum **/*
           sha256sum **/*
       - uses: jfrog/setup-jfrog-cli@v4
+        with:
+          disable-auto-build-publish: true
         if: |
           github.repository_owner == 'wpilibsuite' &&
           startsWith(github.ref, 'refs/tags/v')
