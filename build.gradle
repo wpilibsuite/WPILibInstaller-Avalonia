@@ -104,6 +104,7 @@ apply from: 'scripts/maven.gradle'
 
 apply from: 'scripts/advantagescope.gradle'
 apply from: 'scripts/choreo.gradle'
+apply from: 'scripts/elastic.gradle'
 
 // Tools must happen after maven
 apply from: 'scripts/tools.gradle'
