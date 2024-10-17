@@ -10,7 +10,7 @@ def fileNameMac = 'Elastic-WPILib-macOS.zip'
 
 def downloadUrlMac = baseUrl + fileNameMac
 
-def fineNameMacArm = 'Elastic-WPILib-macOS.zip'
+def fileNameMacArm = 'Elastic-WPILib-macOS.zip'
 
 def downloadUrlMacArm = baseUrl + fileNameMacArm
 
