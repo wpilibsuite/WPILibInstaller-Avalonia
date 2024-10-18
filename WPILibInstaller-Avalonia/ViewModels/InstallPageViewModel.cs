@@ -31,6 +31,52 @@ namespace WPILibInstaller.ViewModels
         public int ProgressTotal { get; set; }
         public string TextTotal { get; set; } = "";
 
+        private async void CreateLinuxShortcut(String name, String frcYear, String wmClass, CancellationToken token)
+        {
+            var launcherFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local/share/applications", $@"{name} {frcYear}.desktop");
+            string contents;
+            if (name.Contains("WPILib"))
+            {
+                var nameNoWPILib = name.Remove(name.Length - " (WPILib)".Length);
+                contents = $@"#!/usr/bin/env xdg-open
+[Desktop Entry]
+Version=1.0
+Type=Application
+Categories=Robotics
+Name={name} {frcYear}
+Comment={nameNoWPILib} tool for the 2025 FIRST Robotics Competition season
+Exec={configurationProvider.InstallDirectory}/tools/{nameNoWPILib}.sh
+Icon={configurationProvider.InstallDirectory}/frccode/wpilib-256.ico
+Terminal=false
+StartupNotify=true
+StartupWMClass={wmClass}
+";
+
+            }
+            else
+            {
+                contents = $@"#!/usr/bin/env xdg-open
+[Desktop Entry]
+Version=1.0
+Type=Application
+Categories=Robotics
+Name={name} {frcYear}
+Comment={name} tool for the 2025 FIRST Robotics Competition season
+Exec={configurationProvider.InstallDirectory}/tools/{name}.sh
+Icon={configurationProvider.InstallDirectory}/frccode/wpilib-256.ico
+Terminal=false
+StartupNotify=true
+StartupWMClass={wmClass}
+";
+            }
+            var launcherPath = Path.GetDirectoryName(launcherFile);
+            if (launcherPath != null)
+            {
+                Directory.CreateDirectory(launcherPath);
+            }
+            await File.WriteAllTextAsync(launcherFile, contents, token);
+        }
+
         public async Task UIUpdateTask(CancellationToken token)
         {
             while (!token.IsCancellationRequested)
@@ -941,12 +987,14 @@ namespace WPILibInstaller.ViewModels
                     break;
                 } while (true);
             }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && vsInstallProvider.Model.InstallingVsCode)
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                // Create Linux desktop shortcut
-                var desktopFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Desktop", $@"FRC VS Code {frcYear}.desktop");
-                var launcherFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local/share/applications", $@"FRC VS Code {frcYear}.desktop");
-                string contents = $@"#!/usr/bin/env xdg-open
+                if (vsInstallProvider.Model.InstallingVsCode)
+                {
+                    // Create Linux desktop shortcut
+                    var desktopFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Desktop", $@"FRC VS Code {frcYear}.desktop");
+                    var launcherFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local/share/applications", $@"FRC VS Code {frcYear}.desktop");
+                    string contents = $@"#!/usr/bin/env xdg-open
 [Desktop Entry]
 Version=1.0
 Type=Application
@@ -960,29 +1008,42 @@ StartupNotify=true
 StartupWMClass=Code
 ";
 
-                var desktopPath = Path.GetDirectoryName(desktopFile);
-                if (desktopPath != null)
-                {
-                    Directory.CreateDirectory(desktopPath);
-                }
-                var launcherPath = Path.GetDirectoryName(launcherFile);
-                if (launcherPath != null)
-                {
-                    Directory.CreateDirectory(launcherPath);
-                }
-                await File.WriteAllTextAsync(desktopFile, contents, token);
-                await File.WriteAllTextAsync(launcherFile, contents, token);
-                await Task.Run(() =>
-                {
-                    var startInfo = new ProcessStartInfo("chmod", $"+x \"{desktopFile}\"")
+                    var desktopPath = Path.GetDirectoryName(desktopFile);
+                    if (desktopPath != null)
                     {
-                        UseShellExecute = false,
-                        WindowStyle = ProcessWindowStyle.Hidden,
-                        CreateNoWindow = true
-                    };
-                    var proc = Process.Start(startInfo);
-                    proc!.WaitForExit();
-                }, token);
+                        Directory.CreateDirectory(desktopPath);
+                    }
+                    var launcherPath = Path.GetDirectoryName(launcherFile);
+                    if (launcherPath != null)
+                    {
+                        Directory.CreateDirectory(launcherPath);
+                    }
+                    await File.WriteAllTextAsync(desktopFile, contents, token);
+                    await File.WriteAllTextAsync(launcherFile, contents, token);
+                    await Task.Run(() =>
+                    {
+                        var startInfo = new ProcessStartInfo("chmod", $"+x \"{desktopFile}\"")
+                        {
+                            UseShellExecute = false,
+                            WindowStyle = ProcessWindowStyle.Hidden,
+                            CreateNoWindow = true
+                        };
+                        var proc = Process.Start(startInfo);
+                        proc!.WaitForExit();
+                    }, token);
+                }
+
+                CreateLinuxShortcut("Choreo (WPILib)", frcYear, "Choreo", token);
+                CreateLinuxShortcut("AdvantageScope (WPILib)", frcYear, "AdvantageScope", token);
+                CreateLinuxShortcut("Glass", frcYear, "Glass - DISCONNECTED", token);
+                CreateLinuxShortcut("OutlineViewer", frcYear, "OutlineViewer - DISCONNECTED", token);
+                CreateLinuxShortcut("DataLogTool", frcYear, "Datalog Tool", token);
+                CreateLinuxShortcut("SysId", frcYear, "System Identification", token);
+                CreateLinuxShortcut("SmartDashboard", frcYear, "SmartDashboard | Disconnected", token);
+                CreateLinuxShortcut("RobotBuilder", frcYear, "FRC RobotBuilder", token);
+                CreateLinuxShortcut("PathWeaver", frcYear, "PathWeaver - 2025.1.1-beta-1", token);
+                CreateLinuxShortcut("roboRIOTeamNumberSetter", frcYear, "roboRIO Team Number Setter", token);
+                CreateLinuxShortcut("Shuffleboard", frcYear, "Shuffleboard", token);
             }
         }
     }
