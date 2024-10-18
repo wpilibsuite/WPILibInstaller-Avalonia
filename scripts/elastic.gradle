@@ -14,7 +14,7 @@ def fileNameMacArm = 'Elastic-WPILib-macOS.zip'
 
 def downloadUrlMacArm = baseUrl + fileNameMacArm
 
-def fileNameLinux = 'Elastic-WPILib-Linux'
+def fileNameLinux = 'Elastic-WPILib-Linux.zip'
 
 def downloadUrlLinux = baseUrl + fileNameLinux
 
