@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <AssemblyName>WPILibInstaller</AssemblyName>
     <RootNamespace>WPILibInstaller</RootNamespace>
-    <ApplicationIcon>wpilib-256.ico</ApplicationIcon>
+    <ApplicationIcon>Assets\wpilib-256.ico</ApplicationIcon>
     <Win32Resource />
     <Nullable>enable</Nullable>
   </PropertyGroup>
