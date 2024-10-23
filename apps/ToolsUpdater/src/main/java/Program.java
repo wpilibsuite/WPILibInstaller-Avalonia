@@ -31,7 +31,6 @@ public class Program {
         if (SystemUtils.IS_OS_WINDOWS) {
           Files.copy(Paths.get(toolsPath, "ScriptBase.vbs"), Paths.get(toolsPath, tool.name + ".vbs"), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
         } else {
-          Files.copy(Paths.get(toolsPath, "ScriptBase.py"), Paths.get(toolsPath, tool.name + ".py"), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
           Files.copy(Paths.get(toolsPath, "ScriptBase.sh"), Paths.get(toolsPath, tool.name + ".sh"), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
         }
       } catch (IOException e) {
@@ -86,7 +85,6 @@ public class Program {
         if (SystemUtils.IS_OS_WINDOWS) {
           Files.copy(Paths.get(toolsPath, "ScriptBaseCpp.vbs"), Paths.get(toolsPath, tool.name + ".vbs"), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
         } else {
-          Files.copy(Paths.get(toolsPath, "ScriptBaseCpp.py"), Paths.get(toolsPath, tool.name + ".py"), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
           Files.copy(Paths.get(toolsPath, "ScriptBaseCpp.sh"), Paths.get(toolsPath, tool.name + ".sh"), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
         }
 
