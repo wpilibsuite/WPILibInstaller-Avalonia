@@ -18,18 +18,8 @@
     </Grid.RowDefinitions>
         <rxui:ViewModelViewHost Grid.Row="0" ViewModel="{Binding CurrentPage}">
     </rxui:ViewModelViewHost>
-    <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="15">
-      <StackPanel.Styles>
-        <Style Selector="StackPanel > :is(Control)">
-          <Setter Property="Margin" Value="2"/>
-        </Style>
-        <Style Selector="StackPanel > TextBlock">
-          <Setter Property="VerticalAlignment" Value="Center"/>
-        </Style>
-      </StackPanel.Styles>
-            <Button FontSize="15" IsVisible="{Binding BackVisible, Mode=OneWay}" Content="{Binding BackName, Mode=OneWay}" Command="{Binding GoBack}" Padding="10" />
-            <Button FontSize="15" IsVisible="{Binding ForwardVisible, Mode=OneWay}" Content="{Binding ForwardName, Mode=OneWay}" Command="{Binding GoNext}" Padding="10" />
-        </StackPanel>
+    <Button FontSize="15" IsVisible="{Binding BackVisible, Mode=OneWay}" Content="{Binding BackName, Mode=OneWay}" Command="{Binding GoBack}" Padding="10" Grid.Row="1" HorizontalAlignment="Left" Margin="15" />
+    <Button FontSize="15" IsVisible="{Binding ForwardVisible, Mode=OneWay}" Content="{Binding ForwardName, Mode=OneWay}" Command="{Binding GoNext}" Padding="10" Grid.Row="1" HorizontalAlignment="Right" Margin="15" />
   </Grid>
 
 </rxui:ReactiveWindow>

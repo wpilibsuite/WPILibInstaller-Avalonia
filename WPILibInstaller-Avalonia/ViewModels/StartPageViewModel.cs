@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-using ReactiveUI;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -8,6 +6,8 @@ using System.Reactive;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using ReactiveUI;
 using WPILibInstaller.Interfaces;
 using WPILibInstaller.Models;
 using WPILibInstaller.Utils;
@@ -25,49 +25,13 @@ namespace WPILibInstaller.ViewModels
         private bool forwardVisible = false;
         public string VerString => verString;
 
-        private string verString = $"0.0.0";
+        private readonly string verString = $"0.0.0";
 
         private bool missingHash = false;
 
-#pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
-        public StartPageViewModel(IMainWindowViewModel mainRefresher, IProgramWindow mainWindow, IViewModelResolver viewModelResolver,
-            ICatchableButtonFactory buttonFactory)
-#pragma warning restore CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
-            : base("Start", "")
+        public void Initialize()
         {
-            try
-            {
-                var rootDirectory = Directory.GetDirectoryRoot(Environment.GetFolderPath(Environment.SpecialFolder.Personal));
-
-                var driveInfo = new DriveInfo(rootDirectory);
-
-                if (driveInfo.AvailableFreeSpace < 3L * 1000L * 1000L * 1000L)
-                {
-                    ;
-                    // Fail
-                }
-            }
-            catch
-            {
-                // Do nothing if we couldn't determine the drive
-            }
-
-            SelectSupportFiles = buttonFactory.CreateCatchableButton(SelectSupportFilesFunc);
-            SelectResourceFiles = buttonFactory.CreateCatchableButton(SelectResourceFilesFunc);
-
-            this.programWindow = mainWindow;
-            this.viewModelResolver = viewModelResolver;
-            refresher = mainRefresher;
-
             var baseDir = AppContext.BaseDirectory;
-
-            try
-            {
-                verString = File.ReadAllText(Path.Join(baseDir, "WPILibInstallerVersion.txt")).Trim();
-            }
-            catch
-            {
-            }
 
             var extension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "zip" : "tar.gz";
 
@@ -127,6 +91,45 @@ namespace WPILibInstaller.ViewModels
                         foundSupport = true;
                     }
                 }
+            }
+        }
+
+        public StartPageViewModel(IMainWindowViewModel mainRefresher, IProgramWindow mainWindow, IViewModelResolver viewModelResolver,
+            ICatchableButtonFactory buttonFactory)
+            : base("Start", "")
+        {
+            try
+            {
+                var rootDirectory = Directory.GetDirectoryRoot(Environment.GetFolderPath(Environment.SpecialFolder.Personal));
+
+                var driveInfo = new DriveInfo(rootDirectory);
+
+                if (driveInfo.AvailableFreeSpace < 3L * 1000L * 1000L * 1000L)
+                {
+                    ;
+                    // Fail
+                }
+            }
+            catch
+            {
+                // Do nothing if we couldn't determine the drive
+            }
+
+            SelectSupportFiles = buttonFactory.CreateCatchableButton(SelectSupportFilesFunc);
+            SelectResourceFiles = buttonFactory.CreateCatchableButton(SelectResourceFilesFunc);
+
+            this.programWindow = mainWindow;
+            this.viewModelResolver = viewModelResolver;
+            refresher = mainRefresher;
+
+            var baseDir = AppContext.BaseDirectory;
+
+            try
+            {
+                verString = File.ReadAllText(Path.Join(baseDir, "WPILibInstallerVersion.txt")).Trim();
+            }
+            catch
+            {
             }
         }
 
@@ -200,6 +203,27 @@ namespace WPILibInstaller.ViewModels
                 }) ?? throw new InvalidOperationException("Not Valid");
             }
 
+            entry = zipArchive.GetEntry("advantageScopeConfig.json");
+
+            using (StreamReader reader = new StreamReader(entry!.Open()))
+            {
+                var configStr = await reader.ReadToEndAsync();
+                AdvantageScopeConfig = JsonConvert.DeserializeObject<AdvantageScopeConfig>(configStr, new JsonSerializerSettings
+                {
+                    MissingMemberHandling = MissingMemberHandling.Error
+                }) ?? throw new InvalidOperationException("Not Valid");
+            }
+
+            entry = zipArchive.GetEntry("choreoConfig.json");
+
+            using (StreamReader reader = new StreamReader(entry!.Open()))
+            {
+                var configStr = await reader.ReadToEndAsync();
+                ChoreoConfig = JsonConvert.DeserializeObject<ChoreoConfig>(configStr, new JsonSerializerSettings
+                {
+                    MissingMemberHandling = MissingMemberHandling.Error
+                }) ?? throw new InvalidOperationException("Not Valid");
+            }
 
             entry = zipArchive.GetEntry("fullConfig.json");
 
@@ -211,7 +235,6 @@ namespace WPILibInstaller.ViewModels
                     MissingMemberHandling = MissingMemberHandling.Error
                 }) ?? throw new InvalidOperationException("Not Valid");
             }
-
 
             entry = zipArchive.GetEntry("upgradeConfig.json");
 
@@ -235,7 +258,7 @@ namespace WPILibInstaller.ViewModels
             }
             else
             {
-                viewModelResolver.ResolveMainWindow().HandleException(new IncorrectPlatformException(neededInstaller));
+                viewModelResolver.ResolveMainWindow().HandleException(new IncorrectPlatformException(neededInstaller, UpgradeConfig.InstallerType));
                 return false;
             }
         }
@@ -243,36 +266,46 @@ namespace WPILibInstaller.ViewModels
 
         private string? CheckInstallerType()
         {
-            // TODO Handle Arm someday
             if (OperatingSystem.IsWindows())
             {
-                if (IntPtr.Size == 8)
+                if (UpgradeConfig.InstallerType != UpgradeConfig.WindowsInstallerType)
                 {
-                    if (UpgradeConfig.InstallerType != UpgradeConfig.Windows64InstallerType)
-                    {
-                        return UpgradeConfig.Windows64InstallerType;
-                    }
-                }
-                else
-                {
-                    if (UpgradeConfig.InstallerType != UpgradeConfig.Windows32InstallerType)
-                    {
-                        return UpgradeConfig.Windows32InstallerType;
-                    }
+                    return UpgradeConfig.WindowsInstallerType;
                 }
             }
             else if (OperatingSystem.IsMacOS())
             {
-                if (UpgradeConfig.InstallerType != UpgradeConfig.MacInstallerType)
+                if (PlatformUtils.CurrentPlatform == Platform.MacArm64)
                 {
-                    return UpgradeConfig.MacInstallerType;
+                    if (UpgradeConfig.InstallerType != UpgradeConfig.MacArmInstallerType)
+                    {
+                        return UpgradeConfig.MacArmInstallerType;
+                    }
                 }
+                else
+                {
+                    if (UpgradeConfig.InstallerType != UpgradeConfig.MacInstallerType)
+                    {
+                        return UpgradeConfig.MacInstallerType;
+                    }
+                }
+
             }
             else if (OperatingSystem.IsLinux())
             {
-                if (UpgradeConfig.InstallerType != UpgradeConfig.LinuxInstallerType)
+                if (PlatformUtils.CurrentPlatform == Platform.LinuxArm64)
                 {
-                    return UpgradeConfig.LinuxInstallerType;
+                    if (UpgradeConfig.InstallerType != UpgradeConfig.LinuxArm64InstallerType)
+                    {
+                        return UpgradeConfig.LinuxArm64InstallerType;
+                    }
+                }
+                else
+                {
+                    if (UpgradeConfig.InstallerType != UpgradeConfig.LinuxInstallerType)
+                    {
+                        return UpgradeConfig.LinuxInstallerType;
+                    }
                 }
             }
             else
@@ -307,7 +340,7 @@ namespace WPILibInstaller.ViewModels
 
                 // Compute the hash of the file that exists.
                 string s;
-                using (SHA256 SHA256 = SHA256Managed.Create())
+                using (SHA256 SHA256 = SHA256.Create())
                 {
                     s = Convert.ToHexString(await SHA256.ComputeHashAsync(fileStream));
                 }
@@ -315,7 +348,7 @@ namespace WPILibInstaller.ViewModels
                 // Make sure they match.
                 if (!s.Equals(hash.ToUpper()))
                 {
-                    viewModelResolver.ResolveMainWindow().HandleException(new Exception("The artifacts file was damaged."));
+                    viewModelResolver.ResolveMainWindow().HandleException(new Exception("The artifacts file was damaged.\nThis is either caused by a bad download,\nor on macOS you originally download the wrong dmg\nand its still mounted. Make sure to eject\nall dmg's and try again (And maybe reboot)."));
                     return false;
                 }
                 MissingHash = false;
@@ -348,10 +381,11 @@ namespace WPILibInstaller.ViewModels
             get
             {
                 VsCodeModel model = new VsCodeModel(VsCodeConfig.VsCodeVersion);
-                model.Platforms.Add(Utils.Platform.Win32, new VsCodeModel.PlatformData(VsCodeConfig.VsCode32Url, VsCodeConfig.VsCode32Name));
-                model.Platforms.Add(Utils.Platform.Win64, new VsCodeModel.PlatformData(VsCodeConfig.VsCode64Url, VsCodeConfig.VsCode64Name));
-                model.Platforms.Add(Utils.Platform.Linux64, new VsCodeModel.PlatformData(VsCodeConfig.VsCodeLinuxUrl, VsCodeConfig.VsCodeLinuxName));
-                model.Platforms.Add(Utils.Platform.Mac64, new VsCodeModel.PlatformData(VsCodeConfig.VsCodeMacUrl, VsCodeConfig.VsCodeMacName));
+                model.Platforms.Add(Utils.Platform.Win64, new VsCodeModel.PlatformData(VsCodeConfig.VsCodeWindowsUrl, VsCodeConfig.VsCodeWindowsName, VsCodeConfig.VsCodeWindowsHash));
+                model.Platforms.Add(Utils.Platform.Linux64, new VsCodeModel.PlatformData(VsCodeConfig.VsCodeLinuxUrl, VsCodeConfig.VsCodeLinuxName, VsCodeConfig.VsCodeLinuxHash));
+                model.Platforms.Add(Utils.Platform.LinuxArm64, new VsCodeModel.PlatformData(VsCodeConfig.VsCodeLinuxArm64Url, VsCodeConfig.VsCodeLinuxArm64Name, VsCodeConfig.VsCodeLinuxArm64Hash));
+                model.Platforms.Add(Utils.Platform.Mac64, new VsCodeModel.PlatformData(VsCodeConfig.VsCodeMacUrl, VsCodeConfig.VsCodeMacName, VsCodeConfig.VsCodeMacHash));
+                model.Platforms.Add(Utils.Platform.MacArm64, new VsCodeModel.PlatformData(VsCodeConfig.VsCodeMacUrl, VsCodeConfig.VsCodeMacName, VsCodeConfig.VsCodeMacHash));
                 return model;
             }
         }
@@ -369,7 +403,7 @@ namespace WPILibInstaller.ViewModels
                     }
                     else
                     {
-                        publicFolder = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+                        publicFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
                     }
                 }
                 return Path.Combine(publicFolder, "wpilib", UpgradeConfig.FrcYear);
@@ -378,18 +412,22 @@ namespace WPILibInstaller.ViewModels
 
         public override PageViewModelBase MoveNext()
         {
-            return viewModelResolver.Resolve<VSCodePageViewModel>();
+            return viewModelResolver.Resolve<ConfigurationPageViewModel>();
         }
 
-        public IArchiveExtractor ZipArchive { get; private set; }
+        public IArchiveExtractor ZipArchive { get; private set; } = null!;
 
-        public UpgradeConfig UpgradeConfig { get; private set; }
+        public UpgradeConfig UpgradeConfig { get; private set; } = null!;
 
-        public FullConfig FullConfig { get; private set; }
+        public FullConfig FullConfig { get; private set; } = null!;
 
-        public JdkConfig JdkConfig { get; private set; }
+        public JdkConfig JdkConfig { get; private set; } = null!;
 
-        public VsCodeConfig VsCodeConfig { get; private set; }
+        public AdvantageScopeConfig AdvantageScopeConfig { get; private set; } = null!;
+
+        public ChoreoConfig ChoreoConfig { get; private set; } = null!;
+
+        public VsCodeConfig VsCodeConfig { get; private set; } = null!;
 
     }
 }

@@ -10,74 +10,125 @@ configurations {
   cppTools
   documentationJava
   documentationCpp
-  runtimex86
   runtimex64
 }
 
 def toolArtifacts = [
-  'edu.wpi.first.shuffleboard:shuffleboard',
-  'edu.wpi.first.tools:OutlineViewer',
-  'edu.wpi.first.tools:SmartDashboard',
+  'edu.wpi.first.tools:Shuffleboard',
   'edu.wpi.first.tools:RobotBuilder',
-  'edu.wpi.first.tools:RobotBuilder-Old',
-  'edu.wpi.first.tools:PathWeaver'
+  'edu.wpi.first.tools:PathWeaver',
+  'edu.wpi.first.tools:SmartDashboard'
 ]
 
 def cppToolsArtifacts = [
-  'edu.wpi.first.tools:Glass'
+  'edu.wpi.first.tools:Glass',
+  'edu.wpi.first.tools:OutlineViewer',
+  'edu.wpi.first.tools:roboRIOTeamNumberSetter',
+  'edu.wpi.first.tools:DataLogTool',
+  'edu.wpi.first.tools:SysId'
 ]
 
+def skipNewPlatformTools = [
+  'edu.wpi.first.tools:SmartDashboard'
+]
+
+def skipTools = []
+
 dependencies {
-    documentationCpp "edu.wpi.first.wpilibc:documentation:${project(':gradleriobase').wpi.wpilibVersion}@zip"
-    documentationJava "edu.wpi.first.wpilibj:documentation:${project(':gradleriobase').wpi.wpilibVersion}@zip"
-    if (project.ext.buildClassifier == 'Windows32') {
-        runtimex86 "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.wpilibVersion}:x86@zip"
-    } else if (project.ext.buildClassifier == 'Windows64') {
-        runtimex64 "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.wpilibVersion}:x64@zip"
+    documentationCpp "edu.wpi.first.wpilibc:documentation:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}@zip"
+    documentationJava "edu.wpi.first.wpilibj:documentation:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}@zip"
+    if (project.ext.buildClassifier == 'Windows') {
+        runtimex64 "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}:x64@zip"
     }
 }
 
 def lazyEvaluator = tasks.register('lazyModelEvaluation') {
 
-  dependsOn project(':gradleriobase').tasks.named('modelEvaluationTrigger')
+  dependsOn ':gradleriobase:build'
   doLast {
     def gradleRioDeps = project(':gradleriobase').getGradleRioDependencies()
     dependencies {
       gradleRioDeps.deps.each { dep->
-        if (dep.classifier == null) {
-          offline "$dep.groupId:$dep.artifactId:$dep.version:@$dep.extension"
-        } else if (dep.classifier.startsWith(project.ext.forceNativeClassifier)) {
-          // Special case win 32
-          if (project.ext.forceNativeClassifier == 'windowsx86') {
-            def cls = dep.classifier.replace('windowsx86-64', 'windowsx86')
-            offline "$dep.groupId:$dep.artifactId:$dep.version:$cls@$dep.extension"
-          } else {
-            offline "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
+        def foundTool = false
+
+        skipTools.each { tool->
+          if ("$dep.groupId:$dep.artifactId" == tool) {
+            def depString = "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
+            println "Skipping " + depString
+            foundTool = true
+            return
           }
-        } else if (dep.classifier.contains('athena')) {
-          offline "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
-        } else if (dep.classifier.contains('headers')) {
-          offline "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
-        } else if (dep.classifier.contains('sources')) {
-          offline "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
+        }
+
+        if (foundTool) {
+          return
+        }
+
+        if (project.hasProperty('macBuildArm') || project.hasProperty('linuxBuildArm64')) {
+          skipNewPlatformTools.each { tool->
+            if ("$dep.groupId:$dep.artifactId" == tool) {
+              def depString = "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
+              println "Skipping because arm " + depString
+              foundTool = true
+              return
+            }
+          }
+        }
+
+        if (foundTool) {
+          return
         }
 
         cppToolsArtifacts.each { tool->
           if ("$dep.groupId:$dep.artifactId" == tool) {
-            cppTools "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
+            def depString = "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
+            cppTools depString
+            println depString
+            foundTool = true
+            return
           }
+        }
+
+        if (foundTool) {
+          return
         }
 
         toolArtifacts.each { tool->
           if ("$dep.groupId:$dep.artifactId" == tool) {
             if (dep.classifier == null) {
-              tools "$dep.groupId:$dep.artifactId:$dep.version:@$dep.extension"
+              def depString = "$dep.groupId:$dep.artifactId:$dep.version:@$dep.extension"
+              tools depString
+              println depString
+              foundTool = true
+              return
             } else {
               if (dep.classifier != 'sources' && dep.classifier != 'javadoc') {
-                tools "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
+                def depString = "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
+                tools depString
+                println depString
+                foundTool = true
+                return
               }
             }
           }
+        }
+
+        if (foundTool) {
+          return
+        }
+
+        println dep
+        if (dep.classifier == null) {
+         offline "$dep.groupId:$dep.artifactId:$dep.version:@$dep.extension"
+        } else if (dep.classifier.startsWith(project.ext.currentClassifier)) {
+          def newClassifier = dep.classifier.replace(project.ext.currentClassifier, project.ext.forceNativeClassifier)
+          offline "$dep.groupId:$dep.artifactId:$dep.version:$newClassifier@$dep.extension"
+        } else if (dep.classifier.contains('athena')) {
+         offline "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
+        } else if (dep.classifier.contains('headers')) {
+         offline "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
+        } else if (dep.classifier.contains('sources')) {
+         offline "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
         }
       }
     }
@@ -117,7 +168,6 @@ offlineDependencies {
   }
 
   configurations 'offline'
-  configurations 'tools'
 
   includeSources = true
   includeJavadocs = true
@@ -130,32 +180,49 @@ ext.mavenConfigSetup = {
   }, { config->
     config['Maven'] = [:]
     config['Maven']['Folder'] = 'maven'
-
-    if (project.ext.isUnix == true) {
-      config['Maven']['MetaDataFixerExe'] = 'MavenMetaDataFixer.py'
-    } else {
-      config['Maven']['MetaDataFixerExe'] = 'MavenMetaDataFixer.bat'
-    }
+    config['Maven']['MetaDataFixerJar'] = 'MavenMetaDataFixer.jar'
   })
 }
 
 def downloadReadTheDocs = tasks.register('downloadReadTheDocs', Download) {
   src 'https://buildmedia.readthedocs.org/media/htmlzip/frc-docs/latest/frc-docs.zip'
-  dest buildDir
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
   overwrite false
 }
 
-def rtdFile = file("$buildDir/frc-docs.zip")
+def downloadPythonAPI = tasks.register('downloadPythonAPI', Download) {
+  src 'https://robotpy.readthedocs.io/_/downloads/robotpy/en/stable/htmlzip/'
+  def fileName = "PythonAPI.zip"
+  dest "$buildDir/downloads/$fileName"
+  overwrite false
+}
 
 def downloadNewCommands = tasks.register('downloadNewCommands', Download) {
-  src 'https://raw.githubusercontent.com/wpilibsuite/allwpilib/master/wpilibNewCommands/WPILibNewCommands.json'
-  dest buildDir
+  src 'https://raw.githubusercontent.com/wpilibsuite/allwpilib/main/wpilibNewCommands/WPILibNewCommands.json'
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
   overwrite false
 }
 
-def downloadOldCommands = tasks.register('downloadOldCommands', Download) {
-  src 'https://raw.githubusercontent.com/wpilibsuite/allwpilib/master/wpilibOldCommands/WPILibOldCommands.json'
-  dest buildDir
+def downloadChoreo = tasks.register('downloadChoreo', Download) {
+  src 'https://SleipnirGroup.github.io/ChoreoLib/dep/ChoreoLib2025Beta.json'
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite false
+}
+
+def downloadRomiVendor = tasks.register('downloadRomiVendor', Download) {
+  src 'https://raw.githubusercontent.com/wpilibsuite/allwpilib/main/romiVendordep/RomiVendordep.json'
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite false
+}
+
+def downloadXrpVendor = tasks.register('downloadXrpVendor', Download) {
+  src 'https://raw.githubusercontent.com/wpilibsuite/allwpilib/main/xrpVendordep/XRPVendordep.json'
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
   overwrite false
 }
 
@@ -167,14 +234,23 @@ ext.mavenZipSetup = { AbstractArchiveTask zip->
   }
 
   zip.dependsOn downloadNewCommands
-  zip.dependsOn downloadOldCommands
+  zip.dependsOn downloadChoreo
   zip.dependsOn downloadReadTheDocs
+  zip.dependsOn downloadPythonAPI
 
-  zip.from("$buildDir/WPILibNewCommands.json") {
+  zip.from(downloadNewCommands.get().outputFiles.first()) {
     into '/vendordeps'
   }
 
-  zip.from("$buildDir/WPILibOldCommands.json") {
+  zip.from(downloadChoreo.get().outputFiles.first()) {
+    into '/vendordeps'
+  }
+
+  zip.from(downloadRomiVendor.get().outputFiles.first()) {
+    into '/vendordeps'
+  }
+
+  zip.from(downloadXrpVendor.get().outputFiles.first()) {
     into '/vendordeps'
   }
 
@@ -185,18 +261,25 @@ ext.mavenZipSetup = { AbstractArchiveTask zip->
     into '/documentation/java'
   }
 
-  if (project.ext.buildClassifier == 'Windows32') {
-    zip.from(project.zipTree(configurations.runtimex86.resolvedConfiguration.resolvedArtifacts.first().file)) {
-      into '/tools'
-    }
-  } else if (project.ext.buildClassifier == 'Windows64') {
+  zip.from(configurations.cppTools) {
+    into '/tools/artifacts'
+  }
+
+  zip.from(configurations.tools) {
+    into '/tools/artifacts'
+  }
+
+  if (project.ext.buildClassifier == 'Windows') {
     zip.from(project.zipTree(configurations.runtimex64.resolvedConfiguration.resolvedArtifacts.first().file)) {
       into '/tools'
     }
   }
 
-  zip.from(project.zipTree(rtdFile)) {
+  zip.from(project.zipTree(downloadReadTheDocs.get().outputFiles.first())) {
     into '/documentation/rtd'
   }
-}
 
+  zip.from(project.zipTree(downloadPythonAPI.get().outputFiles.first())) {
+    into '/documentation/python'
+  }
+}

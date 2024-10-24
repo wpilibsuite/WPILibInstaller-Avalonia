@@ -1,8 +1,8 @@
-﻿using ReactiveUI;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Reactive;
 using System.Threading.Tasks;
+using ReactiveUI;
 using WPILibInstaller.Interfaces;
 
 namespace WPILibInstaller.ViewModels
@@ -20,7 +20,7 @@ namespace WPILibInstaller.ViewModels
             }
         }
 
-        private readonly Stack<PageViewModelBase> pages = new Stack<PageViewModelBase>();
+        private readonly Stack<PageViewModelBase> pages = new();
 
         public string? ForwardName => CurrentPage?.ForwardName;
 
@@ -87,7 +87,19 @@ namespace WPILibInstaller.ViewModels
 
         public void Initialize()
         {
-            CurrentPage = viewModelResolver.Resolve<StartPageViewModel>();
+            if (OperatingSystem.IsWindows())
+            {
+                bool isWindows10 = OperatingSystem.IsWindowsVersionAtLeast(10);
+                bool is64Bit = IntPtr.Size == 8;
+                if (!isWindows10 || !is64Bit)
+                {
+                    CurrentPage = viewModelResolver.Resolve<DeprecatedOsPageViewModel>();
+                    return;
+                }
+            }
+            var startPage = viewModelResolver.Resolve<StartPageViewModel>();
+            CurrentPage = startPage;
+            startPage.Initialize();
         }
 
         private void HandleStateChange()

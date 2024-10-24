@@ -1,10 +1,9 @@
-﻿using Autofac;
-using Avalonia;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using Autofac;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using WPILibInstaller.Interfaces;
 using WPILibInstaller.ViewModels;
 
@@ -21,15 +20,22 @@ namespace WPILibInstaller.Views
             // Initialize our DI
             ContainerBuilder builder = new ContainerBuilder();
 
-            builder.RegisterAssemblyTypes(typeof(MainWindow).Assembly).Where(x => x.IsClass && x.Name.EndsWith("ViewModel")).SingleInstance().AsSelf().AsImplementedInterfaces();
+            builder.RegisterType<CanceledPageViewModel>().SingleInstance().AsSelf().AsImplementedInterfaces();
+            builder.RegisterType<ConfigurationPageViewModel>().SingleInstance().AsSelf().AsImplementedInterfaces();
+            builder.RegisterType<FailedPageViewModel>().SingleInstance().AsSelf().AsImplementedInterfaces();
+            builder.RegisterType<FinalPageViewModel>().SingleInstance().AsSelf().AsImplementedInterfaces();
+            builder.RegisterType<InstallPageViewModel>().SingleInstance().AsSelf().AsImplementedInterfaces();
+            builder.RegisterType<MainWindowViewModel>().SingleInstance().AsSelf().AsImplementedInterfaces();
+            builder.RegisterType<StartPageViewModel>().SingleInstance().AsSelf().AsImplementedInterfaces();
+            builder.RegisterType<VSCodePageViewModel>().SingleInstance().AsSelf().AsImplementedInterfaces();
+            builder.RegisterType<DeprecatedOsPageViewModel>().SingleInstance().AsSelf().AsImplementedInterfaces();
             builder.RegisterInstance(this).AsImplementedInterfaces();
 
             Container = builder.Build();
 
             ViewModel = Container.Resolve<MainWindowViewModel>();
-            ViewModel.Initialize();
-
             DataContext = ViewModel;
+            ViewModel.Initialize();
 
             InitializeComponent();
         }
@@ -94,7 +100,7 @@ namespace WPILibInstaller.Views
 
         public IMainWindowViewModel ResolveMainWindow()
         {
-            return ViewModel;
+            return ViewModel!;
         }
     }
 }

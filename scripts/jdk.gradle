@@ -2,58 +2,59 @@
 evaluationDependsOn(':gradleriobase')
 
 apply plugin: 'de.undercouch.download'
+apply from: 'scripts/versions.gradle'
 
+def jdkVersionUnderscore = jdkVersion.replace('+', '_')
+def jdkVersionEscaped = jdkVersion.replace('+', '%2B')
 
 def downloadLinuxJdk = tasks.register('downloadLinuxJdk', Download) {
-  src 'https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.8%2B10/OpenJDK11U-jdk_x64_linux_hotspot_11.0.8_10.tar.gz'
-  dest buildDir
+  src "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-$jdkVersionEscaped/OpenJDK17U-jdk_x64_linux_hotspot_${jdkVersionUnderscore}.tar.gz"
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
   overwrite false
 }
 
-def jdkLinuxFile = file("$buildDir/OpenJDK11U-jdk_x64_linux_hotspot_11.0.8_10.tar.gz")
+def downloadLinuxArm64Jdk = tasks.register('downloadLinuxJdkArm64', Download) {
+  src "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-$jdkVersionEscaped/OpenJDK17U-jdk_aarch64_linux_hotspot_${jdkVersionUnderscore}.tar.gz"
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite false
+}
 
 def downloadMacJdk = tasks.register('downloadMacJdk', Download) {
-  src 'https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.8%2B10/OpenJDK11U-jdk_x64_mac_hotspot_11.0.8_10.tar.gz'
-  dest buildDir
+  src "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-$jdkVersionEscaped/OpenJDK17U-jdk_x64_mac_hotspot_${jdkVersionUnderscore}.tar.gz"
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
   overwrite false
 }
 
-def jdkMacFile = file("$buildDir/OpenJDK11U-jdk_x64_mac_hotspot_11.0.8_10.tar.gz")
-
-def download32BitJdk = tasks.register('download32BitJdk', Download) {
-  src 'https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.8%2B10/OpenJDK11U-jdk_x86-32_windows_hotspot_11.0.8_10.zip'
-  dest buildDir
+def downloadMacArmJdk = tasks.register('downloadMacArmJdk', Download) {
+  src "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-$jdkVersionEscaped/OpenJDK17U-jdk_aarch64_mac_hotspot_${jdkVersionUnderscore}.tar.gz"
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
   overwrite false
 }
 
-def jdk32File = file("$buildDir//OpenJDK11U-jdk_x86-32_windows_hotspot_11.0.8_10.zip")
-
-def download64BitJdk = tasks.register('download64BitJdk', Download) {
-  src 'https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.8%2B10/OpenJDK11U-jdk_x64_windows_hotspot_11.0.8_10.zip'
-  dest buildDir
+def downloadWindowsJdk = tasks.register('downloadWindowsJdk', Download) {
+  src "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-$jdkVersionEscaped/OpenJDK17U-jdk_x64_windows_hotspot_${jdkVersionUnderscore}.zip"
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
   overwrite false
 }
-
-def jdk64File = file("$buildDir/OpenJDK11U-jdk_x64_windows_hotspot_11.0.8_10.zip")
 
 configurations {
-  runtimex86
   runtimex64
 }
 
 dependencies {
-    if (project.ext.buildClassifier == 'Windows32') {
-        runtimex86 "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.wpilibVersion}:x86@zip"
-    } else if (project.ext.buildClassifier == 'Windows64') {
-        runtimex64 "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.wpilibVersion}:x64@zip"
+    if (project.ext.buildClassifier == 'Windows') {
+        runtimex64 "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.versions.wpilibVersion}:x64@zip"
     }
 }
 
 def runtimeExtractTask = tasks.register('copyAndExtractRuntime', Copy) {
   into 'build/runtime'
-  if (project.ext.buildClassifier == 'Windows32') {
-    from(project.zipTree(configurations.runtimex86.resolvedConfiguration.resolvedArtifacts.first().file))
-  } else if (project.ext.buildClassifier == 'Windows64') {
+  if (project.ext.buildClassifier == 'Windows') {
     from(project.zipTree(configurations.runtimex64.resolvedConfiguration.resolvedArtifacts.first().file))
   }
 }
@@ -89,18 +90,18 @@ ext.jdkConfigFileSetup = { AbstractArchiveTask zip->
   }
 }
 
-ext.jdkZipSetup32 = { AbstractArchiveTask zip->
-  zip.dependsOn download32BitJdk
+ext.jdkZipSetupWindows = { AbstractArchiveTask zip->
+  zip.dependsOn downloadWindowsJdk
   zip.dependsOn jdkConfigFileTask
   zip.dependsOn runtimeExtractTask
 
-  zip.inputs.file jdk32File
+  zip.inputs.files downloadWindowsJdk.get().outputFiles
   zip.inputs.file jdkConfigFile
 
-  zip.from(project.zipTree(jdk32File)) {
+  zip.from(project.zipTree(downloadWindowsJdk.get().outputFiles.first())) {
 
     eachFile { f->
-      f.path = f.path.replace('jdk-11.0.8+10/', 'jdk/')
+      f.path = f.path.replace("jdk-${jdkVersion}/", 'jdk/')
     }
 
     eachFile { f->
@@ -111,49 +112,6 @@ ext.jdkZipSetup32 = { AbstractArchiveTask zip->
       }
     }
 
-    exclude '**/src.zip'
-    exclude '**/bin/*.pdb'
-    exclude '**/bin/*.map'
-    exclude '**/bin/server/*.pdb'
-    exclude '**/bin/server/*.map'
-    exclude '**/demo/**'
-
-    includeEmptyDirs = false
-  }
-
-  zip.from (runtimeExtractTask.get()) {
-    into '/jdk/bin'
-  }
-
-  zip.from(jdkConfigFile) {
-    into '/installUtils'
-    rename {'jdkConfig.json'}
-  }
-}
-
-ext.jdkZipSetup64 = { AbstractArchiveTask zip->
-  zip.dependsOn download64BitJdk
-  zip.dependsOn jdkConfigFileTask
-  zip.dependsOn runtimeExtractTask
-
-  zip.inputs.file jdk64File
-  zip.inputs.file jdkConfigFile
-
-  zip.from(project.zipTree(jdk64File)) {
-
-    eachFile { f->
-      f.path = f.path.replace('jdk-11.0.8+10/', 'jdk/')
-    }
-
-    eachFile { f->
-      file('build/runtime').eachFile {
-        if (f.name.endsWith(it.name)) {
-          f.exclude()
-        }
-      }
-    }
-
-    exclude '**/src.zip'
     exclude '**/bin/*.pdb'
     exclude '**/bin/*.map'
     exclude '**/bin/server/*.pdb'
@@ -177,15 +135,41 @@ ext.jdkZipSetupLinux = { AbstractArchiveTask zip->
   zip.dependsOn downloadLinuxJdk
   zip.dependsOn jdkConfigFileTask
 
-  zip.inputs.file jdkLinuxFile
+  zip.inputs.files downloadLinuxJdk.get().outputFiles
   zip.inputs.file jdkConfigFile
 
-  zip.from(project.tarTree(project.resources.gzip(jdkLinuxFile))) {
+  zip.from(project.tarTree(project.resources.gzip(downloadLinuxJdk.get().outputFiles.first()))) {
     eachFile { f->
-      f.path = f.path.replace('jdk-11.0.8+10/', 'jdk/')
+      f.path = f.path.replace("jdk-${jdkVersion}/", 'jdk/')
     }
 
-    exclude '**/src.zip'
+    exclude '**/bin/*.pdb'
+    exclude '**/bin/*.map'
+    exclude '**/bin/server/*.pdb'
+    exclude '**/bin/server/*.map'
+    exclude '**/demo/**'
+
+    includeEmptyDirs = false
+  }
+
+  zip.from(jdkConfigFile) {
+    into '/installUtils'
+    rename {'jdkConfig.json'}
+  }
+}
+
+ext.jdkZipSetupLinuxArm64 = { AbstractArchiveTask zip->
+  zip.dependsOn downloadLinuxArm64Jdk
+  zip.dependsOn jdkConfigFileTask
+
+  zip.inputs.files downloadLinuxArm64Jdk.get().outputFiles
+  zip.inputs.file jdkConfigFile
+
+  zip.from(project.tarTree(project.resources.gzip(downloadLinuxArm64Jdk.get().outputFiles.first()))) {
+    eachFile { f->
+      f.path = f.path.replace("jdk-${jdkVersion}/", 'jdk/')
+    }
+
     exclude '**/bin/*.pdb'
     exclude '**/bin/*.map'
     exclude '**/bin/server/*.pdb'
@@ -205,18 +189,47 @@ ext.jdkZipSetupMac = { AbstractArchiveTask zip->
   zip.dependsOn downloadMacJdk
   zip.dependsOn jdkConfigFileTask
 
-  zip.inputs.file jdkMacFile
+  zip.inputs.files downloadMacJdk.get().outputFiles
   zip.inputs.file jdkConfigFile
 
-  zip.from(project.tarTree(project.resources.gzip(jdkMacFile))) {
+  zip.from(project.tarTree(project.resources.gzip(downloadMacJdk.get().outputFiles.first()))) {
     eachFile { f ->
-      f.path = f.path.replace('jdk-11.0.8+10/Contents/Home/', 'jdk/')
+      f.path = f.path.replace("jdk-${jdkVersion}/Contents/Home/", 'jdk/')
     }
 
-    exclude './jdk-11.0.8+10/Contents/MacOS/**'
-    exclude './jdk-11.0.8+10/Contents/Info.plist'
+    exclude "./jdk-${jdkVersion}/Contents/MacOS/**"
+    exclude "./jdk-${jdkVersion}/Contents/Info.plist"
 
-    exclude '**/src.zip'
+    exclude '**/bin/*.pdb'
+    exclude '**/bin/*.map'
+    exclude '**/bin/server/*.pdb'
+    exclude '**/bin/server/*.map'
+    exclude '**/demo/**'
+
+    includeEmptyDirs = false
+  }
+
+    zip.from(jdkConfigFile) {
+    into '/installUtils'
+    rename {'jdkConfig.json'}
+  }
+}
+
+ext.jdkZipSetupMacArm = { AbstractArchiveTask zip->
+  zip.dependsOn downloadMacArmJdk
+  zip.dependsOn jdkConfigFileTask
+
+  zip.inputs.files downloadMacArmJdk.get().outputFiles
+  zip.inputs.file jdkConfigFile
+
+  zip.from(project.tarTree(project.resources.gzip(downloadMacArmJdk.get().outputFiles.first()))) {
+    eachFile { f ->
+      f.path = f.path.replace("jdk-${jdkVersion}/Contents/Home/", 'jdk/')
+    }
+
+    exclude "./jdk-${jdkVersion}/Contents/MacOS/**"
+    exclude "./jdk-${jdkVersion}/Contents/Info.plist"
+
     exclude '**/bin/*.pdb'
     exclude '**/bin/*.map'
     exclude '**/bin/server/*.pdb'
@@ -235,11 +248,13 @@ ext.jdkZipSetupMac = { AbstractArchiveTask zip->
 ext.jdkZipSetup = { AbstractArchiveTask zip ->
   if (project.hasProperty('linuxBuild')) {
     jdkZipSetupLinux(zip)
+  } else if (project.hasProperty('linuxBuildArm64')) {
+    jdkZipSetupLinuxArm64(zip)
   } else if (project.hasProperty('macBuild')) {
     jdkZipSetupMac(zip)
-  } else if (project.hasProperty('windows32')) {
-    jdkZipSetup32(zip)
+  } else if (project.hasProperty('macBuildArm')) {
+    jdkZipSetupMacArm(zip)
   } else {
-    jdkZipSetup64(zip)
+    jdkZipSetupWindows(zip)
   }
 }

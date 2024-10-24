@@ -6,8 +6,8 @@ Welcome to the WPILibInstaller repository, which hosts the source code used to i
 
 ### Required Dependencies
 
-- DotNetCore 5.0 or higher.
-- Java 11
+- DotNetCore 8.0 or higher.
+- Java 17
 
 ### Building
 
@@ -20,8 +20,10 @@ gradlew generateInstallers -PXmx3072m -PlinuxBuild -PjenkinsBuild
 ``-PlinuxBuild`` can be replaced with the OS of your choice to build.
 
 - ``-PlinuxBuild``
+- ``-PlinuxBuildArm64``
 - ``-PmacBuild``
-- ``-Pwindows32``
+- ``-PmacBuildArm``
+- ``-PwindowsBuild``
 
 If no OS argument is given, it will default to building Windows 64. Additionally, the other gradle options ensure that the build has enough RAM to build properly. It's not recommended to build the installer if your system has less than 4GB of RAM.
 

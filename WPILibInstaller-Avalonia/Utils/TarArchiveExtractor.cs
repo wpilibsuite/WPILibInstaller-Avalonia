@@ -12,7 +12,7 @@ namespace WPILibInstaller.Utils
         private readonly TarInputStream dataStream;
         private TarEntry currentEntry = null!;
 
-        public TarArchiveExtractor(Stream stream, int size)
+        public TarArchiveExtractor(Stream stream, long size)
         {
             TotalUncompressSize = size;
             var gzipStream = new GZipStream(stream, CompressionMode.Decompress);
@@ -20,7 +20,7 @@ namespace WPILibInstaller.Utils
             this.dataStream = new TarInputStream(gzipStream, Encoding.ASCII);
         }
 
-        public int TotalUncompressSize { get; }
+        public long TotalUncompressSize { get; }
 
         public string EntryKey => currentEntry.Name;
 

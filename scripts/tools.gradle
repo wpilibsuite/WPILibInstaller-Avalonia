@@ -1,9 +1,15 @@
 def toolsJson = file("$buildDir/tools.json")
 def scriptBaseFile = file("files/ScriptBase.vbs")
-def scriptBaseUnixFile = file("files/ScriptBase.py")
+def scriptBaseUnixFile = file("files/ScriptBase.sh")
 
 def scriptBaseCppFile = file("files/ScriptBaseCpp.vbs")
-def scriptBaseCppUnixFile = file("files/ScriptBaseCpp.py")
+def scriptBaseCppUnixFile = file("files/ScriptBaseCpp.sh")
+
+def advantageScopeScriptFile = file("files/AdvantageScope.vbs")
+def advantageScopeScriptUnixFile = file("files/AdvantageScope.sh")
+
+def choreoScriptFile = file("files/Choreo.vbs")
+def choreoScriptUnixFile = file("files/Choreo.sh")
 
 def toolsJsonTask = tasks.register('toolsJson', Task) {
 
@@ -45,6 +51,16 @@ def toolsJsonTask = tasks.register('toolsJson', Task) {
       config << item
     }
 
+    def advantageScopeItem = [:]
+    advantageScopeItem['name'] = "AdvantageScope"
+    advantageScopeItem['version'] = advantagescopeGitTag
+    config << advantageScopeItem
+
+    def choreoItem = [:]
+    choreoItem['name'] = "Choreo"
+    choreoItem['version'] = choreoGitTag
+    config << choreoItem
+
     def gbuilder = getGsonBuilder()
     gbuilder.setPrettyPrinting()
     def json = gbuilder.create().toJson(config)
@@ -61,11 +77,7 @@ ext.toolsConfig = {
   }, { config->
     def tools = [:]
     tools['Folder'] = toolsFolder
-    if (project.ext.isUnix == true) {
-      tools['UpdaterExe'] = 'ToolsUpdater.py'
-    } else {
-      tools['UpdaterExe'] = 'ToolsUpdater.bat'
-    }
+    tools['UpdaterJar'] = 'ToolsUpdater.jar'
     config['Tools'] = tools
   })
 }
@@ -80,21 +92,42 @@ ext.toolsSetup = { AbstractArchiveTask zip->
     into '/tools'
   }
 
-  zip.from (scriptBaseFile) {
-    into '/tools'
-  }
-
-  zip.from (scriptBaseUnixFile) {
-    into '/tools'
-    fileMode 0755
-  }
+  if (project.ext.buildClassifier == 'Windows') {
+    zip.from (scriptBaseFile) {
+      into '/tools'
+    }
 
     zip.from (scriptBaseCppFile) {
-    into '/tools'
+      into '/tools'
+    }
+
+    zip.from (advantageScopeScriptFile) {
+      into '/tools'
+    }
+
+    zip.from (choreoScriptFile) {
+      into '/tools'
+    }
+  } else {
+    zip.from (scriptBaseUnixFile) {
+      into '/tools'
+      fileMode 0755
+    }
+
+    zip.from (scriptBaseCppUnixFile) {
+      into '/tools'
+      fileMode 0755
+    }
+
+    zip.from (advantageScopeScriptUnixFile) {
+      into '/tools'
+      fileMode 0755
+    }
+
+    zip.from (choreoScriptUnixFile) {
+      into '/tools'
+      fileMode 0755
+    }
   }
 
-  zip.from (scriptBaseCppUnixFile) {
-    into '/tools'
-    fileMode 0755
-  }
 }

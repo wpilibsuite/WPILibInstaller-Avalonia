@@ -1,0 +1,121 @@
+apply from: 'scripts/versions.gradle'
+
+def baseUrl = "https://github.com/SleipnirGroup/Choreo/releases/download/$choreoGitTag/"
+
+def fileNameWindows = "Choreo-$choreoGitTag-Windows-x86_64-standalone.zip"
+
+def downloadUrlWindows = baseUrl + fileNameWindows
+
+def fileNameMac = "Choreo-$choreoGitTag-macOS-x86_64-standalone.zip"
+
+def downloadUrlMac = baseUrl + fileNameMac
+
+def fileNameMacArm = "Choreo-$choreoGitTag-macOS-aarch64-standalone.zip"
+
+def downloadUrlMacArm = baseUrl + fileNameMacArm
+
+def fileNameLinux = "Choreo-$choreoGitTag-Linux-x86_64-standalone.zip"
+
+def downloadUrlLinux = baseUrl + fileNameLinux
+
+
+apply plugin: 'de.undercouch.download'
+
+def downloadTaskWindows = tasks.register('downloadChoreoWindows', Download) {
+  src downloadUrlWindows
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite true
+}
+
+def downloadTaskMac = tasks.register('downloadChoreoMac', Download) {
+  src downloadUrlMac
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite true
+}
+
+def downloadTaskMacArm = tasks.register('downloadChoreoMacArm', Download) {
+  src downloadUrlMacArm
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite true
+}
+
+def downloadTaskLinux = tasks.register('downloadChoreoLinux', Download) {
+  src downloadUrlLinux
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite true
+}
+
+def choreoConfigFile = file("$buildDir/choreoConfig.json")
+
+def choreoConfigFileTask = tasks.register("choreoConfigFile") {
+  it.outputs.file choreoConfigFile
+
+  doLast {
+
+    def config = [:]
+    config['folder'] = 'choreo'
+    config['zipFile'] = 'choreo.zip'
+
+    def gbuilder = getGsonBuilder()
+
+    gbuilder.setPrettyPrinting()
+    def json = gbuilder.create().toJson(config)
+
+    choreoConfigFile.parentFile.mkdirs()
+
+    choreoConfigFile.text = json
+  }
+}
+
+ext.choreoConfigFileSetup = { AbstractArchiveTask zip->
+  zip.dependsOn choreoConfigFileTask
+  zip.inputs.file choreoConfigFile
+
+  zip.from(choreoConfigFile) {
+    rename {'choreoConfig.json'}
+  }
+}
+
+ext.choreoZipSetup = { AbstractArchiveTask zip->
+  if (project.hasProperty('linuxBuild')) {
+    zip.dependsOn downloadTaskLinux
+
+    zip.inputs.files downloadTaskLinux.get().outputFiles
+
+    zip.from(project.zipTree(downloadTaskLinux.get().outputFiles.first())) {
+      into '/choreo'
+      includeEmptyDirs = false
+    }
+  } else if (project.hasProperty('macBuild')) {
+    zip.dependsOn downloadTaskMac
+
+    zip.inputs.files downloadTaskMac.get().outputFiles
+
+    zip.from(project.zipTree(downloadTaskMac.get().outputFiles.first())) {
+      into '/choreo'
+      includeEmptyDirs = false
+    }
+  } else if (project.hasProperty('macBuildArm')) {
+    zip.dependsOn downloadTaskMacArm
+
+    zip.inputs.files downloadTaskMacArm.get().outputFiles
+
+    zip.from(project.zipTree(downloadTaskMacArm.get().outputFiles.first())) {
+      into '/choreo'
+      includeEmptyDirs = false
+    }
+  } else {
+    zip.dependsOn downloadTaskWindows
+
+    zip.inputs.files downloadTaskWindows.get().outputFiles
+
+    zip.from(project.zipTree(downloadTaskWindows.get().outputFiles.first())) {
+      into '/choreo'
+      includeEmptyDirs = false
+    }
+  }
+}

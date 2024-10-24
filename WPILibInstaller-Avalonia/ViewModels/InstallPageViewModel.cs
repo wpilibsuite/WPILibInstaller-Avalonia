@@ -1,8 +1,6 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using ReactiveUI;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -11,6 +9,9 @@ using System.Reactive.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using ReactiveUI;
 using WPILibInstaller.Interfaces;
 using WPILibInstaller.Models;
 using WPILibInstaller.Utils;
@@ -88,6 +89,89 @@ namespace WPILibInstaller.ViewModels
             await runInstallTask;
         }
 
+        private async Task ExtractJDKAndTools(CancellationToken token)
+        {
+            await ExtractArchive(token, new[] {
+                configurationProvider.JdkConfig.Folder + "/",
+                configurationProvider.UpgradeConfig.Tools.Folder + "/",
+                configurationProvider.AdvantageScopeConfig.Folder + "/",
+                configurationProvider.ChoreoConfig.Folder + "/",
+                "installUtils/"});
+        }
+
+        private async Task InstallTools(CancellationToken token)
+        {
+            try
+            {
+                do
+                {
+                    ProgressTotal = 0;
+                    TextTotal = "Extracting JDK and Tools";
+                    await ExtractJDKAndTools(token);
+                    if (token.IsCancellationRequested) break;
+                    ProgressTotal = 33;
+                    TextTotal = "Installing Tools";
+                    await RunToolSetup();
+                    ProgressTotal = 66;
+                    TextTotal = "Creating Shortcuts";
+                    await RunShortcutCreator(token);
+                } while (false);
+            }
+            catch (OperationCanceledException)
+            {
+                // Do nothing, we just want to ignore
+            }
+        }
+
+        private async Task InstallEverything(CancellationToken token)
+        {
+            try
+            {
+                do
+                {
+                    ProgressTotal = 0;
+                    TextTotal = "Extracting";
+                    await ExtractArchive(token, null);
+                    if (token.IsCancellationRequested) break;
+                    ProgressTotal = 11;
+                    TextTotal = "Installing Gradle";
+                    await RunGradleSetup();
+                    if (token.IsCancellationRequested) break;
+                    ProgressTotal = 22;
+                    TextTotal = "Installing Tools";
+                    await RunToolSetup();
+                    if (token.IsCancellationRequested) break;
+                    ProgressTotal = 33;
+                    TextTotal = "Installing CPP";
+                    await RunCppSetup();
+                    if (token.IsCancellationRequested) break;
+                    ProgressTotal = 44;
+                    TextTotal = "Fixing Maven";
+                    await RunMavenMetaDataFixer();
+                    if (token.IsCancellationRequested) break;
+                    ProgressTotal = 55;
+                    TextTotal = "Installing VS Code";
+                    await RunVsCodeSetup(token);
+                    if (token.IsCancellationRequested) break;
+                    ProgressTotal = 66;
+                    TextTotal = "Configuring VS Code";
+                    await ConfigureVsCodeSettings();
+                    if (token.IsCancellationRequested) break;
+                    ProgressTotal = 77;
+                    TextTotal = "Installing VS Code Extensions";
+                    await RunVsCodeExtensionsSetup();
+                    if (token.IsCancellationRequested) break;
+                    ProgressTotal = 88;
+                    TextTotal = "Creating Shortcuts";
+                    await RunShortcutCreator(token);
+                } while (false);
+            }
+            catch (OperationCanceledException)
+            {
+                // Do nothing, we just want to ignore
+            }
+        }
+
         private async Task RunInstall()
         {
             source = new CancellationTokenSource();
@@ -100,44 +184,14 @@ namespace WPILibInstaller.ViewModels
 
             try
             {
-                do
+                if (toInstallProvider.Model.InstallTools)
                 {
-                    ProgressTotal = 0;
-                    TextTotal = "Extracting";
-                    await ExtractArchive(source.Token);
-                    if (source.IsCancellationRequested) break;
-                    ProgressTotal = 11;
-                    TextTotal = "Installing Gradle";
-                    await RunGradleSetup();
-                    if (source.IsCancellationRequested) break;
-                    ProgressTotal = 22;
-                    TextTotal = "Installing Tools";
-                    await RunToolSetup();
-                    if (source.IsCancellationRequested) break;
-                    ProgressTotal = 33;
-                    TextTotal = "Installing CPP";
-                    await RunCppSetup();
-                    if (source.IsCancellationRequested) break;
-                    ProgressTotal = 44;
-                    TextTotal = "Fixing Maven";
-                    await RunMavenMetaDataFixer();
-                    if (source.IsCancellationRequested) break;
-                    ProgressTotal = 55;
-                    TextTotal = "Installing VS Code";
-                    await RunVsCodeSetup(source.Token);
-                    if (source.IsCancellationRequested) break;
-                    ProgressTotal = 66;
-                    TextTotal = "Configuring VS Code";
-                    await ConfigureVsCodeSettings();
-                    if (source.IsCancellationRequested) break;
-                    ProgressTotal = 77;
-                    TextTotal = "Installing VS Code Extensions";
-                    await RunVsCodeExtensionsSetup();
-                    if (source.IsCancellationRequested) break;
-                    ProgressTotal = 88;
-                    TextTotal = "Creating Shortcuts";
-                    await RunShortcutCreator(source.Token);
-                } while (false);
+                    await InstallTools(source.Token);
+                }
+                else
+                {
+                    await InstallEverything(source.Token);
+                }
 
                 updateSource.Cancel();
                 await updateTask;
@@ -171,33 +225,28 @@ namespace WPILibInstaller.ViewModels
             }
         }
 
-        private List<string> GetExtractionIgnoreDirectories()
-        {
-            List<string> ignoreDirs = new List<string>();
-            var model = toInstallProvider.Model;
-            if (!model.InstallCpp) ignoreDirs.Add(configurationProvider.FullConfig.CppToolchain.Directory + "/");
-            if (!model.InstallGradle) ignoreDirs.Add(configurationProvider.FullConfig.Gradle.ZipName);
-            if (!model.InstallJDK) ignoreDirs.Add(configurationProvider.JdkConfig.Folder + "/");
-            if (!model.InstallTools) ignoreDirs.Add(configurationProvider.UpgradeConfig.Tools.Folder + "/");
-            if (!model.InstallWPILibDeps) ignoreDirs.Add(configurationProvider.UpgradeConfig.Maven.Folder + "/");
-
-            return ignoreDirs;
-        }
-
         private ValueTask<string> SetVsCodePortableMode()
         {
             string portableFolder = Path.Combine(configurationProvider.InstallDirectory, "vscode");
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+
+            var currentPlatform = PlatformUtils.CurrentPlatform;
+            switch (currentPlatform)
             {
-                portableFolder = Path.Combine(portableFolder, "VSCode-linux-x64", "data");
-            }
-            else if (OperatingSystem.IsMacOS())
-            {
-                portableFolder = Path.Combine(portableFolder, "code-portable-data");
-            }
-            else
-            {
-                portableFolder = Path.Combine(portableFolder, "data");
+                case Platform.Win64:
+                    portableFolder = Path.Combine(portableFolder, "data");
+                    break;
+                case Platform.MacArm64:
+                case Platform.Mac64:
+                    portableFolder = Path.Combine(portableFolder, "code-portable-data");
+                    break;
+                case Platform.Linux64:
+                    portableFolder = Path.Combine(portableFolder, "VSCode-linux-x64", "data");
+                    break;
+                case Platform.LinuxArm64:
+                    portableFolder = Path.Combine(portableFolder, "VSCode-linux-arm64", "data");
+                    break;
+                default:
+                    throw new PlatformNotSupportedException("Invalid platform");
             }
 
             try
@@ -212,19 +261,17 @@ namespace WPILibInstaller.ViewModels
             return new ValueTask<string>(portableFolder);
         }
 
-        private void SetIfNotSet<T>(string key, T value, dynamic settingsJson)
+        private static void SetIfNotSet(string key, object value, JObject settingsJson)
         {
             if (!settingsJson.ContainsKey(key))
             {
-
-                settingsJson[key] = value;
+                settingsJson[key] = JToken.FromObject(value);
             }
         }
 
         private async Task ConfigureVsCodeSettings()
         {
-            var vsVm = viewModelResolver.Resolve<VSCodePageViewModel>();
-            if (!toInstallProvider.Model.InstallVsCode && !vsVm.Model.AlreadyInstalled) return;
+            if (!vsInstallProvider.Model.InstallExtensions) return;
 
             var dataPath = await SetVsCodePortableMode();
 
@@ -253,19 +300,19 @@ namespace WPILibInstaller.ViewModels
 
             }
 
-            dynamic settingsJson = new JObject();
+            JObject settingsJson = new JObject();
             if (File.Exists(settingsFile))
             {
                 settingsJson = (JObject)JsonConvert.DeserializeObject(await File.ReadAllTextAsync(settingsFile))!;
             }
 
-            SetIfNotSet("java.home", Path.Combine(homePath, "jdk"), settingsJson);
+            SetIfNotSet("java.jdt.ls.java.home", Path.Combine(homePath, "jdk"), settingsJson);
             SetIfNotSet("extensions.autoUpdate", false, settingsJson);
             SetIfNotSet("extensions.autoCheckUpdates", false, settingsJson);
             SetIfNotSet("extensions.ignoreRecommendations", true, settingsJson);
-            SetIfNotSet("extensions.showRecommendationsOnlyOnDemand", false, settingsJson);
-            SetIfNotSet("update.channel", "none", settingsJson);
+            SetIfNotSet("update.mode", "none", settingsJson);
             SetIfNotSet("update.showReleaseNotes", false, settingsJson);
+            SetIfNotSet("java.completion.matchCase", "off", settingsJson);
 
             string os;
             string path_seperator;
@@ -287,19 +334,20 @@ namespace WPILibInstaller.ViewModels
 
             if (!settingsJson.ContainsKey("terminal.integrated.env." + os))
             {
-                dynamic terminalProps = new JObject();
-
-                terminalProps["JAVA_HOME"] = Path.Combine(homePath, "jdk");
-                terminalProps["PATH"] = Path.Combine(homePath, "jdk", "bin") + path_seperator + "${env:PATH}";
+                JObject terminalProps = new JObject
+                {
+                    ["JAVA_HOME"] = Path.Combine(homePath, "jdk"),
+                    ["PATH"] = Path.Combine(homePath, "jdk", "bin") + path_seperator + "${env:PATH}"
+                };
 
                 settingsJson["terminal.integrated.env." + os] = terminalProps;
 
             }
             else
             {
-                dynamic terminalEnv = settingsJson["terminal.integrated.env." + os];
+                JToken terminalEnv = settingsJson["terminal.integrated.env." + os]!;
                 terminalEnv["JAVA_HOME"] = Path.Combine(homePath, "jdk");
-                string path = terminalEnv["PATH"];
+                JToken? path = terminalEnv["PATH"];
                 if (path == null)
                 {
                     terminalEnv["PATH"] = Path.Combine(homePath, "jdk", "bin") + path_seperator + "${env:PATH}";
@@ -307,7 +355,7 @@ namespace WPILibInstaller.ViewModels
                 else
                 {
                     var binPath = Path.Combine(homePath, "jdk", "bin");
-                    if (!path.Contains(binPath))
+                    if (!path.ToString().Contains(binPath))
                     {
                         path = binPath + path_seperator + path;
                         terminalEnv["PATH"] = path;
@@ -321,7 +369,7 @@ namespace WPILibInstaller.ViewModels
 
         private async Task RunVsCodeSetup(CancellationToken token)
         {
-            if (!toInstallProvider.Model.InstallVsCode) return;
+            if (!vsInstallProvider.Model.InstallingVsCode) return;
 
             Text = "Installing Visual Studio Code";
             Progress = 0;
@@ -384,22 +432,73 @@ namespace WPILibInstaller.ViewModels
                     await extractor.CopyToStreamAsync(writer);
                 }
 
-                if (extractor.EntryIsExecutable)
+                if (extractor.EntryIsExecutable && !OperatingSystem.IsWindows())
                 {
-                    new Mono.Unix.UnixFileInfo(fullZipToPath).FileAccessPermissions |=
-                        (Mono.Unix.FileAccessPermissions.GroupExecute |
-                         Mono.Unix.FileAccessPermissions.UserExecute |
-                         Mono.Unix.FileAccessPermissions.OtherExecute);
+                    var currentMode = File.GetUnixFileMode(fullZipToPath);
+                    File.SetUnixFileMode(fullZipToPath, currentMode | UnixFileMode.GroupExecute | UnixFileMode.UserExecute | UnixFileMode.OtherExecute);
                 }
             }
 
         }
 
-        private async Task ExtractArchive(CancellationToken token)
+        private async Task ExtractArchive(CancellationToken token, string[]? filter)
         {
-            var directoriesToIgnore = GetExtractionIgnoreDirectories();
-
             Progress = 0;
+            if (OperatingSystem.IsWindows())
+            {
+                Text = "Checking for currently running JDKs";
+                bool foundRunningExe = await Task.Run(() =>
+                {
+                    try
+                    {
+                        var jdkBinFolder = Path.Join(configurationProvider.InstallDirectory, configurationProvider.JdkConfig.Folder, "bin");
+                        var jdkExes = Directory.EnumerateFiles(jdkBinFolder, "*.exe", SearchOption.AllDirectories);
+                        bool found = false;
+                        foreach (var exe in jdkExes)
+                        {
+                            try
+                            {
+                                var name = Path.GetFileNameWithoutExtension(exe)!;
+                                var pNames = Process.GetProcessesByName(name);
+                                foreach (var p in pNames)
+                                {
+                                    if (p.MainModule?.FileName == exe)
+                                    {
+                                        found = true;
+                                        break;
+                                    }
+                                }
+                                if (found)
+                                {
+                                    break;
+                                }
+                            }
+                            catch
+                            {
+                                // Do nothing. We don't want this code to break.
+                            }
+                        }
+                        return found;
+                    }
+                    catch
+                    {
+                        // Do nothing. We don't want this code to break.
+                        return false;
+                    }
+                });
+                if (foundRunningExe)
+                {
+                    string msg = "Running JDK processes have been found. Installation cannot continue. Please restart your computer, and rerun this installer without running anything else (including VS Code)";
+                    await MessageBox.Avalonia.MessageBoxManager.GetMessageBoxStandardWindow(new MessageBox.Avalonia.DTO.MessageBoxStandardParams
+                    {
+                        ContentTitle = "JDKs Running",
+                        ContentMessage = msg,
+                        Icon = MessageBox.Avalonia.Enums.Icon.Error,
+                        ButtonDefinitions = MessageBox.Avalonia.Enums.ButtonEnum.Ok
+                    }).ShowDialog(programWindow.Window);
+                    throw new InvalidOperationException(msg);
+                }
+            }
 
             var archive = configurationProvider.ZipArchive;
 
@@ -420,20 +519,24 @@ namespace WPILibInstaller.ViewModels
                 if (extractor.EntryIsDirectory) continue;
 
                 var entryName = extractor.EntryKey;
-                bool skip = false;
-                foreach (var ignore in directoriesToIgnore)
+                if (filter != null)
                 {
-                    if (entryName.StartsWith(ignore))
+                    bool skip = true;
+                    foreach (var keep in filter)
                     {
-                        skip = true;
-                        break;
+                        if (entryName.StartsWith(keep))
+                        {
+                            skip = false;
+                            break;
+                        }
+                    }
+
+                    if (skip)
+                    {
+                        continue;
                     }
                 }
 
-                if (skip)
-                {
-                    continue;
-                }
 
                 Text = "Installing " + entryName;
 
@@ -461,20 +564,16 @@ namespace WPILibInstaller.ViewModels
                     await extractor.CopyToStreamAsync(writer);
                 }
 
-                if (extractor.EntryIsExecutable)
+                if (extractor.EntryIsExecutable && !OperatingSystem.IsWindows())
                 {
-                    new Mono.Unix.UnixFileInfo(fullZipToPath).FileAccessPermissions |=
-                        (Mono.Unix.FileAccessPermissions.GroupExecute |
-                         Mono.Unix.FileAccessPermissions.UserExecute |
-                         Mono.Unix.FileAccessPermissions.OtherExecute);
+                    var currentMode = File.GetUnixFileMode(fullZipToPath);
+                    File.SetUnixFileMode(fullZipToPath, currentMode | UnixFileMode.GroupExecute | UnixFileMode.UserExecute | UnixFileMode.OtherExecute);
                 }
             }
         }
 
         private Task RunGradleSetup()
         {
-            if (!toInstallProvider.Model.InstallGradle || !toInstallProvider.Model.InstallWPILibDeps) return Task.CompletedTask;
-
             Text = "Configuring Gradle";
             Progress = 50;
 
@@ -508,15 +607,28 @@ namespace WPILibInstaller.ViewModels
 
         private async Task RunCppSetup()
         {
-            if (!toInstallProvider.Model.InstallCpp) return;
-
             Text = "Configuring C++";
             Progress = 50;
 
             await Task.Yield();
         }
 
-        private Task<bool> RunScriptExecutable(string script, int timeoutMs, params string[] args)
+        private static Task<bool> RunJavaJar(string installDir, string jar, int timeoutMs)
+        {
+            string java = Path.Join(installDir, "jdk", "bin", "java");
+            if (OperatingSystem.IsWindows())
+            {
+                java += ".exe";
+            }
+            ProcessStartInfo pstart = new ProcessStartInfo(java, $"-jar \"{jar}\"");
+            var p = Process.Start(pstart);
+            return Task.Run(() =>
+            {
+                return p!.WaitForExit(timeoutMs);
+            });
+        }
+
+        private static Task<bool> RunScriptExecutable(string script, int timeoutMs, params string[] args)
         {
             ProcessStartInfo pstart = new ProcessStartInfo(script, string.Join(" ", args));
             var p = Process.Start(pstart);
@@ -528,49 +640,50 @@ namespace WPILibInstaller.ViewModels
 
         private async Task RunToolSetup()
         {
-            if (!toInstallProvider.Model.InstallTools || !toInstallProvider.Model.InstallWPILibDeps)
-                return;
-
             Text = "Configuring Tools";
             Progress = 50;
 
-            await RunScriptExecutable(Path.Combine(configurationProvider.InstallDirectory,
+            await RunJavaJar(configurationProvider.InstallDirectory,
+                Path.Combine(configurationProvider.InstallDirectory,
                 configurationProvider.UpgradeConfig.Tools.Folder,
-                configurationProvider.UpgradeConfig.Tools.UpdaterExe), 5000, "silent");
+                configurationProvider.UpgradeConfig.Tools.UpdaterJar), 20000);
         }
 
         private async Task RunMavenMetaDataFixer()
         {
-            if (!toInstallProvider.Model.InstallWPILibDeps)
-                return;
-
             Text = "Fixing up maven metadata";
             Progress = 50;
 
-            await RunScriptExecutable(Path.Combine(configurationProvider.InstallDirectory,
+            await RunJavaJar(configurationProvider.InstallDirectory,
+                Path.Combine(configurationProvider.InstallDirectory,
                 configurationProvider.UpgradeConfig.Maven.Folder,
-                configurationProvider.UpgradeConfig.Maven.MetaDataFixerExe), 5000, "silent");
+                configurationProvider.UpgradeConfig.Maven.MetaDataFixerJar), 20000);
         }
-
-
 
         private async Task RunVsCodeExtensionsSetup()
         {
-            if (!toInstallProvider.Model.InstallVsCodeExtensions) return;
+            if (!vsInstallProvider.Model.InstallExtensions) return;
 
             string codeExe;
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            var currentPlatform = PlatformUtils.CurrentPlatform;
+            switch (currentPlatform)
             {
-                codeExe = Path.Combine(configurationProvider.InstallDirectory, "vscode", "bin", "code.cmd");
-            }
-            else if (OperatingSystem.IsMacOS())
-            {
-                codeExe = Path.Combine(configurationProvider.InstallDirectory, "vscode", "Visual Studio Code.app", "Contents", "Resources", "app", "bin", "code");
-            }
-            else
-            {
-                codeExe = Path.Combine(configurationProvider.InstallDirectory, "vscode", "VSCode-linux-x64", "bin", "code");
+                case Platform.Win64:
+                    codeExe = Path.Combine(configurationProvider.InstallDirectory, "vscode", "bin", "code.cmd");
+                    break;
+                case Platform.MacArm64:
+                case Platform.Mac64:
+                    codeExe = Path.Combine(configurationProvider.InstallDirectory, "vscode", "Visual Studio Code.app", "Contents", "Resources", "app", "bin", "code");
+                    break;
+                case Platform.Linux64:
+                    codeExe = Path.Combine(configurationProvider.InstallDirectory, "vscode", "VSCode-linux-x64", "bin", "code");
+                    break;
+                case Platform.LinuxArm64:
+                    codeExe = Path.Combine(configurationProvider.InstallDirectory, "vscode", "VSCode-linux-arm64", "bin", "code");
+                    break;
+                default:
+                    throw new PlatformNotSupportedException("Invalid platform");
             }
 
             // Load existing extensions
@@ -603,10 +716,11 @@ namespace WPILibInstaller.ViewModels
                 }
             });
 
-            var availableToInstall = new List<(Extension extension, WPIVersion version, int sortOrder)>();
-
-            availableToInstall.Add((configurationProvider.VsCodeConfig.WPILibExtension,
-                new WPIVersion(configurationProvider.VsCodeConfig.WPILibExtension.Version), int.MaxValue));
+            var availableToInstall = new List<(Extension extension, WPIVersion version, int sortOrder)>
+            {
+                (configurationProvider.VsCodeConfig.WPILibExtension,
+                new WPIVersion(configurationProvider.VsCodeConfig.WPILibExtension.Version), int.MaxValue)
+            };
 
             for (int i = 0; i < configurationProvider.VsCodeConfig.ThirdPartyExtensions.Length; i++)
             {
@@ -665,37 +779,47 @@ namespace WPILibInstaller.ViewModels
             var frcHomePath = configurationProvider.InstallDirectory;
             var frcYear = configurationProvider.UpgradeConfig.FrcYear;
 
-            shortcutData.IconLocation = Path.Join(frcHomePath, configurationProvider.UpgradeConfig.PathFolder, "wpilib-256.ico");
+            var wpilibIconLocation = Path.Join(frcHomePath, configurationProvider.UpgradeConfig.PathFolder, "wpilib-256.ico");
             shortcutData.IsAdmin = toInstallProvider.Model.InstallAsAdmin;
 
-            if (toInstallProvider.Model.InstallVsCode)
+            if (vsInstallProvider.Model.InstallingVsCode)
             {
                 // Add VS Code Shortcuts
-                shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "vscode", "Code.exe"), $"{frcYear} WPILib VS Code", $"{frcYear} WPILib VS Code"));
-                shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "vscode", "Code.exe"), $"Programs/{frcYear} WPILib VS Code", $"{frcYear} WPILib VS Code"));
+                shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "vscode", "Code.exe"), $"{frcYear} WPILib VS Code", $"{frcYear} WPILib VS Code", wpilibIconLocation));
+                shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "vscode", "Code.exe"), $"Programs/{frcYear} WPILib VS Code", $"{frcYear} WPILib VS Code", wpilibIconLocation));
             }
 
-            if (toInstallProvider.Model.InstallTools)
+            // Add Tool Shortcuts
+            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "Glass.exe"), $"{frcYear} WPILib Tools/Glass {frcYear}", $"Glass {frcYear}", ""));
+            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "OutlineViewer.exe"), $"{frcYear} WPILib Tools/OutlineViewer {frcYear}", $"OutlineViewer {frcYear}", ""));
+            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "PathWeaver.vbs"), $"{frcYear} WPILib Tools/PathWeaver {frcYear}", $"PathWeaver {frcYear}", wpilibIconLocation));
+            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "RobotBuilder.vbs"), $"{frcYear} WPILib Tools/RobotBuilder {frcYear}", $"RobotBuilder {frcYear}", wpilibIconLocation));
+            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "shuffleboard.vbs"), $"{frcYear} WPILib Tools/Shuffleboard {frcYear}", $"Shuffleboard {frcYear}", wpilibIconLocation));
+            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "SmartDashboard.vbs"), $"{frcYear} WPILib Tools/SmartDashboard {frcYear}", $"SmartDashboard {frcYear}", wpilibIconLocation));
+            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "SysId.exe"), $"{frcYear} WPILib Tools/SysId {frcYear}", $"SysId {frcYear}", ""));
+            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "roboRIOTeamNumberSetter.exe"), $"{frcYear} WPILib Tools/roboRIO Team Number Setter {frcYear}", $"roboRIO Team Number Setter {frcYear}", ""));
+            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "DataLogTool.exe"), $"{frcYear} WPILib Tools/Data Log Tool {frcYear}", $"Data Log Tool {frcYear}", ""));
+            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "advantagescope", "AdvantageScope (WPILib).exe"), $"{frcYear} WPILib Tools/AdvantageScope (WPILib) {frcYear}", $"AdvantageScope (WPILib) {frcYear}", ""));
+            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "choreo", "choreo.exe"), $"{frcYear} WPILib Tools/Choreo (WPILib) {frcYear}", $"Choreo (WPILib) {frcYear}", ""));
+
+            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "Glass.exe"), $"Programs/{frcYear} WPILib Tools/Glass {frcYear}", $"Glass {frcYear}", ""));
+            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "OutlineViewer.exe"), $"Programs/{frcYear} WPILib Tools/OutlineViewer {frcYear}", $"OutlineViewer {frcYear}", ""));
+            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "PathWeaver.vbs"), $"Programs/{frcYear} WPILib Tools/PathWeaver {frcYear}", $"PathWeaver {frcYear}", wpilibIconLocation));
+            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "RobotBuilder.vbs"), $"Programs/{frcYear} WPILib Tools/RobotBuilder {frcYear}", $"RobotBuilder {frcYear}", wpilibIconLocation));
+            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "shuffleboard.vbs"), $"Programs/{frcYear} WPILib Tools/Shuffleboard {frcYear}", $"Shuffleboard {frcYear}", wpilibIconLocation));
+            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "SmartDashboard.vbs"), $"Programs/{frcYear} WPILib Tools/SmartDashboard {frcYear}", $"SmartDashboard {frcYear}", wpilibIconLocation));
+            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "SysId.exe"), $"Programs/{frcYear} WPILib Tools/SysId {frcYear}", $"SysId {frcYear}", ""));
+            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "roboRIOTeamNumberSetter.exe"), $"Programs/{frcYear} WPILib Tools/roboRIO Team Number Setter {frcYear}", $"roboRIO Team Number Setter {frcYear}", ""));
+            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "DataLogTool.exe"), $"Programs/{frcYear} WPILib Tools/Data Log Tool {frcYear}", $"Data Log Tool {frcYear}", ""));
+            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "advantagescope", "AdvantageScope (WPILib).exe"), $"Programs/{frcYear} WPILib Tools/AdvantageScope (WPILib) {frcYear}", $"AdvantageScope (WPILib) {frcYear}", ""));
+            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "choreo", "choreo.exe"), $"Programs/{frcYear} WPILib Tools/Choreo (WPILib) {frcYear}", $"Choreo (WPILib) {frcYear}", ""));
+
+            if (toInstallProvider.Model.InstallEverything)
             {
-                // Add Tool Shortcuts
-                shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "OutlineViewer.vbs"), $"{frcYear} WPILib Tools/OutlineViewer", "OutlineViewer"));
-                shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "PathWeaver.vbs"), $"{frcYear} WPILib Tools/PathWeaver", "PathWeaver"));
-                shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "RobotBuilder.vbs"), $"{frcYear} WPILib Tools/RobotBuilder", "RobotBuilder"));
-                shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "RobotBuilder-Old.vbs"), $"{frcYear} WPILib Tools/RobotBuilder-Old", "RobotBuilder-Old"));
-                shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "shuffleboard.vbs"), $"{frcYear} WPILib Tools/Shuffleboard", "Shuffleboard"));
-                shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "SmartDashboard.vbs"), $"{frcYear} WPILib Tools/SmartDashboard", "SmartDashboard"));
-
-                shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "OutlineViewer.vbs"), $"Programs/{frcYear} WPILib Tools/OutlineViewer", "OutlineViewer"));
-                shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "PathWeaver.vbs"), $"Programs/{frcYear} WPILib Tools/PathWeaver", "PathWeaver"));
-                shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "RobotBuilder.vbs"), $"Programs/{frcYear} WPILib Tools/RobotBuilder", "RobotBuilder"));
-                shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "RobotBuilder-Old.vbs"), $"Programs/{frcYear} WPILib Tools/RobotBuilder-Old", "RobotBuilder-Old"));
-                shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "shuffleboard.vbs"), $"Programs/{frcYear} WPILib Tools/Shuffleboard", "Shuffleboard"));
-                shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "SmartDashboard.vbs"), $"Programs/{frcYear} WPILib Tools/SmartDashboard", "SmartDashboard"));
+                // Add Documentation Shortcuts
+                shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "documentation", "rtd", "frc-docs-latest", "index.html"), $"{frcYear} WPILib Documentation", $"{frcYear} WPILib Documentation", wpilibIconLocation));
+                shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "documentation", "rtd", "frc-docs-latest", "index.html"), $"Programs/{frcYear} WPILib Documentation", $"{frcYear} WPILib Documentation", wpilibIconLocation));
             }
-
-            // Add Documentation Shortcuts
-            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "documentation", "rtd", "frc-docs-latest", "index.html"), $"{frcYear} WPILib Documentation", $"{frcYear} WPILib Documentation"));
-            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "documentation", "rtd", "frc-docs-latest", "index.html"), $"Programs/{frcYear} WPILib Documentation", $"{frcYear} WPILib Documentation"));
 
             var serializedData = JsonConvert.SerializeObject(shortcutData);
 
@@ -706,37 +830,69 @@ namespace WPILibInstaller.ViewModels
                 await File.WriteAllTextAsync(tempFile, serializedData, token);
                 var shortcutCreatorPath = Path.Combine(configurationProvider.InstallDirectory, "installUtils", "WPILibShortcutCreator.exe");
 
-                var startInfo = new ProcessStartInfo(shortcutCreatorPath, $"\"{tempFile}\"")
+                do
                 {
-                    WorkingDirectory = Environment.CurrentDirectory
-                };
-                if (shortcutData.IsAdmin)
-                {
-                    startInfo.UseShellExecute = true;
-                    startInfo.Verb = "runas";
-                }
-                else
-                {
-                    startInfo.UseShellExecute = false;
-                    startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                    startInfo.CreateNoWindow = true;
-                    startInfo.RedirectStandardOutput = true;
-                }
-                var exitCode = await Task.Run(() =>
-                {
-                    var proc = Process.Start(startInfo);
-                    proc!.WaitForExit();
-                    return proc.ExitCode;
-                });
+                    var startInfo = new ProcessStartInfo(shortcutCreatorPath, $"\"{tempFile}\"")
+                    {
+                        WorkingDirectory = Environment.CurrentDirectory
+                    };
+                    if (shortcutData.IsAdmin)
+                    {
+                        startInfo.UseShellExecute = true;
+                        startInfo.Verb = "runas";
+                    }
+                    else
+                    {
+                        startInfo.UseShellExecute = false;
+                        startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                        startInfo.CreateNoWindow = true;
+                        startInfo.RedirectStandardOutput = true;
+                    }
+                    var exitCode = await Task.Run(() =>
+                    {
+                        try
+                        {
+                            var proc = Process.Start(startInfo);
+                            proc!.WaitForExit();
+                            return proc.ExitCode;
+                        }
+                        catch (Win32Exception ex)
+                        {
+                            return ex.NativeErrorCode;
+                        }
+                    });
 
-                if (exitCode != 0)
-                {
-                    var result = await MessageBox.Avalonia.MessageBoxManager.GetMessageBoxStandardWindow("Warning",
-                   "Shortcut creation failed. Error Code: " + exitCode,
-                   icon: MessageBox.Avalonia.Enums.Icon.Warning, @enum: MessageBox.Avalonia.Enums.ButtonEnum.Ok).ShowDialog(programWindow.Window);
-                }
+                    if (exitCode == 1223) // ERROR_CANCLED
+                    {
+                        var results = await MessageBox.Avalonia.MessageBoxManager.GetMessageBoxStandardWindow(new MessageBox.Avalonia.DTO.MessageBoxStandardParams
+                        {
+                            ContentTitle = "UAC Prompt Cancelled",
+                            ContentMessage = "UAC Prompt Cancelled or Timed Out. Would you like to retry?",
+                            Icon = MessageBox.Avalonia.Enums.Icon.Info,
+                            ButtonDefinitions = MessageBox.Avalonia.Enums.ButtonEnum.YesNo
+                        }).ShowDialog(programWindow.Window);
+                        if (results == MessageBox.Avalonia.Enums.ButtonResult.Yes)
+                        {
+                            continue;
+                        }
+                        break;
+                    }
+
+                    if (exitCode != 0)
+                    {
+                        await MessageBox.Avalonia.MessageBoxManager.GetMessageBoxStandardWindow(new MessageBox.Avalonia.DTO.MessageBoxStandardParams
+                        {
+                            ContentTitle = "Shortcut Creation Failed",
+                            ContentMessage = $"Shortcut creation failed with error code {exitCode}",
+                            Icon = MessageBox.Avalonia.Enums.Icon.Warning,
+                            ButtonDefinitions = MessageBox.Avalonia.Enums.ButtonEnum.Ok
+                        }).ShowDialog(programWindow.Window);
+                        break;
+                    }
+                    break;
+                } while (true);
             }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && toInstallProvider.Model.InstallVsCode)
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && vsInstallProvider.Model.InstallingVsCode)
             {
                 // Create Linux desktop shortcut
                 var desktopFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Desktop", $@"FRC VS Code {frcYear}.desktop");
@@ -752,6 +908,7 @@ Exec={configurationProvider.InstallDirectory}/frccode/frccode{frcYear}
 Icon={configurationProvider.InstallDirectory}/frccode/wpilib-256.ico
 Terminal=false
 StartupNotify=true
+StartupWMClass=Code
 ";
 
                 var desktopPath = Path.GetDirectoryName(desktopFile);
@@ -766,6 +923,17 @@ StartupNotify=true
                 }
                 await File.WriteAllTextAsync(desktopFile, contents, token);
                 await File.WriteAllTextAsync(launcherFile, contents, token);
+                await Task.Run(() =>
+                {
+                    var startInfo = new ProcessStartInfo("chmod", $"+x \"{desktopFile}\"")
+                    {
+                        UseShellExecute = false,
+                        WindowStyle = ProcessWindowStyle.Hidden,
+                        CreateNoWindow = true
+                    };
+                    var proc = Process.Start(startInfo);
+                    proc!.WaitForExit();
+                }, token);
             }
         }
     }

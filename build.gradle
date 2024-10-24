@@ -1,31 +1,22 @@
 import com.google.gson.GsonBuilder
-import com.google.gson.Gson
-import org.gradle.wrapper.*
-import java.security.MessageDigest
+import io.pry.gradle.offline_dependencies.OfflineDependenciesPlugin
 import org.gradle.internal.os.OperatingSystem
 
 buildscript {
     dependencies {
-        //classpath files('distwrapper/gradle-wrapper.jar')
-        classpath 'com.google.code.gson:gson:2.8.6'
+        classpath 'com.google.code.gson:gson:2.8.9'
     }
 }
 
 plugins {
     id 'java'
     id 'cpp'
-    id "de.undercouch.download" version "4.1.1" apply false
-    id "com.github.johnrengelman.shadow" version "6.0.0" apply false
+    id "de.undercouch.download" version "4.1.2" apply false
+    id "com.github.johnrengelman.shadow" version "7.1.2" apply false
 }
 
-def azureRelease = System.getenv('BUILD_SOURCEBRANCH')
-if (azureRelease != null) {
-    if (azureRelease.startsWith('refs/tags/')) {
-        println 'tagged build'
-    }
-}
-
-apply plugin: io.pry.gradle.offline_dependencies.OfflineDependenciesPlugin
+apply from: "automation/macos_notarization.gradle"
+apply plugin: OfflineDependenciesPlugin
 
 ext.pubVersion = ''
 if (project.hasProperty("publishVersion")) {
@@ -42,45 +33,67 @@ println pubVersion
 
 project.ext.setProperty('toolchain-optional-roboRio', '')
 
+if (OperatingSystem.current().isWindows()) {
+    project.ext.currentClassifier = 'windowsx86-64'
+} else if (OperatingSystem.current().isMacOsX()) {
+    project.ext.currentClassifier = 'osxuniversal'
+} else {
+    project.ext.currentClassifier = 'linuxx86-64'
+}
+
 if (project.hasProperty('linuxBuild')) {
+    project.ext.forcePlatform = 'linuxx86-64'
     project.ext.forceNativeClassifier = 'linuxx86-64'
-    project.ext.forceToolsClassifier = 'linux64'
+    project.ext.forceToolsClassifier = 'linuxx64'
     project.ext.forceCppToolsClassifier = 'linuxx86-64'
     project.ext.buildClassifier = 'Linux'
     offlineRepositoryRoot = "$buildDir/dependencies/linux"
     project.ext.archiveType = Tar
     project.ext.isUnix = true
     project.ext.dotnetRuntime = 'linux-x64'
+} else if (project.hasProperty('linuxBuildArm64')) {
+    project.ext.forcePlatform = 'linuxarm64'
+    project.ext.forceNativeClassifier = 'linuxarm64'
+    project.ext.forceToolsClassifier = 'linuxarm64'
+    project.ext.forceCppToolsClassifier = 'linuxarm64'
+    project.ext.buildClassifier = 'LinuxArm64'
+    offlineRepositoryRoot = "$buildDir/dependencies/linuxarm64"
+    project.ext.archiveType = Tar
+    project.ext.isUnix = true
+    project.ext.dotnetRuntime = 'linux-arm64'
 } else if (project.hasProperty('macBuild')) {
-    project.ext.forceNativeClassifier = 'osxx86-64'
-    project.ext.forceToolsClassifier = 'mac64'
-    project.ext.forceCppToolsClassifier = 'osxx86-64'
+    project.ext.forcePlatform = 'osx'
+    project.ext.forceNativeClassifier = 'osxuniversal'
+    project.ext.forceToolsClassifier = 'macx64'
+    project.ext.forceCppToolsClassifier = 'osxuniversal'
     project.ext.buildClassifier = 'Mac'
     offlineRepositoryRoot = "$buildDir/dependencies/mac"
     project.ext.archiveType = Tar
     project.ext.isUnix = true
     project.ext.dotnetRuntime = 'osx-x64'
-} else if (project.hasProperty('windows32')) {
-    project.ext.forceNativeClassifier = 'windowsx86'
-    project.ext.forceToolsClassifier = 'win32'
-    project.ext.forceCppToolsClassifier = 'windowsx86'
-    project.ext.buildClassifier = 'Windows32'
-    offlineRepositoryRoot = "$buildDir/dependencies/win32"
-    project.ext.archiveType = Zip
-    project.ext.isUnix = false
-    project.ext.dotnetRuntime = 'win-x86'
+} else if (project.hasProperty('macBuildArm')) {
+    project.ext.forcePlatform = 'osx'
+    project.ext.forceNativeClassifier = 'osxuniversal'
+    project.ext.forceToolsClassifier = 'macarm64'
+    project.ext.forceCppToolsClassifier = 'osxuniversal'
+    project.ext.buildClassifier = 'MacArm'
+    offlineRepositoryRoot = "$buildDir/dependencies/mac"
+    project.ext.archiveType = Tar
+    project.ext.isUnix = true
+    project.ext.dotnetRuntime = 'osx-arm64'
 } else {
+    project.ext.forcePlatform = 'windows'
     project.ext.forceNativeClassifier = 'windowsx86-64'
-    project.ext.forceToolsClassifier = 'win64'
+    project.ext.forceToolsClassifier = 'winx64'
     project.ext.forceCppToolsClassifier = 'windowsx86-64'
-    project.ext.buildClassifier = 'Windows64'
-    offlineRepositoryRoot = "$buildDir/dependencies/win64"
+    project.ext.buildClassifier = 'Windows'
+    offlineRepositoryRoot = "$buildDir/dependencies/windows"
     project.ext.archiveType = Zip
     project.ext.isUnix = false
     project.ext.dotnetRuntime = 'win-x64'
 }
 
-ext.frcYear = '2021'
+apply from: 'scripts/versions.gradle'
 
 apply from: 'scripts/gradlew.gradle'
 apply from: 'scripts/installer.gradle'
@@ -88,6 +101,10 @@ apply from: 'scripts/installer.gradle'
 apply from: 'scripts/toolchain.gradle'
 apply from: 'scripts/jdk.gradle'
 apply from: 'scripts/maven.gradle'
+
+apply from: 'scripts/advantagescope.gradle'
+apply from: 'scripts/choreo.gradle'
+
 // Tools must happen after maven
 apply from: 'scripts/tools.gradle'
 apply from: 'scripts/vscode.gradle'
@@ -132,11 +149,11 @@ def upgradeConfigFileTask = tasks.register('generateUpgradeConfigFile', Task) { 
     }
 }
 
-def commonResources = { AbstractArchiveTask zip->
+def commonResources = { AbstractArchiveTask zip ->
     zip.dependsOn upgradeConfigFileTask
     zip.inputs.file upgradeConfigFile
 
-    zip.from (upgradeConfigFile) {
+    zip.from(upgradeConfigFile) {
         into '/installUtils'
     }
 
@@ -178,30 +195,6 @@ def fullConfigFileTask = tasks.register('generateFullConfigFile', Task) { Task t
     }
 }
 
-def generateConfigFiles = tasks.register('generateCommonResources', Zip) {
-    archiveBaseName = 'WPILibInstaller_' + buildClassifier + '-' + pubVersion + '-resources'
-
-    destinationDirectory = file("$buildDir/outputs")
-
-    duplicatesStrategy 'exclude'
-
-    dependsOn fullConfigFileTask
-    inputs.file fullConfigFile
-
-    it.from (fullConfigFile)
-
-    def zip = it
-
-    zip.dependsOn upgradeConfigFileTask
-    zip.inputs.file upgradeConfigFile
-
-    zip.from (upgradeConfigFile)
-
-    jdkConfigFileSetup(zip)
-
-    vscodeConfigZipSetup(zip)
-}
-
 def generateFullResourcesTask = tasks.register('generateFullResources', project.ext.archiveType) {
     archiveBaseName = 'WPILib_' + buildClassifier + '-' + pubVersion + '-artifacts'
 
@@ -210,14 +203,14 @@ def generateFullResourcesTask = tasks.register('generateFullResources', project.
     duplicatesStrategy 'exclude'
 
     if (project.ext.isUnix) {
-        extension = 'tar.gz'
+        archiveExtension = 'tar.gz'
         compression = Compression.GZIP
     }
 
     dependsOn fullConfigFileTask
     inputs.file fullConfigFile
 
-    it.from (fullConfigFile) {
+    it.from(fullConfigFile) {
         into '/installUtils'
     }
 
@@ -228,12 +221,15 @@ def generateFullResourcesTask = tasks.register('generateFullResources', project.
 
     jdkZipSetup(it)
 
+    advantageScopeZipSetup(it)
+    choreoZipSetup(it)
+
     if (OperatingSystem.current().isWindows()) {
         def task = it
         // Grab release shortcut creator
         project(':WPILibShortcutCreator').application.binaries.whenElementFinalized { binary ->
             if (binary.name == 'mainRelease') {
-                task.from (binary.executableFile) {
+                task.from(binary.executableFile) {
                     into '/installUtils'
                 }
                 task.dependsOn binary.executableFileProducer
@@ -242,21 +238,30 @@ def generateFullResourcesTask = tasks.register('generateFullResources', project.
     }
 }
 
+// Creates the main installer application.
 def dotnetInstallerTask = tasks.register('createInstaller', Exec) {
     workingDir = "$projectDir/WPILibInstaller-Avalonia"
 
-    if (project.hasProperty("macBuild")) {
-        commandLine 'dotnet', 'publish', '-c', 'Release', '-r', dotnetRuntime, "/p:Version=$pubVersion", "/t:BundleApp", "-p:RuntimeIdentifier=osx-x64", "-p:CFBundleShortVersionString=$pubVersion", "-p:CFBundleVersion=$pubVersion"
+    def macRuntimeId = "osx-x64"
+    if (project.hasProperty("macBuildArm")) {
+        macRuntimeId = "osx-arm64"
+    }
+
+    if (project.hasProperty("macBuild") || project.hasProperty("macBuildArm")) {
+        commandLine 'dotnet', 'publish', '-c', 'Release', '-r', dotnetRuntime, '--self-contained',
+                "/p:Version=$pubVersion", "/t:BundleApp", "-p:RuntimeIdentifier=${macRuntimeId}",
+                "-p:CFBundleShortVersionString=$pubVersion", "-p:CFBundleVersion=$pubVersion",
+                '/p:EnableCompressionInSingleFile=true'
     } else {
-        commandLine 'dotnet', 'publish', '-c', 'Release', '-r', dotnetRuntime, '/p:PublishSingleFile=true', '/p:PublishTrimmed=true', "/p:Version=$pubVersion"
+        commandLine 'dotnet', 'publish', '-c', 'Release', '-r', dotnetRuntime, '/p:PublishSingleFile=true',
+                 "/p:Version=$pubVersion", '/p:EnableCompressionInSingleFile=true', '--self-contained'
     }
 }
 
-def installDirectory = "$projectDir/WPILibInstaller-Avalonia/bin/Release/net5.0/$dotnetRuntime/publish"
-
+// Creates the WPILib version file.
 def versionFile = file("$buildDir/versionNumber/WPILibInstallerVersion.txt")
 def versionFileTask = tasks.register('writeVersionNumber', Task) {
-    outputs.upToDateWhen {false}
+    outputs.upToDateWhen { false }
     outputs.dir file("$buildDir/versionNumber")
     doLast {
         // TODO make this a bit smarter
@@ -264,29 +269,105 @@ def versionFileTask = tasks.register('writeVersionNumber', Task) {
     }
 }
 
+def installerProj = new XmlParser().parse("$projectDir/WPILibInstaller-Avalonia/WPILibInstaller-Avalonia.csproj")
 
+def dotnetVersion = installerProj.PropertyGroup.TargetFramework.text()
+
+// Copies the main application to build/outputs.
+def installDirectory = "$projectDir/WPILibInstaller-Avalonia/bin/Release/$dotnetVersion/$dotnetRuntime/publish"
+def macIcon = "$projectDir/WPILibInstaller-Avalonia/wpilib.icns"
 def copyInstallerFiles = tasks.register('copyInstallerFiles', Copy) {
-
-    from (installDirectory) {
-        exclude ('WPILibInstaller', 'WPILibInstaller.app')
-        fileMode 0644
-    }
-    from (installDirectory) {
-        include ('WPILibInstaller', 'WPILibInstaller.app/**')
+    if (!project.hasProperty("macBuild") && !project.hasProperty("macBuildArm")) {
+        from(installDirectory) {
+            exclude('WPILibInstaller', 'WPILibInstaller.app')
+            fileMode 0644
+        }
+        from(installDirectory) {
+            include('WPILibInstaller', 'WPILibInstaller.app/**')
+        }
+        from versionFile
+    } else {
+        // We only want to copy the application and its contents. Otherwise, a bunch of other dlls
+        // that we don't need also get copied on Mac.
+        from(installDirectory) { include 'WPILibInstaller.app/**' }
+        into("WPILibInstaller.app/Contents/MacOS") { with copySpec { from versionFile } }
+        into("WPILibInstaller.app/Contents/Resources") { with copySpec { from file(macIcon) } }
     }
 
     into "$buildDir/outputs"
     dependsOn dotnetInstallerTask
     dependsOn versionFileTask
-
-    from versionFile
-
 }
 
-def dotnetCreateImageTask = tasks.register('createDiskImage', Exec) {
-    dependsOn generateConfigFiles
+// Generates common resources and config files.
+def generateConfigFiles = tasks.register('generateCommonResources', Zip) {
+    archiveBaseName = 'WPILibInstaller_' + buildClassifier + '-' + pubVersion + '-resources'
+
+    if (!project.hasProperty("macBuild") && !project.hasProperty("macBuildArm")) {
+        destinationDirectory = file("$buildDir/outputs")
+    } else {
+        destinationDirectory = file("$buildDir/outputs/WPILibInstaller.app/Contents/MacOS")
+    }
+
+    dependsOn copyInstallerFiles
+
+    duplicatesStrategy 'exclude'
+
+    dependsOn fullConfigFileTask
+    inputs.file fullConfigFile
+
+    it.from(fullConfigFile)
+
+    def zip = it
+
+    zip.dependsOn upgradeConfigFileTask
+    zip.inputs.file upgradeConfigFile
+
+    zip.from(upgradeConfigFile)
+
+    jdkConfigFileSetup(zip)
+
+    advantageScopeConfigFileSetup(zip)
+    choreoConfigFileSetup(zip)
+
+    vscodeConfigZipSetup(zip)
+}
+
+// Generates the Info.plist file.
+def infoPlistInput = file("automation/macos_plist.in")
+def infoPlistOutput = file("$buildDir/outputs/WPILibInstaller.app/Contents/Info.plist")
+def generateInfoPlist = tasks.register("generateInfoPlist", Task) {
+    outputs.upToDateWhen { false }
+
+    outputs.file infoPlistOutput
+    inputs.file infoPlistInput
+
+    doLast {
+        if (infoPlistOutput.exists())
+            infoPlistOutput.delete()
+
+        def read = infoPlistInput.text.replace('${wpilib_version}', pubVersion)
+        infoPlistOutput.write(read)
+    }
+
+    dependsOn copyInstallerFiles
+}
+
+// Signs the resources/artifacts tar and saves the signature inside the app (macOS only)
+def signResourcesTask = tasks.register('signResources', Exec) {
     dependsOn generateFullResourcesTask
     dependsOn copyInstallerFiles
+    workingDir = "$buildDir/outputs"
+
+    def file = 'WPILib_' + buildClassifier + '-' + pubVersion + '-artifacts' + '.tar.gz'
+    commandLine 'sh', '-c', "shasum -a 256 $file | cut -d \" \" -f 1 > WPILibInstaller.app/Contents/MacOS/checksum.txt"
+}
+
+// Creates the Windows disk image.
+def windowsCreateImageTask = tasks.register('createWindowsImage', Exec) {
+    dependsOn generateFullResourcesTask
+    dependsOn copyInstallerFiles
+    dependsOn generateConfigFiles
 
     workingDir = "$projectDir/IsoCreator"
     inputs.dir "$buildDir/outputs"
@@ -298,12 +379,13 @@ def dotnetCreateImageTask = tasks.register('createDiskImage', Exec) {
     commandLine 'dotnet', 'run', '--input', "$buildDir/outputs", '--output', file, '--version', pubVersion
 }
 
-def unixCreateImageTask = tasks.register('createTarImage', Tar) {
-    dependsOn generateConfigFiles
+// Creates the Linux tarball.
+def linuxCreateImageTask = tasks.register('createLinuxImage', Tar) {
     dependsOn generateFullResourcesTask
     dependsOn copyInstallerFiles
+    dependsOn generateConfigFiles
 
-    extension = 'tar.gz'
+    archiveExtension = 'tar.gz'
     compression = Compression.GZIP
 
     inputs.dir "$buildDir/outputs"
@@ -319,28 +401,61 @@ def unixCreateImageTask = tasks.register('createTarImage', Tar) {
     from("$buildDir/outputs")
 }
 
-def signResourcesTask = tasks.register('signResources', Exec) {
+// Creates the macOS disk image. If the relevant parameters are provided, the app with also be signed and notarized.
+def macCreateImageTask = tasks.register('createMacImage', Task) {
     dependsOn generateFullResourcesTask
     dependsOn copyInstallerFiles
-    workingDir = "$buildDir/outputs"
+    dependsOn generateConfigFiles
+    dependsOn generateInfoPlist
+    dependsOn signResourcesTask
 
-    def file = 'WPILib_' + buildClassifier + '-' + pubVersion + '-artifacts' + '.tar.gz'
-    commandLine 'sh', '-c', "shasum -a 256 $file | cut -d \" \" -f 1 > WPILibInstaller.app/Contents/MacOS/checksum.txt"
+    doLast {
+        // We can sign the app because we have a Developer ID.
+        if (project.hasProperty("developerID")) {
+            println "Received a Developer ID -- signing the application..."
+            String identity = project.property("developerID")
+            exec {
+                commandLine "sh", "-c", "automation/macos_codesign.sh ${identity} $buildDir/outputs/WPILibInstaller.app"
+            }
+        }
+
+        // Notarize the application.
+        if (project.hasProperty("notarization-username") && project.hasProperty("notarization-teamid") && project.hasProperty("notarization-password")) {
+            println "Received an App Store Connect username and password -- notarizing the application..."
+            notarize(file("$buildDir/outputs/WPILibInstaller.app"), "WPILibInstaller-${pubVersion}",
+                    project.property("notarization-username") as String,
+                    project.property("notarization-teamid") as String,
+                    project.property("notarization-password") as String)
+        }
+
+        // Create disk image.
+        println "Creating disk image..."
+        def diskArch = "macOS-Intel"
+        if (project.hasProperty('macBuildArm')) {
+            diskArch = "macOS-Arm64"
+        }
+        exec { commandLine "mkdir", "-p", "$buildDir/pubOutputs" }
+        exec {
+            commandLine "hdiutil", "create", "-volname", "WPILibInstaller",
+                    "-srcfolder", "$buildDir/outputs/", "-format", "UDRO",
+                    "WPILib_${diskArch}-${pubVersion}.dmg"
+
+            workingDir "$buildDir/pubOutputs"
+        }
+    }
 }
 
+// Runs the entire pipeline and generates
 tasks.register('generateInstallers', Task) {
     if (OperatingSystem.current().isWindows()) {
-        dependsOn dotnetCreateImageTask
-    } else if (!project.hasProperty("macBuild")){
-        dependsOn unixCreateImageTask
+        dependsOn windowsCreateImageTask
+    } else if (project.hasProperty("macBuild") || project.hasProperty("macBuildArm")) {
+        dependsOn macCreateImageTask
     } else {
-        dependsOn generateConfigFiles
-        dependsOn generateFullResourcesTask
-        dependsOn copyInstallerFiles
-        dependsOn signResourcesTask
+        dependsOn linuxCreateImageTask
     }
 }
 
 wrapper {
-    gradleVersion = '6.6.1'
+    gradleVersion = '8.10.2'
 }

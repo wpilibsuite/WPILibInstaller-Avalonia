@@ -4,10 +4,11 @@ namespace WPILibInstaller.Utils
 {
     public enum Platform
     {
-        Win32,
         Win64,
         Linux64,
+        LinuxArm64,
         Mac64,
+        MacArm64,
         Invalid
     }
 
@@ -18,7 +19,7 @@ namespace WPILibInstaller.Utils
             CurrentPlatform = Platform.Invalid;
 
             var currentArch = RuntimeInformation.OSArchitecture;
-            if (currentArch != Architecture.X64 && currentArch != Architecture.X86)
+            if (currentArch != Architecture.X64 && currentArch != Architecture.Arm64)
             {
                 return;
             }
@@ -29,6 +30,10 @@ namespace WPILibInstaller.Utils
                 {
                     CurrentPlatform = Platform.Linux64;
                 }
+                else if (currentArch == Architecture.Arm64)
+                {
+                    CurrentPlatform = Platform.LinuxArm64;
+                }
                 return;
             }
 
@@ -38,18 +43,22 @@ namespace WPILibInstaller.Utils
                 {
                     CurrentPlatform = Platform.Mac64;
                 }
+                else
+                {
+                    CurrentPlatform = Platform.MacArm64;
+                }
                 return;
             }
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                if (currentArch == Architecture.X64)
+                // Since this program ships with an x64 .NET runtime, if it is running on ARM64
+                // we can safely assume that x64 emulation is available and working. This means
+                // everything else (except kernel drivers) can run as x64 ("Win64" in the local
+                // Platform enum).
+                if (currentArch == Architecture.X64 || currentArch == Architecture.Arm64)
                 {
                     CurrentPlatform = Platform.Win64;
-                }
-                else
-                {
-                    CurrentPlatform = Platform.Win32;
                 }
                 return;
             }

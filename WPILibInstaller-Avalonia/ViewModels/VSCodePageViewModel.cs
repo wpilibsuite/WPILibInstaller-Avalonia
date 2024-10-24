@@ -1,12 +1,12 @@
-﻿using MessageBox.Avalonia;
-using ReactiveUI;
-using System;
+﻿using System;
 using System.IO;
 using System.IO.Compression;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Threading;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
+using MessageBox.Avalonia;
+using ReactiveUI;
 using WPILibInstaller.Interfaces;
 using WPILibInstaller.Models;
 using WPILibInstaller.Utils;
@@ -38,20 +38,34 @@ namespace WPILibInstaller.ViewModels
 
         private bool enableSelectionButtons = true;
 
+        public string SingleDownloadText
+        {
+            get => singleDownloadText;
+            set => this.RaiseAndSetIfChanged(ref singleDownloadText, value);
+        }
+
+        public string SkipVsCodeText
+        {
+            get => skipVsCodeText;
+            set => this.RaiseAndSetIfChanged(ref skipVsCodeText, value);
+        }
+
+        public string AllDownloadText
+        {
+            get => allDownloadText;
+            set => this.RaiseAndSetIfChanged(ref allDownloadText, value);
+        }
+
         public string SelectText
         {
             get => selectText;
             set => this.RaiseAndSetIfChanged(ref selectText, value);
         }
 
-        public string DownloadText
-        {
-            get => downloadText;
-            set => this.RaiseAndSetIfChanged(ref downloadText, value);
-        }
-
-        private string selectText = "Use Downloaded Offline Installer";
-        private string downloadText = "Download VS Code for Offline Install";
+        private string singleDownloadText = "Download for this computer only\n(fastest)";
+        private string skipVsCodeText = "Skip and don't use VS Code\n(NOT RECOMMENDED)";
+        private string allDownloadText = "Download VS Code archives to share with\nother computers/OSes for offline\ninstall";
+        private string selectText = "Select existing VS Code archive for\noffline install on this computer";
 
         public double ProgressBar1
         {
@@ -168,7 +182,18 @@ namespace WPILibInstaller.ViewModels
 
         private async Task SelectVsCodeFunc()
         {
-            var file = await programWindow.ShowFilePicker("Select VS Code Installer ZIP", "zip");
+            var currentPlatform = PlatformUtils.CurrentPlatform;
+            String extension;
+
+            if (currentPlatform == Platform.Linux64)
+            {
+                extension = "tar.gz";
+            }
+            else
+            {
+                extension = "zip";
+            }
+            var file = await programWindow.ShowFilePicker("Select VS Code Installer ZIP", extension);
             if (file == null)
             {
                 // No need to error, user explicitly canceled.
@@ -177,11 +202,23 @@ namespace WPILibInstaller.ViewModels
             try
             {
                 FileStream fs = new FileStream(file, FileMode.Open);
-                using System.IO.Compression.ZipArchive archive = new System.IO.Compression.ZipArchive(fs);
-                var currentPlatform = PlatformUtils.CurrentPlatform;
-                var entry = archive.GetEntry(Model.Platforms[currentPlatform].NameInZip);
                 MemoryStream ms = new MemoryStream(100000000);
-                await entry!.Open().CopyToAsync(ms);
+                await fs.CopyToAsync(ms);
+                ms.Seek(0, SeekOrigin.Begin);
+
+                using var sha = SHA256.Create();
+                var hash = await sha.ComputeHashAsync(ms);
+
+                if (!hash.AsSpan().SequenceEqual(Model.Platforms[currentPlatform].Sha256Hash))
+                {
+                    bool cont = await CheckIncorrectHash($"VS Code for {currentPlatform}. File Location {file}", Convert.ToHexString(Model.Platforms[currentPlatform].Sha256Hash), Convert.ToHexString(hash));
+                    if (!cont)
+                    {
+                        throw new InvalidDataException("Invalid hash");
+                    }
+                }
+
+                ms.Seek(0, SeekOrigin.Begin);
 
                 if (OperatingSystem.IsMacOS())
                 {
@@ -195,7 +232,7 @@ namespace WPILibInstaller.ViewModels
             catch
             {
                 await MessageBoxManager.GetMessageBoxStandardWindow("Error",
-                    "Correct VS Code not found in archive.\nYou must select a VS Code installer zip downloaded with this tool.",
+                    "You must select a VS Code zip downloaded with this tool.",
                     icon: MessageBox.Avalonia.Enums.Icon.None).ShowDialog(programWindow.Window);
                 return;
             }
@@ -203,6 +240,19 @@ namespace WPILibInstaller.ViewModels
             DoneText = "Valid VS Code Selected. Press Next to continue";
             EnableSelectionButtons = false;
             SetLocalForwardVisible(true);
+        }
+
+        private async Task<bool> CheckIncorrectHash(string name, string expected, string actual)
+        {
+            string msg = $"Invalid Hash for {name}\nExpected: {expected}\nActual: {actual}\nOK to ignore, Abort to cancel.\nIf cancelled, problems may occur";
+            var res = await MessageBox.Avalonia.MessageBoxManager.GetMessageBoxStandardWindow(new MessageBox.Avalonia.DTO.MessageBoxStandardParams
+            {
+                ContentTitle = "Invalid Hash",
+                ContentMessage = msg,
+                Icon = MessageBox.Avalonia.Enums.Icon.Error,
+                ButtonDefinitions = MessageBox.Avalonia.Enums.ButtonEnum.OkAbort
+            }).ShowDialog(programWindow.Window);
+            return res == MessageBox.Avalonia.Enums.ButtonResult.Ok;
         }
 
         private async Task DownloadVsCodeFunc()
@@ -223,37 +273,40 @@ namespace WPILibInstaller.ViewModels
             EnableSelectionButtons = false;
             SetLocalForwardVisible(false);
 
-            var win32 = DownloadToMemoryStream(Platform.Win32, Model.Platforms[Platform.Win32].DownloadUrl, CancellationToken.None, (d) => ProgressBar1 = d);
-            var win64 = DownloadToMemoryStream(Platform.Win64, Model.Platforms[Platform.Win64].DownloadUrl, CancellationToken.None, (d) => ProgressBar2 = d);
-            var linux64 = DownloadToMemoryStream(Platform.Linux64, Model.Platforms[Platform.Linux64].DownloadUrl, CancellationToken.None, (d) => ProgressBar3 = d);
-            var mac64 = DownloadToMemoryStream(Platform.Mac64, Model.Platforms[Platform.Mac64].DownloadUrl, CancellationToken.None, (d) => ProgressBar4 = d);
+            var win64 = DownloadToMemoryStream(Platform.Win64, Model.Platforms[Platform.Win64].DownloadUrl, (d) => ProgressBar1 = d);
+            var linux64 = DownloadToMemoryStream(Platform.Linux64, Model.Platforms[Platform.Linux64].DownloadUrl, (d) => ProgressBar2 = d);
+            var linuxArm64 = DownloadToMemoryStream(Platform.LinuxArm64, Model.Platforms[Platform.LinuxArm64].DownloadUrl, (d) => ProgressBar3 = d);
+            var mac64 = DownloadToMemoryStream(Platform.Mac64, Model.Platforms[Platform.Mac64].DownloadUrl, (d) => ProgressBar4 = d);
 
-            var results = await Task.WhenAll(win32, win64, linux64, mac64);
-
-            string vscodeFileName = $"WPILib-VSCode-{Model.VSCodeVersion}.zip";
-
-            string vscodeName = Path.Join(file, vscodeFileName);
+            var results = await Task.WhenAll(win64, linux64, linuxArm64, mac64);
 
             try
             {
-                File.Delete(vscodeName);
+                File.Delete(Path.Join(file, Model.Platforms[Platform.Win64].NameInZip));
+                File.Delete(Path.Join(file, Model.Platforms[Platform.Linux64].NameInZip));
+                File.Delete(Path.Join(file, Model.Platforms[Platform.LinuxArm64].NameInZip));
+                File.Delete(Path.Join(file, Model.Platforms[Platform.Mac64].NameInZip));
             }
             catch
             {
 
             }
 
-            using var archive = ZipFile.Open(vscodeName, ZipArchiveMode.Create);
-
             MemoryStream? ms = null;
 
             DoneText = "Copying Archives. Please wait.";
-
-
-            foreach (var (stream, platform) in results)
+            foreach (var (stream, platform, hash) in results)
             {
-                var entry = archive.CreateEntry(Model.Platforms[platform].NameInZip);
-                using var toWriteStream = entry.Open();
+                if (!hash.AsSpan().SequenceEqual(Model.Platforms[platform].Sha256Hash))
+                {
+                    bool cont = await CheckIncorrectHash($"VS Code for {platform}", Convert.ToHexString(Model.Platforms[platform].Sha256Hash), Convert.ToHexString(hash));
+                    if (!cont)
+                    {
+                        throw new InvalidDataException("Invalid hash");
+                    }
+                }
+
+                using var toWriteStream = new FileStream(Path.Join(file, Model.Platforms[platform].NameInZip), FileMode.OpenOrCreate);
                 stream.Seek(0, SeekOrigin.Begin);
                 await stream.CopyToAsync(toWriteStream);
                 if (platform == currentPlatform)
@@ -275,7 +328,8 @@ namespace WPILibInstaller.ViewModels
                     Model.ToExtractArchive = OpenArchive(ms);
                 }
 
-                DoneText = $"Done Downloading. File is named {vscodeFileName} Press Next to continue";
+                DoneText = "Done Downloading. Press Next to continue";
+
                 EnableSelectionButtons = true;
                 SetLocalForwardVisible(true);
             }
@@ -292,46 +346,44 @@ namespace WPILibInstaller.ViewModels
             SetLocalForwardVisible(false);
             ProgressBar1Visible = true;
 
-            var (stream, platform) = await DownloadToMemoryStream(currentPlatform, url, CancellationToken.None, (d) => ProgressBar1 = d);
-            if (stream != null)
+            var (stream, platform, hash) = await DownloadToMemoryStream(currentPlatform, url, (d) => ProgressBar1 = d);
+
+            if (!hash.AsSpan().SequenceEqual(Model.Platforms[platform].Sha256Hash))
             {
-                Console.WriteLine("Trying to open archive");
-
-                if (OperatingSystem.IsMacOS())
+                bool cont = await CheckIncorrectHash($"VS Code for {platform}", Convert.ToHexString(Model.Platforms[platform].Sha256Hash), Convert.ToHexString(hash));
+                if (!cont)
                 {
-                    Model.ToExtractArchiveMacOs = stream;
+                    throw new InvalidDataException("Invalid hash");
                 }
-                else
-                {
-                    Model.ToExtractArchive = OpenArchive(stream);
-                }
+            }
+            Console.WriteLine("Trying to open archive");
 
-                DoneText = "Done Downloading. Press Next to continue";
-                EnableSelectionButtons = true;
-                SetLocalForwardVisible(true);
-                refresher.RefreshForwardBackProperties();
+            if (OperatingSystem.IsMacOS())
+            {
+                Model.ToExtractArchiveMacOs = stream;
             }
             else
             {
-                Console.WriteLine("Failed");
-                EnableSelectionButtons = true;
-                if (Model.AlreadyInstalled)
-                {
-                    SetLocalForwardVisible(true);
-                }
-                ; // TODO Fail
+                Model.ToExtractArchive = OpenArchive(stream);
             }
+
+            DoneText = "Done Downloading. Press Next to continue";
+            EnableSelectionButtons = true;
+            SetLocalForwardVisible(true);
+            refresher.RefreshForwardBackProperties();
         }
 
-        private async Task<(MemoryStream? stream, Platform platform)> DownloadToMemoryStream(Platform platform, string downloadUrl, CancellationToken token, Action<double> progressChanged)
+        private async Task<(MemoryStream stream, Platform platform, byte[] hash)> DownloadToMemoryStream(Platform platform, string downloadUrl, Action<double> progressChanged)
         {
             MemoryStream ms = new MemoryStream(100000000);
-            var successful = await DownloadForPlatform(downloadUrl, ms, token, progressChanged);
-            if (successful) return (ms, platform);
-            return (null, platform);
+            await DownloadForPlatform(downloadUrl, ms, progressChanged);
+            ms.Seek(0, SeekOrigin.Begin);
+            using var sha = SHA256.Create();
+            var hash = await sha.ComputeHashAsync(ms);
+            return (ms, platform, hash);
         }
 
-        private async Task<bool> DownloadForPlatform(string downloadUrl, Stream outputStream, CancellationToken token, Action<double> progressChanged)
+        private async Task DownloadForPlatform(string downloadUrl, Stream outputStream, Action<double> progressChanged)
         {
             using var client = new HttpClientDownloadWithProgress(downloadUrl, outputStream);
             client.ProgressChanged += (totalFileSize, totalBytesDownloaded, progressPercentage) =>
@@ -342,14 +394,12 @@ namespace WPILibInstaller.ViewModels
                 }
             };
 
-            return await client.StartDownload(token);
+            await client.StartDownload();
         }
 
         public override PageViewModelBase MoveNext()
         {
-            var configPage = viewModelResolver.Resolve<ConfigurationPageViewModel>();
-            configPage.UpdateVsSettings();
-            return configPage;
+            return viewModelResolver.Resolve<InstallPageViewModel>();
         }
     }
 }

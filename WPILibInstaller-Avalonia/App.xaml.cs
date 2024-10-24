@@ -1,9 +1,9 @@
-﻿using Avalonia;
+﻿using System.Reflection;
+using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using ReactiveUI;
 using Splat;
-using System.Reflection;
 using WPILibInstaller.Views;
 
 namespace WPILibInstaller
