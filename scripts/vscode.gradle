@@ -411,13 +411,13 @@ ext.vscodeZipSetup = { AbstractArchiveTask zip->
       into '/utility'
       includeEmptyDirs = false
     }
-  } else if (project.hasProperty('macBuild')) {
+  } else if (project.hasProperty('macBuild') || project.hasProperty('macBuildArm')) {
     // Mac
     // Cannot extract, otherwise mac borks
     zip.from (standaloneDownload.get().outputFiles.first()) {
       into '/utility'
     }
-  } else if (project.hasProperty('macBuildArm') || project.hasProperty('linuxBuildArm64')) {
+  } else if (project.hasProperty('linuxBuildArm64')) {
   } else {
     // Windows
     zip.from(project.zipTree(standaloneDownload.get().outputFiles.first())) {
