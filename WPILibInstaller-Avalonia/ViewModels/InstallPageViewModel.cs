@@ -1039,11 +1039,11 @@ StartupWMClass=Code
                 CreateLinuxShortcut("OutlineViewer", frcYear, "OutlineViewer - DISCONNECTED", token);
                 CreateLinuxShortcut("DataLogTool", frcYear, "Datalog Tool", token);
                 CreateLinuxShortcut("SysId", frcYear, "System Identification", token);
-                CreateLinuxShortcut("SmartDashboard", frcYear, "SmartDashboard | Disconnected", token);
-                CreateLinuxShortcut("RobotBuilder", frcYear, "FRC RobotBuilder", token);
-                CreateLinuxShortcut("PathWeaver", frcYear, "PathWeaver - 2025.1.1-beta-1", token);
+                CreateLinuxShortcut("SmartDashboard", frcYear, "edu-wpi-first-smartdashboard-SmartDashboard", token);
+                CreateLinuxShortcut("RobotBuilder", frcYear, "robotbuilder-RobotBuilder", token);
+                CreateLinuxShortcut("PathWeaver", frcYear, "edu.wpi.first.pathweaver.PathWeaver", token);
                 CreateLinuxShortcut("roboRIOTeamNumberSetter", frcYear, "roboRIO Team Number Setter", token);
-                CreateLinuxShortcut("Shuffleboard", frcYear, "Shuffleboard", token);
+                CreateLinuxShortcut("Shuffleboard", frcYear, "edu.wpi.first.shuffleboard.app.Shuffleboard", token);
             }
         }
     }
