@@ -375,7 +375,12 @@ namespace WPILibInstaller.ViewModels
                         if (name.ToString().Equals("JavaSE-17"))
                         {
                             result["path"] = Path.Combine(homePath, "jdk");
+                            result["default"] = true;
                             javaFound = true;
+                        }
+                        else
+                        {
+                            result["default"] = false;
                         }
                     }
                 }
@@ -384,7 +389,8 @@ namespace WPILibInstaller.ViewModels
                     JObject javaConfigProp = new JObject
                     {
                         ["name"] = "JavaSE-17",
-                        ["path"] = Path.Combine(homePath, "jdk")
+                        ["path"] = Path.Combine(homePath, "jdk"),
+                        ["default"] = true
                     };
                     javaConfigEnv.Add(javaConfigProp);
                     settingsJson["java.configuration.runtimes"] = javaConfigEnv;
@@ -396,7 +402,8 @@ namespace WPILibInstaller.ViewModels
                 JObject javaConfigProp = new JObject
                 {
                     ["name"] = "JavaSE-17",
-                    ["path"] = Path.Combine(homePath, "jdk")
+                    ["path"] = Path.Combine(homePath, "jdk"),
+                    ["default"] = "true"
                 };
                 javaConfigProps.Add(javaConfigProp);
                 settingsJson["java.configuration.runtimes"] = javaConfigProps;
