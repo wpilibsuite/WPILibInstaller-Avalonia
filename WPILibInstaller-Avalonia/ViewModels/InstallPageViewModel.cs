@@ -364,6 +364,52 @@ namespace WPILibInstaller.ViewModels
                 }
             }
 
+            if (settingsJson.ContainsKey("java.configuration.runtimes"))
+            {
+                JArray javaConfigEnv = (JArray)settingsJson["java.configuration.runtimes"]!;
+                Boolean javaFound = false;
+                foreach (JToken result in javaConfigEnv)
+                {
+                    JToken? name = result["name"];
+                    if (name != null)
+                    {
+                        if (name.ToString().Equals("JavaSE-17"))
+                        {
+                            result["path"] = Path.Combine(homePath, "jdk");
+                            result["default"] = true;
+                            javaFound = true;
+                        }
+                        else
+                        {
+                            result["default"] = false;
+                        }
+                    }
+                }
+                if (!javaFound)
+                {
+                    JObject javaConfigProp = new JObject
+                    {
+                        ["name"] = "JavaSE-17",
+                        ["path"] = Path.Combine(homePath, "jdk"),
+                        ["default"] = true
+                    };
+                    javaConfigEnv.Add(javaConfigProp);
+                    settingsJson["java.configuration.runtimes"] = javaConfigEnv;
+                }
+            }
+            else
+            {
+                JArray javaConfigProps = new JArray();
+                JObject javaConfigProp = new JObject
+                {
+                    ["name"] = "JavaSE-17",
+                    ["path"] = Path.Combine(homePath, "jdk"),
+                    ["default"] = "true"
+                };
+                javaConfigProps.Add(javaConfigProp);
+                settingsJson["java.configuration.runtimes"] = javaConfigProps;
+            }
+
             var serialized = JsonConvert.SerializeObject(settingsJson, Formatting.Indented);
             await File.WriteAllTextAsync(settingsFile, serialized);
         }
