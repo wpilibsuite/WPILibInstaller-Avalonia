@@ -6,11 +6,11 @@ def fileNameWindows = 'Elastic-WPILib-Windows.zip'
 
 def downloadUrlWindows = baseUrl + fileNameWindows
 
-def fileNameMac = 'Elastic-WPILib-macOS.tar.gz'
+def fileNameMac = 'Elastic-WPILib-macOS.zip'
 
 def downloadUrlMac = baseUrl + fileNameMac
 
-def fileNameMacArm = 'Elastic-WPILib-macOS.tar.gz'
+def fileNameMacArm = 'Elastic-WPILib-macOS.zip'
 
 def downloadUrlMacArm = baseUrl + fileNameMacArm
 
