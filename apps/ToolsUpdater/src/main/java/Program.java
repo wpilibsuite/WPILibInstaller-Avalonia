@@ -133,6 +133,23 @@ public class Program {
     }
   }
 
+  private static void installUtility(String toolsPath) {
+    if (SystemUtils.IS_OS_MAC) {
+      String archiveFileName = "wpilibutility-mac.tar.gz";
+      String utilityFolder = Paths.get(new File(toolsPath).getParent(), "utility").toString();
+      Path archivePath = Paths.get(utilityFolder, archiveFileName);
+
+      try {
+        Runtime.getRuntime().exec(new String[] {
+            "tar", "-xzf", archivePath.toString(), "-C", utilityFolder
+        }).waitFor();
+      } catch (IOException | InterruptedException e) {
+        System.out.println(e.toString());
+        e.printStackTrace();
+      }
+    }
+  }
+
   public static void main(String[] args) throws URISyntaxException, IOException {
     Gson gson = new Gson();
 
@@ -150,6 +167,8 @@ public class Program {
           installAdvantageScope(toolsPath);
         } else if (tool.name.equals("Elastic")) {
           installElastic(toolsPath);
+        } else if (tool.name.equals("Utility")) {
+          installUtility(toolsPath);
         } else if (tool.artifact != null) {
           if (tool.cpp) {
             installCppTool(tool, toolsPath);
