@@ -61,6 +61,11 @@ def toolsJsonTask = tasks.register('toolsJson', Task) {
     choreoItem['version'] = choreoGitTag
     config << choreoItem
 
+    def utilityItem = [:]
+    utilityItem['name'] = "Utility"
+    utilityItem['version'] = wpilibVersion
+    config << utilityItem
+
     def gbuilder = getGsonBuilder()
     gbuilder.setPrettyPrinting()
     def json = gbuilder.create().toJson(config)
