@@ -55,6 +55,8 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="SharpZipLib" Version="1.4.2" />
     <PackageReference Include="Dotnet.Bundle" Version="0.9.13" />
+    <PackageReference Include="SkiaSharp" Version="2.88.9" />
+    <PackageReference Include="System.Drawing.Common" Version="4.7.3" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Assets\wpilib-generic-75.png" />
