@@ -27,4 +27,4 @@ ext.choreoGitTag = 'v2025.0.0-beta-6'
 
 ext.frcYear = '2025'
 
-ext.gradleWrapperVersion = '8.10.2'
+ext.gradleWrapperVersion = '8.11'
