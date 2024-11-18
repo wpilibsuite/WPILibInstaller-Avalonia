@@ -21,6 +21,7 @@ dim runObject
 ' Allow us to catch a script run failure
 On Error Resume Next
 Set runObj = objShell.Exec(shellScript)
+WScript.Sleep 3000
 If Err.Number <> 0 Then
 	If WScript.Arguments.Count > 0 Then
 		If (WScript.Arguments(0) <> "silent") Then
