@@ -14,7 +14,7 @@ def fileNameMacArm = "Choreo-$choreoGitTag-macOS-aarch64-standalone.zip"
 
 def downloadUrlMacArm = baseUrl + fileNameMacArm
 
-def fileNameLinux = "Choreo-$choreoGitTag-Linux-x86_64-standalone.zip"
+def fileNameLinux = "Choreo-$choreoGitTag-Linux-x86_64.AppImage"
 
 def downloadUrlLinux = baseUrl + fileNameLinux
 
@@ -44,8 +44,7 @@ def downloadTaskMacArm = tasks.register('downloadChoreoMacArm', Download) {
 
 def downloadTaskLinux = tasks.register('downloadChoreoLinux', Download) {
   src downloadUrlLinux
-  def fileName = file(src.file).name
-  dest "$buildDir/downloads/$fileName"
+  dest "$buildDir/downloads/choreo"
   overwrite true
 }
 
@@ -86,9 +85,10 @@ ext.choreoZipSetup = { AbstractArchiveTask zip->
 
     zip.inputs.files downloadTaskLinux.get().outputFiles
 
-    zip.from(project.zipTree(downloadTaskLinux.get().outputFiles.first())) {
+    zip.from(downloadTaskLinux.get().outputFiles.first()) {
       into '/choreo'
       includeEmptyDirs = false
+      fileMode 0755
     }
   } else if (project.hasProperty('macBuild')) {
     zip.dependsOn downloadTaskMac
