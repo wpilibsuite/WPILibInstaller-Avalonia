@@ -104,6 +104,7 @@ apply from: 'scripts/maven.gradle'
 
 apply from: 'scripts/advantagescope.gradle'
 apply from: 'scripts/choreo.gradle'
+apply from: 'scripts/elastic.gradle'
 
 // Tools must happen after maven
 apply from: 'scripts/tools.gradle'
@@ -223,6 +224,7 @@ def generateFullResourcesTask = tasks.register('generateFullResources', project.
 
     advantageScopeZipSetup(it)
     choreoZipSetup(it)
+    elasticZipSetup(it)
 
     if (OperatingSystem.current().isWindows()) {
         def task = it
@@ -329,6 +331,7 @@ def generateConfigFiles = tasks.register('generateCommonResources', Zip) {
 
     advantageScopeConfigFileSetup(zip)
     choreoConfigFileSetup(zip)
+    elasticConfigFileSetup(zip)
 
     vscodeConfigZipSetup(zip)
 }
@@ -457,5 +460,5 @@ tasks.register('generateInstallers', Task) {
 }
 
 wrapper {
-    gradleVersion = '8.10.2'
+    gradleVersion = '8.11'
 }

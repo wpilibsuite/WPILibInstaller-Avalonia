@@ -11,6 +11,9 @@ def advantageScopeScriptUnixFile = file("files/AdvantageScope.sh")
 def choreoScriptFile = file("files/Choreo.vbs")
 def choreoScriptUnixFile = file("files/Choreo.sh")
 
+def elasticScriptFile = file("files/Elastic.vbs")
+def elasticScriptUnixFile = file("files/Elastic.sh")
+
 def toolsJsonTask = tasks.register('toolsJson', Task) {
 
   dependsOn tasks.named('lazyModelEvaluation')
@@ -61,6 +64,16 @@ def toolsJsonTask = tasks.register('toolsJson', Task) {
     choreoItem['version'] = choreoGitTag
     config << choreoItem
 
+    def elasticItem = [:]
+    elasticItem['name'] = "Elastic"
+    elasticItem['version'] = elasticGitTag
+    config << elasticItem
+
+    def utilityItem = [:]
+    utilityItem['name'] = "Utility"
+    utilityItem['version'] = wpilibVersion
+    config << utilityItem
+
     def gbuilder = getGsonBuilder()
     gbuilder.setPrettyPrinting()
     def json = gbuilder.create().toJson(config)
@@ -108,6 +121,10 @@ ext.toolsSetup = { AbstractArchiveTask zip->
     zip.from (choreoScriptFile) {
       into '/tools'
     }
+
+    zip.from (elasticScriptFile) {
+      into '/tools'
+    }
   } else {
     zip.from (scriptBaseUnixFile) {
       into '/tools'
@@ -125,6 +142,11 @@ ext.toolsSetup = { AbstractArchiveTask zip->
     }
 
     zip.from (choreoScriptUnixFile) {
+      into '/tools'
+      fileMode 0755
+    }
+
+    zip.from (elasticScriptUnixFile) {
       into '/tools'
       fileMode 0755
     }
