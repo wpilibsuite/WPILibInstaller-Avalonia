@@ -116,6 +116,23 @@ public class Program {
     }
   }
 
+  private static void installElastic(String toolsPath) {
+    if (SystemUtils.IS_OS_MAC) {
+      String archiveFileName = "Elastic-WPILib-macOS.tar.gz";
+      String elasticFolder = Paths.get(new File(toolsPath).getParent(), "elastic").toString();
+      Path archivePath = Paths.get(elasticFolder, archiveFileName);
+
+      try {
+        Runtime.getRuntime().exec(new String[] {
+          "tar", "-xzf", archivePath.toString(), "-C", elasticFolder
+        }).waitFor();
+      } catch (IOException | InterruptedException e) {
+        System.out.println(e.toString());
+        e.printStackTrace();
+      }
+    }
+  }
+
   private static void installUtility(String toolsPath) {
     if (SystemUtils.IS_OS_MAC) {
       String archiveFileName = "wpilibutility-mac.tar.gz";
@@ -148,7 +165,9 @@ public class Program {
         System.out.println("Installing " + tool.name);
         if (tool.name.equals("AdvantageScope")) {
           installAdvantageScope(toolsPath);
-        } if (tool.name.equals("Utility")) {
+        } else if (tool.name.equals("Elastic")) {
+          installElastic(toolsPath);
+        } else if (tool.name.equals("Utility")) {
           installUtility(toolsPath);
         } else if (tool.artifact != null) {
           if (tool.cpp) {

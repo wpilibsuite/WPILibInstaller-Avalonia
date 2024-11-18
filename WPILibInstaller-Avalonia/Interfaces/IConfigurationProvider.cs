@@ -18,6 +18,8 @@ namespace WPILibInstaller.Interfaces
 
         ChoreoConfig ChoreoConfig { get; }
 
+        ElasticConfig ElasticConfig { get; }
+
         VsCodeConfig VsCodeConfig { get; }
 
         string InstallDirectory { get; }

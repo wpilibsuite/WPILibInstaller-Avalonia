@@ -1,0 +1,120 @@
+apply from: 'scripts/versions.gradle'
+
+def baseUrl = "https://github.com/Gold872/elastic-dashboard/releases/download/$elasticGitTag/"
+
+def fileNameWindows = 'Elastic-WPILib-Windows.zip'
+
+def downloadUrlWindows = baseUrl + fileNameWindows
+
+def fileNameMac = 'Elastic-WPILib-macOS.tar.gz'
+
+def downloadUrlMac = baseUrl + fileNameMac
+
+def fileNameMacArm = 'Elastic-WPILib-macOS.tar.gz'
+
+def downloadUrlMacArm = baseUrl + fileNameMacArm
+
+def fileNameLinux = 'Elastic-WPILib-Linux.zip'
+
+def downloadUrlLinux = baseUrl + fileNameLinux
+
+apply plugin: 'de.undercouch.download'
+
+def downloadTaskWindows = tasks.register('downloadElasticWindows', Download) {
+  src downloadUrlWindows
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite true
+}
+
+def downloadTaskMac = tasks.register('downloadElasticMac', Download) {
+  src downloadUrlMac
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite true
+}
+
+def downloadTaskMacArm = tasks.register('downloadElasticMacArm', Download) {
+  src downloadUrlMacArm
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite true
+}
+
+def downloadTaskLinux = tasks.register('downloadElasticLinux', Download) {
+  src downloadUrlLinux
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite true
+}
+
+def elasticConfigFile = file("$buildDir/elasticConfig.json")
+
+def elasticConfigFileTask = tasks.register('elasticConfigFile') {
+  it.outputs.file elasticConfigFile
+
+  doLast {
+    def config = [:]
+    config['folder'] = 'elastic'
+    config['zipFile'] = 'elastic.zip'
+
+    def gbuilder = getGsonBuilder()
+
+    gbuilder.setPrettyPrinting()
+    def json = gbuilder.create().toJson(config)
+
+    elasticConfigFile.parentFile.mkdirs()
+
+    elasticConfigFile.text = json
+  }
+}
+
+ext.elasticConfigFileSetup = { AbstractArchiveTask zip->
+  zip.dependsOn elasticConfigFileTask
+  zip.inputs.file elasticConfigFile
+
+  zip.from(elasticConfigFile) {
+        rename { 'elasticConfig.json' }
+  }
+}
+
+ext.elasticZipSetup = { AbstractArchiveTask zip->
+  if (project.hasProperty('linuxBuild')) {
+    zip.dependsOn downloadTaskLinux
+
+    zip.inputs.files downloadTaskLinux.get().outputFiles
+
+    zip.from(project.zipTree(downloadTaskLinux.get().outputFiles.first())) {
+      into '/elastic'
+      includeEmptyDirs = false
+    }
+  } else if (project.hasProperty('macBuild')) {
+    zip.dependsOn downloadTaskMac
+
+    zip.inputs.files downloadTaskMac.get().outputFiles
+
+    // Cannot extract, otherwise breaks mac
+    zip.from(downloadTaskMac.get().outputFiles.first()) {
+      into '/elastic'
+    }
+  } else if (project.hasProperty('macBuildArm')) {
+    zip.dependsOn downloadTaskMacArm
+
+    zip.inputs.files downloadTaskMacArm.get().outputFiles
+
+    // Cannot extract, otherwise breaks mac
+    zip.from(downloadTaskMacArm.get().outputFiles.first()) {
+      into '/elastic'
+    }
+  } else {
+    zip.dependsOn downloadTaskWindows
+
+    zip.inputs.files downloadTaskWindows.get().outputFiles
+
+    zip.from(project.zipTree(downloadTaskWindows.get().outputFiles.first())) {
+      into '/elastic'
+      includeEmptyDirs = false
+    }
+  }
+}
+

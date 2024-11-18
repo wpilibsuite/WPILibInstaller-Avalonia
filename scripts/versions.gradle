@@ -25,6 +25,8 @@ ext.advantagescopeGitTag = 'v4.0.0-beta-3'
 
 ext.choreoGitTag = 'v2025.0.0-beta-6'
 
+ext.elasticGitTag = 'v2025.0.0-beta-4'
+
 ext.frcYear = '2025'
 
 ext.gradleWrapperVersion = '8.11'
