@@ -1,9 +1,9 @@
-ext.vsCodeVersion = '1.94.2'
+ext.vsCodeVersion = '1.95.3'
 
-ext.vscodeLinuxHash = '364b59a30c569edf7a5dae18c72bfea0c9b01c6ca5608c45ae9c2cff2d178570'
-ext.vscodeMacHash = 'fc364cc7f2ac02288427dd12e2adb188c7eed2cdf94c7e2e1b7812125952a399'
-ext.vscodeWindowsHash = 'a352644fda2d5d2a44baf866037ce0663a80b80c5b861708c6745a22678051df'
-ext.vscodeLinuxArm64Hash = 'd13c41157b017fba6aef7d74be95abb6bd7aa9b7e3fdec9fd34993a07663e58a'
+ext.vscodeLinuxHash = '881c6dce9f9b18bdeaa0020197501be3808c6e23c26baa0ba905b0bc84175b46'
+ext.vscodeMacHash = '2b7788d17d2e0f3ac1fc684b126fa3739403fd2cdcd97e92ddcb738619f04aa9'
+ext.vscodeWindowsHash = '6d6fcd71fee97a3e110770032d7c8494145f15a92598813f031ceb09449c3f1d'
+ext.vscodeLinuxArm64Hash = '2d284dc9e99770fca8e2a10b115d41d0a4fcf2fa4b031433e66bc3f4febee5a4'
 
 ext.cppToolsVersion = '1.22.9'
 ext.javaExtVersion = '1.36.2024092708'
