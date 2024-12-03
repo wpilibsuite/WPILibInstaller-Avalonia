@@ -404,7 +404,7 @@ namespace WPILibInstaller.ViewModels
                 {
                     ["name"] = "JavaSE-17",
                     ["path"] = Path.Combine(homePath, "jdk"),
-                    ["default"] = "true"
+                    ["default"] = true
                 };
                 javaConfigProps.Add(javaConfigProp);
                 settingsJson["java.configuration.runtimes"] = javaConfigProps;
