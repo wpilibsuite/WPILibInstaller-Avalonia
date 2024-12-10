@@ -9,7 +9,7 @@ plugins {
 repositories {
     mavenCentral()
     maven {
-        url = uri("https://SleipnirGroup.github.io/ChoreoLib/dep")
+        url = uri("https://lib.choreo.autos/dep")
     }
 }
 

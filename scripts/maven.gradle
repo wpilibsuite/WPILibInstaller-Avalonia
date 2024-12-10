@@ -206,7 +206,7 @@ def downloadNewCommands = tasks.register('downloadNewCommands', Download) {
 }
 
 def downloadChoreo = tasks.register('downloadChoreo', Download) {
-  src 'https://SleipnirGroup.github.io/ChoreoLib/dep/ChoreoLib2025Beta.json'
+  src 'https://lib.choreo.autos/dep/ChoreoLib2025Beta.json'
   def fileName = file(src.file).name
   dest "$buildDir/downloads/$fileName"
   overwrite false
