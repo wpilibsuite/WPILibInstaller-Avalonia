@@ -42,7 +42,7 @@ namespace WPILibInstaller.ViewModels
 [Desktop Entry]
 Version=1.0
 Type=Application
-Categories=Robotics
+Categories=Science & Maths
 Name={name} {frcYear}
 Comment={nameNoWPILib} tool for the 2025 FIRST Robotics Competition season
 Exec={configurationProvider.InstallDirectory}/tools/{nameNoWPILib}.sh
