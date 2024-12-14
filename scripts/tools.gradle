@@ -59,11 +59,6 @@ def toolsJsonTask = tasks.register('toolsJson', Task) {
     advantageScopeItem['version'] = advantagescopeGitTag
     config << advantageScopeItem
 
-    def choreoItem = [:]
-    choreoItem['name'] = "Choreo"
-    choreoItem['version'] = choreoGitTag
-    config << choreoItem
-
     def elasticItem = [:]
     elasticItem['name'] = "Elastic"
     elasticItem['version'] = elasticGitTag

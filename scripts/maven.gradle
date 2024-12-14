@@ -205,13 +205,6 @@ def downloadNewCommands = tasks.register('downloadNewCommands', Download) {
   overwrite false
 }
 
-def downloadChoreo = tasks.register('downloadChoreo', Download) {
-  src 'https://SleipnirGroup.github.io/ChoreoLib/dep/ChoreoLib2025Beta.json'
-  def fileName = file(src.file).name
-  dest "$buildDir/downloads/$fileName"
-  overwrite false
-}
-
 def downloadRomiVendor = tasks.register('downloadRomiVendor', Download) {
   src 'https://raw.githubusercontent.com/wpilibsuite/allwpilib/main/romiVendordep/RomiVendordep.json'
   def fileName = file(src.file).name
@@ -234,15 +227,10 @@ ext.mavenZipSetup = { AbstractArchiveTask zip->
   }
 
   zip.dependsOn downloadNewCommands
-  zip.dependsOn downloadChoreo
   zip.dependsOn downloadReadTheDocs
   zip.dependsOn downloadPythonAPI
 
   zip.from(downloadNewCommands.get().outputFiles.first()) {
-    into '/vendordeps'
-  }
-
-  zip.from(downloadChoreo.get().outputFiles.first()) {
     into '/vendordeps'
   }
 
