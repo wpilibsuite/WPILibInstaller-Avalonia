@@ -16,8 +16,6 @@ namespace WPILibInstaller.Interfaces
 
         AdvantageScopeConfig AdvantageScopeConfig { get; }
 
-        ChoreoConfig ChoreoConfig { get; }
-
         ElasticConfig ElasticConfig { get; }
 
         VsCodeConfig VsCodeConfig { get; }
