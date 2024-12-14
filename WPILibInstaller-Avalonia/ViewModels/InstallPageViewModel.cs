@@ -1033,6 +1033,7 @@ StartupWMClass=Code
                 }
 
                 CreateLinuxShortcut("AdvantageScope (WPILib)", frcYear, "AdvantageScope", token);
+                CreateLinuxShortcut("Elastic (WPILib)", frcYear, "Elastic", token);
                 CreateLinuxShortcut("Glass", frcYear, "Glass - DISCONNECTED", token);
                 CreateLinuxShortcut("OutlineViewer", frcYear, "OutlineViewer - DISCONNECTED", token);
                 CreateLinuxShortcut("DataLogTool", frcYear, "Datalog Tool", token);
