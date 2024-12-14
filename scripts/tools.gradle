@@ -8,9 +8,6 @@ def scriptBaseCppUnixFile = file("files/ScriptBaseCpp.sh")
 def advantageScopeScriptFile = file("files/AdvantageScope.vbs")
 def advantageScopeScriptUnixFile = file("files/AdvantageScope.sh")
 
-def choreoScriptFile = file("files/Choreo.vbs")
-def choreoScriptUnixFile = file("files/Choreo.sh")
-
 def elasticScriptFile = file("files/Elastic.vbs")
 def elasticScriptUnixFile = file("files/Elastic.sh")
 
@@ -113,10 +110,6 @@ ext.toolsSetup = { AbstractArchiveTask zip->
       into '/tools'
     }
 
-    zip.from (choreoScriptFile) {
-      into '/tools'
-    }
-
     zip.from (elasticScriptFile) {
       into '/tools'
     }
@@ -132,11 +125,6 @@ ext.toolsSetup = { AbstractArchiveTask zip->
     }
 
     zip.from (advantageScopeScriptUnixFile) {
-      into '/tools'
-      fileMode 0755
-    }
-
-    zip.from (choreoScriptUnixFile) {
       into '/tools'
       fileMode 0755
     }
