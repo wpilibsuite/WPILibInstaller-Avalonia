@@ -1033,7 +1033,6 @@ StartupWMClass=Code
                     }, token);
                 }
 
-                CreateLinuxShortcut("Choreo (WPILib)", frcYear, "Choreo", token);
                 CreateLinuxShortcut("AdvantageScope (WPILib)", frcYear, "AdvantageScope", token);
                 CreateLinuxShortcut("Glass", frcYear, "Glass - DISCONNECTED", token);
                 CreateLinuxShortcut("OutlineViewer", frcYear, "OutlineViewer - DISCONNECTED", token);
