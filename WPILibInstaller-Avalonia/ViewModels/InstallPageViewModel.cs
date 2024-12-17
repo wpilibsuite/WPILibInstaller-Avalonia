@@ -60,7 +60,6 @@ StartupWMClass={wmClass}
 Version=1.0
 Type=Application
 Categories=Robotics;Science
-
 Name={name} {frcYear}
 Comment={name} tool for the 2025 FIRST Robotics Competition season
 Exec={configurationProvider.InstallDirectory}/tools/{name}.sh
