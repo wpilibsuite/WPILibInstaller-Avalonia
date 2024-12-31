@@ -6,11 +6,11 @@ ext.vscodeWindowsHash = 'c6c2f97e5cb25a8b576b345f6b8f2021cc168f1726ee370f29d1dbd
 ext.vscodeLinuxArm64Hash = '33e93e2899f7a9c20d882d07b157d5fde6f1419f21c6bb95cd676d7a0412690e'
 
 ext.cppToolsVersion = '1.23.2'
-ext.javaExtVersion = '1.37.0'
+ext.javaExtVersion = '1.38.0'
 ext.javaDebugVersion = '0.58.1'
 ext.javaDependencyVersion = '0.24.1'
-ext.pythonExtVersion = '2024.22.0'
-ext.pylanceVersion = '2024.12.100'
+ext.pythonExtVersion = '2024.22.1'
+ext.pylanceVersion = '2024.12.1'
 ext.isortVersion = '2023.10.1'
 ext.blackVersion = '2024.4.0'
 
