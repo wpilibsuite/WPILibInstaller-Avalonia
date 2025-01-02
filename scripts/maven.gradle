@@ -33,6 +33,10 @@ def skipNewPlatformTools = [
   'edu.wpi.first.tools:SmartDashboard'
 ]
 
+def skipLinuxArm64PlatformTools = [
+  'edu.wpi.first.tools:wpical'
+]
+
 def skipTools = []
 
 dependencies {
@@ -67,6 +71,16 @@ def lazyEvaluator = tasks.register('lazyModelEvaluation') {
 
         if (project.hasProperty('macBuildArm') || project.hasProperty('linuxBuildArm64')) {
           skipNewPlatformTools.each { tool->
+            if ("$dep.groupId:$dep.artifactId" == tool) {
+              def depString = "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
+              println "Skipping because arm " + depString
+              foundTool = true
+              return
+            }
+          }
+        }
+        if (project.hasProperty('linuxBuildArm64')) {
+          skipLinuxArm64PlatformTools.each { tool->
             if ("$dep.groupId:$dep.artifactId" == tool) {
               def depString = "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
               println "Skipping because arm " + depString
