@@ -23,7 +23,7 @@ ext.jdkVersion = '17.0.12+7'
 
 ext.advantagescopeGitTag = 'v4.1.0'
 
-ext.elasticGitTag = 'v2025.0.0'
+ext.elasticGitTag = 'v2025.0.1'
 
 ext.frcYear = '2025'
 
