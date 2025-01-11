@@ -185,7 +185,7 @@ namespace WPILibInstaller.ViewModels
             var currentPlatform = PlatformUtils.CurrentPlatform;
             String extension;
 
-            if (currentPlatform == Platform.Linux64)
+            if (currentPlatform == Platform.Linux64 || currentPlatform == Platform.LinuxArm64)
             {
                 extension = "tar.gz";
             }
