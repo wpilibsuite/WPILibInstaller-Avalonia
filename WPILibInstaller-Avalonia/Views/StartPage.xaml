@@ -18,7 +18,7 @@
                HorizontalAlignment="Center"
                FontSize="25"
                VerticalAlignment="Center" />
-    <TextBlock Text="Ensure you've ejected any other WPILib Installer images"
+    <TextBlock Text="Ensure you've ejected any other WPILib Installer images and restart the installer"
                IsVisible="{Binding MacOSEject}" Foreground="Red"/>
     <TextBlock Text="The artifacts and/or resource files were not found. Please click the buttons below to select them."
                IsVisible="{Binding MissingEitherFile}"/>
