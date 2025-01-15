@@ -154,6 +154,8 @@ namespace WPILibInstaller.ViewModels
 
         public bool MissingEitherFile => MissingSupportFiles || MissingResourceFiles;
 
+        public bool MacOSEject => MissingEitherFile && RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+
         private bool missingSupportFiles = true;
 
         public bool MissingResourceFiles

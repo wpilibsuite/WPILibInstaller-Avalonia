@@ -8,7 +8,7 @@
               VerticalAlignment="Center">
     <Image Source="resm:WPILibInstaller.Assets.wpilib-generic-75.png?assembly=WPILibInstaller"
            Stretch="None"
-           Margin="75"/>
+           Margin="40"/>
     <TextBlock Text="Welcome to the WPILib Installer!"
                HorizontalAlignment="Center"
                FontWeight="Bold"
@@ -18,6 +18,8 @@
                HorizontalAlignment="Center"
                FontSize="25"
                VerticalAlignment="Center" />
+    <TextBlock Text="Ensure you've ejected any other WPILib Installer images and restart the installer"
+               IsVisible="{Binding MacOSEject}" Foreground="Red"/>
     <TextBlock Text="The artifacts and/or resource files were not found. Please click the buttons below to select them."
                IsVisible="{Binding MissingEitherFile}"/>
     <TextBlock Text="Verifying Artifacts File..."
