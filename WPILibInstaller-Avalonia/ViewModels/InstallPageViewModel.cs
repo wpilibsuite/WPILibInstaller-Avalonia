@@ -770,7 +770,12 @@ StartupWMClass={wmClass}
                     break;
                 case Platform.MacArm64:
                 case Platform.Mac64:
-                    codeExe = Path.Combine(configurationProvider.InstallDirectory, "vscode", "Visual Studio Code.app", "Contents", "Resources", "app", "bin", "code");
+                    var appDirectories = Directory.GetDirectories(Path.Combine(configurationProvider.InstallDirectory, "vscode"), "*.app");
+                    if (appDirectories.Length != 1)
+                    {
+                        throw new InvalidOperationException("Expected exactly one .app directory in the vscode folder.");
+                    }
+                    codeExe = Path.Combine(appDirectories[0], "Contents", "Resources", "app", "bin", "code");
                     break;
                 case Platform.Linux64:
                     codeExe = Path.Combine(configurationProvider.InstallDirectory, "vscode", "VSCode-linux-x64", "bin", "code");
