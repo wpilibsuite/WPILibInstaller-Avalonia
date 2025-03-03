@@ -33,7 +33,7 @@ namespace WPILibInstaller.ViewModels
 
         private async void CreateLinuxShortcut(String name, String frcYear, String wmClass, CancellationToken token)
         {
-            var launcherFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local/share/applications", $@"{name} {frcYear}.desktop");
+            var launcherFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local/share/applications", $@"{name.Replace(' ', '_').Replace(")", "").Replace("(", "")}_{frcYear}.desktop");
             string contents;
             if (name.Contains("WPILib"))
             {
@@ -1001,7 +1001,7 @@ StartupWMClass={wmClass}
                 {
                     // Create Linux desktop shortcut
                     var desktopFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Desktop", $@"FRC VS Code {frcYear}.desktop");
-                    var launcherFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local/share/applications", $@"FRC VS Code {frcYear}.desktop");
+                    var launcherFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local/share/applications", $@"FRC_VS_Code_{frcYear}.desktop");
                     string contents = $@"#!/usr/bin/env xdg-open
 [Desktop Entry]
 Version=1.0
