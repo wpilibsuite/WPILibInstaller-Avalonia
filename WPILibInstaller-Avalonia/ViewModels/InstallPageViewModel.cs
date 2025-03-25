@@ -9,12 +9,18 @@ using System.Reactive.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using DynamicData;
+using MsBox.Avalonia;
+using MsBox.Avalonia.Dto;
+using MsBox.Avalonia.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ReactiveUI;
 using WPILibInstaller.Interfaces;
 using WPILibInstaller.Models;
 using WPILibInstaller.Utils;
+using static System.Net.WebRequestMethods;
+using File = System.IO.File;
 
 namespace WPILibInstaller.ViewModels
 {
@@ -585,13 +591,13 @@ StartupWMClass={wmClass}
                 if (foundRunningExe)
                 {
                     string msg = "Running JDK processes have been found. Installation cannot continue. Please restart your computer, and rerun this installer without running anything else (including VS Code)";
-                    await MessageBox.Avalonia.MessageBoxManager.GetMessageBoxStandardWindow(new MessageBox.Avalonia.DTO.MessageBoxStandardParams
+                    await MsBox.Avalonia.MessageBoxManager.GetMessageBoxStandard(new MsBox.Avalonia.Dto.MessageBoxStandardParams
                     {
                         ContentTitle = "JDKs Running",
                         ContentMessage = msg,
-                        Icon = MessageBox.Avalonia.Enums.Icon.Error,
-                        ButtonDefinitions = MessageBox.Avalonia.Enums.ButtonEnum.Ok
-                    }).ShowDialog(programWindow.Window);
+                        Icon = MsBox.Avalonia.Enums.Icon.Error,
+                        ButtonDefinitions = MsBox.Avalonia.Enums.ButtonEnum.Ok
+                    }).ShowWindowDialogAsync(programWindow.Window);
                     throw new InvalidOperationException(msg);
                 }
             }
@@ -742,7 +748,7 @@ StartupWMClass={wmClass}
             await RunJavaJar(configurationProvider.InstallDirectory,
                 Path.Combine(configurationProvider.InstallDirectory,
                 configurationProvider.UpgradeConfig.Tools.Folder,
-                configurationProvider.UpgradeConfig.Tools.UpdaterJar), 20000);
+                configurationProvider.UpgradeConfig.Tools.UpdaterJar), 30000);
         }
 
         private async Task RunMavenMetaDataFixer()
@@ -965,16 +971,16 @@ StartupWMClass={wmClass}
                         }
                     });
 
-                    if (exitCode == 1223) // ERROR_CANCLED
+                    if (exitCode == 1223) // ERROR_CANCELLED
                     {
-                        var results = await MessageBox.Avalonia.MessageBoxManager.GetMessageBoxStandardWindow(new MessageBox.Avalonia.DTO.MessageBoxStandardParams
+                        var results = await MsBox.Avalonia.MessageBoxManager.GetMessageBoxStandard(new MsBox.Avalonia.Dto.MessageBoxStandardParams
                         {
                             ContentTitle = "UAC Prompt Cancelled",
                             ContentMessage = "UAC Prompt Cancelled or Timed Out. Would you like to retry?",
-                            Icon = MessageBox.Avalonia.Enums.Icon.Info,
-                            ButtonDefinitions = MessageBox.Avalonia.Enums.ButtonEnum.YesNo
-                        }).ShowDialog(programWindow.Window);
-                        if (results == MessageBox.Avalonia.Enums.ButtonResult.Yes)
+                            Icon = MsBox.Avalonia.Enums.Icon.Info,
+                            ButtonDefinitions = MsBox.Avalonia.Enums.ButtonEnum.YesNo
+                        }).ShowWindowDialogAsync(programWindow.Window);
+                        if (results == MsBox.Avalonia.Enums.ButtonResult.Yes)
                         {
                             continue;
                         }
@@ -983,13 +989,13 @@ StartupWMClass={wmClass}
 
                     if (exitCode != 0)
                     {
-                        await MessageBox.Avalonia.MessageBoxManager.GetMessageBoxStandardWindow(new MessageBox.Avalonia.DTO.MessageBoxStandardParams
+                        await MsBox.Avalonia.MessageBoxManager.GetMessageBoxStandard(new MsBox.Avalonia.Dto.MessageBoxStandardParams
                         {
                             ContentTitle = "Shortcut Creation Failed",
                             ContentMessage = $"Shortcut creation failed with error code {exitCode}",
-                            Icon = MessageBox.Avalonia.Enums.Icon.Warning,
-                            ButtonDefinitions = MessageBox.Avalonia.Enums.ButtonEnum.Ok
-                        }).ShowDialog(programWindow.Window);
+                            Icon = MsBox.Avalonia.Enums.Icon.Warning,
+                            ButtonDefinitions = MsBox.Avalonia.Enums.ButtonEnum.Ok
+                        }).ShowWindowDialogAsync(programWindow.Window);
                         break;
                     }
                     break;
