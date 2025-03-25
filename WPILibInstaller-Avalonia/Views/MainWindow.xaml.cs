@@ -3,8 +3,8 @@ using System.Threading.Tasks;
 using Autofac;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
-using Avalonia.ReactiveUI;
 using Avalonia.Platform.Storage;
+using Avalonia.ReactiveUI;
 using WPILibInstaller.Interfaces;
 using WPILibInstaller.ViewModels;
 
