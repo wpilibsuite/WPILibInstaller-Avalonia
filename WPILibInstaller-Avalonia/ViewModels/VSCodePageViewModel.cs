@@ -309,7 +309,7 @@ namespace WPILibInstaller.ViewModels
                 using var toWriteStream = new FileStream(Path.Join(file, Model.Platforms[platform].NameInZip), FileMode.OpenOrCreate);
                 stream.Seek(0, SeekOrigin.Begin);
                 await stream.CopyToAsync(toWriteStream);
-                if (platform == currentPlatform)
+                if (platform == currentPlatform || (currentPlatform == Platform.MacArm64 && platform == Platform.Mac64))
                 {
                     ms = stream;
                 }
