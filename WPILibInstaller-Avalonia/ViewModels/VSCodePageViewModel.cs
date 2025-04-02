@@ -5,7 +5,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
-using MessageBox.Avalonia;
+using MsBox.Avalonia;
 using ReactiveUI;
 using WPILibInstaller.Interfaces;
 using WPILibInstaller.Models;
@@ -170,11 +170,11 @@ namespace WPILibInstaller.ViewModels
                 return;
             }
 
-            var result = await MessageBoxManager.GetMessageBoxStandardWindow("Confirmation",
+            var result = await MessageBoxManager.GetMessageBoxStandard("Confirmation",
                 "Are you sure you want to skip installing VS Code?\nA WPILib VS Code install was not detected.",
-                icon: MessageBox.Avalonia.Enums.Icon.None, @enum: MessageBox.Avalonia.Enums.ButtonEnum.YesNo).ShowDialog(programWindow.Window);
+                icon: MsBox.Avalonia.Enums.Icon.None, @enum: MsBox.Avalonia.Enums.ButtonEnum.YesNo).ShowWindowDialogAsync(programWindow.Window);
 
-            if (result == MessageBox.Avalonia.Enums.ButtonResult.Yes)
+            if (result == MsBox.Avalonia.Enums.ButtonResult.Yes)
             {
                 await viewModelResolver.ResolveMainWindow().ExecuteGoNext();
             }
@@ -231,9 +231,9 @@ namespace WPILibInstaller.ViewModels
             }
             catch
             {
-                await MessageBoxManager.GetMessageBoxStandardWindow("Error",
+                await MessageBoxManager.GetMessageBoxStandard("Error",
                     "You must select a VS Code zip downloaded with this tool.",
-                    icon: MessageBox.Avalonia.Enums.Icon.None).ShowDialog(programWindow.Window);
+                    icon: MsBox.Avalonia.Enums.Icon.None).ShowWindowDialogAsync(programWindow.Window);
                 return;
             }
 
@@ -245,14 +245,14 @@ namespace WPILibInstaller.ViewModels
         private async Task<bool> CheckIncorrectHash(string name, string expected, string actual)
         {
             string msg = $"Invalid Hash for {name}\nExpected: {expected}\nActual: {actual}\nOK to ignore, Abort to cancel.\nIf cancelled, problems may occur";
-            var res = await MessageBox.Avalonia.MessageBoxManager.GetMessageBoxStandardWindow(new MessageBox.Avalonia.DTO.MessageBoxStandardParams
+            var res = await MsBox.Avalonia.MessageBoxManager.GetMessageBoxStandard(new MsBox.Avalonia.Dto.MessageBoxStandardParams
             {
                 ContentTitle = "Invalid Hash",
                 ContentMessage = msg,
-                Icon = MessageBox.Avalonia.Enums.Icon.Error,
-                ButtonDefinitions = MessageBox.Avalonia.Enums.ButtonEnum.OkAbort
-            }).ShowDialog(programWindow.Window);
-            return res == MessageBox.Avalonia.Enums.ButtonResult.Ok;
+                Icon = MsBox.Avalonia.Enums.Icon.Error,
+                ButtonDefinitions = MsBox.Avalonia.Enums.ButtonEnum.OkAbort
+            }).ShowWindowDialogAsync(programWindow.Window);
+            return res == MsBox.Avalonia.Enums.ButtonResult.Ok;
         }
 
         private async Task DownloadVsCodeFunc()

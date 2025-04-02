@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Autofac;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
+using Avalonia.Platform.Storage;
 using Avalonia.ReactiveUI;
 using WPILibInstaller.Interfaces;
 using WPILibInstaller.ViewModels;
@@ -47,45 +48,44 @@ namespace WPILibInstaller.Views
 
         public async Task<string?> ShowFilePicker(string title, string extensionFilter, string? initialiDirectory)
         {
-
-            OpenFileDialog dialog = new OpenFileDialog
+            var options = new FilePickerOpenOptions
             {
-                AllowMultiple = false,
                 Title = title,
-                Filters = new List<FileDialogFilter>() {
-                    new FileDialogFilter {
-                        Name = "Archive",
-                        Extensions = new List<string>() {
-                            extensionFilter,
-                        },
-                    },
-                },
+                AllowMultiple = false,
+                FileTypeFilter = new List<FilePickerFileType>
+                {
+                    new FilePickerFileType("Archive")
+                    {
+                        Patterns = new[] { $"*.{extensionFilter}" }
+                    }
+                }
             };
 
             if (initialiDirectory != null)
             {
-                dialog.Directory = initialiDirectory;
+                options.SuggestedStartLocation = await StorageProvider.TryGetFolderFromPathAsync(initialiDirectory);
             }
-            var result = await dialog.ShowAsync(this);
-            if (result == null) return null;
-            if (result.Length != 1) return null;
-            return result[0];
+
+            var result = await StorageProvider.OpenFilePickerAsync(options);
+            if (result == null || result.Count != 1) return null;
+            return result[0].Path.LocalPath;
         }
 
         public async Task<string?> ShowFolderPicker(string title, string? initialiDirectory)
         {
-
-            OpenFolderDialog dialog = new OpenFolderDialog
+            var options = new FolderPickerOpenOptions
             {
-                Title = title,
+                Title = title
             };
+
             if (initialiDirectory != null)
             {
-                dialog.Directory = initialiDirectory;
+                options.SuggestedStartLocation = await StorageProvider.TryGetFolderFromPathAsync(initialiDirectory);
             }
-            var result = await dialog.ShowAsync(this);
-            if (string.IsNullOrWhiteSpace(result)) return null;
-            return result;
+
+            var result = await StorageProvider.OpenFolderPickerAsync(options);
+            if (result == null || result.Count != 1) return null;
+            return result[0].Path.LocalPath;
         }
 
         private void InitializeComponent()

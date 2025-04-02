@@ -6,7 +6,6 @@ using System.Reactive;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
-using MessageBox.Avalonia.DTO;
 using Newtonsoft.Json;
 using ReactiveUI;
 using WPILibInstaller.Interfaces;
