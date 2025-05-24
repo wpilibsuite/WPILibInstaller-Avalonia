@@ -9,6 +9,9 @@ using System.Reactive.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia.Controls;
+using MessageBox.Avalonia;
+using MessageBox.Avalonia.Enums;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ReactiveUI;
@@ -131,6 +134,17 @@ StartupWMClass={wmClass}
 
         public async Task CancelInstallFunc()
         {
+            var box = MessageBoxManager
+            .GetMessageBoxStandardWindow("Are you sure?", "Are you sure you would like cancel the installation?",
+                ButtonEnum.YesNo, Icon.Warning, WindowStartupLocation.CenterOwner, Style.None);
+
+            var result = await box.ShowDialog(programWindow.Window);
+
+            if (result != ButtonResult.Yes)
+            {
+                return;
+            }
+
             source?.Cancel();
             await runInstallTask;
         }
