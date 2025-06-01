@@ -7,6 +7,8 @@ def vscodeLinuxZipName = "VSCode-${vsCodeVersion}-Linux.tar.gz".toString()
 def vscodeLinuxArm64ZipName = "VSCode-${vsCodeVersion}-LinuxArm64.tar.gz".toString()
 def vscodeMacZipName = "VSCode-${vsCodeVersion}-Mac.zip".toString()
 
+wpilibVersion = '2025.3.2' //TODO: delete
+
 def vscodeWindowsUrl = "https://update.code.visualstudio.com/${vsCodeVersion}/win32-x64-archive/stable".toString()
 
 def vscodeLinuxUrl = "https://update.code.visualstudio.com/${vsCodeVersion}/linux-x64/stable".toString()

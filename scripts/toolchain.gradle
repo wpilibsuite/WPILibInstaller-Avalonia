@@ -2,23 +2,23 @@ apply from: 'scripts/versions.gradle'
 
 def baseUrl = "https://github.com/wpilibsuite/opensdk/releases/download/$toolchainGitTag/"
 
-def fileNameWindows = "cortexa9_vfpv3-roborio-academic-2025-x86_64-w64-mingw32-Toolchain-${gccVersion}.zip"
+def fileNameWindows = "arm64-bookworm-2025-x86_64-w64-mingw32-Toolchain-${gccVersion}.zip"
 
 def downloadUrlWindows = baseUrl + fileNameWindows
 
-def fileNameMac = "cortexa9_vfpv3-roborio-academic-2025-x86_64-apple-darwin-Toolchain-${gccVersion}.tgz"
+def fileNameMac = "arm64-bookworm-2025-x86_64-apple-darwin-Toolchain-${gccVersion}.tgz"
 
 def downloadUrlMac = baseUrl + fileNameMac
 
-def fileNameMacArm = "cortexa9_vfpv3-roborio-academic-2025-arm64-apple-darwin-Toolchain-${gccVersion}.tgz"
+def fileNameMacArm = "arm64-bookworm-2025-arm64-apple-darwin-Toolchain-${gccVersion}.tgz"
 
 def downloadUrlMacArm = baseUrl + fileNameMacArm
 
-def fileNameLinux = "cortexa9_vfpv3-roborio-academic-2025-x86_64-linux-gnu-Toolchain-${gccVersion}.tgz"
+def fileNameLinux = "arm64-bookworm-2025-x86_64-linux-gnu-Toolchain-${gccVersion}.tgz"
 
 def downloadUrlLinux = baseUrl + fileNameLinux
 
-def fileNameLinuxArm64 = "cortexa9_vfpv3-roborio-academic-2025-aarch64-bullseye-linux-gnu-Toolchain-${gccVersion}.tgz"
+def fileNameLinuxArm64 = "cortexa9_vfpv3-roborio-academic-2025-aarch64-bullseye-linux-gnu-Toolchain-${gccVersion}.tgz" //TODO: Update when linux aarch64 OpenSDK build availible
 
 def downloadUrlLinuxArm64 = baseUrl + fileNameLinuxArm64
 
@@ -66,7 +66,7 @@ ext.toolchainConfigTaskSetup = {
     def toolchainConfig = [:];
 
     toolchainConfig['Version'] = gccVersion
-    toolchainConfig['Directory'] = 'roborio'
+    toolchainConfig['Directory'] = 'systemcore'
 
     config['CppToolchain'] = toolchainConfig
   });
@@ -88,7 +88,7 @@ ext.toolchainZipSetup = { AbstractArchiveTask zip->
     zip.from(project.tarTree(project.resources.gzip(actualLinuxTask.get().outputFiles.first()))) {
 
       eachFile { f->
-        f.path = f.path.replace('roborio-academic/', 'roborio/')
+        f.path = f.path.replace('bookworm/', 'systemcore/')
       }
 
       includeEmptyDirs = false
@@ -102,7 +102,7 @@ ext.toolchainZipSetup = { AbstractArchiveTask zip->
     zip.from(project.tarTree(project.resources.gzip(downloadTaskMac.get().outputFiles.first()))) {
 
       eachFile { f->
-        f.path = f.path.replace('roborio-academic/', 'roborio/')
+        f.path = f.path.replace('bookworm/', 'systemcore/')
       }
 
       includeEmptyDirs = false
@@ -115,7 +115,7 @@ ext.toolchainZipSetup = { AbstractArchiveTask zip->
     zip.from(project.tarTree(project.resources.gzip(downloadTaskMacArm.get().outputFiles.first()))) {
 
       eachFile { f->
-        f.path = f.path.replace('roborio-academic/', 'roborio/')
+        f.path = f.path.replace('bookworm/', 'systemcore/')
       }
 
       includeEmptyDirs = false
@@ -128,7 +128,7 @@ ext.toolchainZipSetup = { AbstractArchiveTask zip->
     zip.from(project.zipTree(downloadTaskWindows.get().outputFiles.first())) {
 
       eachFile { f->
-        f.path = f.path.replace('roborio-academic/', 'roborio/')
+        f.path = f.path.replace('bookworm/', 'systemcore/')
       }
 
       includeEmptyDirs = false

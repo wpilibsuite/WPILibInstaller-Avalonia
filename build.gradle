@@ -31,7 +31,7 @@ if (pubVersion == '') {
 
 println pubVersion
 
-project.ext.setProperty('toolchain-optional-roboRio', '')
+project.ext.setProperty('toolchain-optional-systemCore', '')
 
 if (OperatingSystem.current().isWindows()) {
     project.ext.currentClassifier = 'windowsx86-64'

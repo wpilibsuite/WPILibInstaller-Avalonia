@@ -3,12 +3,12 @@ import org.gradle.internal.component.external.model.DefaultModuleComponentIdenti
 plugins {
     id "java"
     id 'cpp'
-    id "edu.wpi.first.GradleRIO"
+    id "edu.wpi.first.GradleRIO2027"
 }
 
 deploy {
     targets {
-        roborio(getTargetTypeClass('RoboRIO')) {
+        systemcore(getTargetTypeClass('SystemCore')) {
             team = 0
             debug = false
 
@@ -29,8 +29,8 @@ deploy {
     }
 }
 
-def deployJavaArtifact = deploy.targets.roborio.artifacts.frcJava
-def deployCppArtifact = deploy.targets.roborio.artifacts.frcCpp
+def deployJavaArtifact = deploy.targets.systemcore.artifacts.frcJava
+def deployCppArtifact = deploy.targets.systemcore.artifacts.frcCpp
 
 wpi.java.debugJni = false
 
@@ -39,11 +39,11 @@ dependencies {
     implementation wpi.java.deps.wpilib()
     implementation wpi.java.vendor.java()
 
-    nativeDebug wpi.java.deps.wpilibJniDebug(wpi.platforms.roborio)
-    nativeDebug wpi.java.vendor.jniDebug(wpi.platforms.roborio)
+    systemcoreDebug wpi.java.deps.wpilibJniDebug(wpi.platforms.systemcore)
+    systemcoreDebug wpi.java.vendor.jniDebug(wpi.platforms.systemcore)
 
-    nativeRelease wpi.java.deps.wpilibJniRelease(wpi.platforms.roborio)
-    nativeRelease wpi.java.vendor.jniRelease(wpi.platforms.roborio)
+    systemcoreRelease wpi.java.deps.wpilibJniRelease(wpi.platforms.systemcore)
+    systemcoreRelease wpi.java.vendor.jniRelease(wpi.platforms.systemcore)
 
     nativeDebug wpi.java.deps.wpilibJniDebug(wpi.platforms.desktop)
     nativeDebug wpi.java.vendor.jniDebug(wpi.platforms.desktop)
@@ -144,7 +144,7 @@ nativeUtils {
 model {
     components {
         frcUserProgram(NativeExecutableSpec) {
-            targetPlatform wpi.platforms.roborio
+            targetPlatform wpi.platforms.systemcore
             targetPlatform wpi.platforms.desktop
 
             deployCppArtifact.component = it
@@ -159,7 +159,7 @@ model {
             wpi.cpp.deps.useLibrary(it, 'romivendordep')
         }
         // frcUserProgramStatic(NativeExecutableSpec) {
-        //     targetPlatform wpi.platforms.roborio
+        //     targetPlatform wpi.platforms.systemcore
         //     targetPlatform wpi.platforms.desktop
 
         //     // Defining the dependencies.
