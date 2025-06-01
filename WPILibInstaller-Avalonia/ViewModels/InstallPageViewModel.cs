@@ -210,9 +210,6 @@ StartupWMClass={wmClass}
                     ProgressTotal = 88;
                     TextTotal = "Creating Shortcuts";
                     await RunShortcutCreator(token);
-                    if (token.IsCancellationRequested) break;
-                    ProgressTotal = 99;
-                    TextTotal = "Cleaning Up";
                 } while (false);
             }
             catch (OperationCanceledException)
