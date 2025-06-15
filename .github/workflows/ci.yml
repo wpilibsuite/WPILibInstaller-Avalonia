@@ -56,9 +56,9 @@ jobs:
           github.repository_owner == 'wpilibsuite' &&
           (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
 
-      - name: Install roboRIO Toolchain
+      - name: Install SystemCore Toolchain
         shell: bash
-        run: ./gradlew installRoboRioToolchain
+        run: ./gradlew installSystemCoreToolchain
 
       - name: Build Installer (PR)
         shell: bash
