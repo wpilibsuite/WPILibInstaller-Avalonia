@@ -14,7 +14,7 @@ ext.pylanceVersion = '2024.12.1'
 ext.isortVersion = '2023.10.1'
 ext.blackVersion = '2024.4.0'
 
-ext.wpilibVersion = '2025.3.2-123-g22d12d2' //TODO: gradlerioVersion
+ext.wpilibVersion = gradleRioVersion
 
 ext.gccVersion = '12.2.0'
 ext.toolchainGitTag = 'v2025-1'
