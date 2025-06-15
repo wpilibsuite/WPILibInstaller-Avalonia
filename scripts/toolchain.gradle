@@ -18,7 +18,7 @@ def fileNameLinux = "arm64-bookworm-2025-x86_64-linux-gnu-Toolchain-${gccVersion
 
 def downloadUrlLinux = baseUrl + fileNameLinux
 
-def fileNameLinuxArm64 = "cortexa9_vfpv3-roborio-academic-2025-aarch64-bullseye-linux-gnu-Toolchain-${gccVersion}.tgz" //TODO: Update when linux aarch64 OpenSDK build availible
+def fileNameLinuxArm64 = "arm64-bookworm-2025-arm64-bookworm-linux-gnu-Toolchain-${gccVersion}.tgz"
 
 def downloadUrlLinuxArm64 = baseUrl + fileNameLinuxArm64
 

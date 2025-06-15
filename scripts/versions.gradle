@@ -17,7 +17,7 @@ ext.blackVersion = '2024.4.0'
 ext.wpilibVersion = gradleRioVersion
 
 ext.gccVersion = '12.2.0'
-ext.toolchainGitTag = 'v2025-1'
+ext.toolchainGitTag = 'v2025-2'
 
 ext.jdkVersion = '17.0.12+7'
 
