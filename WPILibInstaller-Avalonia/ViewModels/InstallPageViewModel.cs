@@ -210,10 +210,6 @@ StartupWMClass={wmClass}
                     ProgressTotal = 88;
                     TextTotal = "Creating Shortcuts";
                     await RunShortcutCreator(token);
-                    if (token.IsCancellationRequested) break;
-                    ProgressTotal = 99;
-                    TextTotal = "Cleaning Up";
-                    await RunChoreoCleanup();
                 } while (false);
             }
             catch (OperationCanceledException)
@@ -1055,27 +1051,5 @@ StartupWMClass=Code
                 CreateLinuxShortcut("WPIcal", frcYear, "WPIcal", token);
             }
         }
-
-        private async Task RunChoreoCleanup()
-        {
-            if (Directory.Exists(Path.Combine(configurationProvider.InstallDirectory, "choreo")))
-            {
-                Text = "Clean up Choreo Directory";
-                Progress = 25;
-                Directory.Delete(Path.Combine(configurationProvider.InstallDirectory, "choreo"), true);
-
-                Text = "Clean up Choreo Scripts";
-                Progress = 50;
-                File.Delete(Path.Combine(configurationProvider.InstallDirectory, "tools", "choreo.vbs"));
-                File.Delete(Path.Combine(configurationProvider.InstallDirectory, "tools", "choreo.sh"));
-
-                Text = "Clean up Choreo Vendordeps";
-                Progress = 75;
-                File.Delete(Path.Combine(configurationProvider.InstallDirectory, "vendordeps", "ChoreoLib2025Beta.json"));
-            }
-
-            await Task.Yield();
-        }
-
     }
 }
