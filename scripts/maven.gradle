@@ -14,23 +14,17 @@ configurations {
 }
 
 def toolArtifacts = [
-  'edu.wpi.first.tools:Shuffleboard',
-  'edu.wpi.first.tools:RobotBuilder',
-  'edu.wpi.first.tools:PathWeaver',
-  'edu.wpi.first.tools:SmartDashboard'
 ]
 
 def cppToolsArtifacts = [
   'edu.wpi.first.tools:Glass',
   'edu.wpi.first.tools:OutlineViewer',
-  'edu.wpi.first.tools:roboRIOTeamNumberSetter',
   'edu.wpi.first.tools:DataLogTool',
   'edu.wpi.first.tools:SysId',
   'edu.wpi.first.tools:wpical'
 ]
 
 def skipNewPlatformTools = [
-  'edu.wpi.first.tools:SmartDashboard'
 ]
 
 def skipLinuxArm64PlatformTools = [
@@ -138,7 +132,7 @@ def lazyEvaluator = tasks.register('lazyModelEvaluation') {
         } else if (dep.classifier.startsWith(project.ext.currentClassifier)) {
           def newClassifier = dep.classifier.replace(project.ext.currentClassifier, project.ext.forceNativeClassifier)
           offline "$dep.groupId:$dep.artifactId:$dep.version:$newClassifier@$dep.extension"
-        } else if (dep.classifier.contains('athena')) {
+        } else if (dep.classifier.contains('systemcore')) {
          offline "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
         } else if (dep.classifier.contains('headers')) {
          offline "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
@@ -214,21 +208,21 @@ def downloadPythonAPI = tasks.register('downloadPythonAPI', Download) {
 }
 
 def downloadNewCommands = tasks.register('downloadNewCommands', Download) {
-  src 'https://raw.githubusercontent.com/wpilibsuite/allwpilib/main/wpilibNewCommands/WPILibNewCommands.json'
+  src 'https://raw.githubusercontent.com/wpilibsuite/allwpilib/2027/wpilibNewCommands/WPILibNewCommands.json'
   def fileName = file(src.file).name
   dest "$buildDir/downloads/$fileName"
   overwrite false
 }
 
 def downloadRomiVendor = tasks.register('downloadRomiVendor', Download) {
-  src 'https://raw.githubusercontent.com/wpilibsuite/allwpilib/main/romiVendordep/RomiVendordep.json'
+  src 'https://raw.githubusercontent.com/wpilibsuite/allwpilib/2027/romiVendordep/RomiVendordep.json'
   def fileName = file(src.file).name
   dest "$buildDir/downloads/$fileName"
   overwrite false
 }
 
 def downloadXrpVendor = tasks.register('downloadXrpVendor', Download) {
-  src 'https://raw.githubusercontent.com/wpilibsuite/allwpilib/main/xrpVendordep/XRPVendordep.json'
+  src 'https://raw.githubusercontent.com/wpilibsuite/allwpilib/2027/xrpVendordep/XRPVendordep.json'
   def fileName = file(src.file).name
   dest "$buildDir/downloads/$fileName"
   overwrite false
