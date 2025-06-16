@@ -18,7 +18,7 @@ def fileNameLinux = "arm64-bookworm-2025-x86_64-linux-gnu-Toolchain-${gccVersion
 
 def downloadUrlLinux = baseUrl + fileNameLinux
 
-def fileNameLinuxArm64 = "arm64-bookworm-2025-arm64-bookworm-linux-gnu-Toolchain-${gccVersion}.tgz"
+def fileNameLinuxArm64 = "arm64-bookworm-2025-aarch64-bookworm-linux-gnu-Toolchain-${gccVersion}.tgz"
 
 def downloadUrlLinuxArm64 = baseUrl + fileNameLinuxArm64
 
