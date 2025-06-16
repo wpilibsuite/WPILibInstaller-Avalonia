@@ -122,20 +122,6 @@ def wpilibExtensionDownload = tasks.register("wpilibExtensionDownload", Download
   overwrite false
 }
 
-def standaloneDownload = tasks.register("standaloneDownload", Download) {
-
-  if (project.hasProperty('linuxBuild')) {
-    src wpilibUtilLinuxUrl
-  } else if (project.hasProperty('macBuild') || project.hasProperty('macBuildArm')) {
-    src wpilibUtilMacUrl
-  } else {
-    src wpilibUtilWinUrl
-  }
-  def fileName = file(src.file).name
-  dest "$buildDir/downloads/$fileName"
-  overwrite false
-}
-
 def cppExtensionDownload = tasks.register("cppExtensionDownload", Download) {
   src cppWindowsUrl
   def fileName = file(src.file).name
@@ -401,31 +387,8 @@ ext.vscodeConfigZipSetup = { AbstractArchiveTask zip->
 ext.vscodeZipSetup = { AbstractArchiveTask zip->
   zip.dependsOn vscodeTask
   zip.dependsOn wpilibExtensionDownload
-  zip.dependsOn standaloneDownload
 
   zip.inputs.file vscodeFile
-
-  if (project.hasProperty('linuxBuild')) {
-    // Linux
-    zip.from(project.tarTree(project.resources.gzip(standaloneDownload.get().outputFiles.first()))) {
-      into '/utility'
-      includeEmptyDirs = false
-    }
-  } else if (project.hasProperty('macBuild') || project.hasProperty('macBuildArm')) {
-    // Mac
-    // Cannot extract, otherwise mac borks
-    zip.from (standaloneDownload.get().outputFiles.first()) {
-      into '/utility'
-    }
-  } else if (project.hasProperty('linuxBuildArm64')) {
-  } else {
-    // Windows
-    zip.from(project.zipTree(standaloneDownload.get().outputFiles.first())) {
-      into '/utility'
-
-      includeEmptyDirs = false
-    }
-  }
 
   zip.from (vscodeFile) {
     into '/installUtils'
