@@ -43,12 +43,6 @@ def blackUrl = "https://frcmaven.wpi.edu/artifactory/vscode-extensions/ms-python
 
 def wpilibExtensionUrl = "https://github.com/wpilibsuite/vscode-wpilib/releases/download/v${wpilibVersion}/vscode-wpilib-${wpilibVersion}.vsix"
 
-def wpilibUtilWinUrl = "https://github.com/wpilibsuite/vscode-wpilib/releases/download/v${wpilibVersion}/wpilibutility-windows.zip"
-
-def wpilibUtilLinuxUrl = "https://github.com/wpilibsuite/vscode-wpilib/releases/download/v${wpilibVersion}/wpilibutility-linux.tar.gz"
-
-def wpilibUtilMacUrl = "https://github.com/wpilibsuite/vscode-wpilib/releases/download/v${wpilibVersion}/wpilibutility-mac.tar.gz"
-
 def javaDebugUrl = "https://frcmaven.wpi.edu/api/download/vscode-extensions/vscjava/vscode-java-debug/vscjava.vscode-java-debug-${javaDebugVersion}.vsix"
 
 def javaLangUrl = "https://frcmaven.wpi.edu/api/download/vscode-extensions/redhat/java/redhat.java-${javaExtVersion}.vsix"

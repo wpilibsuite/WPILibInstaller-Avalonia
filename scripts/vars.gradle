@@ -5,7 +5,6 @@ def codefile = file("files/frccode")
 def codefileCmd = file("files/frccode.cmd")
 def icoFile = file("WPILibInstaller-Avalonia/Assets/wpilib-256.ico")
 def codeAppArmorFile = file("files/frccode.AppArmor")
-def utilAppArmorFile = file("files/wpilibutility.AppArmor")
 def advantagescopeAppArmorFile = file("files/advantagescope.AppArmor")
 
 def pathfolder = 'frccode'
@@ -26,7 +25,6 @@ ext.varsZipSetup = { AbstractArchiveTask zip->
   zip.inputs.file codefile
   zip.inputs.file codefileCmd
   zip.inputs.file codeAppArmorFile
-  zip.inputs.file utilAppArmorFile
 
   if (project.ext.buildClassifier == 'Windows') {
     zip.from (varsfile) {
@@ -74,13 +72,6 @@ ext.varsZipSetup = { AbstractArchiveTask zip->
       into "/$pathfolder/AppArmor"
       rename {
         "frccode"
-      }
-    }
-
-    zip.from (utilAppArmorFile) {
-      into "/$pathfolder/AppArmor"
-      rename {
-        "wpilibutility"
       }
     }
 
