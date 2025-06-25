@@ -37,7 +37,7 @@ namespace WPILibInstaller.ViewModels
         public int ProgressTotal { get; set; }
         public string TextTotal { get; set; } = "";
 
-        private async void CreateLinuxShortcut(String name, String frcYear, String wmClass, CancellationToken token)
+        private async void CreateLinuxShortcut(String name, String frcYear, String wmClass, String iconName, CancellationToken token)
         {
             var launcherFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local/share/applications", $@"{name.Replace(' ', '_').Replace(")", "").Replace("(", "")}_{frcYear}.desktop");
             string contents;
@@ -52,7 +52,7 @@ Categories=Robotics;Science
 Name={name} {frcYear}
 Comment={nameNoWPILib} tool for the 2025 FIRST Robotics Competition season
 Exec={configurationProvider.InstallDirectory}/tools/{nameNoWPILib}.sh
-Icon={configurationProvider.InstallDirectory}/frccode/wpilib-256.ico
+Icon={configurationProvider.InstallDirectory}/icons/{iconName}
 Terminal=false
 StartupNotify=true
 StartupWMClass={wmClass}
@@ -69,7 +69,7 @@ Categories=Robotics;Science
 Name={name} {frcYear}
 Comment={name} tool for the 2025 FIRST Robotics Competition season
 Exec={configurationProvider.InstallDirectory}/tools/{name}.sh
-Icon={configurationProvider.InstallDirectory}/frccode/wpilib-256.ico
+Icon={configurationProvider.InstallDirectory}/icons/{iconName}
 Terminal=false
 StartupNotify=true
 StartupWMClass={wmClass}
@@ -148,7 +148,7 @@ StartupWMClass={wmClass}
                 configurationProvider.UpgradeConfig.Tools.Folder + "/",
                 configurationProvider.AdvantageScopeConfig.Folder + "/",
                 configurationProvider.ElasticConfig.Folder + "/",
-                "installUtils/"});
+                "installUtils/", "icons"});
         }
 
         private async Task InstallTools(CancellationToken token)
@@ -882,7 +882,9 @@ StartupWMClass={wmClass}
             var frcHomePath = configurationProvider.InstallDirectory;
             var frcYear = configurationProvider.UpgradeConfig.FrcYear;
 
-            var wpilibIconLocation = Path.Join(frcHomePath, configurationProvider.UpgradeConfig.PathFolder, "wpilib-256.ico");
+            var iconLocation = Path.Join(frcHomePath, "icons");
+            var wpilibIconLocation = Path.Join(iconLocation, "wpilib-256.ico");
+
             shortcutData.IsAdmin = toInstallProvider.Model.InstallAsAdmin;
 
             if (vsInstallProvider.Model.InstallingVsCode)
@@ -896,7 +898,7 @@ StartupWMClass={wmClass}
             shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "Glass.exe"), $"{frcYear} WPILib Tools/Glass {frcYear}", $"Glass {frcYear}", ""));
             shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "OutlineViewer.exe"), $"{frcYear} WPILib Tools/OutlineViewer {frcYear}", $"OutlineViewer {frcYear}", ""));
             shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "PathWeaver.vbs"), $"{frcYear} WPILib Tools/PathWeaver {frcYear}", $"PathWeaver {frcYear}", wpilibIconLocation));
-            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "RobotBuilder.vbs"), $"{frcYear} WPILib Tools/RobotBuilder {frcYear}", $"RobotBuilder {frcYear}", wpilibIconLocation));
+            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "RobotBuilder.vbs"), $"{frcYear} WPILib Tools/RobotBuilder {frcYear}", $"RobotBuilder {frcYear}", Path.Join(iconLocation, "robotbuilder.ico")));
             shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "shuffleboard.vbs"), $"{frcYear} WPILib Tools/Shuffleboard {frcYear}", $"Shuffleboard {frcYear}", wpilibIconLocation));
             shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "SmartDashboard.vbs"), $"{frcYear} WPILib Tools/SmartDashboard {frcYear}", $"SmartDashboard {frcYear}", wpilibIconLocation));
             shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "SysId.exe"), $"{frcYear} WPILib Tools/SysId {frcYear}", $"SysId {frcYear}", ""));
@@ -909,7 +911,7 @@ StartupWMClass={wmClass}
             shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "Glass.exe"), $"Programs/{frcYear} WPILib Tools/Glass {frcYear}", $"Glass {frcYear}", ""));
             shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "OutlineViewer.exe"), $"Programs/{frcYear} WPILib Tools/OutlineViewer {frcYear}", $"OutlineViewer {frcYear}", ""));
             shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "PathWeaver.vbs"), $"Programs/{frcYear} WPILib Tools/PathWeaver {frcYear}", $"PathWeaver {frcYear}", wpilibIconLocation));
-            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "RobotBuilder.vbs"), $"Programs/{frcYear} WPILib Tools/RobotBuilder {frcYear}", $"RobotBuilder {frcYear}", wpilibIconLocation));
+            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "RobotBuilder.vbs"), $"Programs/{frcYear} WPILib Tools/RobotBuilder {frcYear}", $"RobotBuilder {frcYear}", Path.Join(iconLocation, "robotbuilder.ico")));
             shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "shuffleboard.vbs"), $"Programs/{frcYear} WPILib Tools/Shuffleboard {frcYear}", $"Shuffleboard {frcYear}", wpilibIconLocation));
             shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "SmartDashboard.vbs"), $"Programs/{frcYear} WPILib Tools/SmartDashboard {frcYear}", $"SmartDashboard {frcYear}", wpilibIconLocation));
             shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "SysId.exe"), $"Programs/{frcYear} WPILib Tools/SysId {frcYear}", $"SysId {frcYear}", ""));
@@ -1012,7 +1014,7 @@ Categories=Development
 Name=FRC VS Code {frcYear}
 Comment=Official C++/Java IDE for the FIRST Robotics Competition
 Exec={configurationProvider.InstallDirectory}/frccode/frccode{frcYear}
-Icon={configurationProvider.InstallDirectory}/frccode/wpilib-256.ico
+Icon={configurationProvider.InstallDirectory}/icons/wpilib-icon-256.png
 Terminal=false
 StartupNotify=true
 StartupWMClass=Code
@@ -1043,18 +1045,18 @@ StartupWMClass=Code
                     }, token);
                 }
 
-                CreateLinuxShortcut("AdvantageScope (WPILib)", frcYear, "AdvantageScope (WPILib)", token);
-                CreateLinuxShortcut("Elastic (WPILib)", frcYear, "elastic_dashboard", token);
-                CreateLinuxShortcut("Glass", frcYear, "Glass - DISCONNECTED", token);
-                CreateLinuxShortcut("OutlineViewer", frcYear, "OutlineViewer - DISCONNECTED", token);
-                CreateLinuxShortcut("DataLogTool", frcYear, "Datalog Tool", token);
-                CreateLinuxShortcut("SysId", frcYear, "System Identification", token);
-                CreateLinuxShortcut("SmartDashboard", frcYear, "edu-wpi-first-smartdashboard-SmartDashboard", token);
-                CreateLinuxShortcut("RobotBuilder", frcYear, "robotbuilder-RobotBuilder", token);
-                CreateLinuxShortcut("PathWeaver", frcYear, "edu.wpi.first.pathweaver.PathWeaver", token);
-                CreateLinuxShortcut("roboRIOTeamNumberSetter", frcYear, "roboRIO Team Number Setter", token);
-                CreateLinuxShortcut("Shuffleboard", frcYear, "edu.wpi.first.shuffleboard.app.Shuffleboard", token);
-                CreateLinuxShortcut("WPIcal", frcYear, "WPIcal", token);
+                CreateLinuxShortcut("AdvantageScope (WPILib)", frcYear, "AdvantageScope (WPILib)", "advantagescope.png", token);
+                CreateLinuxShortcut("Elastic (WPILib)", frcYear, "elastic_dashboard", "elastic.png", token);
+                CreateLinuxShortcut("Glass", frcYear, "Glass - DISCONNECTED", "glass.png", token);
+                CreateLinuxShortcut("OutlineViewer", frcYear, "OutlineViewer - DISCONNECTED", "outlineviewer.png", token);
+                CreateLinuxShortcut("DataLogTool", frcYear, "Datalog Tool", "datalogtool.png", token);
+                CreateLinuxShortcut("SysId", frcYear, "System Identification", "sysid.png", token);
+                CreateLinuxShortcut("SmartDashboard", frcYear, "edu-wpi-first-smartdashboard-SmartDashboard", "wpilib-icon-256.png", token);
+                CreateLinuxShortcut("RobotBuilder", frcYear, "robotbuilder-RobotBuilder", "robotbuilder.png", token);
+                CreateLinuxShortcut("PathWeaver", frcYear, "edu.wpi.first.pathweaver.PathWeaver", "wpilib-icon-256.png", token);
+                CreateLinuxShortcut("roboRIOTeamNumberSetter", frcYear, "roboRIO Team Number Setter", "roborioteamnumbersetter.png", token);
+                CreateLinuxShortcut("Shuffleboard", frcYear, "edu.wpi.first.shuffleboard.app.Shuffleboard", "wpilib-icon-256.png", token);
+                CreateLinuxShortcut("WPIcal", frcYear, "WPIcal", "wpical.png", token);
             }
         }
     }
