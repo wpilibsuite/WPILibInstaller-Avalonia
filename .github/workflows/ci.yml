@@ -27,6 +27,17 @@ jobs:
     name: "Build - ${{ matrix.artifact-name }}"
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Free Disk Space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: true
+          dotnet: false
+          haskell: true
+          large-packages: false
+          docker-images: false
+          swap-storage: false
+        if: (matrix.artifact-name == 'Linux' || matrix.artifact-name == 'LinuxArm64')
       - uses: actions/checkout@v4
       - uses: gradle/actions/wrapper-validation@v4
       - uses: actions/setup-dotnet@v4
