@@ -8,6 +8,7 @@ def codeAppArmorFile = file("files/frccode.AppArmor")
 def advantagescopeAppArmorFile = file("files/advantagescope.AppArmor")
 
 def pathfolder = 'frccode'
+def iconfolder = 'icons'
 
 ext.varConfigSetup = {
   return new Tuple2({ Task task ->
@@ -64,7 +65,11 @@ ext.varsZipSetup = { AbstractArchiveTask zip->
   }
 
   zip.from (icoFile) {
-    into "/$pathfolder"
+    into "/$iconfolder"
+  }
+  
+  zip.from (file("icons")) {
+    into "/$iconfolder"
   }
 
   if (project.ext.buildClassifier == 'Linux') {
