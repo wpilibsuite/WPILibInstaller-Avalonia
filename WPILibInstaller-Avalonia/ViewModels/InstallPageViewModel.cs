@@ -37,7 +37,7 @@ namespace WPILibInstaller.ViewModels
         public int ProgressTotal { get; set; }
         public string TextTotal { get; set; } = "";
 
-        private async void CreateLinuxShortcut(String name, String frcYear, String wmClass, CancellationToken token)
+        private async void CreateLinuxShortcut(String name, String frcYear, String wmClass, String iconName, CancellationToken token)
         {
             var launcherFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local/share/applications", $@"{name.Replace(' ', '_').Replace(")", "").Replace("(", "")}_{frcYear}.desktop");
             string contents;
@@ -52,7 +52,7 @@ Categories=Robotics;Science
 Name={name} {frcYear}
 Comment={nameNoWPILib} tool for the 2025 FIRST Robotics Competition season
 Exec={configurationProvider.InstallDirectory}/tools/{nameNoWPILib}.sh
-Icon={configurationProvider.InstallDirectory}/frccode/wpilib-256.ico
+Icon={configurationProvider.InstallDirectory}/icons/{iconName}
 Terminal=false
 StartupNotify=true
 StartupWMClass={wmClass}
@@ -69,7 +69,7 @@ Categories=Robotics;Science
 Name={name} {frcYear}
 Comment={name} tool for the 2025 FIRST Robotics Competition season
 Exec={configurationProvider.InstallDirectory}/tools/{name}.sh
-Icon={configurationProvider.InstallDirectory}/frccode/wpilib-256.ico
+Icon={configurationProvider.InstallDirectory}/icons/{iconName}
 Terminal=false
 StartupNotify=true
 StartupWMClass={wmClass}
@@ -148,7 +148,7 @@ StartupWMClass={wmClass}
                 configurationProvider.UpgradeConfig.Tools.Folder + "/",
                 configurationProvider.AdvantageScopeConfig.Folder + "/",
                 configurationProvider.ElasticConfig.Folder + "/",
-                "installUtils/"});
+                "installUtils/", "icons"});
         }
 
         private async Task InstallTools(CancellationToken token)
@@ -882,7 +882,9 @@ StartupWMClass={wmClass}
             var frcHomePath = configurationProvider.InstallDirectory;
             var frcYear = configurationProvider.UpgradeConfig.FrcYear;
 
-            var wpilibIconLocation = Path.Join(frcHomePath, configurationProvider.UpgradeConfig.PathFolder, "wpilib-256.ico");
+            var iconLocation = Path.Join(frcHomePath, "icons");
+            var wpilibIconLocation = Path.Join(iconLocation, "wpilib-256.ico");
+
             shortcutData.IsAdmin = toInstallProvider.Model.InstallAsAdmin;
 
             if (vsInstallProvider.Model.InstallingVsCode)
@@ -1002,7 +1004,7 @@ Categories=Development
 Name=FRC VS Code {frcYear}
 Comment=Official C++/Java IDE for the FIRST Robotics Competition
 Exec={configurationProvider.InstallDirectory}/frccode/frccode{frcYear}
-Icon={configurationProvider.InstallDirectory}/frccode/wpilib-256.ico
+Icon={configurationProvider.InstallDirectory}/icons/wpilib-icon-256.png
 Terminal=false
 StartupNotify=true
 StartupWMClass=Code
@@ -1033,13 +1035,13 @@ StartupWMClass=Code
                     }, token);
                 }
 
-                CreateLinuxShortcut("AdvantageScope (WPILib)", frcYear, "AdvantageScope (WPILib)", token);
-                CreateLinuxShortcut("Elastic (WPILib)", frcYear, "elastic_dashboard", token);
-                CreateLinuxShortcut("Glass", frcYear, "Glass - DISCONNECTED", token);
-                CreateLinuxShortcut("OutlineViewer", frcYear, "OutlineViewer - DISCONNECTED", token);
-                CreateLinuxShortcut("DataLogTool", frcYear, "Datalog Tool", token);
-                CreateLinuxShortcut("SysId", frcYear, "System Identification", token);
-                CreateLinuxShortcut("WPIcal", frcYear, "WPIcal", token);
+                CreateLinuxShortcut("AdvantageScope (WPILib)", frcYear, "AdvantageScope (WPILib)", "advantagescope.png", token);
+                CreateLinuxShortcut("Elastic (WPILib)", frcYear, "elastic_dashboard", "elastic.png", token);
+                CreateLinuxShortcut("Glass", frcYear, "Glass - DISCONNECTED", "glass.png", token);
+                CreateLinuxShortcut("OutlineViewer", frcYear, "OutlineViewer - DISCONNECTED", "outlineviewer.png", token);
+                CreateLinuxShortcut("DataLogTool", frcYear, "Datalog Tool", "datalogtool.png", token);
+                CreateLinuxShortcut("SysId", frcYear, "System Identification", "sysid.png", token);
+                CreateLinuxShortcut("WPIcal", frcYear, "WPIcal", "wpical.png", token);
             }
         }
     }
