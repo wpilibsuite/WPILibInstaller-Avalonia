@@ -1,15 +1,6 @@
 def toolsJson = file("$buildDir/tools.json")
-def scriptBaseFile = file("files/ScriptBase.vbs")
-def scriptBaseUnixFile = file("files/ScriptBase.sh")
-
-def scriptBaseCppFile = file("files/ScriptBaseCpp.vbs")
-def scriptBaseCppUnixFile = file("files/ScriptBaseCpp.sh")
-
-def advantageScopeScriptFile = file("files/AdvantageScope.vbs")
-def advantageScopeScriptUnixFile = file("files/AdvantageScope.sh")
-
-def elasticScriptFile = file("files/Elastic.vbs")
-def elasticScriptUnixFile = file("files/Elastic.sh")
+def scriptBaseFile = file("files/processstarter.exe")
+def scriptBaseUnixFile = file("files/processstarter")
 
 def toolsJsonTask = tasks.register('toolsJson', Task) {
 
@@ -101,35 +92,8 @@ ext.toolsSetup = { AbstractArchiveTask zip->
     zip.from (scriptBaseFile) {
       into '/tools'
     }
-
-    zip.from (scriptBaseCppFile) {
-      into '/tools'
-    }
-
-    zip.from (advantageScopeScriptFile) {
-      into '/tools'
-    }
-
-    zip.from (elasticScriptFile) {
-      into '/tools'
-    }
   } else {
     zip.from (scriptBaseUnixFile) {
-      into '/tools'
-      fileMode 0755
-    }
-
-    zip.from (scriptBaseCppUnixFile) {
-      into '/tools'
-      fileMode 0755
-    }
-
-    zip.from (advantageScopeScriptUnixFile) {
-      into '/tools'
-      fileMode 0755
-    }
-
-    zip.from (elasticScriptUnixFile) {
       into '/tools'
       fileMode 0755
     }
