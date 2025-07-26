@@ -88,7 +88,7 @@ ext.toolsSetup = { AbstractArchiveTask zip->
     into '/tools'
   }
 
-  if (project.ext.buildClassifier == 'Windows') {
+  /*if (project.ext.buildClassifier == 'Windows') {
     zip.from (scriptBaseFile) {
       into '/tools'
     }
@@ -97,6 +97,6 @@ ext.toolsSetup = { AbstractArchiveTask zip->
       into '/tools'
       fileMode 0755
     }
-  }
+  }*/
 
 }
