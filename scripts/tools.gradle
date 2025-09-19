@@ -84,15 +84,4 @@ ext.toolsSetup = { AbstractArchiveTask zip->
     into '/tools'
   }
 
-  /*if (project.ext.buildClassifier == 'Windows') {
-    zip.from (scriptBaseFile) {
-      into '/tools'
-    }
-  } else {
-    zip.from (scriptBaseUnixFile) {
-      into '/tools'
-      fileMode 0755
-    }
-  }*/
-
 }
