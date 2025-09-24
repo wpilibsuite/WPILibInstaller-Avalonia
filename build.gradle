@@ -15,6 +15,12 @@ plugins {
     id "com.github.johnrengelman.shadow" version "7.1.2" apply false
 }
 
+java {
+    sourceCompatibility = 17
+    targetCompatibility = 17
+}
+
+
 apply from: "automation/macos_notarization.gradle"
 apply plugin: OfflineDependenciesPlugin
 
