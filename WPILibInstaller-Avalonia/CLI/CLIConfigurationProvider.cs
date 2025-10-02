@@ -22,7 +22,8 @@ namespace WPILibInstaller.CLI
         private CLIConfigurationProvider(UpgradeConfig upgradeConfig,
             FullConfig fullConfig, JdkConfig jdkConfig,
             VsCodeConfig vsCodeConfig, ChoreoConfig choreoConfig,
-            AdvantageScopeConfig advantageScopeConfig,
+            AdvantageScopeConfig advantageScopeConfig, 
+            ElasticConfig elasticConfig,
             IArchiveExtractor zipArchive, string installDirectory
         )
         {
@@ -34,6 +35,7 @@ namespace WPILibInstaller.CLI
             InstallDirectory = installDirectory;
             ChoreoConfig = choreoConfig;
             AdvantageScopeConfig = advantageScopeConfig;
+            ElasticConfig = elasticConfig;
         }
 
         public static async Task<CLIConfigurationProvider> From(string artifactsFile, string resourcesFile)
@@ -44,6 +46,7 @@ namespace WPILibInstaller.CLI
             VsCodeConfig VsCodeConfig;
             ChoreoConfig ChoreoConfig;
             AdvantageScopeConfig AdvantageScopeConfig;
+            ElasticConfig ElasticConfig;
 
             var publicFolder = Environment.GetEnvironmentVariable("PUBLIC");
             if (publicFolder == null)
@@ -139,6 +142,16 @@ namespace WPILibInstaller.CLI
                 }) ?? throw new InvalidOperationException("Not Valid");
             }
 
+            entry = resourcesArchive.GetEntry("elasticConfig.json");
+
+            using (StreamReader reader = new StreamReader(entry!.Open()))
+            {
+                var configStr = await reader.ReadToEndAsync();
+                ElasticConfig = JsonConvert.DeserializeObject<ElasticConfig>(configStr, new JsonSerializerSettings
+                {
+                    MissingMemberHandling = MissingMemberHandling.Error
+                }) ?? throw new InvalidOperationException("Not Valid");
+            }
 
             entry = resourcesArchive.GetEntry("upgradeConfig.json");
 
@@ -152,7 +165,11 @@ namespace WPILibInstaller.CLI
             }
 
             var InstallDirectory = Path.Combine(publicFolder, "wpilib", UpgradeConfig.FrcYear);
-            return new CLIConfigurationProvider(UpgradeConfig, FullConfig, JdkConfig, VsCodeConfig, ChoreoConfig, AdvantageScopeConfig, ZipArchive, InstallDirectory);
+            return new CLIConfigurationProvider(
+                UpgradeConfig, FullConfig, JdkConfig, VsCodeConfig, 
+                ChoreoConfig, AdvantageScopeConfig, ElasticConfig, ZipArchive, 
+                InstallDirectory
+            );
         }
 
         public VsCodeModel VsCodeModel
@@ -181,6 +198,8 @@ namespace WPILibInstaller.CLI
         public VsCodeConfig VsCodeConfig { get; private set; }
 
         public ChoreoConfig ChoreoConfig { get; private set; }
+
+        public ElasticConfig ElasticConfig { get; private set; }
 
         public AdvantageScopeConfig AdvantageScopeConfig { get; private set; }
 
