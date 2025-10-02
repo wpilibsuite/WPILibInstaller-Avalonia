@@ -8,8 +8,8 @@ def scriptBaseCppUnixFile = file("files/ScriptBaseCpp.sh")
 def advantageScopeScriptFile = file("files/AdvantageScope.vbs")
 def advantageScopeScriptUnixFile = file("files/AdvantageScope.sh")
 
-def choreoScriptFile = file("files/Choreo.vbs")
-def choreoScriptUnixFile = file("files/Choreo.sh")
+def elasticScriptFile = file("files/Elastic.vbs")
+def elasticScriptUnixFile = file("files/Elastic.sh")
 
 def toolsJsonTask = tasks.register('toolsJson', Task) {
 
@@ -56,10 +56,15 @@ def toolsJsonTask = tasks.register('toolsJson', Task) {
     advantageScopeItem['version'] = advantagescopeGitTag
     config << advantageScopeItem
 
-    def choreoItem = [:]
-    choreoItem['name'] = "Choreo"
-    choreoItem['version'] = choreoGitTag
-    config << choreoItem
+    def elasticItem = [:]
+    elasticItem['name'] = "Elastic"
+    elasticItem['version'] = elasticGitTag
+    config << elasticItem
+
+    def utilityItem = [:]
+    utilityItem['name'] = "Utility"
+    utilityItem['version'] = wpilibVersion
+    config << utilityItem
 
     def gbuilder = getGsonBuilder()
     gbuilder.setPrettyPrinting()
@@ -105,7 +110,7 @@ ext.toolsSetup = { AbstractArchiveTask zip->
       into '/tools'
     }
 
-    zip.from (choreoScriptFile) {
+    zip.from (elasticScriptFile) {
       into '/tools'
     }
   } else {
@@ -124,7 +129,7 @@ ext.toolsSetup = { AbstractArchiveTask zip->
       fileMode 0755
     }
 
-    zip.from (choreoScriptUnixFile) {
+    zip.from (elasticScriptUnixFile) {
       into '/tools'
       fileMode 0755
     }

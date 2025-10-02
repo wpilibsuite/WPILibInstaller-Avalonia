@@ -1,93 +1,91 @@
 apply from: 'scripts/versions.gradle'
 
-def baseUrl = "https://github.com/SleipnirGroup/Choreo/releases/download/$choreoGitTag/"
+def baseUrl = "https://github.com/Gold872/elastic-dashboard/releases/download/$elasticGitTag/"
 
-def fileNameWindows = "Choreo-$choreoGitTag-Windows-x86_64-standalone.zip"
+def fileNameWindows = 'Elastic-WPILib-Windows.zip'
 
 def downloadUrlWindows = baseUrl + fileNameWindows
 
-def fileNameMac = "Choreo-$choreoGitTag-macOS-x86_64-standalone.zip"
+def fileNameMac = 'Elastic-WPILib-macOS.tar.gz'
 
 def downloadUrlMac = baseUrl + fileNameMac
 
-def fileNameMacArm = "Choreo-$choreoGitTag-macOS-aarch64-standalone.zip"
+def fileNameMacArm = 'Elastic-WPILib-macOS.tar.gz'
 
 def downloadUrlMacArm = baseUrl + fileNameMacArm
 
-def fileNameLinux = "Choreo-$choreoGitTag-Linux-x86_64-standalone.zip"
+def fileNameLinux = 'Elastic-WPILib-Linux.zip'
 
 def downloadUrlLinux = baseUrl + fileNameLinux
 
-
 apply plugin: 'de.undercouch.download'
 
-def downloadTaskWindows = tasks.register('downloadChoreoWindows', Download) {
+def downloadTaskWindows = tasks.register('downloadElasticWindows', Download) {
   src downloadUrlWindows
   def fileName = file(src.file).name
   dest "$buildDir/downloads/$fileName"
   overwrite true
 }
 
-def downloadTaskMac = tasks.register('downloadChoreoMac', Download) {
+def downloadTaskMac = tasks.register('downloadElasticMac', Download) {
   src downloadUrlMac
   def fileName = file(src.file).name
   dest "$buildDir/downloads/$fileName"
   overwrite true
 }
 
-def downloadTaskMacArm = tasks.register('downloadChoreoMacArm', Download) {
+def downloadTaskMacArm = tasks.register('downloadElasticMacArm', Download) {
   src downloadUrlMacArm
   def fileName = file(src.file).name
   dest "$buildDir/downloads/$fileName"
   overwrite true
 }
 
-def downloadTaskLinux = tasks.register('downloadChoreoLinux', Download) {
+def downloadTaskLinux = tasks.register('downloadElasticLinux', Download) {
   src downloadUrlLinux
   def fileName = file(src.file).name
   dest "$buildDir/downloads/$fileName"
   overwrite true
 }
 
-def choreoConfigFile = file("$buildDir/choreoConfig.json")
+def elasticConfigFile = file("$buildDir/elasticConfig.json")
 
-def choreoConfigFileTask = tasks.register("choreoConfigFile") {
-  it.outputs.file choreoConfigFile
+def elasticConfigFileTask = tasks.register('elasticConfigFile') {
+  it.outputs.file elasticConfigFile
 
   doLast {
-
     def config = [:]
-    config['folder'] = 'choreo'
-    config['zipFile'] = 'choreo.zip'
+    config['folder'] = 'elastic'
+    config['zipFile'] = 'elastic.zip'
 
     def gbuilder = getGsonBuilder()
 
     gbuilder.setPrettyPrinting()
     def json = gbuilder.create().toJson(config)
 
-    choreoConfigFile.parentFile.mkdirs()
+    elasticConfigFile.parentFile.mkdirs()
 
-    choreoConfigFile.text = json
+    elasticConfigFile.text = json
   }
 }
 
-ext.choreoConfigFileSetup = { AbstractArchiveTask zip->
-  zip.dependsOn choreoConfigFileTask
-  zip.inputs.file choreoConfigFile
+ext.elasticConfigFileSetup = { AbstractArchiveTask zip->
+  zip.dependsOn elasticConfigFileTask
+  zip.inputs.file elasticConfigFile
 
-  zip.from(choreoConfigFile) {
-    rename {'choreoConfig.json'}
+  zip.from(elasticConfigFile) {
+        rename { 'elasticConfig.json' }
   }
 }
 
-ext.choreoZipSetup = { AbstractArchiveTask zip->
+ext.elasticZipSetup = { AbstractArchiveTask zip->
   if (project.hasProperty('linuxBuild')) {
     zip.dependsOn downloadTaskLinux
 
     zip.inputs.files downloadTaskLinux.get().outputFiles
 
     zip.from(project.zipTree(downloadTaskLinux.get().outputFiles.first())) {
-      into '/choreo'
+      into '/elastic'
       includeEmptyDirs = false
     }
   } else if (project.hasProperty('macBuild')) {
@@ -95,18 +93,18 @@ ext.choreoZipSetup = { AbstractArchiveTask zip->
 
     zip.inputs.files downloadTaskMac.get().outputFiles
 
-    zip.from(project.zipTree(downloadTaskMac.get().outputFiles.first())) {
-      into '/choreo'
-      includeEmptyDirs = false
+    // Cannot extract, otherwise breaks mac
+    zip.from(downloadTaskMac.get().outputFiles.first()) {
+      into '/elastic'
     }
   } else if (project.hasProperty('macBuildArm')) {
     zip.dependsOn downloadTaskMacArm
 
     zip.inputs.files downloadTaskMacArm.get().outputFiles
 
-    zip.from(project.zipTree(downloadTaskMacArm.get().outputFiles.first())) {
-      into '/choreo'
-      includeEmptyDirs = false
+    // Cannot extract, otherwise breaks mac
+    zip.from(downloadTaskMacArm.get().outputFiles.first()) {
+      into '/elastic'
     }
   } else {
     zip.dependsOn downloadTaskWindows
@@ -114,8 +112,9 @@ ext.choreoZipSetup = { AbstractArchiveTask zip->
     zip.inputs.files downloadTaskWindows.get().outputFiles
 
     zip.from(project.zipTree(downloadTaskWindows.get().outputFiles.first())) {
-      into '/choreo'
+      into '/elastic'
       includeEmptyDirs = false
     }
   }
 }
+

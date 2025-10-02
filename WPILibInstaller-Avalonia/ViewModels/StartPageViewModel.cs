@@ -155,6 +155,8 @@ namespace WPILibInstaller.ViewModels
 
         public bool MissingEitherFile => MissingSupportFiles || MissingResourceFiles;
 
+        public bool MacOSEject => MissingEitherFile && RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+
         private bool missingSupportFiles = true;
 
         public bool MissingResourceFiles
@@ -215,12 +217,12 @@ namespace WPILibInstaller.ViewModels
                 }) ?? throw new InvalidOperationException("Not Valid");
             }
 
-            entry = zipArchive.GetEntry("choreoConfig.json");
+            entry = zipArchive.GetEntry("elasticConfig.json");
 
             using (StreamReader reader = new StreamReader(entry!.Open()))
             {
                 var configStr = await reader.ReadToEndAsync();
-                ChoreoConfig = JsonConvert.DeserializeObject<ChoreoConfig>(configStr, new JsonSerializerSettings
+                ElasticConfig = JsonConvert.DeserializeObject<ElasticConfig>(configStr, new JsonSerializerSettings
                 {
                     MissingMemberHandling = MissingMemberHandling.Error
                 }) ?? throw new InvalidOperationException("Not Valid");
@@ -426,7 +428,7 @@ namespace WPILibInstaller.ViewModels
 
         public AdvantageScopeConfig AdvantageScopeConfig { get; private set; } = null!;
 
-        public ChoreoConfig ChoreoConfig { get; private set; } = null!;
+        public ElasticConfig ElasticConfig { get; private set; } = null!;
 
         public VsCodeConfig VsCodeConfig { get; private set; } = null!;
 

@@ -9,12 +9,18 @@ using System.Reactive.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using DynamicData;
+using MsBox.Avalonia;
+using MsBox.Avalonia.Dto;
+using MsBox.Avalonia.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ReactiveUI;
 using WPILibInstaller.Interfaces;
 using WPILibInstaller.Models;
 using WPILibInstaller.Utils;
+using static System.Net.WebRequestMethods;
+using File = System.IO.File;
 
 namespace WPILibInstaller.ViewModels
 {
@@ -30,6 +36,52 @@ namespace WPILibInstaller.ViewModels
         public string Text { get; set; } = "";
         public int ProgressTotal { get; set; }
         public string TextTotal { get; set; } = "";
+
+        private async void CreateLinuxShortcut(String name, String frcYear, String wmClass, String iconName, CancellationToken token)
+        {
+            var launcherFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local/share/applications", $@"{name.Replace(' ', '_').Replace(")", "").Replace("(", "")}_{frcYear}.desktop");
+            string contents;
+            if (name.Contains("WPILib"))
+            {
+                var nameNoWPILib = name.Remove(name.Length - " (WPILib)".Length);
+                contents = $@"#!/usr/bin/env xdg-open
+[Desktop Entry]
+Version=1.0
+Type=Application
+Categories=Robotics;Science
+Name={name} {frcYear}
+Comment={nameNoWPILib} tool for the 2025 FIRST Robotics Competition season
+Exec={configurationProvider.InstallDirectory}/tools/{nameNoWPILib}.sh
+Icon={configurationProvider.InstallDirectory}/icons/{iconName}
+Terminal=false
+StartupNotify=true
+StartupWMClass={wmClass}
+";
+
+            }
+            else
+            {
+                contents = $@"#!/usr/bin/env xdg-open
+[Desktop Entry]
+Version=1.0
+Type=Application
+Categories=Robotics;Science
+Name={name} {frcYear}
+Comment={name} tool for the 2025 FIRST Robotics Competition season
+Exec={configurationProvider.InstallDirectory}/tools/{name}.sh
+Icon={configurationProvider.InstallDirectory}/icons/{iconName}
+Terminal=false
+StartupNotify=true
+StartupWMClass={wmClass}
+";
+            }
+            var launcherPath = Path.GetDirectoryName(launcherFile);
+            if (launcherPath != null)
+            {
+                Directory.CreateDirectory(launcherPath);
+            }
+            await File.WriteAllTextAsync(launcherFile, contents, token);
+        }
 
         public async Task UIUpdateTask(CancellationToken token)
         {
@@ -95,8 +147,8 @@ namespace WPILibInstaller.ViewModels
                 configurationProvider.JdkConfig.Folder + "/",
                 configurationProvider.UpgradeConfig.Tools.Folder + "/",
                 configurationProvider.AdvantageScopeConfig.Folder + "/",
-                configurationProvider.ChoreoConfig.Folder + "/",
-                "installUtils/"});
+                configurationProvider.ElasticConfig.Folder + "/",
+                "installUtils/", "icons"});
         }
 
         private async Task InstallTools(CancellationToken token)
@@ -363,6 +415,52 @@ namespace WPILibInstaller.ViewModels
                 }
             }
 
+            if (settingsJson.ContainsKey("java.configuration.runtimes"))
+            {
+                JArray javaConfigEnv = (JArray)settingsJson["java.configuration.runtimes"]!;
+                Boolean javaFound = false;
+                foreach (JToken result in javaConfigEnv)
+                {
+                    JToken? name = result["name"];
+                    if (name != null)
+                    {
+                        if (name.ToString().Equals("JavaSE-17"))
+                        {
+                            result["path"] = Path.Combine(homePath, "jdk");
+                            result["default"] = true;
+                            javaFound = true;
+                        }
+                        else
+                        {
+                            result["default"] = false;
+                        }
+                    }
+                }
+                if (!javaFound)
+                {
+                    JObject javaConfigProp = new JObject
+                    {
+                        ["name"] = "JavaSE-17",
+                        ["path"] = Path.Combine(homePath, "jdk"),
+                        ["default"] = true
+                    };
+                    javaConfigEnv.Add(javaConfigProp);
+                    settingsJson["java.configuration.runtimes"] = javaConfigEnv;
+                }
+            }
+            else
+            {
+                JArray javaConfigProps = new JArray();
+                JObject javaConfigProp = new JObject
+                {
+                    ["name"] = "JavaSE-17",
+                    ["path"] = Path.Combine(homePath, "jdk"),
+                    ["default"] = true
+                };
+                javaConfigProps.Add(javaConfigProp);
+                settingsJson["java.configuration.runtimes"] = javaConfigProps;
+            }
+
             var serialized = JsonConvert.SerializeObject(settingsJson, Formatting.Indented);
             await File.WriteAllTextAsync(settingsFile, serialized);
         }
@@ -489,13 +587,13 @@ namespace WPILibInstaller.ViewModels
                 if (foundRunningExe)
                 {
                     string msg = "Running JDK processes have been found. Installation cannot continue. Please restart your computer, and rerun this installer without running anything else (including VS Code)";
-                    await MessageBox.Avalonia.MessageBoxManager.GetMessageBoxStandardWindow(new MessageBox.Avalonia.DTO.MessageBoxStandardParams
+                    await MsBox.Avalonia.MessageBoxManager.GetMessageBoxStandard(new MsBox.Avalonia.Dto.MessageBoxStandardParams
                     {
                         ContentTitle = "JDKs Running",
                         ContentMessage = msg,
-                        Icon = MessageBox.Avalonia.Enums.Icon.Error,
-                        ButtonDefinitions = MessageBox.Avalonia.Enums.ButtonEnum.Ok
-                    }).ShowDialog(programWindow.Window);
+                        Icon = MsBox.Avalonia.Enums.Icon.Error,
+                        ButtonDefinitions = MsBox.Avalonia.Enums.ButtonEnum.Ok
+                    }).ShowWindowDialogAsync(programWindow.Window);
                     throw new InvalidOperationException(msg);
                 }
             }
@@ -646,7 +744,7 @@ namespace WPILibInstaller.ViewModels
             await RunJavaJar(configurationProvider.InstallDirectory,
                 Path.Combine(configurationProvider.InstallDirectory,
                 configurationProvider.UpgradeConfig.Tools.Folder,
-                configurationProvider.UpgradeConfig.Tools.UpdaterJar), 20000);
+                configurationProvider.UpgradeConfig.Tools.UpdaterJar), 30000);
         }
 
         private async Task RunMavenMetaDataFixer()
@@ -674,7 +772,12 @@ namespace WPILibInstaller.ViewModels
                     break;
                 case Platform.MacArm64:
                 case Platform.Mac64:
-                    codeExe = Path.Combine(configurationProvider.InstallDirectory, "vscode", "Visual Studio Code.app", "Contents", "Resources", "app", "bin", "code");
+                    var appDirectories = Directory.GetDirectories(Path.Combine(configurationProvider.InstallDirectory, "vscode"), "*.app");
+                    if (appDirectories.Length != 1)
+                    {
+                        throw new InvalidOperationException("Expected exactly one .app directory in the vscode folder.");
+                    }
+                    codeExe = Path.Combine(appDirectories[0], "Contents", "Resources", "app", "bin", "code");
                     break;
                 case Platform.Linux64:
                     codeExe = Path.Combine(configurationProvider.InstallDirectory, "vscode", "VSCode-linux-x64", "bin", "code");
@@ -779,7 +882,9 @@ namespace WPILibInstaller.ViewModels
             var frcHomePath = configurationProvider.InstallDirectory;
             var frcYear = configurationProvider.UpgradeConfig.FrcYear;
 
-            var wpilibIconLocation = Path.Join(frcHomePath, configurationProvider.UpgradeConfig.PathFolder, "wpilib-256.ico");
+            var iconLocation = Path.Join(frcHomePath, "icons");
+            var wpilibIconLocation = Path.Join(iconLocation, "wpilib-256.ico");
+
             shortcutData.IsAdmin = toInstallProvider.Model.InstallAsAdmin;
 
             if (vsInstallProvider.Model.InstallingVsCode)
@@ -793,26 +898,28 @@ namespace WPILibInstaller.ViewModels
             shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "Glass.exe"), $"{frcYear} WPILib Tools/Glass {frcYear}", $"Glass {frcYear}", ""));
             shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "OutlineViewer.exe"), $"{frcYear} WPILib Tools/OutlineViewer {frcYear}", $"OutlineViewer {frcYear}", ""));
             shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "PathWeaver.vbs"), $"{frcYear} WPILib Tools/PathWeaver {frcYear}", $"PathWeaver {frcYear}", wpilibIconLocation));
-            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "RobotBuilder.vbs"), $"{frcYear} WPILib Tools/RobotBuilder {frcYear}", $"RobotBuilder {frcYear}", wpilibIconLocation));
+            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "RobotBuilder.vbs"), $"{frcYear} WPILib Tools/RobotBuilder {frcYear}", $"RobotBuilder {frcYear}", Path.Join(iconLocation, "robotbuilder.ico")));
             shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "shuffleboard.vbs"), $"{frcYear} WPILib Tools/Shuffleboard {frcYear}", $"Shuffleboard {frcYear}", wpilibIconLocation));
             shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "SmartDashboard.vbs"), $"{frcYear} WPILib Tools/SmartDashboard {frcYear}", $"SmartDashboard {frcYear}", wpilibIconLocation));
             shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "SysId.exe"), $"{frcYear} WPILib Tools/SysId {frcYear}", $"SysId {frcYear}", ""));
             shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "roboRIOTeamNumberSetter.exe"), $"{frcYear} WPILib Tools/roboRIO Team Number Setter {frcYear}", $"roboRIO Team Number Setter {frcYear}", ""));
             shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "DataLogTool.exe"), $"{frcYear} WPILib Tools/Data Log Tool {frcYear}", $"Data Log Tool {frcYear}", ""));
+            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "WPIcal.exe"), $"{frcYear} WPILib Tools/WPIcal {frcYear}", $"WPIcal {frcYear}", ""));
             shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "advantagescope", "AdvantageScope (WPILib).exe"), $"{frcYear} WPILib Tools/AdvantageScope (WPILib) {frcYear}", $"AdvantageScope (WPILib) {frcYear}", ""));
-            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "choreo", "choreo.exe"), $"{frcYear} WPILib Tools/Choreo (WPILib) {frcYear}", $"Choreo (WPILib) {frcYear}", ""));
+            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "elastic", "elastic_dashboard.exe"), $"{frcYear} WPILib Tools/Elastic (WPILib) {frcYear}", $"Elastic (WPILib) {frcYear}", ""));
 
             shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "Glass.exe"), $"Programs/{frcYear} WPILib Tools/Glass {frcYear}", $"Glass {frcYear}", ""));
             shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "OutlineViewer.exe"), $"Programs/{frcYear} WPILib Tools/OutlineViewer {frcYear}", $"OutlineViewer {frcYear}", ""));
             shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "PathWeaver.vbs"), $"Programs/{frcYear} WPILib Tools/PathWeaver {frcYear}", $"PathWeaver {frcYear}", wpilibIconLocation));
-            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "RobotBuilder.vbs"), $"Programs/{frcYear} WPILib Tools/RobotBuilder {frcYear}", $"RobotBuilder {frcYear}", wpilibIconLocation));
+            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "RobotBuilder.vbs"), $"Programs/{frcYear} WPILib Tools/RobotBuilder {frcYear}", $"RobotBuilder {frcYear}", Path.Join(iconLocation, "robotbuilder.ico")));
             shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "shuffleboard.vbs"), $"Programs/{frcYear} WPILib Tools/Shuffleboard {frcYear}", $"Shuffleboard {frcYear}", wpilibIconLocation));
             shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "SmartDashboard.vbs"), $"Programs/{frcYear} WPILib Tools/SmartDashboard {frcYear}", $"SmartDashboard {frcYear}", wpilibIconLocation));
             shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "SysId.exe"), $"Programs/{frcYear} WPILib Tools/SysId {frcYear}", $"SysId {frcYear}", ""));
             shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "roboRIOTeamNumberSetter.exe"), $"Programs/{frcYear} WPILib Tools/roboRIO Team Number Setter {frcYear}", $"roboRIO Team Number Setter {frcYear}", ""));
             shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "DataLogTool.exe"), $"Programs/{frcYear} WPILib Tools/Data Log Tool {frcYear}", $"Data Log Tool {frcYear}", ""));
+            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "WPIcal.exe"), $"Programs/{frcYear} WPILib Tools/WPIcal {frcYear}", $"WPIcal {frcYear}", ""));
             shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "advantagescope", "AdvantageScope (WPILib).exe"), $"Programs/{frcYear} WPILib Tools/AdvantageScope (WPILib) {frcYear}", $"AdvantageScope (WPILib) {frcYear}", ""));
-            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "choreo", "choreo.exe"), $"Programs/{frcYear} WPILib Tools/Choreo (WPILib) {frcYear}", $"Choreo (WPILib) {frcYear}", ""));
+            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "elastic", "elastic_dashboard.exe"), $"Programs/{frcYear} WPILib Tools/Elastic (WPILib) {frcYear}", $"Elastic (WPILib) {frcYear}", ""));
 
             if (toInstallProvider.Model.InstallEverything)
             {
@@ -862,16 +969,16 @@ namespace WPILibInstaller.ViewModels
                         }
                     });
 
-                    if (exitCode == 1223) // ERROR_CANCLED
+                    if (exitCode == 1223) // ERROR_CANCELLED
                     {
-                        var results = await MessageBox.Avalonia.MessageBoxManager.GetMessageBoxStandardWindow(new MessageBox.Avalonia.DTO.MessageBoxStandardParams
+                        var results = await MsBox.Avalonia.MessageBoxManager.GetMessageBoxStandard(new MsBox.Avalonia.Dto.MessageBoxStandardParams
                         {
                             ContentTitle = "UAC Prompt Cancelled",
                             ContentMessage = "UAC Prompt Cancelled or Timed Out. Would you like to retry?",
-                            Icon = MessageBox.Avalonia.Enums.Icon.Info,
-                            ButtonDefinitions = MessageBox.Avalonia.Enums.ButtonEnum.YesNo
-                        }).ShowDialog(programWindow.Window);
-                        if (results == MessageBox.Avalonia.Enums.ButtonResult.Yes)
+                            Icon = MsBox.Avalonia.Enums.Icon.Info,
+                            ButtonDefinitions = MsBox.Avalonia.Enums.ButtonEnum.YesNo
+                        }).ShowWindowDialogAsync(programWindow.Window);
+                        if (results == MsBox.Avalonia.Enums.ButtonResult.Yes)
                         {
                             continue;
                         }
@@ -880,24 +987,26 @@ namespace WPILibInstaller.ViewModels
 
                     if (exitCode != 0)
                     {
-                        await MessageBox.Avalonia.MessageBoxManager.GetMessageBoxStandardWindow(new MessageBox.Avalonia.DTO.MessageBoxStandardParams
+                        await MsBox.Avalonia.MessageBoxManager.GetMessageBoxStandard(new MsBox.Avalonia.Dto.MessageBoxStandardParams
                         {
                             ContentTitle = "Shortcut Creation Failed",
                             ContentMessage = $"Shortcut creation failed with error code {exitCode}",
-                            Icon = MessageBox.Avalonia.Enums.Icon.Warning,
-                            ButtonDefinitions = MessageBox.Avalonia.Enums.ButtonEnum.Ok
-                        }).ShowDialog(programWindow.Window);
+                            Icon = MsBox.Avalonia.Enums.Icon.Warning,
+                            ButtonDefinitions = MsBox.Avalonia.Enums.ButtonEnum.Ok
+                        }).ShowWindowDialogAsync(programWindow.Window);
                         break;
                     }
                     break;
                 } while (true);
             }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && vsInstallProvider.Model.InstallingVsCode)
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                // Create Linux desktop shortcut
-                var desktopFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Desktop", $@"FRC VS Code {frcYear}.desktop");
-                var launcherFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local/share/applications", $@"FRC VS Code {frcYear}.desktop");
-                string contents = $@"#!/usr/bin/env xdg-open
+                if (vsInstallProvider.Model.InstallingVsCode)
+                {
+                    // Create Linux desktop shortcut
+                    var desktopFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Desktop", $@"FRC VS Code {frcYear}.desktop");
+                    var launcherFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local/share/applications", $@"FRC_VS_Code_{frcYear}.desktop");
+                    string contents = $@"#!/usr/bin/env xdg-open
 [Desktop Entry]
 Version=1.0
 Type=Application
@@ -905,35 +1014,49 @@ Categories=Development
 Name=FRC VS Code {frcYear}
 Comment=Official C++/Java IDE for the FIRST Robotics Competition
 Exec={configurationProvider.InstallDirectory}/frccode/frccode{frcYear}
-Icon={configurationProvider.InstallDirectory}/frccode/wpilib-256.ico
+Icon={configurationProvider.InstallDirectory}/icons/wpilib-icon-256.png
 Terminal=false
 StartupNotify=true
 StartupWMClass=Code
 ";
 
-                var desktopPath = Path.GetDirectoryName(desktopFile);
-                if (desktopPath != null)
-                {
-                    Directory.CreateDirectory(desktopPath);
-                }
-                var launcherPath = Path.GetDirectoryName(launcherFile);
-                if (launcherPath != null)
-                {
-                    Directory.CreateDirectory(launcherPath);
-                }
-                await File.WriteAllTextAsync(desktopFile, contents, token);
-                await File.WriteAllTextAsync(launcherFile, contents, token);
-                await Task.Run(() =>
-                {
-                    var startInfo = new ProcessStartInfo("chmod", $"+x \"{desktopFile}\"")
+                    var desktopPath = Path.GetDirectoryName(desktopFile);
+                    if (desktopPath != null)
                     {
-                        UseShellExecute = false,
-                        WindowStyle = ProcessWindowStyle.Hidden,
-                        CreateNoWindow = true
-                    };
-                    var proc = Process.Start(startInfo);
-                    proc!.WaitForExit();
-                }, token);
+                        Directory.CreateDirectory(desktopPath);
+                    }
+                    var launcherPath = Path.GetDirectoryName(launcherFile);
+                    if (launcherPath != null)
+                    {
+                        Directory.CreateDirectory(launcherPath);
+                    }
+                    await File.WriteAllTextAsync(desktopFile, contents, token);
+                    await File.WriteAllTextAsync(launcherFile, contents, token);
+                    await Task.Run(() =>
+                    {
+                        var startInfo = new ProcessStartInfo("chmod", $"+x \"{desktopFile}\"")
+                        {
+                            UseShellExecute = false,
+                            WindowStyle = ProcessWindowStyle.Hidden,
+                            CreateNoWindow = true
+                        };
+                        var proc = Process.Start(startInfo);
+                        proc!.WaitForExit();
+                    }, token);
+                }
+
+                CreateLinuxShortcut("AdvantageScope (WPILib)", frcYear, "AdvantageScope (WPILib)", "advantagescope.png", token);
+                CreateLinuxShortcut("Elastic (WPILib)", frcYear, "elastic_dashboard", "elastic.png", token);
+                CreateLinuxShortcut("Glass", frcYear, "Glass - DISCONNECTED", "glass.png", token);
+                CreateLinuxShortcut("OutlineViewer", frcYear, "OutlineViewer - DISCONNECTED", "outlineviewer.png", token);
+                CreateLinuxShortcut("DataLogTool", frcYear, "Datalog Tool", "datalogtool.png", token);
+                CreateLinuxShortcut("SysId", frcYear, "System Identification", "sysid.png", token);
+                CreateLinuxShortcut("SmartDashboard", frcYear, "edu-wpi-first-smartdashboard-SmartDashboard", "wpilib-icon-256.png", token);
+                CreateLinuxShortcut("RobotBuilder", frcYear, "robotbuilder-RobotBuilder", "robotbuilder.png", token);
+                CreateLinuxShortcut("PathWeaver", frcYear, "edu.wpi.first.pathweaver.PathWeaver", "wpilib-icon-256.png", token);
+                CreateLinuxShortcut("roboRIOTeamNumberSetter", frcYear, "roboRIO Team Number Setter", "roborioteamnumbersetter.png", token);
+                CreateLinuxShortcut("Shuffleboard", frcYear, "edu.wpi.first.shuffleboard.app.Shuffleboard", "wpilib-icon-256.png", token);
+                CreateLinuxShortcut("WPIcal", frcYear, "WPIcal", "wpical.png", token);
             }
         }
     }

@@ -4,13 +4,13 @@ Set fso = WScript.CreateObject("Scripting.FileSystemObject")
 'Get the folder of this script
 toolsFolder = fso.GetParentFolderName(WScript.ScriptFullName)
 
-'Get the Choreo folder
+'Get the Elastic folder
 toolsFolder = fso.GetParentFolderName(WScript.ScriptFullName)
 yearFolder = fso.GetParentFolderName(toolsFolder)
-choreoFolder = fso.BuildPath(yearFolder, "choreo")
+elasticFolder = fso.BuildPath(yearFolder, "elastic")
 
 'Get the full path to the exe
-fullExeName = fso.BuildPath(choreoFolder, "choreo.exe")
+fullExeName = fso.BuildPath(elasticFolder, "elastic_dashboard.exe")
 
 shellScript = fullExeName
 

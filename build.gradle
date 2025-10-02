@@ -15,6 +15,12 @@ plugins {
     id "com.github.johnrengelman.shadow" version "7.1.2" apply false
 }
 
+java {
+    sourceCompatibility = 17
+    targetCompatibility = 17
+}
+
+
 apply from: "automation/macos_notarization.gradle"
 apply plugin: OfflineDependenciesPlugin
 
@@ -103,7 +109,7 @@ apply from: 'scripts/jdk.gradle'
 apply from: 'scripts/maven.gradle'
 
 apply from: 'scripts/advantagescope.gradle'
-apply from: 'scripts/choreo.gradle'
+apply from: 'scripts/elastic.gradle'
 
 // Tools must happen after maven
 apply from: 'scripts/tools.gradle'
@@ -222,7 +228,7 @@ def generateFullResourcesTask = tasks.register('generateFullResources', project.
     jdkZipSetup(it)
 
     advantageScopeZipSetup(it)
-    choreoZipSetup(it)
+    elasticZipSetup(it)
 
     if (OperatingSystem.current().isWindows()) {
         def task = it
@@ -250,11 +256,10 @@ def dotnetInstallerTask = tasks.register('createInstaller', Exec) {
     if (project.hasProperty("macBuild") || project.hasProperty("macBuildArm")) {
         commandLine 'dotnet', 'publish', '-c', 'Release', '-r', dotnetRuntime, '--self-contained',
                 "/p:Version=$pubVersion", "/t:BundleApp", "-p:RuntimeIdentifier=${macRuntimeId}",
-                "-p:CFBundleShortVersionString=$pubVersion", "-p:CFBundleVersion=$pubVersion",
-                '/p:EnableCompressionInSingleFile=true'
+                "-p:CFBundleShortVersionString=$pubVersion", "-p:CFBundleVersion=$pubVersion"
     } else {
         commandLine 'dotnet', 'publish', '-c', 'Release', '-r', dotnetRuntime, '/p:PublishSingleFile=true',
-                 "/p:Version=$pubVersion", '/p:EnableCompressionInSingleFile=true', '--self-contained'
+                 "/p:Version=$pubVersion", '--self-contained'
     }
 }
 
@@ -328,7 +333,7 @@ def generateConfigFiles = tasks.register('generateCommonResources', Zip) {
     jdkConfigFileSetup(zip)
 
     advantageScopeConfigFileSetup(zip)
-    choreoConfigFileSetup(zip)
+    elasticConfigFileSetup(zip)
 
     vscodeConfigZipSetup(zip)
 }
@@ -457,5 +462,5 @@ tasks.register('generateInstallers', Task) {
 }
 
 wrapper {
-    gradleVersion = '8.10.2'
+    gradleVersion = '8.11'
 }
