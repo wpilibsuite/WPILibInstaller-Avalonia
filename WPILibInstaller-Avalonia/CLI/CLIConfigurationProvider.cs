@@ -22,7 +22,7 @@ namespace WPILibInstaller.CLI
         private CLIConfigurationProvider(UpgradeConfig upgradeConfig,
             FullConfig fullConfig, JdkConfig jdkConfig,
             VsCodeConfig vsCodeConfig, ChoreoConfig choreoConfig,
-            AdvantageScopeConfig advantageScopeConfig, 
+            AdvantageScopeConfig advantageScopeConfig,
             ElasticConfig elasticConfig,
             IArchiveExtractor zipArchive, string installDirectory
         )
@@ -166,8 +166,8 @@ namespace WPILibInstaller.CLI
 
             var InstallDirectory = Path.Combine(publicFolder, "wpilib", UpgradeConfig.FrcYear);
             return new CLIConfigurationProvider(
-                UpgradeConfig, FullConfig, JdkConfig, VsCodeConfig, 
-                ChoreoConfig, AdvantageScopeConfig, ElasticConfig, ZipArchive, 
+                UpgradeConfig, FullConfig, JdkConfig, VsCodeConfig,
+                ChoreoConfig, AdvantageScopeConfig, ElasticConfig, ZipArchive,
                 InstallDirectory
             );
         }
