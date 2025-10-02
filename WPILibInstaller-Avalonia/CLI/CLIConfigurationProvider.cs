@@ -19,7 +19,12 @@ namespace WPILibInstaller.CLI
 {
     class CLIConfigurationProvider : IConfigurationProvider
     {
-        private CLIConfigurationProvider(UpgradeConfig upgradeConfig, FullConfig fullConfig, JdkConfig jdkConfig, VsCodeConfig vsCodeConfig, IArchiveExtractor zipArchive, string installDirectory)
+        private CLIConfigurationProvider(UpgradeConfig upgradeConfig, 
+            FullConfig fullConfig, JdkConfig jdkConfig,
+            VsCodeConfig vsCodeConfig, ChoreoConfig choreoConfig,
+            AdvantageScopeConfig advantageScopeConfig,
+            IArchiveExtractor zipArchive, string installDirectory
+        )
         {
             UpgradeConfig = upgradeConfig;
             FullConfig = fullConfig;
@@ -27,6 +32,8 @@ namespace WPILibInstaller.CLI
             VsCodeConfig = vsCodeConfig;
             ZipArchive = zipArchive;
             InstallDirectory = installDirectory;
+            ChoreoConfig = choreoConfig;
+            AdvantageScopeConfig = advantageScopeConfig;
         }
 
         public static async Task<CLIConfigurationProvider> From(string artifactsFile, string resourcesFile)
@@ -35,6 +42,8 @@ namespace WPILibInstaller.CLI
             FullConfig FullConfig;
             JdkConfig JdkConfig;
             VsCodeConfig VsCodeConfig;
+            ChoreoConfig ChoreoConfig;
+            AdvantageScopeConfig AdvantageScopeConfig;
 
             var publicFolder = Environment.GetEnvironmentVariable("PUBLIC");
             if (publicFolder == null)
@@ -96,7 +105,28 @@ namespace WPILibInstaller.CLI
                     MissingMemberHandling = MissingMemberHandling.Error
                 }) ?? throw new InvalidOperationException("Not Valid");
             }
+            
+            // CODE REVIEWERS: Please review this code.
+            entry = resourcesArchive.GetEntry("choreoConfig.json");
+            using (StreamReader reader = new StreamReader(entry!.Open()))
+            {
+                var configStr = await reader.ReadToEndAsync();
+                ChoreoConfig = JsonConvert.DeserializeObject<UpgradeConfig>(configStr, new JsonSerializerSettings
+                {
+                    MissingMemberHandling = MissingMemberHandling.Error
+                }) ?? throw new InvalidOperationException("Not Valid");
+            }
 
+            // CODE REVIEWERS: please review this
+            entry = resourcesArchive.GetEntry("advantageScopeConfig.json");
+            using (StreamReader reader = new StreamReader(entry!.Open()))
+            {
+                var configStr = await reader.ReadToEndAsync();
+                AdvantageScopeConfig = JsonConvert.DeserializeObject<UpgradeConfig>(configStr, new JsonSerializerSettings
+                {
+                    MissingMemberHandling = MissingMemberHandling.Error
+                }) ?? throw new InvalidOperationException("Not Valid");
+            }
 
             entry = resourcesArchive.GetEntry("fullConfig.json");
 
@@ -148,6 +178,10 @@ namespace WPILibInstaller.CLI
         public JdkConfig JdkConfig { get; private set; }
 
         public VsCodeConfig VsCodeConfig { get; private set; }
+
+        public ChoreoConfig ChoreoConfig { get; private set; }
+
+        public AdvantageScopeConfig AdvantageScopeConfig { get; private set; }
 
         public string InstallDirectory { get; private set; }
     }
