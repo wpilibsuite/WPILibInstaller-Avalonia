@@ -21,7 +21,7 @@ namespace WPILibInstaller.CLI
     {
         private CLIConfigurationProvider(UpgradeConfig upgradeConfig,
             FullConfig fullConfig, JdkConfig jdkConfig,
-            VsCodeConfig vsCodeConfig, ChoreoConfig choreoConfig,
+            VsCodeConfig vsCodeConfig,
             AdvantageScopeConfig advantageScopeConfig,
             ElasticConfig elasticConfig,
             IArchiveExtractor zipArchive, string installDirectory
@@ -33,7 +33,6 @@ namespace WPILibInstaller.CLI
             VsCodeConfig = vsCodeConfig;
             ZipArchive = zipArchive;
             InstallDirectory = installDirectory;
-            ChoreoConfig = choreoConfig;
             AdvantageScopeConfig = advantageScopeConfig;
             ElasticConfig = elasticConfig;
         }
@@ -44,7 +43,6 @@ namespace WPILibInstaller.CLI
             FullConfig FullConfig;
             JdkConfig JdkConfig;
             VsCodeConfig VsCodeConfig;
-            ChoreoConfig ChoreoConfig;
             AdvantageScopeConfig AdvantageScopeConfig;
             ElasticConfig ElasticConfig;
 
@@ -109,17 +107,6 @@ namespace WPILibInstaller.CLI
                 }) ?? throw new InvalidOperationException("Not Valid");
             }
 
-            // CODE REVIEWERS: Please review this code.
-            entry = resourcesArchive.GetEntry("choreoConfig.json");
-            using (StreamReader reader = new StreamReader(entry!.Open()))
-            {
-                var configStr = await reader.ReadToEndAsync();
-                ChoreoConfig = JsonConvert.DeserializeObject<ChoreoConfig>(configStr, new JsonSerializerSettings
-                {
-                    MissingMemberHandling = MissingMemberHandling.Error
-                }) ?? throw new InvalidOperationException("Not Valid");
-            }
-
             // CODE REVIEWERS: please review this
             entry = resourcesArchive.GetEntry("advantageScopeConfig.json");
             using (StreamReader reader = new StreamReader(entry!.Open()))
@@ -167,7 +154,7 @@ namespace WPILibInstaller.CLI
             var InstallDirectory = Path.Combine(publicFolder, "wpilib", UpgradeConfig.FrcYear);
             return new CLIConfigurationProvider(
                 UpgradeConfig, FullConfig, JdkConfig, VsCodeConfig,
-                ChoreoConfig, AdvantageScopeConfig, ElasticConfig, ZipArchive,
+                AdvantageScopeConfig, ElasticConfig, ZipArchive,
                 InstallDirectory
             );
         }
@@ -196,8 +183,6 @@ namespace WPILibInstaller.CLI
         public JdkConfig JdkConfig { get; private set; }
 
         public VsCodeConfig VsCodeConfig { get; private set; }
-
-        public ChoreoConfig ChoreoConfig { get; private set; }
 
         public ElasticConfig ElasticConfig { get; private set; }
 
