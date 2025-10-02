@@ -1,7 +1,7 @@
-﻿using Avalonia;
+﻿using System;
+using Avalonia;
 using Avalonia.ReactiveUI;
 using WPILibInstaller.CLI;
-using System;
 
 namespace WPILibInstaller
 {

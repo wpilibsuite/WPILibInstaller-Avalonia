@@ -1,25 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using WPILibInstaller.Interfaces;
 using WPILibInstaller.Models;
 using WPILibInstaller.Utils;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System.Diagnostics;
-using System.Threading;
 
 namespace WPILibInstaller.CLI
 {
     class CLIConfigurationProvider : IConfigurationProvider
     {
-        private CLIConfigurationProvider(UpgradeConfig upgradeConfig, 
+        private CLIConfigurationProvider(UpgradeConfig upgradeConfig,
             FullConfig fullConfig, JdkConfig jdkConfig,
             VsCodeConfig vsCodeConfig, ChoreoConfig choreoConfig,
             AdvantageScopeConfig advantageScopeConfig,
@@ -105,7 +105,7 @@ namespace WPILibInstaller.CLI
                     MissingMemberHandling = MissingMemberHandling.Error
                 }) ?? throw new InvalidOperationException("Not Valid");
             }
-            
+
             // CODE REVIEWERS: Please review this code.
             entry = resourcesArchive.GetEntry("choreoConfig.json");
             using (StreamReader reader = new StreamReader(entry!.Open()))
