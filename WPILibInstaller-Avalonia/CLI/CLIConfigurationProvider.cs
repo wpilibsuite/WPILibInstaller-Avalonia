@@ -66,9 +66,9 @@ namespace WPILibInstaller.CLI
 
                 // Compute the hash of the file that exists.
                 string s;
-                using (SHA256 SHA256 = SHA256Managed.Create())
+                using (var sha256 = SHA256.Create())
                 {
-                    s = Convert.ToHexString(await SHA256.ComputeHashAsync(fileStream));
+                    s = Convert.ToHexString(await sha256.ComputeHashAsync(fileStream));
                 }
 
                 // Make sure they match.
@@ -152,7 +152,7 @@ namespace WPILibInstaller.CLI
             }
 
             var InstallDirectory = Path.Combine(publicFolder, "wpilib", UpgradeConfig.FrcYear);
-            return new CLIConfigurationProvider(UpgradeConfig, FullConfig, JdkConfig, VsCodeConfig, ZipArchive, InstallDirectory);
+            return new CLIConfigurationProvider(UpgradeConfig, FullConfig, JdkConfig, VsCodeConfig, ChoreoConfig, AdvantageScopeConfig, ZipArchive, InstallDirectory);
         }
 
         public VsCodeModel VsCodeModel
@@ -160,10 +160,11 @@ namespace WPILibInstaller.CLI
             get
             {
                 VsCodeModel model = new VsCodeModel(VsCodeConfig.VsCodeVersion);
-                model.Platforms.Add(Utils.Platform.Win32, new VsCodeModel.PlatformData(VsCodeConfig.VsCode32Url, VsCodeConfig.VsCode32Name));
-                model.Platforms.Add(Utils.Platform.Win64, new VsCodeModel.PlatformData(VsCodeConfig.VsCode64Url, VsCodeConfig.VsCode64Name));
-                model.Platforms.Add(Utils.Platform.Linux64, new VsCodeModel.PlatformData(VsCodeConfig.VsCodeLinuxUrl, VsCodeConfig.VsCodeLinuxName));
-                model.Platforms.Add(Utils.Platform.Mac64, new VsCodeModel.PlatformData(VsCodeConfig.VsCodeMacUrl, VsCodeConfig.VsCodeMacName));
+                model.Platforms.Add(Utils.Platform.Win64, new VsCodeModel.PlatformData(VsCodeConfig.VsCodeWindowsUrl, VsCodeConfig.VsCodeWindowsName, VsCodeConfig.VsCodeWindowsHash));
+                model.Platforms.Add(Utils.Platform.Linux64, new VsCodeModel.PlatformData(VsCodeConfig.VsCodeLinuxUrl, VsCodeConfig.VsCodeLinuxName, VsCodeConfig.VsCodeLinuxHash));
+                model.Platforms.Add(Utils.Platform.LinuxArm64, new VsCodeModel.PlatformData(VsCodeConfig.VsCodeLinuxArm64Url, VsCodeConfig.VsCodeLinuxArm64Name, VsCodeConfig.VsCodeLinuxArm64Hash));
+                model.Platforms.Add(Utils.Platform.Mac64, new VsCodeModel.PlatformData(VsCodeConfig.VsCodeMacUrl, VsCodeConfig.VsCodeMacName, VsCodeConfig.VsCodeMacHash));
+                model.Platforms.Add(Utils.Platform.MacArm64, new VsCodeModel.PlatformData(VsCodeConfig.VsCodeMacUrl, VsCodeConfig.VsCodeMacName, VsCodeConfig.VsCodeMacHash));
                 return model;
             }
         }
