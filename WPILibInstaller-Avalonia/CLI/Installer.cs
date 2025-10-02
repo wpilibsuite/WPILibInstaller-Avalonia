@@ -51,6 +51,46 @@ namespace WPILibInstaller.CLI
             // await RunShortcutCreator();
         }
 
+        private void SetExecutableIfNeeded(string fullZipToPath, bool entryIsExecutable)
+        {
+            if (!entryIsExecutable)
+            {
+                return;
+            }
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // Windows doesn't use executable bits, nothing to do
+                return;
+            }
+
+            try
+            {
+                var startInfo = new ProcessStartInfo
+                {
+                    FileName = "/bin/chmod",
+                    Arguments = $"+x \"{fullZipToPath}\"",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                using var proc = Process.Start(startInfo);
+                proc!.WaitForExit();
+
+                if (proc.ExitCode != 0)
+                {
+                    Console.WriteLine($"Warning: chmod failed for {fullZipToPath} (exit code {proc.ExitCode})");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Warning: unable to set executable bit for {fullZipToPath}: {ex.Message}");
+            }
+        }
+
+
         private async Task ExtractArchive()
         {
             var directoriesToIgnore = GetExtractionIgnoreDirectories();
@@ -103,14 +143,7 @@ namespace WPILibInstaller.CLI
                     using FileStream writer = File.Create(fullZipToPath);
                     await extractor.CopyToStreamAsync(writer);
                 }
-
-                if (extractor.EntryIsExecutable)
-                {
-                    new Mono.Unix.UnixFileInfo(fullZipToPath).FileAccessPermissions |=
-                        (Mono.Unix.FileAccessPermissions.GroupExecute |
-                         Mono.Unix.FileAccessPermissions.UserExecute |
-                         Mono.Unix.FileAccessPermissions.OtherExecute);
-                }
+                SetExecutableIfNeeded(fullZipToPath, extractor.EntryIsExecutable);
             }
         }
 
@@ -163,9 +196,25 @@ namespace WPILibInstaller.CLI
             if (!installSelectionModel.InstallTools || !installSelectionModel.InstallWPILibDeps)
                 return;
 
-            await RunScriptExecutable(Path.Combine(configurationProvider.InstallDirectory,
+            await RunJavaJar(configurationProvider.InstallDirectory,
+                Path.Combine(configurationProvider.InstallDirectory,
                 configurationProvider.UpgradeConfig.Tools.Folder,
-                configurationProvider.UpgradeConfig.Tools.UpdaterExe), 5000, "silent");
+                configurationProvider.UpgradeConfig.Tools.UpdaterJar), 20000);
+        }
+
+        private static Task<bool> RunJavaJar(string installDir, string jar, int timeoutMs)
+        {
+            string java = Path.Join(installDir, "jdk", "bin", "java");
+            if (OperatingSystem.IsWindows())
+            {
+                java += ".exe";
+            }
+            ProcessStartInfo pstart = new ProcessStartInfo(java, $"-jar \"{jar}\"");
+            var p = Process.Start(pstart);
+            return Task.Run(() =>
+            {
+                return p!.WaitForExit(timeoutMs);
+            });
         }
 
         private Task<bool> RunScriptExecutable(string script, int timeoutMs, params string[] args)
@@ -190,9 +239,10 @@ namespace WPILibInstaller.CLI
             if (!installSelectionModel.InstallWPILibDeps)
                 return;
 
-            await RunScriptExecutable(Path.Combine(configurationProvider.InstallDirectory,
+            await RunJavaJar(configurationProvider.InstallDirectory,
+                Path.Combine(configurationProvider.InstallDirectory,
                 configurationProvider.UpgradeConfig.Maven.Folder,
-                configurationProvider.UpgradeConfig.Maven.MetaDataFixerExe), 5000, "silent");
+                configurationProvider.UpgradeConfig.Maven.MetaDataFixerJar), 20000);
         }
 
         private async Task RunVsCodeSetup()
@@ -242,14 +292,7 @@ namespace WPILibInstaller.CLI
                     using FileStream writer = File.Create(fullZipToPath);
                     await extractor.CopyToStreamAsync(writer);
                 }
-
-                if (extractor.EntryIsExecutable)
-                {
-                    new Mono.Unix.UnixFileInfo(fullZipToPath).FileAccessPermissions |=
-                        (Mono.Unix.FileAccessPermissions.GroupExecute |
-                         Mono.Unix.FileAccessPermissions.UserExecute |
-                         Mono.Unix.FileAccessPermissions.OtherExecute);
-                }
+                SetExecutableIfNeeded(fullZipToPath, extractor.EntryIsExecutable);
             }
 
         }
