@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WPILibInstaller.Models;
+using WPILibInstaller.Models.CLI;
 
 namespace WPILibInstaller.CLI
 {
@@ -11,12 +12,12 @@ namespace WPILibInstaller.CLI
     {
         public readonly CLIConfigurationProvider configurationProvider;
 
-        public readonly InstallSelectionModel installSelectionModel;
+        public readonly CLIInstallSelectionModel installSelectionModel;
 
         public Parser(string[] args)
         {
             string artifactsFile = "", resourcesFile = "";
-            installSelectionModel = new InstallSelectionModel();
+            installSelectionModel = new CLIInstallSelectionModel();
 
             bool skip = false;
             for (int i = 0; i < args.Length; i++)

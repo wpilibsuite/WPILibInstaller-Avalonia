@@ -111,7 +111,7 @@ namespace WPILibInstaller.CLI
             using (StreamReader reader = new StreamReader(entry!.Open()))
             {
                 var configStr = await reader.ReadToEndAsync();
-                ChoreoConfig = JsonConvert.DeserializeObject<UpgradeConfig>(configStr, new JsonSerializerSettings
+                ChoreoConfig = JsonConvert.DeserializeObject<ChoreoConfig>(configStr, new JsonSerializerSettings
                 {
                     MissingMemberHandling = MissingMemberHandling.Error
                 }) ?? throw new InvalidOperationException("Not Valid");
@@ -122,7 +122,7 @@ namespace WPILibInstaller.CLI
             using (StreamReader reader = new StreamReader(entry!.Open()))
             {
                 var configStr = await reader.ReadToEndAsync();
-                AdvantageScopeConfig = JsonConvert.DeserializeObject<UpgradeConfig>(configStr, new JsonSerializerSettings
+                AdvantageScopeConfig = JsonConvert.DeserializeObject<AdvantageScopeConfig>(configStr, new JsonSerializerSettings
                 {
                     MissingMemberHandling = MissingMemberHandling.Error
                 }) ?? throw new InvalidOperationException("Not Valid");

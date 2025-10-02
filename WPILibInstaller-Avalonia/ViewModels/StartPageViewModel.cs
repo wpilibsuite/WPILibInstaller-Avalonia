@@ -38,7 +38,8 @@ namespace WPILibInstaller.ViewModels
             bool foundResources = false;
             bool foundSupport = false;
 
-            // Enumerate all files in base dir
+            // Enumerate all files in base dir, and find the zip archive of
+            // resources and artifacts
             foreach (var file in Directory.EnumerateFiles(baseDir))
             {
                 if (file.EndsWith($"{verString}-resources.zip"))
