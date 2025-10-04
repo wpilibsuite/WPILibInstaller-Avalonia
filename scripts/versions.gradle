@@ -1,28 +1,30 @@
-ext.vsCodeVersion = '1.85.1'
+ext.vsCodeVersion = '1.96.2'
 
-ext.vscodeLinuxHash = '01669d69e567a5290336b1d2f7b2f0f1816e9d7099004b81a26f8f40ee17c9fc'
-ext.vscodeMacHash = '27b79f0807c6c702d7a2e78af8441c17dc08c2fb74a4e132750b3b5d1d75868f'
-ext.vscodeWindowsHash = '8520a2f67d4d8d0871320ff65f4145a0a2e6167234c7a8af37f1ef43eda9a0ef'
-ext.vscodeLinuxArm64Hash = '7234a03003d4f34e195b3c4a57f071a6d5b816becad639c454f964f95c97aeac'
+ext.vscodeLinuxHash = '2681040089faf143bed37246f2b0bc0787f6d342d878b1ec4b3737b38833c088'
+ext.vscodeMacHash = '28159393558c4065e72b3c61ff8e0b8c74f3d2060ec5f046a91122aa8819c232'
+ext.vscodeWindowsHash = 'c6c2f97e5cb25a8b576b345f6b8f2021cc168f1726ee370f29d1dbd136ffe9f8'
+ext.vscodeLinuxArm64Hash = '33e93e2899f7a9c20d882d07b157d5fde6f1419f21c6bb95cd676d7a0412690e'
 
-ext.cppToolsVersion = '1.19.1'
-ext.javaExtVersion = '1.26.2023121408'
-ext.javaDebugVersion = '0.55.2023121302'
-ext.javaDependencyVersion = '0.23.2023120100'
-ext.pythonExtVersion = '2023.23.13481009'
-ext.pylanceVersion = '2023.12.100'
-ext.isortVersion = '2023.11.13191009'
-ext.blackVersion = '2023.7.13471009'
+ext.cppToolsVersion = '1.23.2'
+ext.javaExtVersion = '1.38.0'
+ext.javaDebugVersion = '0.58.1'
+ext.javaDependencyVersion = '0.24.1'
+ext.pythonExtVersion = '2024.22.1'
+ext.pylanceVersion = '2024.12.1'
+ext.isortVersion = '2023.10.1'
+ext.blackVersion = '2024.4.0'
 
 ext.wpilibVersion = gradleRioVersion
 
 ext.gccVersion = '12.1.0'
-ext.toolchainGitTag = 'v2024-1'
+ext.toolchainGitTag = 'v2025-1'
 
-ext.jdkVersion = '17.0.8.1+1'
+ext.jdkVersion = '17.0.16+8'
 
-ext.advantagescopeGitTag = 'v3.2.1'
+ext.advantagescopeGitTag = 'v4.1.5'
 
-ext.frcYear = '2024'
+ext.elasticGitTag = 'v2025.2.0'
 
-ext.gradleWrapperVersion = '8.5'
+ext.frcYear = '2025'
+
+ext.gradleWrapperVersion = '8.11'

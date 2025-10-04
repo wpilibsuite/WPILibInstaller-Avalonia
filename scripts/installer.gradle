@@ -5,9 +5,9 @@ evaluationDependsOn(':apps:MavenMetaDataFixer')
 evaluationDependsOn(':apps:ToolsUpdater')
 
 def metaDataScriptBatch = file("$rootDir/files/MavenMetaDataFixer.bat")
-def metaDataScriptSh = file("$rootDir/files/MavenMetaDataFixer.py")
+def metaDataScriptSh = file("$rootDir/files/MavenMetaDataFixer.sh")
 def toolsUpdaterBatch = file("$rootDir/files/ToolsUpdater.bat")
-def toolsUpdaterSh = file("$rootDir/files/ToolsUpdater.py")
+def toolsUpdaterSh = file("$rootDir/files/ToolsUpdater.sh")
 
 ext.msBuildExtraSetup = { AbstractArchiveTask zip->
   //zip.dependsOn msbuild

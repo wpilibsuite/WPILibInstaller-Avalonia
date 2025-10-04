@@ -9,24 +9,24 @@ namespace WPILibInstaller.Models
         public List<NewEnvVariable> NewEnvironmentalVariables { get; set; } = new();
         public List<ShortcutInfo> StartMenuShortcuts { get; set; } = new List<ShortcutInfo>();
         public List<AddedPathVariable> AddToPath { get; set; } = new();
-
-        public string IconLocation { get; set; } = "";
     }
 
     public class ShortcutInfo
     {
         public ShortcutInfo() { }
 
-        public ShortcutInfo(string path, string name, string description)
+        public ShortcutInfo(string path, string name, string description, string iconLocation)
         {
             Path = path;
             Name = name;
             Description = description;
+            IconLocation = iconLocation;
         }
 
         public string Path { get; set; } = "";
         public string Name { get; set; } = "";
         public string Description { get; set; } = "";
+        public string IconLocation { get; set; } = "";
     }
 
     public class NewEnvVariable

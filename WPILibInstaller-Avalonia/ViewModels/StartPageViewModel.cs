@@ -154,6 +154,8 @@ namespace WPILibInstaller.ViewModels
 
         public bool MissingEitherFile => MissingSupportFiles || MissingResourceFiles;
 
+        public bool MacOSEject => MissingEitherFile && RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+
         private bool missingSupportFiles = true;
 
         public bool MissingResourceFiles
@@ -209,6 +211,17 @@ namespace WPILibInstaller.ViewModels
             {
                 var configStr = await reader.ReadToEndAsync();
                 AdvantageScopeConfig = JsonConvert.DeserializeObject<AdvantageScopeConfig>(configStr, new JsonSerializerSettings
+                {
+                    MissingMemberHandling = MissingMemberHandling.Error
+                }) ?? throw new InvalidOperationException("Not Valid");
+            }
+
+            entry = zipArchive.GetEntry("elasticConfig.json");
+
+            using (StreamReader reader = new StreamReader(entry!.Open()))
+            {
+                var configStr = await reader.ReadToEndAsync();
+                ElasticConfig = JsonConvert.DeserializeObject<ElasticConfig>(configStr, new JsonSerializerSettings
                 {
                     MissingMemberHandling = MissingMemberHandling.Error
                 }) ?? throw new InvalidOperationException("Not Valid");
@@ -413,6 +426,8 @@ namespace WPILibInstaller.ViewModels
         public JdkConfig JdkConfig { get; private set; } = null!;
 
         public AdvantageScopeConfig AdvantageScopeConfig { get; private set; } = null!;
+
+        public ElasticConfig ElasticConfig { get; private set; } = null!;
 
         public VsCodeConfig VsCodeConfig { get; private set; } = null!;
 

@@ -1,12 +1,15 @@
 def toolsJson = file("$buildDir/tools.json")
 def scriptBaseFile = file("files/ScriptBase.vbs")
-def scriptBaseUnixFile = file("files/ScriptBase.py")
+def scriptBaseUnixFile = file("files/ScriptBase.sh")
 
 def scriptBaseCppFile = file("files/ScriptBaseCpp.vbs")
-def scriptBaseCppUnixFile = file("files/ScriptBaseCpp.py")
+def scriptBaseCppUnixFile = file("files/ScriptBaseCpp.sh")
 
 def advantageScopeScriptFile = file("files/AdvantageScope.vbs")
-def advantageScopeScriptUnixFile = file("files/AdvantageScope.py")
+def advantageScopeScriptUnixFile = file("files/AdvantageScope.sh")
+
+def elasticScriptFile = file("files/Elastic.vbs")
+def elasticScriptUnixFile = file("files/Elastic.sh")
 
 def toolsJsonTask = tasks.register('toolsJson', Task) {
 
@@ -53,6 +56,16 @@ def toolsJsonTask = tasks.register('toolsJson', Task) {
     advantageScopeItem['version'] = advantagescopeGitTag
     config << advantageScopeItem
 
+    def elasticItem = [:]
+    elasticItem['name'] = "Elastic"
+    elasticItem['version'] = elasticGitTag
+    config << elasticItem
+
+    def utilityItem = [:]
+    utilityItem['name'] = "Utility"
+    utilityItem['version'] = wpilibVersion
+    config << utilityItem
+
     def gbuilder = getGsonBuilder()
     gbuilder.setPrettyPrinting()
     def json = gbuilder.create().toJson(config)
@@ -84,30 +97,42 @@ ext.toolsSetup = { AbstractArchiveTask zip->
     into '/tools'
   }
 
-  zip.from (scriptBaseFile) {
-    into '/tools'
+  if (project.ext.buildClassifier == 'Windows') {
+    zip.from (scriptBaseFile) {
+      into '/tools'
+    }
+
+    zip.from (scriptBaseCppFile) {
+      into '/tools'
+    }
+
+    zip.from (advantageScopeScriptFile) {
+      into '/tools'
+    }
+
+    zip.from (elasticScriptFile) {
+      into '/tools'
+    }
+  } else {
+    zip.from (scriptBaseUnixFile) {
+      into '/tools'
+      fileMode 0755
+    }
+
+    zip.from (scriptBaseCppUnixFile) {
+      into '/tools'
+      fileMode 0755
+    }
+
+    zip.from (advantageScopeScriptUnixFile) {
+      into '/tools'
+      fileMode 0755
+    }
+
+    zip.from (elasticScriptUnixFile) {
+      into '/tools'
+      fileMode 0755
+    }
   }
 
-  zip.from (scriptBaseUnixFile) {
-    into '/tools'
-    fileMode 0755
-  }
-
-  zip.from (scriptBaseCppFile) {
-    into '/tools'
-  }
-
-  zip.from (scriptBaseCppUnixFile) {
-    into '/tools'
-    fileMode 0755
-  }
-
-  zip.from (advantageScopeScriptFile) {
-    into '/tools'
-  }
-
-  zip.from (advantageScopeScriptUnixFile) {
-    into '/tools'
-    fileMode 0755
-  }
 }

@@ -16,6 +16,8 @@ namespace WPILibInstaller.Interfaces
 
         AdvantageScopeConfig AdvantageScopeConfig { get; }
 
+        ElasticConfig ElasticConfig { get; }
+
         VsCodeConfig VsCodeConfig { get; }
 
         string InstallDirectory { get; }

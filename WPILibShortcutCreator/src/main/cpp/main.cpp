@@ -85,13 +85,13 @@ int main (int argc, char *argv[]) {
     bool createdDesktop = false;
 
     if (desktopFolder) {
-        createdDesktop = shortcutCreator.CreateShortcuts(s.desktopShortcuts, s.iconLocation, *desktopFolder);
+        createdDesktop = shortcutCreator.CreateShortcuts(s.desktopShortcuts, *desktopFolder);
     }
 
     bool createdStartMenu = false;
 
     if (startMenuFolder) {
-        createdStartMenu = shortcutCreator.CreateShortcuts(s.startMenuShortcuts, s.iconLocation, *startMenuFolder);
+        createdStartMenu = shortcutCreator.CreateShortcuts(s.startMenuShortcuts, *startMenuFolder);
     }
 
     if (!createdDesktop || !createdStartMenu) {

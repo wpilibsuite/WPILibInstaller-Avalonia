@@ -3,9 +3,13 @@ def varsfilePS = file("files/frcvars.ps1")
 def varsfilesh = file("files/frcvars.sh")
 def codefile = file("files/frccode")
 def codefileCmd = file("files/frccode.cmd")
-def icoFile = file("files/wpilib-256.ico")
+def icoFile = file("WPILibInstaller-Avalonia/Assets/wpilib-256.ico")
+def codeAppArmorFile = file("files/frccode.AppArmor")
+def utilAppArmorFile = file("files/wpilibutility.AppArmor")
+def advantagescopeAppArmorFile = file("files/advantagescope.AppArmor")
 
 def pathfolder = 'frccode'
+def iconfolder = 'icons'
 
 ext.varConfigSetup = {
   return new Tuple2({ Task task ->
@@ -22,43 +26,74 @@ ext.varsZipSetup = { AbstractArchiveTask zip->
   zip.inputs.file icoFile
   zip.inputs.file codefile
   zip.inputs.file codefileCmd
+  zip.inputs.file codeAppArmorFile
+  zip.inputs.file utilAppArmorFile
 
-  zip.from (varsfile) {
-    into "/$pathfolder"
-    rename {
-      "frcvars${frcYear}.bat"
+  if (project.ext.buildClassifier == 'Windows') {
+    zip.from (varsfile) {
+      into "/$pathfolder"
+      rename {
+        "frcvars${frcYear}.bat"
+      }
     }
-  }
 
-  zip.from (varsfilePS) {
-    into "/$pathfolder"
-    rename {
-      "frcvars${frcYear}.ps1"
+    zip.from (varsfilePS) {
+      into "/$pathfolder"
+      rename {
+        "frcvars${frcYear}.ps1"
+      }
     }
-  }
 
-  zip.from (varsfilesh) {
-    into "/$pathfolder"
-    rename {
-      "frcvars${frcYear}.sh"
+    zip.from (codefileCmd) {
+      into "/$pathfolder"
+      rename {
+        "frccode${frcYear}.cmd"
+      }
     }
-  }
+  } else {
+    zip.from (varsfilesh) {
+      into "/$pathfolder"
+      rename {
+        "frcvars${frcYear}.sh"
+      }
+    }
 
     zip.from (codefile) {
-    into "/$pathfolder"
-    rename {
-      "frccode${frcYear}"
-    }
-  }
-
-  zip.from (codefileCmd) {
-    into "/$pathfolder"
-    rename {
-      "frccode${frcYear}.cmd"
+      into "/$pathfolder"
+      rename {
+        "frccode${frcYear}"
+      }
     }
   }
 
   zip.from (icoFile) {
-    into "/$pathfolder"
+    into "/$iconfolder"
+  }
+  
+  zip.from (file("icons")) {
+    into "/$iconfolder"
+  }
+
+  if (project.ext.buildClassifier == 'Linux') {
+    zip.from (codeAppArmorFile) {
+      into "/$pathfolder/AppArmor"
+      rename {
+        "frccode"
+      }
+    }
+
+    zip.from (utilAppArmorFile) {
+      into "/$pathfolder/AppArmor"
+      rename {
+        "wpilibutility"
+      }
+    }
+
+    zip.from (advantagescopeAppArmorFile) {
+      into "/$pathfolder/AppArmor"
+      rename {
+        "advantagescope"
+      }
+    }
   }
 }
