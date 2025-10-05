@@ -32,7 +32,7 @@ namespace WPILibInstaller.CLI
         public async Task Install()
         {
             Console.WriteLine("Extracting");
-            await ExtractArchive();
+            await ExtractArchive(null);
             Console.WriteLine("Installing Gradle");
             await RunGradleSetup();
             Console.WriteLine("Installing Tools");
@@ -48,7 +48,7 @@ namespace WPILibInstaller.CLI
             Console.WriteLine("Installing VS Code Extensions");
             await RunVsCodeExtensionsSetup();
             Console.WriteLine("Creating Shortcuts");
-            // await RunShortcutCreator();
+            await RunShortcutCreator();
         }
 
         private void SetExecutableIfNeeded(string fullZipToPath, bool entryIsExecutable)
@@ -91,9 +91,55 @@ namespace WPILibInstaller.CLI
         }
 
 
-        private async Task ExtractArchive()
+        private async Task ExtractArchive(string[]? filter)
         {
-            var directoriesToIgnore = GetExtractionIgnoreDirectories();
+            if (OperatingSystem.IsWindows())
+            {
+                bool foundRunningExe = await Task.Run(() =>
+                {
+                    try
+                    {
+                        var jdkBinFolder = Path.Join(configurationProvider.InstallDirectory, configurationProvider.JdkConfig.Folder, "bin");
+                        var jdkExes = Directory.EnumerateFiles(jdkBinFolder, "*.exe", SearchOption.AllDirectories);
+                        bool found = false;
+                        foreach (var exe in jdkExes)
+                        {
+                            try
+                            {
+                                var name = Path.GetFileNameWithoutExtension(exe)!;
+                                var pNames = Process.GetProcessesByName(name);
+                                foreach (var p in pNames)
+                                {
+                                    if (p.MainModule?.FileName == exe)
+                                    {
+                                        found = true;
+                                        break;
+                                    }
+                                }
+                                if (found)
+                                {
+                                    break;
+                                }
+                            }
+                            catch
+                            {
+                                // Do nothing. We don't want this code to break.
+                            }
+                        }
+                        return found;
+                    }
+                    catch
+                    {
+                        // Do nothing. We don't want this code to break.
+                        return false;
+                    }
+                });
+                if (foundRunningExe)
+                {
+                    string msg = "Running JDK processes have been found. Installation cannot continue. Please restart your computer, and rerun this installer without running anything else (including VS Code)";
+                    throw new InvalidOperationException(msg);
+                }
+            }
 
             var archive = configurationProvider.ZipArchive;
 
@@ -110,20 +156,27 @@ namespace WPILibInstaller.CLI
                 if (extractor.EntryIsDirectory) continue;
 
                 var entryName = extractor.EntryKey;
-                bool skip = false;
-                foreach (var ignore in directoriesToIgnore)
+                if (filter != null)
                 {
-                    if (entryName.StartsWith(ignore))
+                    bool skip = true;
+                    foreach (var keep in filter)
                     {
-                        skip = true;
-                        break;
+                        if (entryName.StartsWith(keep))
+                        {
+                            skip = false;
+                            break;
+                        }
+                    }
+
+                    if (skip)
+                    {
+                        continue;
                     }
                 }
 
-                if (skip)
-                {
-                    continue;
-                }
+                double currentPercentage = (currentSize / totalSize) * 100;
+                if (currentPercentage > 100) currentPercentage = 100;
+                if (currentPercentage < 0) currentPercentage = 0;
 
                 string fullZipToPath = Path.Combine(intoPath, entryName);
                 string? directoryName = Path.GetDirectoryName(fullZipToPath);
@@ -143,8 +196,14 @@ namespace WPILibInstaller.CLI
                     using FileStream writer = File.Create(fullZipToPath);
                     await extractor.CopyToStreamAsync(writer);
                 }
-                SetExecutableIfNeeded(fullZipToPath, extractor.EntryIsExecutable);
+
+                if (extractor.EntryIsExecutable && !OperatingSystem.IsWindows())
+                {
+                    var currentMode = File.GetUnixFileMode(fullZipToPath);
+                    File.SetUnixFileMode(fullZipToPath, currentMode | UnixFileMode.GroupExecute | UnixFileMode.UserExecute | UnixFileMode.OtherExecute);
+                }
             }
+
         }
 
         private List<string> GetExtractionIgnoreDirectories()
@@ -522,7 +581,7 @@ namespace WPILibInstaller.CLI
             }
         }
 
-        private async Task RunShortcutCreator(CancellationToken token)
+        private async Task RunShortcutCreator()
         {
             var shortcutData = new ShortcutData();
 
@@ -567,7 +626,7 @@ namespace WPILibInstaller.CLI
             {
                 // Run windows shortcut creater
                 var tempFile = Path.GetTempFileName();
-                await File.WriteAllTextAsync(tempFile, serializedData, token);
+                await File.WriteAllTextAsync(tempFile, serializedData);
                 var shortcutCreatorPath = Path.Combine(configurationProvider.InstallDirectory, "installUtils", "WPILibShortcutCreator.exe");
 
                 var startInfo = new ProcessStartInfo(shortcutCreatorPath, $"\"{tempFile}\"")
