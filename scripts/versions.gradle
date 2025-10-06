@@ -5,8 +5,9 @@ ext.vscodeMacHash = '28159393558c4065e72b3c61ff8e0b8c74f3d2060ec5f046a91122aa881
 ext.vscodeWindowsHash = 'c6c2f97e5cb25a8b576b345f6b8f2021cc168f1726ee370f29d1dbd136ffe9f8'
 ext.vscodeLinuxArm64Hash = '33e93e2899f7a9c20d882d07b157d5fde6f1419f21c6bb95cd676d7a0412690e'
 
-ext.cppToolsVersion = '1.23.2'
+ext.cppToolsVersion = '1.23.6'
 ext.javaExtVersion = '1.38.0'
+ext.javaExtPatchVersion = '403'
 ext.javaDebugVersion = '0.58.1'
 ext.javaDependencyVersion = '0.24.1'
 ext.pythonExtVersion = '2024.22.1'
