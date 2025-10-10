@@ -55,7 +55,7 @@ namespace WPILibInstaller.CLI
                 }
                 else
                 {
-                    publicFolder = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+                    publicFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
                 }
             }
 
@@ -82,6 +82,7 @@ namespace WPILibInstaller.CLI
 
             fileStream.Position = 0;
             var ZipArchive = ArchiveUtils.OpenArchive(fileStream);
+
 
             var resourcesArchive = ZipFile.OpenRead(resourcesFile);
 
