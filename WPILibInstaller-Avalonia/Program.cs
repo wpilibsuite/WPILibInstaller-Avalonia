@@ -12,7 +12,6 @@ namespace WPILibInstaller
         // yet and stuff might break.
         public static void Main(string[] args)
         {
-            Console.WriteLine(args.Length);
             if (args.Length == 0)
             {
                 BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);

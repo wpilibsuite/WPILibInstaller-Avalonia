@@ -13,6 +13,7 @@ using WPILibInstaller.Interfaces;
 using WPILibInstaller.Models;
 using WPILibInstaller.Models.CLI;
 using WPILibInstaller.Utils;
+using static WPILibInstaller.Utils.ArchiveUtils;
 
 namespace WPILibInstaller.CLI
 {
@@ -87,6 +88,7 @@ namespace WPILibInstaller.CLI
             catch (Exception ex)
             {
                 Console.WriteLine($"Warning: unable to set executable bit for {fullZipToPath}: {ex.Message}");
+                throw;
             }
         }
 
@@ -304,56 +306,115 @@ namespace WPILibInstaller.CLI
                 configurationProvider.UpgradeConfig.Maven.MetaDataFixerJar), 20000);
         }
 
+        private async Task<(MemoryStream stream, Platform platform, byte[] hash)> DownloadToMemoryStream(Platform platform, string downloadUrl)
+        {
+            MemoryStream ms = new MemoryStream(100000000);
+            // Download VS Code for current platform
+            {
+                using var client = new HttpClientDownloadWithProgress(downloadUrl, ms);
+                await client.StartDownload();
+            }
+
+            // Compute hash of download
+            ms.Seek(0, SeekOrigin.Begin);
+            using var sha = SHA256.Create();
+            var hash = await sha.ComputeHashAsync(ms);
+            return (ms, platform, hash);
+        }
+
+        private async Task DownloadVsCode()
+        {
+            var currentPlatform = PlatformUtils.CurrentPlatform;
+            var url = configurationProvider.VsCodeModel.Platforms[currentPlatform].DownloadUrl;
+            Console.WriteLine("url = " + url);
+
+            var (stream, platform, hash) = await DownloadToMemoryStream(currentPlatform, url);
+
+            if (!hash.AsSpan().SequenceEqual(configurationProvider.VsCodeModel.Platforms[platform].Sha256Hash))
+            {
+                throw new InvalidDataException("Invalid hash for VSCode download");
+            }
+
+            if (OperatingSystem.IsMacOS())
+            {
+                configurationProvider.VsCodeModel.ToExtractArchiveMacOs = stream;
+            }
+            else
+            {
+                configurationProvider.VsCodeModel.ToExtractArchive = OpenArchive(stream);
+            }
+        }
+
         private async Task RunVsCodeSetup()
         {
             if (!installSelectionModel.InstallVsCode) return;
+
+            await DownloadVsCode();
 
             string intoPath = Path.Join(configurationProvider.InstallDirectory, "vscode");
 
             if (configurationProvider.VsCodeModel.ToExtractArchiveMacOs != null)
             {
+                // MacOS Behavior
                 configurationProvider.VsCodeModel.ToExtractArchiveMacOs.Seek(0, SeekOrigin.Begin);
                 var zipPath = Path.Join(intoPath, "MacVsCode.zip");
                 Directory.CreateDirectory(intoPath);
                 {
                     using var fileToWrite = new FileStream(zipPath, FileMode.Create, FileAccess.Write, FileShare.None);
-                    configurationProvider.VsCodeModel.ToExtractArchiveMacOs.CopyTo(fileToWrite);
+                    await configurationProvider.VsCodeModel.ToExtractArchiveMacOs.CopyToAsync(fileToWrite);
                 }
                 await RunScriptExecutable("unzip", Timeout.Infinite, zipPath, "-d", intoPath);
                 File.Delete(zipPath);
                 return;
             }
-
-            var archive = configurationProvider.VsCodeModel.ToExtractArchive!;
-
-            var extractor = archive;
-
-            while (extractor.MoveToNextEntry())
+            else if (configurationProvider.VsCodeModel.ToExtractArchive != null)
             {
-                if (extractor.EntryIsDirectory) continue;
-                var entryName = extractor.EntryKey;
+                var archive = configurationProvider.VsCodeModel.ToExtractArchive!;
 
-                string fullZipToPath = Path.Combine(intoPath, entryName);
-                string? directoryName = Path.GetDirectoryName(fullZipToPath);
-                if (directoryName?.Length > 0)
+                var extractor = archive;
+
+                // FIXME: archive is, in fact, null on MacOS
+                if (archive == null)
                 {
-                    try
+                    throw new Exception("archive is null.");
+                }
+
+                while (extractor.MoveToNextEntry())
+                {
+                    if (extractor == null)
+                    {
+                        Console.WriteLine("extractor is null");
+                        break;
+                    }
+
+                    if (extractor.EntryIsDirectory)
+                        continue;
+
+                    var entryName = extractor.EntryKey;
+                    if (entryName == null)
+                    {
+                        Console.WriteLine("entryName is null");
+                        break;
+                    }
+
+                    string fullZipToPath = Path.Combine(intoPath, entryName);
+                    string? directoryName = Path.GetDirectoryName(fullZipToPath);
+                    if (directoryName?.Length > 0)
                     {
                         Directory.CreateDirectory(directoryName);
                     }
-                    catch (IOException)
+
                     {
-
+                        using FileStream writer = File.Create(fullZipToPath);
+                        await extractor.CopyToStreamAsync(writer);
                     }
+                    SetExecutableIfNeeded(fullZipToPath, extractor.EntryIsExecutable);
                 }
-
-                {
-                    using FileStream writer = File.Create(fullZipToPath);
-                    await extractor.CopyToStreamAsync(writer);
-                }
-                SetExecutableIfNeeded(fullZipToPath, extractor.EntryIsExecutable);
             }
-
+            else
+            {
+                throw new Exception("ToExtractArchive and ToExtractArchiveMacOs are both null.");
+            }
         }
 
         private async Task ConfigureVsCodeSettings()
