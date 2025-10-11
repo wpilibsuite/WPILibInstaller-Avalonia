@@ -36,8 +36,10 @@ namespace WPILibInstaller.CLI
             await ExtractArchive(null);
             Console.WriteLine("Installing Gradle");
             await RunGradleSetup();
-            Console.WriteLine("Installing Tools");
-            await RunToolSetup();
+            if (installSelectionModel.InstallTools && installSelectionModel.InstallWPILibDeps) {
+                Console.WriteLine("Installing Tools");
+                await RunToolSetup();
+            }
             Console.WriteLine("Installing CPP");
             await RunCppSetup();
             Console.WriteLine("Fixing Maven");
@@ -271,6 +273,7 @@ namespace WPILibInstaller.CLI
                 java += ".exe";
             }
             ProcessStartInfo pstart = new ProcessStartInfo(java, $"-jar \"{jar}\"");
+            pstart.RedirectStandardOutput = true;
             var p = Process.Start(pstart);
             return Task.Run(() =>
             {
@@ -326,7 +329,6 @@ namespace WPILibInstaller.CLI
         {
             var currentPlatform = PlatformUtils.CurrentPlatform;
             var url = configurationProvider.VsCodeModel.Platforms[currentPlatform].DownloadUrl;
-            Console.WriteLine("url = " + url);
 
             var (stream, platform, hash) = await DownloadToMemoryStream(currentPlatform, url);
 
@@ -363,7 +365,7 @@ namespace WPILibInstaller.CLI
                     using var fileToWrite = new FileStream(zipPath, FileMode.Create, FileAccess.Write, FileShare.None);
                     await configurationProvider.VsCodeModel.ToExtractArchiveMacOs.CopyToAsync(fileToWrite);
                 }
-                await RunScriptExecutable("unzip", Timeout.Infinite, zipPath, "-d", intoPath);
+                await RunScriptExecutable("unzip", Timeout.Infinite, "-qq", zipPath, "-d", intoPath);
                 File.Delete(zipPath);
                 return;
             }
