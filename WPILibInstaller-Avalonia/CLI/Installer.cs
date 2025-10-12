@@ -31,30 +31,55 @@ namespace WPILibInstaller.CLI
             installSelectionModel = parser.installSelectionModel;
         }
 
+        
         public async Task Install()
         {
-            Console.WriteLine("Extracting");
-            await ExtractArchive(null);
-            Console.WriteLine("Installing Gradle");
-            await RunGradleSetup();
-            if (installSelectionModel.InstallTools && installSelectionModel.InstallWPILibDeps) {
-                Console.WriteLine("Installing Tools");
-                await RunToolSetup();
-            }
-            Console.WriteLine("Installing CPP");
-            await RunCppSetup();
-            Console.WriteLine("Fixing Maven");
-            await RunMavenMetaDataFixer();
+            await AnsiConsole.Status()
+                .Spinner(Spinner.Known.Dots)
+                .StartAsync("Starting installation...", async ctx =>
+                {
+                    ctx.Status("Extracting archive...");
+                    await ExtractArchive(null);
 
-            Console.WriteLine("Installing VS Code");
-            await RunVsCodeSetup();
+                    if (installSelectionModel.InstallGradle)
+                    {
+                        ctx.Status("Installing Gradle...");
+                        await RunGradleSetup();
+                    }
 
-            Console.WriteLine("Configuring VS Code");
-            await ConfigureVsCodeSettings();
-            Console.WriteLine("Installing VS Code Extensions");
-            await RunVsCodeExtensionsSetup();
-            Console.WriteLine("Creating Shortcuts");
-            await RunShortcutCreator();
+                    if (installSelectionModel.InstallTools)
+                    {
+                        ctx.Status("Installing Tools...");
+                        await RunToolSetup();
+                    }
+
+                    if (installSelectionModel.InstallCpp)
+                    {
+                        ctx.Status("Installing C++...");
+                        await RunCppSetup();
+                    }
+
+                    ctx.Status("Fixing Maven metadata...");
+                    await RunMavenMetaDataFixer();
+
+                    if (installSelectionModel.InstallVsCode)
+                    {
+                        ctx.Status("Installing VS Code...");
+                        await RunVsCodeSetup();
+
+                        ctx.Status("Configuring VS Code...");
+                        await ConfigureVsCodeSettings();
+
+                        ctx.Status("Installing VS Code Extensions...");
+                    await RunVsCodeExtensionsSetup();
+                }
+
+                ctx.Status("Creating Shortcuts...");
+                await RunShortcutCreator();
+
+                ctx.Status("Installation complete!");
+                await Task.Delay(500); // tiny pause to show final message
+            });
         }
 
         private void SetExecutableIfNeeded(string fullZipToPath, bool entryIsExecutable)
@@ -312,63 +337,12 @@ namespace WPILibInstaller.CLI
                 configurationProvider.UpgradeConfig.Maven.MetaDataFixerJar), 20000);
         }
 
-        private async Task<(MemoryStream stream, Platform platform, byte[] hash)> DownloadToMemoryStream(Platform platform, string downloadUrl, string name)
+        private async Task<(MemoryStream stream, Platform platform, byte[] hash)> DownloadToMemoryStream(Platform platform, string downloadUrl)
         {
             MemoryStream ms = new MemoryStream(100000000);
             // Download VS Code for current platform
             using var client = new HttpClientDownloadWithProgress(downloadUrl, ms);
-
-            // Subscribe to the raw-bytes event and update a Spectre progress task.
-            HttpClientDownloadWithProgress.ProgressBytesChangedHandler? bytesHandler = null;
-
-            await AnsiConsole.Progress()
-                .AutoClear(true)
-                .Columns(new ProgressColumn[]
-                {
-                    new TaskDescriptionColumn(),
-                    new ProgressBarColumn(),
-                    new DownloadedColumn(),
-                    new TransferSpeedColumn(),
-                    new RemainingTimeColumn()
-                })
-                .StartAsync(async ctx =>
-                {
-                    ProgressTask? task = null;
-
-                    bytesHandler = (long? totalFileSize, long totalBytesDownloaded) =>
-                    {
-                        // Create the task only once we know the total size
-                        if (task == null && totalFileSize.HasValue)
-                        {
-                            // maxValue uses absolute bytes so the Spectre task can be updated directly
-                            task = ctx.AddTask("Downloading" + name, maxValue: totalFileSize.Value);
-                        }
-
-                        if (task != null)
-                        {
-                            // Set to the absolute bytes downloaded
-                            task.Value = totalBytesDownloaded;
-                        }
-                        else
-                        {
-                            // If total size is not known yet, you can optionally show a status line
-                            // or leave it until the size becomes known. We keep it minimal here.
-                        }
-                    };
-
-                    client.ProgressBytesChanged += bytesHandler;
-
-                    try
-                    {
-                        await client.StartDownload();
-                    }
-                    finally
-                    {
-                        // Always unsubscribe to avoid retaining the lambda and leaking references
-                        if (bytesHandler != null)
-                            client.ProgressBytesChanged -= bytesHandler;
-                    }
-                });
+            await client.StartDownload();
 
             // Compute hash of download
             ms.Seek(0, SeekOrigin.Begin);
@@ -382,7 +356,7 @@ namespace WPILibInstaller.CLI
             var currentPlatform = PlatformUtils.CurrentPlatform;
             var url = configurationProvider.VsCodeModel.Platforms[currentPlatform].DownloadUrl;
 
-            var (stream, platform, hash) = await DownloadToMemoryStream(currentPlatform, url, "VS Code");
+            var (stream, platform, hash) = await DownloadToMemoryStream(currentPlatform, url);
 
             if (!hash.AsSpan().SequenceEqual(configurationProvider.VsCodeModel.Platforms[platform].Sha256Hash))
             {

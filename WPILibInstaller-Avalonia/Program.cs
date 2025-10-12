@@ -2,6 +2,7 @@
 using Avalonia;
 using Avalonia.ReactiveUI;
 using WPILibInstaller.CLI;
+using Spectre.Console;
 
 namespace WPILibInstaller
 {
@@ -18,14 +19,13 @@ namespace WPILibInstaller
             }
             else
             {
-                Console.WriteLine("Installing with CLI");
                 try
                 {
                     new Installer(args).Install().Wait();
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("CLI Installation Failed: " + e.Message);
+                    AnsiConsole.WriteException(e);
                 }
             }
         }
