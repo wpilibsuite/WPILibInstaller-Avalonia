@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Spectre.Console;
 using WPILibInstaller.Interfaces;
 using WPILibInstaller.Models;
 using WPILibInstaller.Models.CLI;
@@ -44,8 +45,10 @@ namespace WPILibInstaller.CLI
             await RunCppSetup();
             Console.WriteLine("Fixing Maven");
             await RunMavenMetaDataFixer();
+
             Console.WriteLine("Installing VS Code");
             await RunVsCodeSetup();
+
             Console.WriteLine("Configuring VS Code");
             await ConfigureVsCodeSettings();
             Console.WriteLine("Installing VS Code Extensions");
@@ -313,10 +316,51 @@ namespace WPILibInstaller.CLI
         {
             MemoryStream ms = new MemoryStream(100000000);
             // Download VS Code for current platform
-            {
-                using var client = new HttpClientDownloadWithProgress(downloadUrl, ms);
-                await client.StartDownload();
-            }
+            using var client = new HttpClientDownloadWithProgress(downloadUrl, ms);
+
+            // Subscribe to the raw-bytes event and update a Spectre progress task.
+            HttpClientDownloadWithProgress.ProgressBytesChangedHandler? bytesHandler = null;
+
+            await AnsiConsole.Progress()
+                .AutoClear(true)
+                .StartAsync(async ctx =>
+                {
+                    ProgressTask? task = null;
+
+                    bytesHandler = (long? totalFileSize, long totalBytesDownloaded) =>
+                    {
+                        // Create the task only once we know the total size
+                        if (task == null && totalFileSize.HasValue)
+                        {
+                            // maxValue uses absolute bytes so the Spectre task can be updated directly
+                            task = ctx.AddTask("Downloading", maxValue: totalFileSize.Value);
+                        }
+
+                        if (task != null)
+                        {
+                            // Set to the absolute bytes downloaded
+                            task.Value = totalBytesDownloaded;
+                        }
+                        else
+                        {
+                            // If total size is not known yet, you can optionally show a status line
+                            // or leave it until the size becomes known. We keep it minimal here.
+                        }
+                    };
+
+                    client.ProgressBytesChanged += bytesHandler;
+
+                    try
+                    {
+                        await client.StartDownload();
+                    }
+                    finally
+                    {
+                        // Always unsubscribe to avoid retaining the lambda and leaking references
+                        if (bytesHandler != null)
+                            client.ProgressBytesChanged -= bytesHandler;
+                    }
+                });
 
             // Compute hash of download
             ms.Seek(0, SeekOrigin.Begin);
