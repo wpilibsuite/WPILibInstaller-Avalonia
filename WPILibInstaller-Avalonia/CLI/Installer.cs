@@ -312,7 +312,7 @@ namespace WPILibInstaller.CLI
                 configurationProvider.UpgradeConfig.Maven.MetaDataFixerJar), 20000);
         }
 
-        private async Task<(MemoryStream stream, Platform platform, byte[] hash)> DownloadToMemoryStream(Platform platform, string downloadUrl)
+        private async Task<(MemoryStream stream, Platform platform, byte[] hash)> DownloadToMemoryStream(Platform platform, string downloadUrl, string name)
         {
             MemoryStream ms = new MemoryStream(100000000);
             // Download VS Code for current platform
@@ -323,6 +323,14 @@ namespace WPILibInstaller.CLI
 
             await AnsiConsole.Progress()
                 .AutoClear(true)
+                .Columns(new ProgressColumn[]
+                {
+                    new TaskDescriptionColumn(),
+                    new ProgressBarColumn(),
+                    new DownloadedColumn(),
+                    new TransferSpeedColumn(),
+                    new RemainingTimeColumn()
+                })
                 .StartAsync(async ctx =>
                 {
                     ProgressTask? task = null;
@@ -333,7 +341,7 @@ namespace WPILibInstaller.CLI
                         if (task == null && totalFileSize.HasValue)
                         {
                             // maxValue uses absolute bytes so the Spectre task can be updated directly
-                            task = ctx.AddTask("Downloading", maxValue: totalFileSize.Value);
+                            task = ctx.AddTask("Downloading" + name, maxValue: totalFileSize.Value);
                         }
 
                         if (task != null)
@@ -374,7 +382,7 @@ namespace WPILibInstaller.CLI
             var currentPlatform = PlatformUtils.CurrentPlatform;
             var url = configurationProvider.VsCodeModel.Platforms[currentPlatform].DownloadUrl;
 
-            var (stream, platform, hash) = await DownloadToMemoryStream(currentPlatform, url);
+            var (stream, platform, hash) = await DownloadToMemoryStream(currentPlatform, url, "VS Code");
 
             if (!hash.AsSpan().SequenceEqual(configurationProvider.VsCodeModel.Platforms[platform].Sha256Hash))
             {
