@@ -26,7 +26,8 @@ def cppToolsArtifacts = [
   'edu.wpi.first.tools:roboRIOTeamNumberSetter',
   'edu.wpi.first.tools:DataLogTool',
   'edu.wpi.first.tools:SysId',
-  'edu.wpi.first.tools:wpical'
+  'edu.wpi.first.tools:wpical',
+  'edu.wpi.first.tools:processstarter'
 ]
 
 def skipNewPlatformTools = [

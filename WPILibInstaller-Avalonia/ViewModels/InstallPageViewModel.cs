@@ -869,7 +869,6 @@ StartupWMClass={wmClass}
                 double percentage = (idx / end) * 100;
                 if (percentage > 100) percentage = 100;
                 if (percentage < 0) percentage = 0;
-
                 Progress = (int)percentage;
 
 

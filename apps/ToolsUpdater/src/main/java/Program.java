@@ -29,9 +29,9 @@ public class Program {
       try {
         Files.copy(artifactPath, Paths.get(toolsPath, tool.name + ".jar"), StandardCopyOption.REPLACE_EXISTING);
         if (SystemUtils.IS_OS_WINDOWS) {
-          Files.copy(Paths.get(toolsPath, "ScriptBase.vbs"), Paths.get(toolsPath, tool.name + ".vbs"), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
+          Files.copy(Paths.get(toolsPath, "processstarter.exe"), Paths.get(toolsPath, tool.name + ".exe"), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
         } else {
-          Files.copy(Paths.get(toolsPath, "ScriptBase.sh"), Paths.get(toolsPath, tool.name + ".sh"), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
+          Files.copy(Paths.get(toolsPath, "processstarter"), Paths.get(toolsPath, tool.name), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
         }
       } catch (IOException e) {
         System.out.println(e.toString());
@@ -82,11 +82,6 @@ public class Program {
         FileUtils.copyDirectory(exeFolder, new File(toolsPath));
 
         FileUtils.deleteDirectory(tempDir);
-        if (SystemUtils.IS_OS_WINDOWS) {
-          Files.copy(Paths.get(toolsPath, "ScriptBaseCpp.vbs"), Paths.get(toolsPath, tool.name + ".vbs"), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
-        } else {
-          Files.copy(Paths.get(toolsPath, "ScriptBaseCpp.sh"), Paths.get(toolsPath, tool.name + ".sh"), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
-        }
 
       } catch (IOException e) {
         System.out.println(e.toString());
@@ -113,6 +108,17 @@ public class Program {
         System.out.println(e.toString());
         e.printStackTrace();
       }
+
+    }
+    try {
+      if (SystemUtils.IS_OS_WINDOWS) {
+        Files.copy(Paths.get(toolsPath, "processstarter.exe"), Paths.get(toolsPath, "AdvantageScope.exe"), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
+      } else {
+        Files.copy(Paths.get(toolsPath, "processstarter"), Paths.get(toolsPath, "AdvantageScope"), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
+      }
+    } catch (IOException e) {
+        System.out.println(e.toString());
+        e.printStackTrace();
     }
   }
 
@@ -126,10 +132,21 @@ public class Program {
         Runtime.getRuntime().exec(new String[] {
           "tar", "-xzf", archivePath.toString(), "-C", elasticFolder
         }).waitFor();
+
       } catch (IOException | InterruptedException e) {
         System.out.println(e.toString());
         e.printStackTrace();
       }
+    }
+    try {
+      if (SystemUtils.IS_OS_WINDOWS) {
+        Files.copy(Paths.get(toolsPath, "processstarter.exe"), Paths.get(toolsPath, "Elastic.exe"), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
+      } else {
+        Files.copy(Paths.get(toolsPath, "processstarter"), Paths.get(toolsPath, "Elastic"), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
+      }
+    } catch (IOException e) {
+        System.out.println(e.toString());
+        e.printStackTrace();
     }
   }
 
