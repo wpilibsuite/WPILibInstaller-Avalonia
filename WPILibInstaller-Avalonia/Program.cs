@@ -1,8 +1,8 @@
 ﻿using System;
 using Avalonia;
 using Avalonia.ReactiveUI;
-using WPILibInstaller.CLI;
 using Spectre.Console;
+using WPILibInstaller.CLI;
 
 namespace WPILibInstaller
 {

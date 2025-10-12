@@ -31,7 +31,7 @@ namespace WPILibInstaller.CLI
             installSelectionModel = parser.installSelectionModel;
         }
 
-        
+
         public async Task Install()
         {
             await AnsiConsole.Status()
@@ -71,15 +71,15 @@ namespace WPILibInstaller.CLI
                         await ConfigureVsCodeSettings();
 
                         ctx.Status("Installing VS Code Extensions...");
-                    await RunVsCodeExtensionsSetup();
-                }
+                        await RunVsCodeExtensionsSetup();
+                    }
 
-                ctx.Status("Creating Shortcuts...");
-                await RunShortcutCreator();
+                    ctx.Status("Creating Shortcuts...");
+                    await RunShortcutCreator();
 
-                ctx.Status("Installation complete!");
-                await Task.Delay(500); // tiny pause to show final message
-            });
+                    ctx.Status("Installation complete!");
+                    await Task.Delay(500); // tiny pause to show final message
+                });
         }
 
         private void SetExecutableIfNeeded(string fullZipToPath, bool entryIsExecutable)
