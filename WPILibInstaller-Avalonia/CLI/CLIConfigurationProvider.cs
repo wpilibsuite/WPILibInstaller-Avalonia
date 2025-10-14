@@ -116,7 +116,6 @@ namespace WPILibInstaller.CLI
                 }) ?? throw new InvalidOperationException("Not Valid");
             }
 
-            // CODE REVIEWERS: please review this
             entry = resourcesArchive.GetEntry("advantageScopeConfig.json");
             using (StreamReader reader = new StreamReader(entry!.Open()))
             {
