@@ -362,6 +362,7 @@ StartupWMClass={wmClass}
             SetIfNotSet("extensions.autoUpdate", false, settingsJson);
             SetIfNotSet("extensions.autoCheckUpdates", false, settingsJson);
             SetIfNotSet("extensions.ignoreRecommendations", true, settingsJson);
+            SetIfNotSet("extensions.showRecommendationsOnlyOnDemand", true, settingsJson);
             SetIfNotSet("update.mode", "none", settingsJson);
             SetIfNotSet("update.showReleaseNotes", false, settingsJson);
             SetIfNotSet("java.completion.matchCase", "off", settingsJson);
