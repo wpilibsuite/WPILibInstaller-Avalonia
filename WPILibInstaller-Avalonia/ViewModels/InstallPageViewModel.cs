@@ -852,6 +852,7 @@ StartupWMClass={wmClass}
             Progress = 0;
             foreach (var item in installs)
             {
+                Text = "Installing Extension " + item.Name;
                 var startInfo = new ProcessStartInfo(codeExe, "--install-extension " + Path.Combine(configurationProvider.InstallDirectory, "vsCodeExtensions", item.Vsix))
                 {
                     UseShellExecute = false,
