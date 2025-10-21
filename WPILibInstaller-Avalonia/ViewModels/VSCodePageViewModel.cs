@@ -7,6 +7,7 @@ using System.Security.Cryptography;
 using System.Threading.Tasks;
 using MsBox.Avalonia;
 using ReactiveUI;
+using SkiaSharp;
 using WPILibInstaller.Interfaces;
 using WPILibInstaller.Models;
 using WPILibInstaller.Utils;
@@ -115,6 +116,14 @@ namespace WPILibInstaller.ViewModels
 
         private double progressBar4 = 0;
 
+        public double ProgressBar5
+        {
+            get => progressBar5;
+            set => this.RaiseAndSetIfChanged(ref progressBar5, value);
+        }
+
+        private double progressBar5 = 0;
+
         public string DoneText
         {
             get => doneText;
@@ -128,6 +137,7 @@ namespace WPILibInstaller.ViewModels
         private readonly IProgramWindow programWindow;
         private readonly IMainWindowViewModel refresher;
         private readonly IViewModelResolver viewModelResolver;
+        private readonly IConfigurationProvider configurationProvider;
 
         public VSCodePageViewModel(IMainWindowViewModel mainRefresher, IProgramWindow programWindow, IConfigurationProvider modelProvider, IViewModelResolver viewModelResolver,
             ICatchableButtonFactory buttonFactory)
@@ -142,6 +152,7 @@ namespace WPILibInstaller.ViewModels
             this.refresher = mainRefresher;
             this.programWindow = programWindow;
             Model = modelProvider.VsCodeModel;
+            configurationProvider = modelProvider;
             this.viewModelResolver = viewModelResolver;
 
             refresher.RefreshForwardBackProperties();
@@ -228,11 +239,28 @@ namespace WPILibInstaller.ViewModels
                 {
                     Model.ToExtractArchive = OpenArchive(ms);
                 }
+
+                // Copy pylance vsix from the same directory as the selected VS Code archive
+                var sourceDir = Path.GetDirectoryName(file)!;
+                var pylanceSourcePath = Path.Combine(sourceDir, configurationProvider.VsCodeConfig.pylanceName);
+                var pylanceDestDir = Path.Combine(configurationProvider.InstallDirectory, "vsCodeExtensions");
+                Directory.CreateDirectory(pylanceDestDir);
+                var pylanceDestPath = Path.Combine(pylanceDestDir, configurationProvider.VsCodeConfig.pylanceName);
+
+                if (!File.Exists(pylanceSourcePath))
+                {
+                    await MessageBoxManager.GetMessageBoxStandard("Error",
+                        $"Could not find Pylance file: {pylanceSourcePath}",
+                        icon: MsBox.Avalonia.Enums.Icon.Error).ShowWindowDialogAsync(programWindow.Window);
+                    return;
+                }
+
+                File.Copy(pylanceSourcePath, pylanceDestPath, true);
             }
             catch
             {
                 await MessageBoxManager.GetMessageBoxStandard("Error",
-                    "You must select a VS Code zip downloaded with this tool.",
+                    "You must select a VS Code zip downloaded with this tool.\npylance extension must be in the same folder.",
                     icon: MsBox.Avalonia.Enums.Icon.None).ShowWindowDialogAsync(programWindow.Window);
                 return;
             }
@@ -277,8 +305,10 @@ namespace WPILibInstaller.ViewModels
             var linux64 = DownloadToMemoryStream(Platform.Linux64, Model.Platforms[Platform.Linux64].DownloadUrl, (d) => ProgressBar2 = d);
             var linuxArm64 = DownloadToMemoryStream(Platform.LinuxArm64, Model.Platforms[Platform.LinuxArm64].DownloadUrl, (d) => ProgressBar3 = d);
             var mac64 = DownloadToMemoryStream(Platform.Mac64, Model.Platforms[Platform.Mac64].DownloadUrl, (d) => ProgressBar4 = d);
+            var pylance = DownloadToMemoryStream(configurationProvider.VsCodeConfig.pylanceUrl, (d) => ProgressBar5 = d);
 
             var results = await Task.WhenAll(win64, linux64, linuxArm64, mac64);
+            var pylanceResult = await pylance;
 
             try
             {
@@ -286,6 +316,7 @@ namespace WPILibInstaller.ViewModels
                 File.Delete(Path.Join(file, Model.Platforms[Platform.Linux64].NameInZip));
                 File.Delete(Path.Join(file, Model.Platforms[Platform.LinuxArm64].NameInZip));
                 File.Delete(Path.Join(file, Model.Platforms[Platform.Mac64].NameInZip));
+                File.Delete(Path.Join(file, configurationProvider.VsCodeConfig.pylanceName));
             }
             catch
             {
@@ -314,6 +345,19 @@ namespace WPILibInstaller.ViewModels
                     ms = stream;
                 }
             }
+
+            if (!Convert.ToHexString(pylanceResult.hash).Equals(configurationProvider.VsCodeConfig.pylanceHash.ToUpper()))
+            {
+                bool cont = await CheckIncorrectHash("pylance", configurationProvider.VsCodeConfig.pylanceHash.ToUpper(), Convert.ToHexString(pylanceResult.hash));
+                if (!cont)
+                {
+                    throw new InvalidDataException("Invalid hash");
+                }
+            }
+
+            using var pylancetoWriteStream = new FileStream(Path.Join(file, configurationProvider.VsCodeConfig.pylanceName), FileMode.OpenOrCreate);
+            pylanceResult.stream.Seek(0, SeekOrigin.Begin);
+            await pylanceResult.stream.CopyToAsync(pylancetoWriteStream);
 
             if (ms != null)
             {
@@ -347,6 +391,8 @@ namespace WPILibInstaller.ViewModels
             ProgressBar1Visible = true;
 
             var (stream, platform, hash) = await DownloadToMemoryStream(currentPlatform, url, (d) => ProgressBar1 = d);
+            var pylanceResult = await DownloadToMemoryStream(configurationProvider.VsCodeConfig.pylanceUrl, (d) => ProgressBar5 = d);
+
 
             if (!hash.AsSpan().SequenceEqual(Model.Platforms[platform].Sha256Hash))
             {
@@ -367,6 +413,22 @@ namespace WPILibInstaller.ViewModels
                 Model.ToExtractArchive = OpenArchive(stream);
             }
 
+            if (!Convert.ToHexString(pylanceResult.hash).Equals(configurationProvider.VsCodeConfig.pylanceHash.ToUpper()))
+            {
+                bool cont = await CheckIncorrectHash("pylance", configurationProvider.VsCodeConfig.pylanceHash.ToUpper(), Convert.ToHexString(pylanceResult.hash));
+                if (!cont)
+                {
+                    throw new InvalidDataException("Invalid hash");
+                }
+            }
+
+            var pylanceDestDir = Path.Combine(configurationProvider.InstallDirectory, "vsCodeExtensions");
+            Directory.CreateDirectory(pylanceDestDir);
+            using var pylancetoWriteStream = new FileStream(Path.Combine(pylanceDestDir, configurationProvider.VsCodeConfig.pylanceName), FileMode.OpenOrCreate);
+            pylanceResult.stream.Seek(0, SeekOrigin.Begin);
+            await pylanceResult.stream.CopyToAsync(pylancetoWriteStream);
+
+
             DoneText = "Done Downloading. Press Next to continue";
             EnableSelectionButtons = true;
             SetLocalForwardVisible(true);
@@ -381,6 +443,16 @@ namespace WPILibInstaller.ViewModels
             using var sha = SHA256.Create();
             var hash = await sha.ComputeHashAsync(ms);
             return (ms, platform, hash);
+        }
+
+        private async Task<(MemoryStream stream, byte[] hash)> DownloadToMemoryStream(string downloadUrl, Action<double> progressChanged)
+        {
+            MemoryStream ms = new MemoryStream(100000000);
+            await DownloadForPlatform(downloadUrl, ms, progressChanged);
+            ms.Seek(0, SeekOrigin.Begin);
+            using var sha = SHA256.Create();
+            var hash = await sha.ComputeHashAsync(ms);
+            return (ms, hash);
         }
 
         private async Task DownloadForPlatform(string downloadUrl, Stream outputStream, Action<double> progressChanged)

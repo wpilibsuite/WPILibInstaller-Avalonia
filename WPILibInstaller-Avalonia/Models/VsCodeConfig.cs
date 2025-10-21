@@ -38,5 +38,9 @@ namespace WPILibInstaller.Models
         public Extension WPILibExtension { get; set; }
         [JsonProperty("thirdPartyExtensions")]
         public Extension[] ThirdPartyExtensions { get; set; }
+
+        public string pylanceUrl { get; set; }
+        public string pylanceName { get; set; }
+        public string pylanceHash { get; set; }
     }
 }

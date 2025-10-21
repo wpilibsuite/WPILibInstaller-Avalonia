@@ -35,7 +35,7 @@ def pythonLinuxUrl = "https://frcmaven.wpi.edu/api/download/vscode-extensions/ms
 
 def pythonLinuxArm64Url = "https://frcmaven.wpi.edu/api/download/vscode-extensions/ms-python/python/ms-python.python-${pythonExtVersion}@linux-arm64.vsix"
 
-def pylanceUrl = "https://frcmaven.wpi.edu/artifactory/vscode-extensions/ms-python/vscode-pylance/ms-python.vscode-pylance-${pylanceVersion}.vsix"
+def pylanceUrl = "https://frcmaven.wpi.edu/artifactory/vscode-extensions/ms-python/vscode-pylance/ms-python.vscode-pylance-${pylanceVersion}.vsix".toString()
 
 def isortUrl = "https://open-vsx.org/api/ms-python/isort/${isortVersion}/file/ms-python.isort-${isortVersion}.vsix"
 
@@ -240,6 +240,15 @@ def pylanceExtensionDownload = tasks.register("pylanceExtensionDownload", Downlo
   overwrite false
 }
 
+def verifypylance = tasks.register("verifypylance", Verify) {
+  dependsOn pylanceExtensionDownload
+  inputs.files pylanceExtensionDownload.get().outputFiles.first()
+  inputs.property 'hash', vscodeLinuxArm64Hash
+  src pylanceExtensionDownload.get().outputFiles.first()
+  algorithm 'SHA-256'
+  checksum pylanceHash
+}
+
 
 def isortExtensionDownload = tasks.register("isortExtensionDownload", Download) {
   src isortUrl
@@ -379,6 +388,10 @@ def vscodeTask = tasks.register('vscodeConfig', Task) {
       blackMap
     ]
 
+    config['pylanceUrl'] = pylanceUrl
+    config['PylanceName'] = pylanceExtensionDownload.get().outputFiles.first().name
+    config['PylanceHash'] = pylanceHash
+
 
     def gbuilder = getGsonBuilder()
 
@@ -447,9 +460,6 @@ ext.vscodeZipSetup = { AbstractArchiveTask zip->
     into '/vsCodeExtensions'
   }
   zip.from (pythonDownloadTask.get().outputFiles.first()) {
-    into '/vsCodeExtensions'
-  }
-  zip.from (pylanceExtensionDownload.get().outputFiles.first()) {
     into '/vsCodeExtensions'
   }
   zip.from (isortExtensionDownload.get().outputFiles.first()) {
