@@ -463,6 +463,48 @@ StartupWMClass={wmClass}
                 settingsJson["java.configuration.runtimes"] = javaConfigProps;
             }
 
+            if (settingsJson.ContainsKey("settingsSync.ignoredSettings"))
+            {
+                JArray ignoredSettings = (JArray)settingsJson["settingsSync.ignoredSettings"]!;
+                ignoredSettings.Add("extensions.autoUpdate");
+                ignoredSettings.Add("extensions.autoCheckUpdates");
+                ignoredSettings.Add("extensions.ignoreRecommendations");
+                ignoredSettings.Add("extensions.showRecommendationsOnlyOnDemand");
+                ignoredSettings.Add("update.mode");
+                ignoredSettings.Add("java.completion.matchCase");
+                ignoredSettings.Add("terminal.integrated.env.windows");
+                ignoredSettings.Add("java.dependency.enableDependencyCheckup");
+                ignoredSettings.Add("workbench.secondarySideBar.defaultVisibility");
+                settingsJson["settingsSync.ignoredSettings"] = ignoredSettings;
+            }
+            else
+            {
+                JArray ignoredSettings = new JArray();
+                ignoredSettings.Add("extensions.autoUpdate");
+                ignoredSettings.Add("extensions.autoCheckUpdates");
+                ignoredSettings.Add("extensions.ignoreRecommendations");
+                ignoredSettings.Add("extensions.showRecommendationsOnlyOnDemand");
+                ignoredSettings.Add("update.mode");
+                ignoredSettings.Add("java.completion.matchCase");
+                ignoredSettings.Add("terminal.integrated.env.windows");
+                ignoredSettings.Add("java.dependency.enableDependencyCheckup");
+                ignoredSettings.Add("workbench.secondarySideBar.defaultVisibility");
+                settingsJson["settingsSync.ignoredSettings"] = ignoredSettings;
+            }
+
+            if (settingsJson.ContainsKey("settingsSync.ignoredExtensions"))
+            {
+                JArray ignoredExtensions = (JArray)settingsJson["settingsSync.ignoredExtensions"]!;
+                ignoredExtensions.Add("wpilibsuite.vscode-wpilib");
+                settingsJson["settingsSync.ignoredExtensions"] = ignoredExtensions;
+            }
+            else
+            {
+                JArray ignoredExtensions = new JArray();
+                ignoredExtensions.Add("wpilibsuite.vscode-wpilib");
+                settingsJson["settingsSync.ignoredExtensions"] = ignoredExtensions;
+            }
+
             var serialized = JsonConvert.SerializeObject(settingsJson, Formatting.Indented);
             await File.WriteAllTextAsync(settingsFile, serialized);
         }
