@@ -366,6 +366,7 @@ StartupWMClass={wmClass}
             SetIfNotSet("update.mode", "none", settingsJson);
             SetIfNotSet("update.showReleaseNotes", false, settingsJson);
             SetIfNotSet("java.completion.matchCase", "off", settingsJson);
+            SetIfNotSet("workbench.secondarySideBar.defaultVisibility", "hidden", settingsJson);
 
             string os;
             string path_seperator;
