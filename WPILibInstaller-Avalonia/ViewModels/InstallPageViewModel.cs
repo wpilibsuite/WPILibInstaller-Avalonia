@@ -321,6 +321,41 @@ StartupWMClass={wmClass}
             }
         }
 
+        private static void SetIfNotSetIgnoreSync(string key, object value, JObject settingsJson)
+        {
+            SetIfNotSet(key, value, settingsJson);
+            IgnoreSync(key, settingsJson);
+        }
+
+        private static void IgnoreSync(string key, JObject settingsJson)
+        {
+            if (settingsJson.ContainsKey("settingsSync.ignoredSettings"))
+            {
+                JArray ignoredSettings = (JArray)settingsJson["settingsSync.ignoredSettings"]!;
+                Boolean keyFound = false;
+                foreach (JToken result in ignoredSettings)
+                {
+                    if (result.Value<string>() != null)
+                    {
+                        if (result.Value<string>() == key)
+                        {
+                            keyFound = true;
+                        }
+                    }
+                }
+                if (!keyFound)
+                {
+                    ignoredSettings.Add(key);
+                    settingsJson["settingsSync.ignoredSettings"] = ignoredSettings;
+                }
+            }
+            else
+            {
+                JArray ignoredSettings = [key];
+                settingsJson["settingsSync.ignoredSettings"] = ignoredSettings;
+            }
+        }
+
         private async Task ConfigureVsCodeSettings()
         {
             if (!vsInstallProvider.Model.InstallExtensions) return;
@@ -359,14 +394,14 @@ StartupWMClass={wmClass}
             }
 
             SetIfNotSet("java.jdt.ls.java.home", Path.Combine(homePath, "jdk"), settingsJson);
-            SetIfNotSet("extensions.autoUpdate", false, settingsJson);
-            SetIfNotSet("extensions.autoCheckUpdates", false, settingsJson);
-            SetIfNotSet("extensions.ignoreRecommendations", true, settingsJson);
-            SetIfNotSet("extensions.showRecommendationsOnlyOnDemand", true, settingsJson);
-            SetIfNotSet("update.mode", "none", settingsJson);
-            SetIfNotSet("update.showReleaseNotes", false, settingsJson);
-            SetIfNotSet("java.completion.matchCase", "off", settingsJson);
-            SetIfNotSet("workbench.secondarySideBar.defaultVisibility", "hidden", settingsJson);
+            SetIfNotSetIgnoreSync("extensions.autoUpdate", false, settingsJson);
+            SetIfNotSetIgnoreSync("extensions.autoCheckUpdates", false, settingsJson);
+            SetIfNotSetIgnoreSync("extensions.ignoreRecommendations", true, settingsJson);
+            SetIfNotSetIgnoreSync("extensions.showRecommendationsOnlyOnDemand", true, settingsJson);
+            SetIfNotSetIgnoreSync("update.mode", "none", settingsJson);
+            SetIfNotSetIgnoreSync("update.showReleaseNotes", false, settingsJson);
+            SetIfNotSetIgnoreSync("java.completion.matchCase", "off", settingsJson);
+            SetIfNotSetIgnoreSync("workbench.secondarySideBar.defaultVisibility", "hidden", settingsJson);
 
             string os;
             string path_seperator;
@@ -416,6 +451,7 @@ StartupWMClass={wmClass}
                     }
                 }
             }
+            IgnoreSync("terminal.integrated.env." + os, settingsJson);
 
             if (settingsJson.ContainsKey("java.configuration.runtimes"))
             {
@@ -463,45 +499,29 @@ StartupWMClass={wmClass}
                 settingsJson["java.configuration.runtimes"] = javaConfigProps;
             }
 
-            if (settingsJson.ContainsKey("settingsSync.ignoredSettings"))
-            {
-                JArray ignoredSettings = (JArray)settingsJson["settingsSync.ignoredSettings"]!;
-                ignoredSettings.Add("extensions.autoUpdate");
-                ignoredSettings.Add("extensions.autoCheckUpdates");
-                ignoredSettings.Add("extensions.ignoreRecommendations");
-                ignoredSettings.Add("extensions.showRecommendationsOnlyOnDemand");
-                ignoredSettings.Add("update.mode");
-                ignoredSettings.Add("java.completion.matchCase");
-                ignoredSettings.Add("terminal.integrated.env.windows");
-                ignoredSettings.Add("java.dependency.enableDependencyCheckup");
-                ignoredSettings.Add("workbench.secondarySideBar.defaultVisibility");
-                settingsJson["settingsSync.ignoredSettings"] = ignoredSettings;
-            }
-            else
-            {
-                JArray ignoredSettings = new JArray();
-                ignoredSettings.Add("extensions.autoUpdate");
-                ignoredSettings.Add("extensions.autoCheckUpdates");
-                ignoredSettings.Add("extensions.ignoreRecommendations");
-                ignoredSettings.Add("extensions.showRecommendationsOnlyOnDemand");
-                ignoredSettings.Add("update.mode");
-                ignoredSettings.Add("java.completion.matchCase");
-                ignoredSettings.Add("terminal.integrated.env.windows");
-                ignoredSettings.Add("java.dependency.enableDependencyCheckup");
-                ignoredSettings.Add("workbench.secondarySideBar.defaultVisibility");
-                settingsJson["settingsSync.ignoredSettings"] = ignoredSettings;
-            }
-
             if (settingsJson.ContainsKey("settingsSync.ignoredExtensions"))
             {
                 JArray ignoredExtensions = (JArray)settingsJson["settingsSync.ignoredExtensions"]!;
-                ignoredExtensions.Add("wpilibsuite.vscode-wpilib");
-                settingsJson["settingsSync.ignoredExtensions"] = ignoredExtensions;
+                Boolean keyFound = false;
+                foreach (JToken result in ignoredExtensions)
+                {
+                    if (result.Value<string>() != null)
+                    {
+                        if (result.Value<string>() == "wpilibsuite.vscode-wpilib")
+                        {
+                            keyFound = true;
+                        }
+                    }
+                }
+                if (!keyFound)
+                {
+                    ignoredExtensions.Add("wpilibsuite.vscode-wpilib");
+                    settingsJson["settingsSync.ignoredExtensions"] = ignoredExtensions;
+                }
             }
             else
             {
-                JArray ignoredExtensions = new JArray();
-                ignoredExtensions.Add("wpilibsuite.vscode-wpilib");
+                JArray ignoredExtensions = ["wpilibsuite.vscode-wpilib"];
                 settingsJson["settingsSync.ignoredExtensions"] = ignoredExtensions;
             }
 
