@@ -10,7 +10,14 @@
     </TextBlock>
   <Button FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" Content="Open Known Issues" Command="{Binding OpenKnownIssues}"></Button>
   <Button FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" Content="Open Changelog" Command="{Binding OpenChangelog}"></Button>
-  <TextBlock FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding FinishText}">
+      <TextBlock FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,20,0,0">
+          Thank you for alpha testing the Systemcore and 2027 WPILib!
+      </TextBlock>
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+          <Button FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" Content="Open 2027 Documentation" Command="{Binding OpenBetaDocs}"></Button>
+          <Button FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" Content="Open Systemcore Feedback Site" Command="{Binding OpenBetaSite}"></Button>
+      </StackPanel>
+      <TextBlock FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding FinishText}">
   </TextBlock>
   </StackPanel>
 
