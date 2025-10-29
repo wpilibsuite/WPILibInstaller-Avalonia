@@ -280,7 +280,7 @@ ext.mavenZipSetup = { AbstractArchiveTask zip->
   }
 
   zip.from(project.zipTree(downloadReadTheDocs.get().outputFiles.first())) {
-    into '/documentation/rtd'
+    into '/documentation'
   }
 
   zip.from(project.zipTree(downloadPythonAPI.get().outputFiles.first())) {
