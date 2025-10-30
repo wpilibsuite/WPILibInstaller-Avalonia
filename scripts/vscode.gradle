@@ -59,6 +59,7 @@ def vscodeWindowsDownload = tasks.register("vscodeWindowsDownload", Download) {
   src vscodeWindowsUrl
   dest "$buildDir/downloads/$vscodeWindowsZipName"
   overwrite false
+  retries 1
 }
 
 def verifyWindows = tasks.register("verifyVscodeWindowsDownload", Verify) {
@@ -74,6 +75,7 @@ def vscodeMacDownload = tasks.register("vscodeMacDownload", Download) {
   src vscodeMacUrl
   dest "$buildDir/downloads/$vscodeMacZipName"
   overwrite false
+  retries 1
 }
 
 def verifyMac = tasks.register("verifyVscodeMacDownload", Verify) {
@@ -89,6 +91,7 @@ def vscodeLinuxDownload = tasks.register("vscodeLinuxDownload", Download) {
   src vscodeLinuxUrl
   dest "$buildDir/downloads/$vscodeLinuxZipName"
   overwrite false
+  retries 1
 }
 
 def verifyLinux = tasks.register("verifyVscodeLinuxDownload", Verify) {
@@ -104,6 +107,7 @@ def vscodeLinuxArm64Download = tasks.register("vscodeLinuxArm64Download", Downlo
   src vscodeLinuxArm64Url
   dest "$buildDir/downloads/$vscodeLinuxArm64ZipName"
   overwrite false
+  retries 1
 }
 
 def verifyLinuxArm64 = tasks.register("verifyVscodeLinuxArm64Download", Verify) {
