@@ -208,7 +208,7 @@ def downloadPythonAPI = tasks.register('downloadPythonAPI', Download) {
 }
 
 def downloadNewCommands = tasks.register('downloadNewCommands', Download) {
-  src 'https://raw.githubusercontent.com/wpilibsuite/allwpilib/2027/wpilibNewCommands/WPILibNewCommands.json'
+  src 'https://raw.githubusercontent.com/wpilibsuite/allwpilib/2027/commandsv2/CommandsV2.json'
   def fileName = file(src.file).name
   dest "$buildDir/downloads/$fileName"
   overwrite false
