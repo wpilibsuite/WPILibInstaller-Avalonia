@@ -193,10 +193,36 @@ StartupWMClass={wmClass}
             {
                 do
                 {
+                    // Extract the archive
                     ProgressTotal = 0;
                     TextTotal = "Extracting";
-                    await ExtractArchive(token, null);
-                    if (token.IsCancellationRequested) break;
+                    ExtractArchiveTask task = new ExtractArchiveTask(
+                        configurationProvider, null
+                    );
+
+                    task.Attach(this); // Subscribe to progress changes
+                    try
+                    {
+                        await task.Execute(token); 
+                    }
+
+                    // Handle if a running exe was found
+                    catch (FoundRunningExeException) {
+                        string msg = "Running JDK processes have been found. Installation cannot continue. Please restart your computer, and rerun this installer without running anything else (including VS Code)";
+                        await MsBox.Avalonia.MessageBoxManager.GetMessageBoxStandard(new MsBox.Avalonia.Dto.MessageBoxStandardParams
+                        {
+                            ContentTitle = "JDKs Running",
+                            ContentMessage = msg,
+                            Icon = MsBox.Avalonia.Enums.Icon.Error,
+                            ButtonDefinitions = MsBox.Avalonia.Enums.ButtonEnum.Ok
+                        }).ShowWindowDialogAsync(programWindow.Window);
+                        throw new InvalidOperationException(msg);
+                    }
+                    if (token.IsCancellationRequested)
+                        break;
+
+                    task.Detach(this); // Unsubscribe from progress changes
+
                     ProgressTotal = 11;
                     TextTotal = "Installing Gradle";
                     await RunGradleSetup();

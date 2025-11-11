@@ -1,34 +1,42 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using WPILibInstaller.Interfaces;
-using WPILibInstaller.Models;
-using WPILibInstaller.Models.CLI;
-using WPILibInstaller.Utils;
-using WPILibInstaller.Controllers;
 
-namespace WPILibInstaller.Controllers {
-    public class ExtractArchive : InstallTask {
+namespace WPILibInstaller.Controllers
+{
+    public class FoundRunningExeException : Exception
+    {
+        public FoundRunningExeException()
+        {
+        }
+
+        public FoundRunningExeException(string message)
+            : base(message)
+        {
+        }
+
+        public FoundRunningExeException(string message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
+    }
+
+    public class ExtractArchiveTask : InstallTask {
 
         override protected IConfigurationProvider configurationProvider {get; set;}
         private string[]? filter;
 
-        public ExtractArchive(
+        public ExtractArchiveTask(
             IConfigurationProvider pConfigurationProvider, string[]? pFilter
         ) {
             configurationProvider = pConfigurationProvider;
             filter = pFilter;
         }
 
-        override public async Task Execute(CancellationToken? token) {
+        override public async Task Execute(CancellationToken token) {
             Progress = 0;
             if (OperatingSystem.IsWindows())
             {
@@ -74,15 +82,7 @@ namespace WPILibInstaller.Controllers {
                 });
                 if (foundRunningExe)
                 {
-                    string msg = "Running JDK processes have been found. Installation cannot continue. Please restart your computer, and rerun this installer without running anything else (including VS Code)";
-                    await MsBox.Avalonia.MessageBoxManager.GetMessageBoxStandard(new MsBox.Avalonia.Dto.MessageBoxStandardParams
-                    {
-                        ContentTitle = "JDKs Running",
-                        ContentMessage = msg,
-                        Icon = MsBox.Avalonia.Enums.Icon.Error,
-                        ButtonDefinitions = MsBox.Avalonia.Enums.ButtonEnum.Ok
-                    }).ShowWindowDialogAsync(programWindow.Window);
-                    throw new InvalidOperationException(msg);
+                    throw new FoundRunningExeException();
                 }
             }
 

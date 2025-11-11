@@ -67,6 +67,6 @@ namespace WPILibInstaller.Controllers
         }
 
         protected abstract IConfigurationProvider configurationProvider { get; set;}
-        public abstract Task Execute(CancellationToken? token); 
+        public abstract Task Execute(CancellationToken token); 
     }
 }
