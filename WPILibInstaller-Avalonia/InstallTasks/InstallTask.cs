@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using WPILibInstaller.Interfaces;
 using WPILibInstaller.Interfaces.Observer;
 
-namespace WPILibInstaller.Controllers
+namespace WPILibInstaller.InstallTasks
 {
     public abstract class InstallTask : ISubject
     {
@@ -75,7 +75,6 @@ namespace WPILibInstaller.Controllers
             }
         }
 
-        protected abstract IConfigurationProvider configurationProvider { get; set; }
         public abstract Task Execute(CancellationToken token);
     }
 }

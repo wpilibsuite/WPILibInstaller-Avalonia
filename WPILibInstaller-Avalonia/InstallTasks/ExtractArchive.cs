@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using WPILibInstaller.Interfaces;
 
-namespace WPILibInstaller.Controllers
+namespace WPILibInstaller.InstallTasks
 {
     public class FoundRunningExeException : Exception
     {
@@ -27,7 +27,7 @@ namespace WPILibInstaller.Controllers
     public class ExtractArchiveTask : InstallTask
     {
 
-        override protected IConfigurationProvider configurationProvider { get; set; }
+        private readonly IConfigurationProvider configurationProvider;
         private string[]? filter;
 
         public ExtractArchiveTask(

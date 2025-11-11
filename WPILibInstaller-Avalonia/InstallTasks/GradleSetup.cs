@@ -7,12 +7,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using WPILibInstaller.Interfaces;
 
-namespace WPILibInstaller.Controllers
+namespace WPILibInstaller.InstallTasks
 {
     public class GradleSetupTask : InstallTask
     {
 
-        override protected IConfigurationProvider configurationProvider { get; set; }
+        private readonly IConfigurationProvider configurationProvider;
 
         public GradleSetupTask(
             IConfigurationProvider pConfigurationProvider
