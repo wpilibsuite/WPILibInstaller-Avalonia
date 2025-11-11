@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+  </Folder>
+  <Project Path="IsoCreator/IsoCreator.csproj" />
+  <Project Path="WPILibInstaller-Avalonia/WPILibInstaller-Avalonia.csproj" />
+</Solution>
