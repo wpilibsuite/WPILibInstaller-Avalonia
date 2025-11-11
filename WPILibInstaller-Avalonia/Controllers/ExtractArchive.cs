@@ -24,19 +24,22 @@ namespace WPILibInstaller.Controllers
         }
     }
 
-    public class ExtractArchiveTask : InstallTask {
+    public class ExtractArchiveTask : InstallTask
+    {
 
-        override protected IConfigurationProvider configurationProvider {get; set;}
+        override protected IConfigurationProvider configurationProvider { get; set; }
         private string[]? filter;
 
         public ExtractArchiveTask(
             IConfigurationProvider pConfigurationProvider, string[]? pFilter
-        ) {
+        )
+        {
             configurationProvider = pConfigurationProvider;
             filter = pFilter;
         }
 
-        override public async Task Execute(CancellationToken token) {
+        override public async Task Execute(CancellationToken token)
+        {
             Progress = 0;
             if (OperatingSystem.IsWindows())
             {

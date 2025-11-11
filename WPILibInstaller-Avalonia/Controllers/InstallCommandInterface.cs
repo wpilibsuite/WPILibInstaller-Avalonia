@@ -1,8 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using System.Threading;
-using WPILibInstaller.Interfaces.Observer;
+using System.Threading.Tasks;
 using WPILibInstaller.Interfaces;
-using System.Collections.Generic;
+using WPILibInstaller.Interfaces.Observer;
 
 namespace WPILibInstaller.Controllers
 {
@@ -12,34 +12,42 @@ namespace WPILibInstaller.Controllers
         private int _progressTotal;
         private string _text = "";
         private string _textTotal = "";
-        
-        public int Progress {
+
+        public int Progress
+        {
             get => _progress;
-            protected set {
+            protected set
+            {
                 _progress = value;
                 this.Notify();
             }
         }
 
-        public int ProgressTotal {
+        public int ProgressTotal
+        {
             get => _progressTotal;
-            protected set {
+            protected set
+            {
                 _progressTotal = value;
                 this.Notify();
             }
         }
 
-        public string Text {
+        public string Text
+        {
             get => _text;
-            protected set {
+            protected set
+            {
                 _text = value;
                 this.Notify();
             }
         }
 
-        public string TextTotal {
+        public string TextTotal
+        {
             get => _textTotal;
-            protected set {
+            protected set
+            {
                 _textTotal = value;
                 this.Notify();
             }
@@ -59,14 +67,15 @@ namespace WPILibInstaller.Controllers
             this._observers.Remove(observer);
         }
 
-        public void Notify() {
+        public void Notify()
+        {
             foreach (var observer in _observers)
             {
                 observer.Update(this);
             }
         }
 
-        protected abstract IConfigurationProvider configurationProvider { get; set;}
-        public abstract Task Execute(CancellationToken token); 
+        protected abstract IConfigurationProvider configurationProvider { get; set; }
+        public abstract Task Execute(CancellationToken token);
     }
 }
