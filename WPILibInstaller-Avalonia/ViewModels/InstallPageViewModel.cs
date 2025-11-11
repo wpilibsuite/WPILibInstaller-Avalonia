@@ -18,13 +18,17 @@ using Newtonsoft.Json.Linq;
 using ReactiveUI;
 using WPILibInstaller.Interfaces;
 using WPILibInstaller.Models;
+using WPILibInstaller.Controllers;
 using WPILibInstaller.Utils;
 using static System.Net.WebRequestMethods;
 using File = System.IO.File;
 
+using IObserver = WPILibInstaller.Interfaces.Observer.IObserver;
+using ISubject = WPILibInstaller.Interfaces.Observer.ISubject;
+
 namespace WPILibInstaller.ViewModels
 {
-    public class InstallPageViewModel : PageViewModelBase
+    public class InstallPageViewModel : PageViewModelBase, IObserver
     {
         private readonly IViewModelResolver viewModelResolver;
         private readonly IToInstallProvider toInstallProvider;
@@ -81,6 +85,14 @@ StartupWMClass={wmClass}
                 Directory.CreateDirectory(launcherPath);
             }
             await File.WriteAllTextAsync(launcherFile, contents, token);
+        }
+
+        public void Update(ISubject subject)
+        {
+            Progress = (subject as InstallTask)!.Progress;
+            Text = (subject as InstallTask)!.Text;
+            ProgressTotal = (subject as InstallTask)!.ProgressTotal;
+            TextTotal = (subject as InstallTask)!.TextTotal;
         }
 
         public async Task UIUpdateTask(CancellationToken token)
