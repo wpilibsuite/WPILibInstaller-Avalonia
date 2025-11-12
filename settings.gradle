@@ -18,5 +18,4 @@ pluginManagement {
 
 include 'gradleriobase'
 include 'apps:MavenMetaDataFixer'
-include 'apps:ToolsUpdater'
 include 'WPILibShortcutCreator'

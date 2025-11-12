@@ -711,6 +711,28 @@ StartupWMClass={wmClass}
             await Task.Yield();
         }
 
+        private static async Task<bool> RunExecutable(string path, int timeoutMs)
+        {
+            if (OperatingSystem.IsWindows())
+            {
+                path += ".exe";
+            }
+
+            using CancellationTokenSource cts = new CancellationTokenSource(timeoutMs);
+
+            ProcessStartInfo pstart = new ProcessStartInfo(path);
+            var p = Process.Start(pstart);
+            try
+            {
+                await p!.WaitForExitAsync(cts.Token);
+                return true;
+            }
+            catch (OperationCanceledException)
+            {
+                return false;
+            }
+        }
+
         private static Task<bool> RunJavaJar(string installDir, string jar, int timeoutMs)
         {
             string java = Path.Join(installDir, "jdk", "bin", "java");
@@ -741,10 +763,10 @@ StartupWMClass={wmClass}
             Text = "Configuring Tools";
             Progress = 50;
 
-            await RunJavaJar(configurationProvider.InstallDirectory,
+            await RunExecutable(
                 Path.Combine(configurationProvider.InstallDirectory,
                 configurationProvider.UpgradeConfig.Tools.Folder,
-                configurationProvider.UpgradeConfig.Tools.UpdaterJar), 30000);
+                configurationProvider.UpgradeConfig.Tools.UpdaterExe), 30000);
         }
 
         private async Task RunMavenMetaDataFixer()
