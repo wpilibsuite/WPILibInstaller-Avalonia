@@ -27,7 +27,6 @@ namespace WPILibInstaller.InstallTasks
             :base(pConfigurationProvider)
         {
             vsInstallProvider = pVsInstallProvider;
-            configurationProvider = pConfigurationProvider;
         }
 
         public override async Task Execute(CancellationToken token)

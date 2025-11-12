@@ -219,7 +219,7 @@ namespace WPILibInstaller.ViewModels
                     {
                         ProgressTotal = 0;
                         TextTotal = "Extracting";
-                        ExtractArchiveTask task = new ExtractArchiveTask(
+                        var task = new ExtractArchiveTask(
                             configurationProvider, null
                         );
 
