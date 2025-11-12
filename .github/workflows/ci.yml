@@ -42,7 +42,9 @@ jobs:
       - uses: gradle/actions/wrapper-validation@v4
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.x
+          dotnet-version: |
+            8.x
+            10.x
 
       - uses: actions/setup-java@v4
         with:
