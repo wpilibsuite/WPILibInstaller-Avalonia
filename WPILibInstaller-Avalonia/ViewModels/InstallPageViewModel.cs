@@ -4,10 +4,9 @@ using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ReactiveUI;
-
+using WPILibInstaller.InstallTasks;
 using WPILibInstaller.Interfaces;
 using WPILibInstaller.Interfaces.Observer;
-using WPILibInstaller.InstallTasks;
 
 namespace WPILibInstaller.ViewModels
 {
@@ -89,14 +88,14 @@ namespace WPILibInstaller.ViewModels
             // Define what to do if UAC times out during shortcut creation (windows)
             uacTimeoutCallback = async () =>
             {
-               var results = await MsBox.Avalonia.MessageBoxManager.GetMessageBoxStandard(new MsBox.Avalonia.Dto.MessageBoxStandardParams
-               {
-                   ContentTitle = "UAC Prompt Cancelled",
-                   ContentMessage = "UAC Prompt Cancelled or Timed Out. Would you like to retry?",
-                   Icon = MsBox.Avalonia.Enums.Icon.Info,
-                   ButtonDefinitions = MsBox.Avalonia.Enums.ButtonEnum.YesNo
-               }).ShowWindowDialogAsync(programWindow.Window);
-               return (results == MsBox.Avalonia.Enums.ButtonResult.Yes);
+                var results = await MsBox.Avalonia.MessageBoxManager.GetMessageBoxStandard(new MsBox.Avalonia.Dto.MessageBoxStandardParams
+                {
+                    ContentTitle = "UAC Prompt Cancelled",
+                    ContentMessage = "UAC Prompt Cancelled or Timed Out. Would you like to retry?",
+                    Icon = MsBox.Avalonia.Enums.Icon.Info,
+                    ButtonDefinitions = MsBox.Avalonia.Enums.ButtonEnum.YesNo
+                }).ShowWindowDialogAsync(programWindow.Window);
+                return (results == MsBox.Avalonia.Enums.ButtonResult.Yes);
             };
         }
 
@@ -182,14 +181,15 @@ namespace WPILibInstaller.ViewModels
                         );
                         task.Attach(this);
                         // Define what to do if UAC times out (windows)
-                        task.uacTimeoutCallback = uacTimeoutCallback; 
+                        task.uacTimeoutCallback = uacTimeoutCallback;
 
                         try
                         {
                             await task.Execute(token);
                         }
                         // Handle shortcut creator failing
-                        catch (ShortcutCreationFailedException err) {
+                        catch (ShortcutCreationFailedException err)
+                        {
                             await MsBox.Avalonia.MessageBoxManager.GetMessageBoxStandard(new MsBox.Avalonia.Dto.MessageBoxStandardParams
                             {
                                 ContentTitle = "Shortcut Creation Failed",
@@ -335,7 +335,7 @@ namespace WPILibInstaller.ViewModels
                         task.Attach(this);
 
                         // Define what to do if UAC times out (windows)
-                        task.uacTimeoutCallback = uacTimeoutCallback; 
+                        task.uacTimeoutCallback = uacTimeoutCallback;
 
                         try
                         {
@@ -343,7 +343,8 @@ namespace WPILibInstaller.ViewModels
                         }
 
                         // Handle shortcut creator failing
-                        catch (ShortcutCreationFailedException err) {
+                        catch (ShortcutCreationFailedException err)
+                        {
                             await MsBox.Avalonia.MessageBoxManager.GetMessageBoxStandard(new MsBox.Avalonia.Dto.MessageBoxStandardParams
                             {
                                 ContentTitle = "Shortcut Creation Failed",

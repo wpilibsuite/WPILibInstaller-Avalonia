@@ -15,7 +15,7 @@ namespace WPILibInstaller.InstallTasks
             IVsCodeInstallLocationProvider pVsInstallProvider,
             IConfigurationProvider pConfigurationProvider
         )
-        :base(pConfigurationProvider)
+        : base(pConfigurationProvider)
         {
             vsInstallProvider = pVsInstallProvider;
         }

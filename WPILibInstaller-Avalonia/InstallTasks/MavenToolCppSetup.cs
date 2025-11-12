@@ -1,7 +1,6 @@
-﻿using System.Threading;
+﻿using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
-using System.IO;
-
 using WPILibInstaller.Interfaces;
 
 namespace WPILibInstaller.InstallTasks
@@ -9,8 +8,8 @@ namespace WPILibInstaller.InstallTasks
     public class CppSetupTask : InstallTask
     {
 
-        public CppSetupTask (IConfigurationProvider pConfigurationProvider)
-            :base(pConfigurationProvider)
+        public CppSetupTask(IConfigurationProvider pConfigurationProvider)
+            : base(pConfigurationProvider)
         {
         }
 
@@ -28,7 +27,7 @@ namespace WPILibInstaller.InstallTasks
         public ToolSetupTask(
             IConfigurationProvider pConfigurationProvider
         )
-        :base(pConfigurationProvider)
+        : base(pConfigurationProvider)
         {
         }
 
@@ -50,7 +49,7 @@ namespace WPILibInstaller.InstallTasks
         public MavenMetaDataFixerTask(
             IConfigurationProvider pConfigurationProvider
         )
-            :base(pConfigurationProvider)
+            : base(pConfigurationProvider)
         {
         }
 

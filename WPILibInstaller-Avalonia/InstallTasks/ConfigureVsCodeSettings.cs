@@ -4,12 +4,10 @@ using System.Reactive.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-
-using WPILibInstaller.Utils;
 using WPILibInstaller.Interfaces;
+using WPILibInstaller.Utils;
 
 
 namespace WPILibInstaller.InstallTasks
@@ -23,7 +21,7 @@ namespace WPILibInstaller.InstallTasks
             IVsCodeInstallLocationProvider pVsInstallProvider,
             IConfigurationProvider pConfigurationProvider
         )
-            :base(pConfigurationProvider)
+            : base(pConfigurationProvider)
         {
             vsInstallProvider = pVsInstallProvider;
         }

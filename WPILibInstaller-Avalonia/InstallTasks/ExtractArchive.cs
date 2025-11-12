@@ -23,7 +23,7 @@ namespace WPILibInstaller.InstallTasks
         public ExtractArchiveTask(
             IConfigurationProvider pConfigurationProvider, string[]? pFilter
         )
-        :base(pConfigurationProvider)
+        : base(pConfigurationProvider)
         {
             filter = pFilter;
         }

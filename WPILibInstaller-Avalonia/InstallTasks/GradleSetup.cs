@@ -15,7 +15,7 @@ namespace WPILibInstaller.InstallTasks
         public GradleSetupTask(
             IConfigurationProvider pConfigurationProvider
         )
-        :base(pConfigurationProvider)
+        : base(pConfigurationProvider)
         {
         }
 

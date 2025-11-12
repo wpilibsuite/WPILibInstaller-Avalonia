@@ -7,23 +7,20 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
-
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-
 using Spectre.Console;
-
+using WPILibInstaller.InstallTasks;
 using WPILibInstaller.Interfaces;
+using WPILibInstaller.Interfaces.Observer;
 using WPILibInstaller.Models;
 using WPILibInstaller.Models.CLI;
 using WPILibInstaller.Utils;
 using static WPILibInstaller.Utils.ArchiveUtils;
-using WPILibInstaller.InstallTasks;
-using WPILibInstaller.Interfaces.Observer;
 
 namespace WPILibInstaller.CLI
 {
-    public class Installer : IObserver 
+    public class Installer : IObserver
     {
         private readonly IConfigurationProvider configurationProvider;
         private readonly CLIInstallSelectionModel installSelectionModel;

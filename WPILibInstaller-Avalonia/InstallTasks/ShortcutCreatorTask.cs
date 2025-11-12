@@ -37,14 +37,14 @@ namespace WPILibInstaller.InstallTasks
         private readonly IVsCodeInstallLocationProvider vsInstallProvider;
         private readonly IToInstallProvider toInstallProvider;
 
-        public Func<Task<bool>> uacTimeoutCallback {get; set;}
+        public Func<Task<bool>> uacTimeoutCallback { get; set; }
 
         public ShortcutCreatorTask(
             IVsCodeInstallLocationProvider pVsInstallProvider,
             IConfigurationProvider pConfigurationProvider,
             IToInstallProvider pToInstallProvider
         )
-            :base(pConfigurationProvider)
+            : base(pConfigurationProvider)
         {
             vsInstallProvider = pVsInstallProvider;
             toInstallProvider = pToInstallProvider;
@@ -152,11 +152,11 @@ namespace WPILibInstaller.InstallTasks
 
                     if (exitCode == 1223) // ERROR_CANCELLED
                     {
-                       bool retry = await this.uacTimeoutCallback();
-                       if (retry)
-                           continue;
-                       else
-                           break;
+                        bool retry = await this.uacTimeoutCallback();
+                        if (retry)
+                            continue;
+                        else
+                            break;
                     }
 
                     if (exitCode != 0)
