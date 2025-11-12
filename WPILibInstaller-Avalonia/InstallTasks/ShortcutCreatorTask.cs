@@ -35,7 +35,6 @@ namespace WPILibInstaller.InstallTasks
     {
 
         private readonly IVsCodeInstallLocationProvider vsInstallProvider;
-        private readonly IConfigurationProvider configurationProvider;
         private readonly IToInstallProvider toInstallProvider;
 
         public Func<Task<bool>> uacTimeoutCallback {get; set;}
@@ -45,14 +44,16 @@ namespace WPILibInstaller.InstallTasks
             IConfigurationProvider pConfigurationProvider,
             IToInstallProvider pToInstallProvider
         )
+            :base(pConfigurationProvider)
         {
             vsInstallProvider = pVsInstallProvider;
-            configurationProvider = pConfigurationProvider;
             toInstallProvider = pToInstallProvider;
 #pragma warning disable CS1998
             uacTimeoutCallback = async () => false; // placeholder for future work 
 #pragma warning restore CS1998
         }
+
+        public delegate Task<bool> UACTimeoutCallback();
 
 
         public override async Task Execute(CancellationToken token)

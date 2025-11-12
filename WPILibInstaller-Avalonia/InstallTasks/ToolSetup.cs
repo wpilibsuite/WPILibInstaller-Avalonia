@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using WPILibInstaller.Interfaces;
@@ -11,14 +7,11 @@ namespace WPILibInstaller.InstallTasks
 {
     public class ToolSetupTask : InstallTask
     {
-
-        private readonly IConfigurationProvider configurationProvider;
-
         public ToolSetupTask(
             IConfigurationProvider pConfigurationProvider
         )
+        :base(pConfigurationProvider)
         {
-            configurationProvider = pConfigurationProvider;
         }
 
         public override async Task Execute(CancellationToken token)

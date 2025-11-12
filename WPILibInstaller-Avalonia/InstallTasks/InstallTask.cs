@@ -8,6 +8,14 @@ namespace WPILibInstaller.InstallTasks
 {
     public abstract class InstallTask : ISubject
     {
+
+        protected readonly IConfigurationProvider configurationProvider;
+
+        protected InstallTask(IConfigurationProvider pconfigurationProvider)
+        {
+            configurationProvider = pconfigurationProvider;
+        }
+
         private int _progress;
         private int _progressTotal;
         private string _text = "";

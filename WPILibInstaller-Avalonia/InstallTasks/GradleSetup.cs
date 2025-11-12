@@ -17,8 +17,8 @@ namespace WPILibInstaller.InstallTasks
         public GradleSetupTask(
             IConfigurationProvider pConfigurationProvider
         )
+        :base(pConfigurationProvider)
         {
-            configurationProvider = pConfigurationProvider;
         }
 
         public override async Task Execute(CancellationToken token)

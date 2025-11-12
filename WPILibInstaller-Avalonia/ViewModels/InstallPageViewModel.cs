@@ -1,27 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using DynamicData;
-using MsBox.Avalonia;
-using MsBox.Avalonia.Dto;
-using MsBox.Avalonia.Models;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using ReactiveUI;
-using WPILibInstaller.Interfaces;
-using WPILibInstaller.Models;
-using WPILibInstaller.Utils;
-using static System.Net.WebRequestMethods;
-using File = System.IO.File;
 
+using WPILibInstaller.Interfaces;
 using WPILibInstaller.Interfaces.Observer;
 using WPILibInstaller.InstallTasks;
 
@@ -47,7 +31,7 @@ namespace WPILibInstaller.ViewModels
         {
             if ((subject as InstallTask) != null)
             {
-                InstallTask task = (subject as InstallTask)!
+                InstallTask task = (subject as InstallTask)!;
                 Progress = task.Progress;
                 Text = task.Text;
                 ProgressTotal = task.ProgressTotal;
@@ -181,7 +165,7 @@ namespace WPILibInstaller.ViewModels
                     {
                         ProgressTotal = 33;
                         TextTotal = "Installing Tools";
-                        ToolSetupTask task = new ToolSetupTask(
+                        var task = new ToolSetupTask(
                             configurationProvider
                         );
                         task.Attach(this);
@@ -193,7 +177,7 @@ namespace WPILibInstaller.ViewModels
                     {
                         ProgressTotal = 66;
                         TextTotal = "Creating Shortcuts";
-                        ShortcutCreatorTask task = new ShortcutCreatorTask(
+                        var task = new ShortcutCreatorTask(
                             vsInstallProvider, configurationProvider, toInstallProvider
                         );
                         task.Attach(this);
@@ -260,7 +244,7 @@ namespace WPILibInstaller.ViewModels
                     {
                         ProgressTotal = 11;
                         TextTotal = "Installing Gradle";
-                        GradleSetupTask task = new GradleSetupTask(
+                        var task = new GradleSetupTask(
                             configurationProvider
                         );
                         task.Attach(this);
@@ -273,7 +257,7 @@ namespace WPILibInstaller.ViewModels
                     {
                         ProgressTotal = 22;
                         TextTotal = "Installing Tools";
-                        ToolSetupTask task = new ToolSetupTask(
+                        var task = new ToolSetupTask(
                             configurationProvider
                         );
                         task.Attach(this);
@@ -285,7 +269,7 @@ namespace WPILibInstaller.ViewModels
                     {
                         ProgressTotal = 33;
                         TextTotal = "Installing C++";
-                        CppSetupTask task = new CppSetupTask(
+                        var task = new CppSetupTask(
                             configurationProvider
                         );
                         task.Attach(this);
@@ -297,7 +281,7 @@ namespace WPILibInstaller.ViewModels
                     {
                         ProgressTotal = 44;
                         TextTotal = "Fixing Maven";
-                        MavenMetaDataFixerTask task = new MavenMetaDataFixerTask(
+                        var task = new MavenMetaDataFixerTask(
                             configurationProvider
                         );
                         task.Attach(this);
@@ -309,7 +293,7 @@ namespace WPILibInstaller.ViewModels
                     {
                         ProgressTotal = 55;
                         TextTotal = "Installing VS Code";
-                        VsCodeSetupTask task = new VsCodeSetupTask(
+                        var task = new VsCodeSetupTask(
                             vsInstallProvider, configurationProvider
                         );
                         task.Attach(this);
@@ -321,7 +305,7 @@ namespace WPILibInstaller.ViewModels
                     {
                         ProgressTotal = 66;
                         TextTotal = "Configuring VS Code";
-                        ConfigureVsCodeSettingsTask task = new ConfigureVsCodeSettingsTask(
+                        var task = new ConfigureVsCodeSettingsTask(
                             vsInstallProvider, configurationProvider
                         );
                         task.Attach(this);
@@ -333,7 +317,7 @@ namespace WPILibInstaller.ViewModels
                     {
                         ProgressTotal = 77;
                         TextTotal = "Installing VS Code Extensions";
-                        VsCodeExtensionsSetupTask task = new VsCodeExtensionsSetupTask(
+                        var task = new VsCodeExtensionsSetupTask(
                             vsInstallProvider, configurationProvider
                         );
                         task.Attach(this);
@@ -345,7 +329,7 @@ namespace WPILibInstaller.ViewModels
                     {
                         ProgressTotal = 88;
                         TextTotal = "Creating Shortcuts";
-                        ShortcutCreatorTask task = new ShortcutCreatorTask(
+                        var task = new ShortcutCreatorTask(
                             vsInstallProvider, configurationProvider, toInstallProvider
                         );
                         task.Attach(this);

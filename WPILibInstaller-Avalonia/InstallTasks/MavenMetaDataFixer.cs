@@ -8,13 +8,11 @@ namespace WPILibInstaller.InstallTasks
     public class MavenMetaDataFixerTask : InstallTask
     {
 
-        private readonly IConfigurationProvider configurationProvider;
-
         public MavenMetaDataFixerTask(
             IConfigurationProvider pConfigurationProvider
         )
+            :base(pConfigurationProvider)
         {
-            configurationProvider = pConfigurationProvider;
         }
 
         public override async Task Execute(CancellationToken token)

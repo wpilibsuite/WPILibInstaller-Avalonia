@@ -10,16 +10,7 @@ namespace WPILibInstaller.InstallTasks
     public class FoundRunningExeException : Exception
     {
         public FoundRunningExeException()
-        {
-        }
-
-        public FoundRunningExeException(string message)
-            : base(message)
-        {
-        }
-
-        public FoundRunningExeException(string message, Exception innerException)
-            : base(message, innerException)
+            : base()
         {
         }
     }
@@ -27,14 +18,13 @@ namespace WPILibInstaller.InstallTasks
     public class ExtractArchiveTask : InstallTask
     {
 
-        private readonly IConfigurationProvider configurationProvider;
         private string[]? filter;
 
         public ExtractArchiveTask(
             IConfigurationProvider pConfigurationProvider, string[]? pFilter
         )
+        :base(pConfigurationProvider)
         {
-            configurationProvider = pConfigurationProvider;
             filter = pFilter;
         }
 

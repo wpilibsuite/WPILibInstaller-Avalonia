@@ -19,12 +19,12 @@ namespace WPILibInstaller.InstallTasks
     {
 
         private readonly IVsCodeInstallLocationProvider vsInstallProvider;
-        private readonly IConfigurationProvider configurationProvider;
 
         public VsCodeExtensionsSetupTask(
             IVsCodeInstallLocationProvider pVsInstallProvider,
             IConfigurationProvider pConfigurationProvider
         )
+            :base(pConfigurationProvider)
         {
             vsInstallProvider = pVsInstallProvider;
             configurationProvider = pConfigurationProvider;

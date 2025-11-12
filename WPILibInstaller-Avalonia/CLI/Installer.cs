@@ -7,28 +7,47 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
+
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+
 using Spectre.Console;
+
 using WPILibInstaller.Interfaces;
 using WPILibInstaller.Models;
 using WPILibInstaller.Models.CLI;
 using WPILibInstaller.Utils;
 using static WPILibInstaller.Utils.ArchiveUtils;
+using WPILibInstaller.InstallTasks;
+using WPILibInstaller.Interfaces.Observer;
 
 namespace WPILibInstaller.CLI
 {
-    public class Installer
+    public class Installer : IObserver 
     {
         private readonly IConfigurationProvider configurationProvider;
-
         private readonly CLIInstallSelectionModel installSelectionModel;
+
+        public int Progress { get; set; }
+        public string Text { get; set; } = "";
+        public string TextTotal { get; set; } = "";
 
         public Installer(string[] args)
         {
             var parser = new Parser(args);
             configurationProvider = parser.configurationProvider;
             installSelectionModel = parser.installSelectionModel;
+        }
+
+        public void Update(ISubject subject)
+        {
+            if ((subject as InstallTask) != null)
+            {
+                InstallTask task = (subject as InstallTask)!;
+                Progress = task.Progress;
+                Text = task.Text;
+                TextTotal = task.TextTotal;
+            }
         }
 
 
