@@ -12,8 +12,6 @@ namespace WPILibInstaller.InstallTasks
     public class GradleSetupTask : InstallTask
     {
 
-        private readonly IConfigurationProvider configurationProvider;
-
         public GradleSetupTask(
             IConfigurationProvider pConfigurationProvider
         )

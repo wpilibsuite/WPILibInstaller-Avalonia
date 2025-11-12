@@ -10,15 +10,14 @@ namespace WPILibInstaller.InstallTasks
     {
 
         private readonly IVsCodeInstallLocationProvider vsInstallProvider;
-        private readonly IConfigurationProvider configurationProvider;
 
         public VsCodeSetupTask(
             IVsCodeInstallLocationProvider pVsInstallProvider,
             IConfigurationProvider pConfigurationProvider
         )
+        :base(pConfigurationProvider)
         {
             vsInstallProvider = pVsInstallProvider;
-            configurationProvider = pConfigurationProvider;
         }
 
         public override async Task Execute(CancellationToken token)
