@@ -177,8 +177,8 @@ namespace WPILibInstaller.ViewModels
                         ProgressTotal = 66;
                         TextTotal = "Creating Shortcuts";
                         var task = new ShortcutCreatorTask(
-                            vsInstallProvider.Model, configurationProvider, 
-                            toInstallProvider.Model.InstallAsAdmin, 
+                            vsInstallProvider.Model, configurationProvider,
+                            toInstallProvider.Model.InstallAsAdmin,
                             toInstallProvider.Model.InstallEverything
                         );
                         task.Attach(this);
@@ -332,8 +332,8 @@ namespace WPILibInstaller.ViewModels
                         ProgressTotal = 88;
                         TextTotal = "Creating Shortcuts";
                         var task = new ShortcutCreatorTask(
-                            vsInstallProvider.Model, configurationProvider, 
-                            toInstallProvider.Model.InstallAsAdmin, 
+                            vsInstallProvider.Model, configurationProvider,
+                            toInstallProvider.Model.InstallAsAdmin,
                             toInstallProvider.Model.InstallEverything
                         );
                         task.Attach(this);

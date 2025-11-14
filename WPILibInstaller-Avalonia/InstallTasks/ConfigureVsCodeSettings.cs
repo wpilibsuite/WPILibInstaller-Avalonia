@@ -4,13 +4,11 @@ using System.Reactive.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-
 using WPILibInstaller.Interfaces;
-using WPILibInstaller.Utils;
 using WPILibInstaller.Models;
+using WPILibInstaller.Utils;
 
 
 namespace WPILibInstaller.InstallTasks

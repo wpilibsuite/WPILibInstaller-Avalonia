@@ -61,7 +61,7 @@ namespace WPILibInstaller.CLI
                     {
                         ctx.Status("Extracting archive...");
                         var task = new ExtractArchiveTask(
-                            configurationProvider, null 
+                            configurationProvider, null
                         );
 
                         task.Attach(this); // Subscribe to progress changes
@@ -154,10 +154,10 @@ namespace WPILibInstaller.CLI
                     ctx.Status("Creating Shortcuts...");
                     {
                         var task = new ShortcutCreatorTask(
-                            configurationProvider.VsCodeModel, 
-                            configurationProvider, 
-                            installSelectionModel.InstallAsAdmin, 
-                            installSelectionModel.InstallDocs 
+                            configurationProvider.VsCodeModel,
+                            configurationProvider,
+                            installSelectionModel.InstallAsAdmin,
+                            installSelectionModel.InstallDocs
                         );
                         task.Attach(this);
 
