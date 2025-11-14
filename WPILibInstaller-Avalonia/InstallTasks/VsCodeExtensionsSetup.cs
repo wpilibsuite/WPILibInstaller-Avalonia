@@ -18,20 +18,20 @@ namespace WPILibInstaller.InstallTasks
     public class VsCodeExtensionsSetupTask : InstallTask
     {
 
-        private readonly IVsCodeInstallLocationProvider vsInstallProvider;
+        private readonly VsCodeModel vsCodeModel;
 
         public VsCodeExtensionsSetupTask(
-            IVsCodeInstallLocationProvider pVsInstallProvider,
+            VsCodeModel pVsCodeModel,
             IConfigurationProvider pConfigurationProvider
         )
-            : base(pConfigurationProvider)
+        : base(pConfigurationProvider)
         {
-            vsInstallProvider = pVsInstallProvider;
+            vsCodeModel = pVsCodeModel;
         }
 
         public override async Task Execute(CancellationToken token)
         {
-            if (!vsInstallProvider.Model.InstallExtensions) return;
+            if (!vsCodeModel.InstallExtensions) return;
 
             string codeExe;
 

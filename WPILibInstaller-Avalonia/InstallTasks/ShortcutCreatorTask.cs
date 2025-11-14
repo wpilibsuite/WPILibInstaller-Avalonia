@@ -34,20 +34,26 @@ namespace WPILibInstaller.InstallTasks
     public class ShortcutCreatorTask : InstallTask
     {
 
-        private readonly IVsCodeInstallLocationProvider vsInstallProvider;
-        private readonly IToInstallProvider toInstallProvider;
+        private readonly VsCodeModel vsCodeModel;
 
         public Func<Task<bool>> uacTimeoutCallback { get; set; }
 
+        private bool installAsAdmin;
+        private bool installDocs;
+
         public ShortcutCreatorTask(
-            IVsCodeInstallLocationProvider pVsInstallProvider,
+            VsCodeModel pVsCodeModel,
             IConfigurationProvider pConfigurationProvider,
-            IToInstallProvider pToInstallProvider
+            bool pInstallAsAdmin,
+            bool pInstallDocs
         )
             : base(pConfigurationProvider)
         {
-            vsInstallProvider = pVsInstallProvider;
-            toInstallProvider = pToInstallProvider;
+            vsCodeModel = pVsCodeModel;
+
+            installAsAdmin = pInstallAsAdmin;
+            installDocs = pInstallDocs;
+
 #pragma warning disable CS1998
             uacTimeoutCallback = async () => false; // placeholder for future work 
 #pragma warning restore CS1998
@@ -66,9 +72,9 @@ namespace WPILibInstaller.InstallTasks
             var iconLocation = Path.Join(frcHomePath, "icons");
             var wpilibIconLocation = Path.Join(iconLocation, "wpilib-256.ico");
 
-            shortcutData.IsAdmin = toInstallProvider.Model.InstallAsAdmin;
+            shortcutData.IsAdmin = installAsAdmin;
 
-            if (vsInstallProvider.Model.InstallingVsCode)
+            if (vsCodeModel.InstallingVsCode)
             {
                 // Add VS Code Shortcuts
                 shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "vscode", "Code.exe"), $"{frcYear} WPILib VS Code", $"{frcYear} WPILib VS Code", wpilibIconLocation));
@@ -102,7 +108,7 @@ namespace WPILibInstaller.InstallTasks
             shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "advantagescope", "AdvantageScope (WPILib).exe"), $"Programs/{frcYear} WPILib Tools/AdvantageScope (WPILib) {frcYear}", $"AdvantageScope (WPILib) {frcYear}", ""));
             shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "elastic", "elastic_dashboard.exe"), $"Programs/{frcYear} WPILib Tools/Elastic (WPILib) {frcYear}", $"Elastic (WPILib) {frcYear}", ""));
 
-            if (toInstallProvider.Model.InstallEverything)
+            if (installDocs) // used to be to be InstallProvider.Model.InstallEverything
             {
                 // Add Documentation Shortcuts
                 shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "documentation", "rtd", "frc-docs-latest", "index.html"), $"{frcYear} WPILib Documentation", $"{frcYear} WPILib Documentation", wpilibIconLocation));
@@ -168,7 +174,7 @@ namespace WPILibInstaller.InstallTasks
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                if (vsInstallProvider.Model.InstallingVsCode)
+                if (vsCodeModel.InstallingVsCode)
                 {
                     // Create Linux desktop shortcut
                     var desktopFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Desktop", $@"FRC VS Code {frcYear}.desktop");

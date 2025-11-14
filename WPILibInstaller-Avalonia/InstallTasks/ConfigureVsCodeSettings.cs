@@ -4,10 +4,13 @@ using System.Reactive.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+
 using WPILibInstaller.Interfaces;
 using WPILibInstaller.Utils;
+using WPILibInstaller.Models;
 
 
 namespace WPILibInstaller.InstallTasks
@@ -15,20 +18,20 @@ namespace WPILibInstaller.InstallTasks
     public class ConfigureVsCodeSettingsTask : InstallTask
     {
 
-        private readonly IVsCodeInstallLocationProvider vsInstallProvider;
+        private readonly VsCodeModel vsCodeModel;
 
         public ConfigureVsCodeSettingsTask(
-            IVsCodeInstallLocationProvider pVsInstallProvider,
+            VsCodeModel pVsCodeModel,
             IConfigurationProvider pConfigurationProvider
         )
             : base(pConfigurationProvider)
         {
-            vsInstallProvider = pVsInstallProvider;
+            vsCodeModel = pVsCodeModel;
         }
 
         public override async Task Execute(CancellationToken token)
         {
-            if (!vsInstallProvider.Model.InstallExtensions) return;
+            if (!vsCodeModel.InstallExtensions) return;
 
             var dataPath = await SetVsCodePortableMode();
 

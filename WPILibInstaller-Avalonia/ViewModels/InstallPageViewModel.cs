@@ -177,7 +177,9 @@ namespace WPILibInstaller.ViewModels
                         ProgressTotal = 66;
                         TextTotal = "Creating Shortcuts";
                         var task = new ShortcutCreatorTask(
-                            vsInstallProvider, configurationProvider, toInstallProvider
+                            vsInstallProvider.Model, configurationProvider, 
+                            toInstallProvider.Model.InstallAsAdmin, 
+                            toInstallProvider.Model.InstallEverything
                         );
                         task.Attach(this);
                         // Define what to do if UAC times out (windows)
@@ -294,7 +296,7 @@ namespace WPILibInstaller.ViewModels
                         ProgressTotal = 55;
                         TextTotal = "Installing VS Code";
                         var task = new VsCodeSetupTask(
-                            vsInstallProvider, configurationProvider
+                            vsInstallProvider.Model, configurationProvider
                         );
                         task.Attach(this);
                         await task.Execute(token);
@@ -306,7 +308,7 @@ namespace WPILibInstaller.ViewModels
                         ProgressTotal = 66;
                         TextTotal = "Configuring VS Code";
                         var task = new ConfigureVsCodeSettingsTask(
-                            vsInstallProvider, configurationProvider
+                            vsInstallProvider.Model, configurationProvider
                         );
                         task.Attach(this);
                         await task.Execute(token);
@@ -318,7 +320,7 @@ namespace WPILibInstaller.ViewModels
                         ProgressTotal = 77;
                         TextTotal = "Installing VS Code Extensions";
                         var task = new VsCodeExtensionsSetupTask(
-                            vsInstallProvider, configurationProvider
+                            vsInstallProvider.Model, configurationProvider
                         );
                         task.Attach(this);
                         await task.Execute(token);
@@ -330,7 +332,9 @@ namespace WPILibInstaller.ViewModels
                         ProgressTotal = 88;
                         TextTotal = "Creating Shortcuts";
                         var task = new ShortcutCreatorTask(
-                            vsInstallProvider, configurationProvider, toInstallProvider
+                            vsInstallProvider.Model, configurationProvider, 
+                            toInstallProvider.Model.InstallAsAdmin, 
+                            toInstallProvider.Model.InstallEverything
                         );
                         task.Attach(this);
 

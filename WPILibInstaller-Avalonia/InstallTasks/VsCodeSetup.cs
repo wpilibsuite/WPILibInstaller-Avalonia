@@ -3,47 +3,48 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using WPILibInstaller.Interfaces;
+using WPILibInstaller.Models;
 
 namespace WPILibInstaller.InstallTasks
 {
     public class VsCodeSetupTask : InstallTask
     {
 
-        private readonly IVsCodeInstallLocationProvider vsInstallProvider;
+        private readonly VsCodeModel vsCodeModel;
 
         public VsCodeSetupTask(
-            IVsCodeInstallLocationProvider pVsInstallProvider,
+            VsCodeModel pVsCodeModel,
             IConfigurationProvider pConfigurationProvider
         )
         : base(pConfigurationProvider)
         {
-            vsInstallProvider = pVsInstallProvider;
+            vsCodeModel = pVsCodeModel;
         }
 
         public override async Task Execute(CancellationToken token)
         {
-            if (!vsInstallProvider.Model.InstallingVsCode) return;
+            if (!vsCodeModel.InstallingVsCode) return;
 
             Text = "Installing VS Code";
             Progress = 0;
 
             string intoPath = Path.Join(configurationProvider.InstallDirectory, "vscode");
 
-            if (vsInstallProvider.Model.ToExtractArchiveMacOs != null)
+            if (vsCodeModel.ToExtractArchiveMacOs != null)
             {
-                vsInstallProvider.Model.ToExtractArchiveMacOs.Seek(0, SeekOrigin.Begin);
+                vsCodeModel.ToExtractArchiveMacOs.Seek(0, SeekOrigin.Begin);
                 var zipPath = Path.Join(intoPath, "MacVsCode.zip");
                 Directory.CreateDirectory(intoPath);
                 {
                     using var fileToWrite = new FileStream(zipPath, FileMode.Create, FileAccess.Write, FileShare.None);
-                    await vsInstallProvider.Model.ToExtractArchiveMacOs.CopyToAsync(fileToWrite, token);
+                    await vsCodeModel.ToExtractArchiveMacOs.CopyToAsync(fileToWrite, token);
                 }
                 await Utilities.RunScriptExecutable("unzip", Timeout.Infinite, zipPath, "-d", intoPath);
                 File.Delete(zipPath);
                 return;
             }
 
-            var archive = vsInstallProvider.Model.ToExtractArchive!;
+            var archive = vsCodeModel.ToExtractArchive!;
 
             var extractor = archive;
 
