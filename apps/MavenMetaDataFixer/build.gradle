@@ -16,6 +16,6 @@ repositories {
 }
 
 dependencies {
-  implementation 'org.apache.maven:maven-repository-metadata:3.5.4'
-  implementation 'org.apache.maven:maven-model:3.5.4'
+  implementation 'org.apache.maven:maven-repository-metadata:3.9.11'
+  implementation 'org.apache.maven:maven-model:3.9.11'
 }
