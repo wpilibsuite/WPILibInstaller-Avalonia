@@ -12,9 +12,16 @@ namespace WPILibInstaller.Utils
 
         private HttpClient? _httpClient;
 
+        // ORIGINAL delegate & event (unchanged)
         public delegate void ProgressChangedHandler(long? totalFileSize, long totalBytesDownloaded, double? progressPercentage);
 
         public event ProgressChangedHandler? ProgressChanged;
+
+        // NEW: delegate & event that provide raw byte counts (useful for Spectre.Console progress)
+        // Signature: total file size (nullable) and bytes downloaded so far.
+        public delegate void ProgressBytesChangedHandler(long? totalFileSize, long totalBytesDownloaded);
+
+        public event ProgressBytesChangedHandler? ProgressBytesChanged;
 
         public HttpClientDownloadWithProgress(string downloadUrl, Stream output)
         {
@@ -70,14 +77,16 @@ namespace WPILibInstaller.Utils
 
         private void TriggerProgressChanged(long? totalDownloadSize, long totalBytesRead)
         {
-            if (ProgressChanged == null)
-                return;
-
+            // Compute percentage (this preserves existing behavior)
             double? progressPercentage = null;
-            if (totalDownloadSize.HasValue)
+            if (totalDownloadSize.HasValue && totalDownloadSize.Value > 0)
                 progressPercentage = Math.Round((double)totalBytesRead / totalDownloadSize.Value * 100, 2);
 
-            ProgressChanged(totalDownloadSize, totalBytesRead, progressPercentage);
+            // Invoke original event (unchanged signature)
+            ProgressChanged?.Invoke(totalDownloadSize, totalBytesRead, progressPercentage);
+
+            // Invoke new raw-bytes event (useful for Spectre.Console)
+            ProgressBytesChanged?.Invoke(totalDownloadSize, totalBytesRead);
         }
 
         public void Dispose()
