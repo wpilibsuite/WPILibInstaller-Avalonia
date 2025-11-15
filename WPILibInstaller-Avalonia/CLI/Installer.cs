@@ -63,7 +63,7 @@ namespace WPILibInstaller.CLI
                 new TaskDescriptionColumn(),
                 new ProgressBarColumn(),
                 new PercentageColumn(),
-                new RemainingTimeColumn()
+                new SpinnerColumn(),
             })
             .StartAsync(async progress =>
             {
@@ -197,30 +197,25 @@ namespace WPILibInstaller.CLI
                         token
                     );
                 }
-                catch (ShortcutCreationFailedException err)
+                catch (ShortcutCreationFailedException)
                 {
-                    AnsiConsole.MarkupLine($"[red]Shortcut creation failed: {err.Message}[/]");
                     throw;
                 }
 
-                Spectre.Console.AnsiConsole.WriteLine("Installation complete!");
             });
 
+            Spectre.Console.AnsiConsole.MarkupLine("Installation complete!");
         }
 
+#pragma warning disable CS1998
         private static Func<Task<bool>> getUacTimeoutCallback()
         {
             return async () =>
             {
-                var prompt = new Spectre.Console.ConfirmationPrompt(
-                    "UAC Prompt Cancelled or Timed Out. Would you like to retry?"
-                );
-
-                // TODO: find another way to prompt user,
-                // you can't use Progress with prompts
-                return await Spectre.Console.AnsiConsole.PromptAsync(prompt);
+                return false;
             };
         }
+#pragma warning restore CS1998
 
 
         private void foundRunningExeHandler()

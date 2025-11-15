@@ -21,6 +21,7 @@ namespace WPILibInstaller
             {
                 try
                 {
+                    Spectre.Console.AnsiConsole.MarkupLine("WPILib CLI Installer");
                     new Installer(args).Install().Wait();
                 }
                 catch (Exception e)

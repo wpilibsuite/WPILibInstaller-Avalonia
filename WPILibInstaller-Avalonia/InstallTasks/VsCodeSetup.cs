@@ -37,6 +37,7 @@ namespace WPILibInstaller.InstallTasks
                 Directory.CreateDirectory(intoPath);
                 {
                     using var fileToWrite = new FileStream(zipPath, FileMode.Create, FileAccess.Write, FileShare.None);
+                    Progress = 50;
                     await vsCodeModel.ToExtractArchiveMacOs.CopyToAsync(fileToWrite, token);
                 }
                 await Utilities.RunScriptExecutable("unzip", Timeout.Infinite, zipPath, "-d", intoPath);
