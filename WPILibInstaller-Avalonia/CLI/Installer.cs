@@ -27,7 +27,8 @@ namespace WPILibInstaller.CLI
 
         public int Progress { get; set; }
         public string Text { get; set; } = "";
-        public string TextTotal { get; set; } = "";
+
+        private ProgressTask? currentSpectreTask;
 
         public Installer(string[] args)
         {
@@ -44,144 +45,167 @@ namespace WPILibInstaller.CLI
                 InstallTask task = (subject as InstallTask)!;
                 Progress = task.Progress;
                 Text = task.Text;
-                TextTotal = task.TextTotal;
+
+                if (currentSpectreTask != null)
+                    currentSpectreTask.Value = Progress;
             }
         }
 
 
         public async Task Install()
         {
-            var tokenSource = new CancellationTokenSource();
-            var token = tokenSource.Token;
-
-            await AnsiConsole.Status()
-                .Spinner(Spinner.Known.Dots)
-                .StartAsync("Starting installation...", async ctx =>
+            var cancellationTokenSource = new CancellationTokenSource();
+            var token = cancellationTokenSource.Token;
+            await AnsiConsole.Progress()
+            .AutoClear(false)
+            .Columns(new ProgressColumn[]
+            {
+                new TaskDescriptionColumn(),
+                new ProgressBarColumn(),
+                new PercentageColumn(),
+                new RemainingTimeColumn()
+            })
+            .StartAsync(async progress =>
+            {
+                // helper
+                async Task RunWithBar(string status, InstallTask task, CancellationToken token)
                 {
+                    var bar = progress.AddTask(status, maxValue: 100);
+                    currentSpectreTask = bar;
+                    bar.Description(status);
+
+                    task.Attach(this);
+                    try
                     {
-                        ctx.Status("Extracting archive...");
-                        var task = new ExtractArchiveTask(
-                            configurationProvider, null
-                        );
-
-                        task.Attach(this); // Subscribe to progress changes
-                        try
-                        {
-                            await task.Execute(token);
-                        }
-
-                        // Handle if a running exe was found
-                        catch (FoundRunningExeException)
-                        {
-                            foundRunningExeHandler();
-                        }
-                        task.Detach(this); // Unsubscribe from progress changes
-                    }
-
-                    if (installSelectionModel.InstallGradle)
-                    {
-                        ctx.Status("Installing Gradle...");
-                        var task = new GradleSetupTask(
-                            configurationProvider
-                        );
-                        task.Attach(this);
                         await task.Execute(token);
+                    }
+                    finally
+                    {
                         task.Detach(this);
+                        bar.Value = 100;
+                        bar.StopTask();
                     }
+                }
 
-                    if (installSelectionModel.InstallTools)
-                    {
-                        ctx.Status("Installing Tools...");
-                        TextTotal = "Installing Tools";
-                        var task = new ToolSetupTask(
-                            configurationProvider
-                        );
-                        task.Attach(this);
-                        await task.Execute(token);
-                    }
+                //
+                // Extract Archive
+                //
+                try
+                {
+                    await RunWithBar(
+                        "Extracting archive",
+                        new ExtractArchiveTask(configurationProvider, null),
+                        token
+                    );
+                }
+                catch (FoundRunningExeException)
+                {
+                    foundRunningExeHandler();
+                }
 
-                    if (installSelectionModel.InstallCpp)
-                    {
-                        ctx.Status("Installing C++...");
-                        var task = new CppSetupTask(
-                            configurationProvider
-                        );
-                        task.Attach(this);
-                        await task.Execute(token);
-                    }
+                //
+                // Gradle
+                //
+                if (installSelectionModel.InstallGradle)
+                {
+                    await RunWithBar(
+                        "Installing Gradle",
+                        new GradleSetupTask(configurationProvider),
+                        token
+                    );
+                }
 
-                    {
-                        ctx.Status("Fixing Maven metadata...");
-                        var task = new MavenMetaDataFixerTask(
-                            configurationProvider
-                        );
-                        task.Attach(this);
-                        await task.Execute(token);
-                    }
+                //
+                // Tools
+                //
+                if (installSelectionModel.InstallTools)
+                {
+                    await RunWithBar(
+                        "Installing Tools",
+                        new ToolSetupTask(configurationProvider),
+                        token
+                    );
+                }
 
-                    if (installSelectionModel.InstallVsCode)
-                    {
-                        ctx.Status("Downloading VS Code...");
-                        await DownloadVsCode();
+                //
+                // C++
+                //
+                if (installSelectionModel.InstallCpp)
+                {
+                    await RunWithBar(
+                        "Installing C++",
+                        new CppSetupTask(configurationProvider),
+                        token
+                    );
+                }
 
-                        {
-                            ctx.Status("Extracting VS Code...");
-                            var task = new VsCodeSetupTask(
-                                configurationProvider.VsCodeModel, configurationProvider
-                            );
-                            task.Attach(this);
-                            await task.Execute(token);
-                        }
+                //
+                // Maven Metadata
+                //
+                await RunWithBar(
+                    "Fixing Maven metadata",
+                    new MavenMetaDataFixerTask(configurationProvider),
+                    token
+                );
 
-                        {
-                            ctx.Status("Configuring VS Code...");
-                            var task = new ConfigureVsCodeSettingsTask(
-                                configurationProvider.VsCodeModel, configurationProvider
-                            );
-                            task.Attach(this);
-                        }
+                //
+                // VS Code
+                //
+                if (installSelectionModel.InstallVsCode)
+                {
+                    var status = "Downloading VS Code";
+                    var bar = progress.AddTask(status, maxValue: 100);
+                    currentSpectreTask = bar;
+                    bar.Description(status);
+                    await DownloadVsCode();
 
-                        {
-                            ctx.Status("Installing VS Code Extensions...");
-                            var task = new VsCodeExtensionsSetupTask(
-                                configurationProvider.VsCodeModel, configurationProvider
-                            );
-                            task.Attach(this);
-                            await task.Execute(token);
-                        }
-                    }
+                    await RunWithBar(
+                        "Extracting VS Code",
+                        new VsCodeSetupTask(configurationProvider.VsCodeModel, configurationProvider),
+                        token
+                    );
 
-                    ctx.Status("Creating Shortcuts...");
-                    {
-                        var task = new ShortcutCreatorTask(
-                            configurationProvider.VsCodeModel,
-                            configurationProvider,
-                            installSelectionModel.InstallAsAdmin,
-                            installSelectionModel.InstallDocs
-                        );
-                        task.Attach(this);
+                    await RunWithBar(
+                        "Configuring VS Code",
+                        new ConfigureVsCodeSettingsTask(configurationProvider.VsCodeModel, configurationProvider),
+                        token
+                    );
 
-                        // Define what to do if UAC times out (windows)
-                        task.uacTimeoutCallback = uacTimeoutCallback;
+                    await RunWithBar(
+                        "Installing VS Code Extensions",
+                        new VsCodeExtensionsSetupTask(configurationProvider.VsCodeModel, configurationProvider),
+                        token
+                    );
+                }
 
-                        try
-                        {
-                            await task.Execute(token);
-                        }
+                //
+                // Shortcuts
+                //
+                var shortcutTask = new ShortcutCreatorTask(
+                    configurationProvider.VsCodeModel,
+                    configurationProvider,
+                    installSelectionModel.InstallAsAdmin,
+                    installSelectionModel.InstallDocs
+                );
+                shortcutTask.uacTimeoutCallback = uacTimeoutCallback;
 
-                        // Handle shortcut creator failing
-                        catch (ShortcutCreationFailedException err)
-                        {
-                            AnsiConsole.WriteLine(
-                                $"[red]Shortcut creation failed with error code {err.Message}[/]"
-                            );
-                            throw;
-                        }
-                    }
+                try
+                {
+                    await RunWithBar(
+                        "Creating Shortcuts",
+                        shortcutTask,
+                        token
+                    );
+                }
+                catch (ShortcutCreationFailedException err)
+                {
+                    AnsiConsole.MarkupLine($"[red]Shortcut creation failed: {err.Message}[/]");
+                    throw;
+                }
 
-                    ctx.Status("Installation complete!");
-                    await Task.Delay(500); // tiny pause to show final message
-                });
+                Spectre.Console.AnsiConsole.WriteLine("Installation complete!");
+            });
+
         }
 
         private static Func<Task<bool>> getUacTimeoutCallback()
@@ -192,6 +216,8 @@ namespace WPILibInstaller.CLI
                     "UAC Prompt Cancelled or Timed Out. Would you like to retry?"
                 );
 
+                // TODO: find another way to prompt user,
+                // you can't use Progress with prompts
                 return await Spectre.Console.AnsiConsole.PromptAsync(prompt);
             };
         }
@@ -221,6 +247,16 @@ namespace WPILibInstaller.CLI
             MemoryStream ms = new MemoryStream(100000000);
             // Download VS Code for current platform
             using var client = new HttpClientDownloadWithProgress(downloadUrl, ms);
+            client.ProgressChanged += (totalFileSize, totalBytesDownloaded, progressPercentage) =>
+            {
+                if (progressPercentage != null)
+                {
+                    Progress = Convert.ToInt16(progressPercentage);
+                    if (currentSpectreTask != null)
+                        currentSpectreTask.Value = Progress;
+                }
+            };
+
             await client.StartDownload();
 
             // Compute hash of download
