@@ -17,27 +17,27 @@ def toolArtifacts = [
 ]
 
 def cppToolsArtifacts = [
-  'edu.wpi.first.tools:Glass',
-  'edu.wpi.first.tools:OutlineViewer',
-  'edu.wpi.first.tools:DataLogTool',
-  'edu.wpi.first.tools:SysId',
-  'edu.wpi.first.tools:wpical'
+  'org.wpilib.tools:Glass',
+  'org.wpilib.tools:OutlineViewer',
+  'org.wpilib.tools:DataLogTool',
+  'org.wpilib.tools:SysId',
+  'org.wpilib.tools:wpical'
 ]
 
 def skipNewPlatformTools = [
 ]
 
 def skipLinuxArm64PlatformTools = [
-  'edu.wpi.first.tools:wpical'
+  'org.wpilib.tools:wpical'
 ]
 
 def skipTools = []
 
 dependencies {
-    documentationCpp "edu.wpi.first.wpilibc:documentation:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}@zip"
-    documentationJava "edu.wpi.first.wpilibj:documentation:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}@zip"
+    documentationCpp "org.wpilib.wpilibc:documentation:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}@zip"
+    documentationJava "org.wpilib.wpilibj:documentation:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}@zip"
     if (project.ext.buildClassifier == 'Windows') {
-        runtimex64 "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}:x64@zip"
+        runtimex64 "org.wpilib.msvc:runtime:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}:x64@zip"
     }
 }
 
