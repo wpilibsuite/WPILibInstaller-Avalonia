@@ -37,50 +37,34 @@ namespace WPILibInstaller.ViewModels
         public int ProgressTotal { get; set; }
         public string TextTotal { get; set; } = "";
 
-        private async void CreateLinuxShortcut(String name, String frcYear, String wmClass, String iconName, CancellationToken token)
+        private async void CreateLinuxShortcut(String name, String executableName, String frcYear, String wmClass, String iconName, CancellationToken token)
         {
             var launcherFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local/share/applications", $@"{name.Replace(' ', '_').Replace(")", "").Replace("(", "")}_{frcYear}.desktop");
             string contents;
-            if (name.Contains("WPILib"))
-            {
-                var nameNoWPILib = name.Remove(name.Length - " (WPILib)".Length);
-                contents = $@"#!/usr/bin/env xdg-open
+            contents = $@"#!/usr/bin/env xdg-open
 [Desktop Entry]
 Version=1.0
 Type=Application
 Categories=Robotics;Science
 Name={name} {frcYear}
-Comment={nameNoWPILib} tool for the 2025 FIRST Robotics Competition season
-Exec={configurationProvider.InstallDirectory}/tools/{nameNoWPILib}
+Comment={name} tool for the {frcYear} FIRST Robotics Competition season
+Exec={configurationProvider.InstallDirectory}/tools/{executableName}
 Icon={configurationProvider.InstallDirectory}/icons/{iconName}
 Terminal=false
 StartupNotify=true
 StartupWMClass={wmClass}
 ";
-
-            }
-            else
-            {
-                contents = $@"#!/usr/bin/env xdg-open
-[Desktop Entry]
-Version=1.0
-Type=Application
-Categories=Robotics;Science
-Name={name} {frcYear}
-Comment={name} tool for the 2025 FIRST Robotics Competition season
-Exec={configurationProvider.InstallDirectory}/tools/{name}
-Icon={configurationProvider.InstallDirectory}/icons/{iconName}
-Terminal=false
-StartupNotify=true
-StartupWMClass={wmClass}
-";
-            }
             var launcherPath = Path.GetDirectoryName(launcherFile);
             if (launcherPath != null)
             {
                 Directory.CreateDirectory(launcherPath);
             }
             await File.WriteAllTextAsync(launcherFile, contents, token);
+        }
+
+        private void CreateLinuxShortcut(String name, String frcYear, String wmClass, String iconName, CancellationToken token)
+        {
+            CreateLinuxShortcut(name, name, frcYear, wmClass, iconName, token);
         }
 
         public async Task UIUpdateTask(CancellationToken token)
@@ -1110,18 +1094,18 @@ StartupWMClass=Code
                     }, token);
                 }
 
-                CreateLinuxShortcut("AdvantageScope (WPILib)", frcYear, "AdvantageScope (WPILib)", "advantagescope.png", token);
-                CreateLinuxShortcut("Elastic (WPILib)", frcYear, "elastic_dashboard", "elastic.png", token);
-                CreateLinuxShortcut("Glass", frcYear, "Glass - DISCONNECTED", "glass.png", token);
-                CreateLinuxShortcut("OutlineViewer", frcYear, "OutlineViewer - DISCONNECTED", "outlineviewer.png", token);
-                CreateLinuxShortcut("DataLogTool", frcYear, "Datalog Tool", "datalogtool.png", token);
-                CreateLinuxShortcut("SysId", frcYear, "System Identification", "sysid.png", token);
+                CreateLinuxShortcut("AdvantageScope (WPILib)", "AdvantageScope", frcYear, "AdvantageScope (WPILib)", "advantagescope.png", token);
+                CreateLinuxShortcut("Elastic (WPILib)", "Elastic", frcYear, "elastic_dashboard", "elastic.png", token);
+                CreateLinuxShortcut("Glass", "glass", frcYear, "Glass - DISCONNECTED", "glass.png", token);
+                CreateLinuxShortcut("OutlineViewer", "outlineviewer", frcYear, "OutlineViewer - DISCONNECTED", "outlineviewer.png", token);
+                CreateLinuxShortcut("DataLogTool", "datalogtool", frcYear, "Datalog Tool", "datalogtool.png", token);
+                CreateLinuxShortcut("SysId", "sysid", frcYear, "System Identification", "sysid.png", token);
                 CreateLinuxShortcut("SmartDashboard", frcYear, "edu-wpi-first-smartdashboard-SmartDashboard", "wpilib-icon-256.png", token);
                 CreateLinuxShortcut("RobotBuilder", frcYear, "robotbuilder-RobotBuilder", "robotbuilder.png", token);
                 CreateLinuxShortcut("PathWeaver", frcYear, "edu.wpi.first.pathweaver.PathWeaver", "wpilib-icon-256.png", token);
-                CreateLinuxShortcut("roboRIOTeamNumberSetter", frcYear, "roboRIO Team Number Setter", "roborioteamnumbersetter.png", token);
+                CreateLinuxShortcut("roboRIOTeamNumberSetter", "roborioteamnumbersetter", frcYear, "roboRIO Team Number Setter", "roborioteamnumbersetter.png", token);
                 CreateLinuxShortcut("Shuffleboard", frcYear, "edu.wpi.first.shuffleboard.app.Shuffleboard", "wpilib-icon-256.png", token);
-                CreateLinuxShortcut("WPIcal", frcYear, "WPIcal", "wpical.png", token);
+                CreateLinuxShortcut("WPIcal", "wpical", frcYear, "WPIcal", "wpical.png", token);
             }
         }
     }
