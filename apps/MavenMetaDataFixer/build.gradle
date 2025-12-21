@@ -1,7 +1,7 @@
 plugins {
   id 'java'
   id 'application'
-  id "com.github.johnrengelman.shadow"
+  id "com.gradleup.shadow"
 }
 
 java {
@@ -9,7 +9,8 @@ java {
     targetCompatibility = 17
 }
 
-mainClassName = 'Program'
+application { mainClass = 'Program' }
+
 
 repositories {
   mavenCentral()
