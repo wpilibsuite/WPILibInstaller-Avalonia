@@ -134,12 +134,14 @@ def upgradeConfigFileTask = tasks.register('generateUpgradeConfigFile', Task) { 
         it.first(task)
     }
 
+    def installerType = project.ext.buildClassifier
+
     doLast {
         def config = [:]
 
         config['FrcYear'] = frcYear
 
-        config['InstallerType'] = project.ext.buildClassifier
+        config['InstallerType'] = installerType
 
         configurations.each {
             it.second(config)

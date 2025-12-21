@@ -51,8 +51,10 @@ dependencies {
 def lazyEvaluator = tasks.register('lazyModelEvaluation') {
 
   dependsOn ':gradleriobase:build'
+  def gradleRioDeps = project(':gradleriobase').getGradleRioDependencies()
+  def macBuildArm = project.hasProperty('macBuildArm')
+  def linuxBuildArm64 = project.hasProperty('linuxBuildArm64')
   doLast {
-    def gradleRioDeps = project(':gradleriobase').getGradleRioDependencies()
     dependencies {
       gradleRioDeps.deps.each { dep->
         def foundTool = false
@@ -70,7 +72,7 @@ def lazyEvaluator = tasks.register('lazyModelEvaluation') {
           return
         }
 
-        if (project.hasProperty('macBuildArm') || project.hasProperty('linuxBuildArm64')) {
+        if (macBuildArm || linuxBuildArm64) {
           skipNewPlatformTools.each { tool->
             if ("$dep.groupId:$dep.artifactId" == tool) {
               def depString = "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
@@ -80,7 +82,7 @@ def lazyEvaluator = tasks.register('lazyModelEvaluation') {
             }
           }
         }
-        if (project.hasProperty('linuxBuildArm64')) {
+        if (linuxBuildArm64) {
           skipLinuxArm64PlatformTools.each { tool->
             if ("$dep.groupId:$dep.artifactId" == tool) {
               def depString = "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
