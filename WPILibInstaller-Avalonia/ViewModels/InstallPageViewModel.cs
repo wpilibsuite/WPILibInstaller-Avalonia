@@ -40,8 +40,7 @@ namespace WPILibInstaller.ViewModels
         private async void CreateLinuxShortcut(String name, String executableName, String frcYear, String wmClass, String iconName, CancellationToken token)
         {
             var launcherFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local/share/applications", $@"{name.Replace(' ', '_').Replace(")", "").Replace("(", "")}_{frcYear}.desktop");
-            string contents;
-            contents = $@"#!/usr/bin/env xdg-open
+            string contents = $@"#!/usr/bin/env xdg-open
 [Desktop Entry]
 Version=1.0
 Type=Application
