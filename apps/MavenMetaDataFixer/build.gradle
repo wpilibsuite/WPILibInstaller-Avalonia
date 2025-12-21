@@ -1,16 +1,22 @@
 plugins {
   id 'java'
   id 'application'
-  id "com.github.johnrengelman.shadow"
+  id "com.gradleup.shadow"
 }
 
-mainClassName = 'Program'
+java {
+    sourceCompatibility = 17
+    targetCompatibility = 17
+}
+
+application { mainClass = 'Program' }
+
 
 repositories {
   mavenCentral()
 }
 
 dependencies {
-  implementation 'org.apache.maven:maven-repository-metadata:3.5.4'
-  implementation 'org.apache.maven:maven-model:3.5.4'
+  implementation 'org.apache.maven:maven-repository-metadata:3.9.11'
+  implementation 'org.apache.maven:maven-model:3.9.11'
 }

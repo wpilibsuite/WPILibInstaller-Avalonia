@@ -30,7 +30,8 @@ import org.gradle.language.base.artifact.SourcesArtifact
 import org.gradle.language.java.artifact.JavadocArtifact
 import org.gradle.maven.MavenModule
 import org.gradle.maven.MavenPomArtifact
-import org.gradle.util.GFileUtils
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 
 import static io.pry.gradle.offline_dependencies.Utils.addToMultimap
 
@@ -64,8 +65,13 @@ class UpdateOfflineRepositoryTask extends DefaultTask {
       // copy collected files to destination directory
       repositoryFiles.each { id, files ->
         def directory = moduleDirectory(id)
-        GFileUtils.mkdirs(directory)
-        files.each { File file -> GFileUtils.copyFile(file, new File(directory, file.name)) }
+        // ensure directory exists
+        Files.createDirectories(directory.toPath())
+
+        // copy files into module directory, overwrite if present
+        files.each { File file ->
+          Files.copy(file.toPath(), new File(directory, file.name).toPath(), StandardCopyOption.REPLACE_EXISTING)
+        }
       }
     }
   }

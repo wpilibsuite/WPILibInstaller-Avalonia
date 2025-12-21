@@ -150,8 +150,8 @@ repositories {
       }
     }
     maven {
-      name 'artifactory'
-      url 'https://frcmaven.wpi.edu/artifactory/plugins'
+      name = 'artifactory'
+      url = 'https://frcmaven.wpi.edu/artifactory/plugins'
     }
 }
 
@@ -171,8 +171,8 @@ offlineDependencies {
       }
     }
     maven {
-      name 'artifactory'
-      url 'https://frcmaven.wpi.edu/artifactory/plugins'
+      name = 'artifactory'
+      url = 'https://frcmaven.wpi.edu/artifactory/plugins'
     }
   }
 
