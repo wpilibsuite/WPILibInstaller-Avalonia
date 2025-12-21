@@ -22,7 +22,7 @@ ext.toolchainGitTag = 'v2025-1'
 
 ext.jdkVersion = '17.0.16+8'
 
-ext.advantagescopeGitTag = 'v26.0.0-beta-1'
+ext.advantagescopeGitTag = 'v26.0.0-beta-2'
 
 ext.elasticGitTag = 'v2026.0.0-beta-1'
 
