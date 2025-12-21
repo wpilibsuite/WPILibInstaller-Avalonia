@@ -3,7 +3,7 @@ import org.gradle.internal.component.external.model.DefaultModuleComponentIdenti
 plugins {
     id "java"
     id 'cpp'
-    id "edu.wpi.first.GradleRIO2027"
+    id "org.wpilib.GradleRIO"
 }
 
 deploy {
