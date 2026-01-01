@@ -109,6 +109,10 @@ public interface GradleRioValueSourceParameters extends ValueSourceParameters {
     Property<String> getGradlerioVersion();
     RegularFileProperty getCurrentProjectFolder();
     Property<String> getBuildClassifier();
+    Property<String> getForceNativeClassifier();
+    Property<String> getForceToolsClassifier();
+    Property<String> getForceCppToolsClassifier();
+    Property<Boolean> getInstallToolchains();
 }
 
 public abstract class GradleRioValueSource implements ValueSource<Object, GradleRioValueSourceParameters> {
@@ -125,7 +129,10 @@ public abstract class GradleRioValueSource implements ValueSource<Object, Gradle
         def projectFolder = getParameters().getCurrentProjectFolder().getAsFile().get();
         def gradlew = new File(projectFolder, "gradlew${OperatingSystem.current().isWindows() ? '.bat' : ''}");
         execOperations.exec {
-            it.args = ['writeMetadataFile', "-PgradleRioVersion=${getParameters().getGradlerioVersion().get()}", "-PbuildClassifier=${getParameters().getBuildClassifier().get()}"]
+            it.args = ['writeMetadataFile', "-PgradleRioVersion=${getParameters().getGradlerioVersion().get()}", "-PbuildClassifier=${getParameters().getBuildClassifier().get()}", "-PforceNativeClassifier=${getParameters().getForceNativeClassifier().get()}", "-PforceToolsClassifier=${getParameters().getForceToolsClassifier().get()}", "-PforceCppToolsClassifier=${getParameters().getForceCppToolsClassifier().get()}"]
+            if (getParameters().getInstallToolchains().get()) {
+                it.args += ['installSystemCoreToolchain']
+            }
             it.workingDir = gradlerioBuildFolder
             it.executable = gradlew.absolutePath
         }
@@ -141,7 +148,13 @@ project.ext.gradlerioMetadata = providers.of(GradleRioValueSource.class) {
     getParameters().getGradlerioVersion().set(gradleRioVersion)
     getParameters().getCurrentProjectFolder().set(file("$projectDir"))
     getParameters().getBuildClassifier().set(project.ext.buildClassifier)
+    getParameters().getForceNativeClassifier().set(project.ext.forceNativeClassifier)
+    getParameters().getForceToolsClassifier().set(project.ext.forceToolsClassifier)
+    getParameters().getForceCppToolsClassifier().set(project.ext.forceCppToolsClassifier)
+    getParameters().getInstallToolchains().set(project.hasProperty('installToolchains') ? true : false)
 }.get()
+
+task emptyTask {}
 
 apply from: 'scripts/versions.gradle'
 
