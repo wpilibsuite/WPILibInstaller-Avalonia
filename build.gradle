@@ -130,7 +130,7 @@ public abstract class GradleRioValueSource implements ValueSource<Object, Gradle
         def gradlew = new File(projectFolder, "gradlew${OperatingSystem.current().isWindows() ? '.bat' : ''}");
         def installToolchains = getParameters().getInstallToolchains().get();
         execOperations.exec {
-            it.args = ['writeMetadataFile', "-PgradleRioVersion=${getParameters().getGradlerioVersion().get()}", "-PbuildClassifier=${getParameters().getBuildClassifier().get()}", "-PforceNativeClassifier=${getParameters().getForceNativeClassifier().get()}", "-PforceToolsClassifier=${getParameters().getForceToolsClassifier().get()}", "-PforceCppToolsClassifier=${getParameters().getForceCppToolsClassifier().get()}"]
+            it.args = ['writeMetadataFile', "-PgradleRioVersion=${getParameters().getGradlerioVersion().get()}", "-PbuildClassifier=${getParameters().getBuildClassifier().get()}", "-PforceNativeClassifier=${getParameters().getForceNativeClassifier().get()}", "-PforceToolsClassifier=${getParameters().getForceToolsClassifier().get()}", "-PforceCppToolsClassifier=${getParameters().getForceCppToolsClassifier().get()}", "--warning-mode", "all"]
             if (installToolchains) {
                 it.args += ['installSystemCoreToolchain']
             }
@@ -138,8 +138,12 @@ public abstract class GradleRioValueSource implements ValueSource<Object, Gradle
             it.executable = gradlew.absolutePath
         }
 
-        def gradlerioMetadataFile = new File(gradlerioBuildFolder, "build/gradlerio-metadata.json");
-        return new JsonSlurper().parseText(gradlerioMetadataFile.text)
+        if (installToolchains) {
+            return new JsonSlurper().parseText('{"urls": [],"dependencies": [],"wpilibVersion": "2027.0.0"}')
+        } else {
+            def gradlerioMetadataFile = new File(gradlerioBuildFolder, "build/gradlerio-metadata.json");
+            return new JsonSlurper().parseText(gradlerioMetadataFile.text)
+        }
     }
 }
 
