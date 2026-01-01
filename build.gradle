@@ -467,6 +467,12 @@ def linuxCreateImageTask = tasks.register('createLinuxImage', Tar) {
     from("$buildDir/outputs")
 }
 
+interface ExecOperationsProvider {
+   @javax.inject.Inject
+   ExecOperations getExecOperations()
+}
+def execOperations = objects.newInstance(ExecOperationsProvider).execOperations
+
 // Creates the macOS disk image. If the relevant parameters are provided, the app with also be signed and notarized.
 def macCreateImageTask = tasks.register('createMacImage', Task) {
     dependsOn generateFullResourcesTask
@@ -480,7 +486,7 @@ def macCreateImageTask = tasks.register('createMacImage', Task) {
         if (project.hasProperty("developerID")) {
             println "Received a Developer ID -- signing the application..."
             String identity = project.property("developerID")
-            exec {
+            execOperations.exec {
                 commandLine "sh", "-c", "automation/macos_codesign.sh ${identity} $buildDir/outputs/WPILibInstaller.app"
             }
         }
@@ -500,8 +506,8 @@ def macCreateImageTask = tasks.register('createMacImage', Task) {
         if (project.hasProperty('macBuildArm')) {
             diskArch = "macOS-Arm64"
         }
-        exec { commandLine "mkdir", "-p", "$buildDir/pubOutputs" }
-        exec {
+        execOperations.exec { commandLine "mkdir", "-p", "$buildDir/pubOutputs" }
+        execOperations.exec {
             commandLine "hdiutil", "create", "-volname", "WPILibInstaller",
                     "-srcfolder", "$buildDir/outputs/", "-format", "UDRO",
                     "WPILib_${diskArch}-${pubVersion}.dmg"
