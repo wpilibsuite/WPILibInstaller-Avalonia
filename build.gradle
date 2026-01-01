@@ -1,7 +1,11 @@
 import com.google.gson.GsonBuilder
+import groovy.json.JsonSlurper
 import io.pry.gradle.offline_dependencies.OfflineDependenciesPlugin
 import org.gradle.internal.os.OperatingSystem
 import groovy.xml.XmlParser
+import org.gradle.api.provider.ValueSourceParameters
+import org.gradle.api.provider.ValueSource
+import org.gradle.process.ExecOperations
 
 buildscript {
     dependencies {
@@ -99,6 +103,45 @@ if (project.hasProperty('linuxBuild')) {
     project.ext.isUnix = false
     project.ext.dotnetRuntime = 'win-x64'
 }
+
+public interface GradleRioValueSourceParameters extends ValueSourceParameters {
+    RegularFileProperty getGradlerioBuildFolder();
+    Property<String> getGradlerioVersion();
+    RegularFileProperty getCurrentProjectFolder();
+    Property<String> getBuildClassifier();
+}
+
+public abstract class GradleRioValueSource implements ValueSource<Object, GradleRioValueSourceParameters> {
+    private final ExecOperations execOperations;
+
+    @Inject
+    public GradleRioValueSource(ExecOperations execOperations) {
+        this.execOperations = execOperations;
+    }
+
+    @Override
+    public Object obtain() {
+        def gradlerioBuildFolder = getParameters().getGradlerioBuildFolder().getAsFile().get();
+        def projectFolder = getParameters().getCurrentProjectFolder().getAsFile().get();
+        def gradlew = new File(projectFolder, "gradlew${OperatingSystem.current().isWindows() ? '.bat' : ''}");
+        execOperations.exec {
+            it.args = ['writeMetadataFile', "-PgradleRioVersion=${getParameters().getGradlerioVersion().get()}", "-PbuildClassifier=${getParameters().getBuildClassifier().get()}"]
+            it.workingDir = gradlerioBuildFolder
+            it.executable = gradlew.absolutePath
+        }
+
+        def gradlerioMetadataFile = new File(gradlerioBuildFolder, "build/gradlerio-metadata.json");
+        // your custom implementation
+        return new JsonSlurper().parseText(gradlerioMetadataFile.text)
+    }
+}
+
+project.ext.gradlerioMetadata = providers.of(GradleRioValueSource.class) {
+    getParameters().getGradlerioBuildFolder().set(file("$projectDir/gradleriobase"))
+    getParameters().getGradlerioVersion().set(gradleRioVersion)
+    getParameters().getCurrentProjectFolder().set(file("$projectDir"))
+    getParameters().getBuildClassifier().set(project.ext.buildClassifier)
+}.get()
 
 apply from: 'scripts/versions.gradle'
 

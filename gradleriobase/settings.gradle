@@ -15,7 +15,3 @@ pluginManagement {
         }
     }
 }
-
-include 'apps:MavenMetaDataFixer'
-include 'apps:ToolsUpdater'
-include 'WPILibShortcutCreator'
