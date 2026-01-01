@@ -13,8 +13,6 @@ def elasticScriptUnixFile = file("files/Elastic.sh")
 
 def toolsJsonTask = tasks.register('toolsJson', Task) {
 
-  dependsOn tasks.named('lazyModelEvaluation')
-
   doLast {
     def resolvedDeps = configurations.tools.resolvedConfiguration.resolvedArtifacts.toList()
     def config = []
