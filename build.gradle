@@ -129,9 +129,11 @@ public abstract class GradleRioValueSource implements ValueSource<Object, Gradle
         def projectFolder = getParameters().getCurrentProjectFolder().getAsFile().get();
         def gradlew = new File(projectFolder, "gradlew${OperatingSystem.current().isWindows() ? '.bat' : ''}");
         execOperations.exec {
-            it.args = ['writeMetadataFile', "-PgradleRioVersion=${getParameters().getGradlerioVersion().get()}", "-PbuildClassifier=${getParameters().getBuildClassifier().get()}", "-PforceNativeClassifier=${getParameters().getForceNativeClassifier().get()}", "-PforceToolsClassifier=${getParameters().getForceToolsClassifier().get()}", "-PforceCppToolsClassifier=${getParameters().getForceCppToolsClassifier().get()}"]
+            it.args = ["-PgradleRioVersion=${getParameters().getGradlerioVersion().get()}", "-PbuildClassifier=${getParameters().getBuildClassifier().get()}", "-PforceNativeClassifier=${getParameters().getForceNativeClassifier().get()}", "-PforceToolsClassifier=${getParameters().getForceToolsClassifier().get()}", "-PforceCppToolsClassifier=${getParameters().getForceCppToolsClassifier().get()}"]
             if (getParameters().getInstallToolchains().get()) {
                 it.args += ['installSystemCoreToolchain']
+            } else {
+                it.args += ['writeMetadataFile']
             }
             it.workingDir = gradlerioBuildFolder
             it.executable = gradlew.absolutePath
