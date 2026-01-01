@@ -528,6 +528,13 @@ tasks.register('generateInstallers', Task) {
     }
 }
 
+tasks.withType(AbstractArchiveTask).configureEach {
+    // Use file timestamps from the file system
+    preserveFileTimestamps = true
+    // Use permissions from the file system
+    useFileSystemPermissions()
+}
+
 wrapper {
     gradleVersion = '9.2.0'
 }
