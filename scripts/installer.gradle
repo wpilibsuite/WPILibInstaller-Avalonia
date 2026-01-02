@@ -11,8 +11,8 @@ def toolsUpdaterSh = file("$rootDir/files/ToolsUpdater.sh")
 
 ext.msBuildExtraSetup = { AbstractArchiveTask zip->
   //zip.dependsOn msbuild
-  zip.inputs.file project(':apps:MavenMetaDataFixer').shadowJar.archivePath
-  zip.inputs.file project(':apps:ToolsUpdater').shadowJar.archivePath
+  zip.inputs.file project(':apps:MavenMetaDataFixer').shadowJar.archiveFile
+  zip.inputs.file project(':apps:ToolsUpdater').shadowJar.archiveFile
   zip.inputs.file metaDataScriptBatch
   zip.inputs.file metaDataScriptSh
   zip.inputs.file toolsUpdaterBatch
@@ -21,7 +21,7 @@ ext.msBuildExtraSetup = { AbstractArchiveTask zip->
   zip.dependsOn project(':apps:MavenMetaDataFixer').shadowJar
   zip.dependsOn project(':apps:ToolsUpdater').shadowJar
 
-  zip.from (project(':apps:MavenMetaDataFixer').shadowJar.archivePath) {
+  zip.from (project(':apps:MavenMetaDataFixer').shadowJar.archiveFile) {
     into '/maven'
     rename { 'MavenMetaDataFixer.jar' }
   }
@@ -29,7 +29,7 @@ ext.msBuildExtraSetup = { AbstractArchiveTask zip->
   if (project.ext.isUnix == true) {
     zip.from(metaDataScriptSh) {
       into '/maven'
-      fileMode 0755
+      filePermissions { unix(0755) }
     }
   } else {
     zip.from(metaDataScriptBatch) {
@@ -37,7 +37,7 @@ ext.msBuildExtraSetup = { AbstractArchiveTask zip->
     }
   }
 
-  zip.from (project(':apps:ToolsUpdater').shadowJar.archivePath) {
+  zip.from (project(':apps:ToolsUpdater').shadowJar.archiveFile) {
     into '/tools'
     rename { 'ToolsUpdater.jar' }
   }
@@ -45,7 +45,7 @@ ext.msBuildExtraSetup = { AbstractArchiveTask zip->
   if (project.ext.isUnix == true) {
     zip.from(toolsUpdaterSh) {
       into '/tools'
-      fileMode 0755
+      filePermissions { unix(0755) }
     }
   } else {
     zip.from(toolsUpdaterBatch) {

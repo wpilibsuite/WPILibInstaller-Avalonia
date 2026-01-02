@@ -1,4 +1,10 @@
-import org.gradle.internal.component.external.model.DefaultModuleComponentIdentifier
+import com.google.gson.GsonBuilder
+
+buildscript {
+    dependencies {
+        classpath 'com.google.code.gson:gson:2.8.9'
+    }
+}
 
 plugins {
     id "java"
@@ -72,8 +78,8 @@ dependencies {
     implementation "edu.wpi.first.wpilibNewCommands:wpilibNewCommands-java:${wpi.versions.wpilibVersion.get()}"
     implementation "edu.wpi.first.xrpVendordep:xrpVendordep-java:${wpi.versions.wpilibVersion.get()}"
     implementation "edu.wpi.first.romiVendordep:romiVendordep-java:${wpi.versions.wpilibVersion.get()}"
-    if (project(":").ext.buildClassifier == 'Windows') {
-        implementation "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}:x64@zip"
+    if (project.ext.buildClassifier == 'Windows') {
+        implementation "edu.wpi.first.msvc:runtime:${wpi.versions.wpilibVersion.get()}:x64@zip"
     }
 }
 
@@ -223,7 +229,7 @@ repositories {
     mavenLocal()
 }
 
-ext.getGradleRioUrls = {
+def getGradleRioUrls = {
     Set urls = [];
 
     repositories.each {
@@ -233,8 +239,7 @@ ext.getGradleRioUrls = {
     return urls
 }
 
-ext.getGradleRioDependencies = {
-    def output = [:]
+def getGradleRioDependencies = {
     Set deps = []
 
     getConfig(configurations, deps)
@@ -251,7 +256,24 @@ ext.getGradleRioDependencies = {
         }
     }
 
-    output['deps'] = deps
+    return deps
+}
 
-    return output
+task writeMetadataFile() {
+    def depsFile = file("$buildDir/gradlerio-metadata.json")
+
+    doLast {
+        def gbuilder = new GsonBuilder()
+
+        def metadata = [:]
+        metadata['urls'] = getGradleRioUrls()
+        metadata['dependencies'] = getGradleRioDependencies()
+        metadata['wpilibVersion'] = wpi.versions.wpilibVersion.get()
+
+        gbuilder.setPrettyPrinting()
+        def json = gbuilder.create().toJson(metadata)
+
+        depsFile.parentFile.mkdirs()
+        depsFile.text = json
+    }
 }
