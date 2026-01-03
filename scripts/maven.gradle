@@ -1,5 +1,3 @@
-evaluationDependsOn(':gradleriobase')
-
 def otherDeps = []
 
 apply plugin: 'de.undercouch.download'
@@ -34,20 +32,15 @@ def skipLinuxArm64PlatformTools = [
 def skipTools = []
 
 dependencies {
-    documentationCpp "org.wpilib.wpilibc:documentation:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}@zip"
-    documentationJava "org.wpilib.wpilibj:documentation:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}@zip"
+    documentationCpp "org.wpilib.wpilibc:documentation:${project.ext.gradlerioMetadata.wpilibVersion}@zip"
+    documentationJava "org.wpilib.first.wpilibj:documentation:${project.ext.gradlerioMetadata.wpilibVersion}@zip"
     if (project.ext.buildClassifier == 'Windows') {
-        runtimex64 "org.wpilib.msvc:runtime:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}:x64@zip"
+        runtimex64 "org.wpilib.msvc:runtime:${project.ext.gradlerioMetadata.wpilibVersion}:x64@zip"
     }
 }
 
-def lazyEvaluator = tasks.register('lazyModelEvaluation') {
-
-  dependsOn ':gradleriobase:build'
-  doLast {
-    def gradleRioDeps = project(':gradleriobase').getGradleRioDependencies()
-    dependencies {
-      gradleRioDeps.deps.each { dep->
+dependencies {
+  project.ext.gradlerioMetadata.dependencies.each { dep->
         def foundTool = false
 
         skipTools.each { tool->
@@ -140,18 +133,17 @@ def lazyEvaluator = tasks.register('lazyModelEvaluation') {
          offline "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
         }
       }
-    }
-  }
 }
+
 repositories {
-    project(':gradleriobase').getGradleRioUrls().each { gUrl->
+    project.ext.gradlerioMetadata.urls.each { gUrl->
       maven {
         url = gUrl
       }
     }
     maven {
-      name 'artifactory'
-      url 'https://frcmaven.wpi.edu/artifactory/plugins'
+      name = 'artifactory'
+      url = 'https://frcmaven.wpi.edu/artifactory/plugins'
     }
 }
 
@@ -160,19 +152,18 @@ def cleanoffline = tasks.register("cleanOfflineRepository", Delete) {
 }
 
 updateOfflineRepository.dependsOn cleanoffline
-updateOfflineRepository.dependsOn lazyEvaluator
 
 offlineDependencies {
   repositories {
     // You'll have to add your buildscript repositories here too
-    project(':gradleriobase').getGradleRioUrls().each { gUrl->
+    project.ext.gradlerioMetadata.urls.each { gUrl->
       maven {
         url = gUrl
       }
     }
     maven {
-      name 'artifactory'
-      url 'https://frcmaven.wpi.edu/artifactory/plugins'
+      name = 'artifactory'
+      url = 'https://frcmaven.wpi.edu/artifactory/plugins'
     }
   }
 

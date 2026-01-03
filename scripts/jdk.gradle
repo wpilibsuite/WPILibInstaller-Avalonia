@@ -1,6 +1,3 @@
-
-evaluationDependsOn(':gradleriobase')
-
 apply plugin: 'de.undercouch.download'
 apply from: 'scripts/versions.gradle'
 
@@ -48,7 +45,7 @@ configurations {
 
 dependencies {
     if (project.ext.buildClassifier == 'Windows') {
-        runtimex64 "org.wpilib.msvc:runtime:${project(':gradleriobase').wpi.versions.wpilibVersion}:x64@zip"
+        runtimex64 "org.wpilib.first.msvc:runtime:${project.ext.gradlerioMetadata.wpilibVersion}:x64@zip"
     }
 }
 
