@@ -33,7 +33,7 @@ def skipTools = []
 
 dependencies {
     documentationCpp "org.wpilib.wpilibc:documentation:${project.ext.gradlerioMetadata.wpilibVersion}@zip"
-    documentationJava "org.wpilib.first.wpilibj:documentation:${project.ext.gradlerioMetadata.wpilibVersion}@zip"
+    documentationJava "org.wpilib.wpilibj:documentation:${project.ext.gradlerioMetadata.wpilibVersion}@zip"
     if (project.ext.buildClassifier == 'Windows') {
         runtimex64 "org.wpilib.msvc:runtime:${project.ext.gradlerioMetadata.wpilibVersion}:x64@zip"
     }
