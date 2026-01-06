@@ -44,12 +44,19 @@ namespace WPILibInstaller
         // Keep the artifacts stream alive for the lifetime of ZipArchive extractor
         private FileStream? _artifactsStream;
 
-        public async Task<int> RunInstallAsync(bool allUsers)
+        public async Task<int> RunInstallAsync(bool allUsers, string installMode = "all")
         {
             try
             {
                 Console.WriteLine("WPILib Installer - CLI Mode");
                 Console.WriteLine("============================\n");
+
+                // Validate install mode
+                if (installMode != "all" && installMode != "tools")
+                {
+                    Console.Error.WriteLine($"Error: Invalid install mode '{installMode}'. Valid options are 'all' or 'tools'.");
+                    return 1;
+                }
 
                 if (!InstallerFileUtils.TryFindInstallerFiles(out _resourcesFile, out _artifactsFile))
                 {
@@ -68,16 +75,22 @@ namespace WPILibInstaller
                 }
 
                 InstallDirectory = InstallerFileUtils.ComputeInstallDirectory(allUsers, UpgradeConfig.FrcYear);
-                Console.WriteLine($"Installing to: {InstallDirectory}\n");
+                Console.WriteLine($"Installing to: {InstallDirectory}");
+                Console.WriteLine($"Install mode: {installMode}\n");
 
                 // Configure installation mode
-                Model.InstallEverything = true;
+                bool installEverything = installMode == "all";
+                Model.InstallEverything = installEverything;
+                Model.InstallTools = !installEverything;
                 Model.InstallAsAdmin = allUsers;
 
                 using var cts = new CancellationTokenSource();
 
-                // Download and prepare VS Code before installation
-                await DownloadAndPrepareVsCodeAsync(cts.Token);
+                // Download and prepare VS Code before installation (only for "all" mode)
+                if (installEverything)
+                {
+                    await DownloadAndPrepareVsCodeAsync(cts.Token);
+                }
 
                 // Create services (pass null for IProgramWindow since CLI doesn't show dialogs)
                 var archiveService = new Services.ArchiveExtractionService(this, null!);
@@ -94,32 +107,48 @@ namespace WPILibInstaller
                     }
                 });
 
-                Console.WriteLine("\n[1/9] Extracting archive...");
-                await archiveService.ExtractArchive(cts.Token, null, progress);
+                if (installEverything)
+                {
+                    // Full installation
+                    Console.WriteLine("\n[1/9] Extracting archive...");
+                    await archiveService.ExtractArchive(cts.Token, null, progress);
 
-                Console.WriteLine("[2/9] Setting up Gradle...");
-                await toolService.RunGradleSetup(progress);
+                    Console.WriteLine("[2/9] Setting up Gradle...");
+                    await toolService.RunGradleSetup(progress);
 
-                Console.WriteLine("[3/9] Setting up tools...");
-                await toolService.RunToolSetup(progress);
+                    Console.WriteLine("[3/9] Setting up tools...");
+                    await toolService.RunToolSetup(progress);
 
-                Console.WriteLine("[4/9] Setting up C++...");
-                await toolService.RunCppSetup(progress);
+                    Console.WriteLine("[4/9] Setting up C++...");
+                    await toolService.RunCppSetup(progress);
 
-                Console.WriteLine("[5/9] Fixing Maven metadata...");
-                await toolService.RunMavenMetaDataFixer(progress);
+                    Console.WriteLine("[5/9] Fixing Maven metadata...");
+                    await toolService.RunMavenMetaDataFixer(progress);
 
-                Console.WriteLine("[6/9] Installing VS Code...");
-                await vsCodeService.RunVsCodeSetup(cts.Token, progress);
+                    Console.WriteLine("[6/9] Installing VS Code...");
+                    await vsCodeService.RunVsCodeSetup(cts.Token, progress);
 
-                Console.WriteLine("[7/9] Configuring VS Code settings...");
-                await vsCodeService.ConfigureVsCodeSettings();
+                    Console.WriteLine("[7/9] Configuring VS Code settings...");
+                    await vsCodeService.ConfigureVsCodeSettings();
 
-                Console.WriteLine("[8/9] Installing VS Code extensions...");
-                await vsCodeService.RunVsCodeExtensionsSetup(progress);
+                    Console.WriteLine("[8/9] Installing VS Code extensions...");
+                    await vsCodeService.RunVsCodeExtensionsSetup(progress);
 
-                Console.WriteLine("[9/9] Creating shortcuts...");
-                await shortcutService.RunShortcutCreator(cts.Token);
+                    Console.WriteLine("[9/9] Creating shortcuts...");
+                    await shortcutService.RunShortcutCreator(cts.Token);
+                }
+                else
+                {
+                    // Tools-only installation
+                    Console.WriteLine("\n[1/3] Extracting JDK and Tools...");
+                    await archiveService.ExtractJDKAndTools(cts.Token, progress);
+
+                    Console.WriteLine("[2/3] Setting up tools...");
+                    await toolService.RunToolSetup(progress);
+
+                    Console.WriteLine("[3/3] Creating shortcuts...");
+                    await shortcutService.RunShortcutCreator(cts.Token);
+                }
 
                 Console.WriteLine("\n✓ Installation completed successfully!");
                 return 0;
