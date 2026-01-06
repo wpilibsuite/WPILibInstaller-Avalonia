@@ -365,3 +365,7 @@ build/
 offline-repository/
 buildSrc/libs
 .vscode/
+
+# Resource files (.tar.gz, .zip) that are generated during the build process
+*.tar.gz
+*.zip

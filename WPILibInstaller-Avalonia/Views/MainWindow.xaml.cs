@@ -30,6 +30,13 @@ namespace WPILibInstaller.Views
             builder.RegisterType<StartPageViewModel>().SingleInstance().AsSelf().AsImplementedInterfaces();
             builder.RegisterType<VSCodePageViewModel>().SingleInstance().AsSelf().AsImplementedInterfaces();
             builder.RegisterType<DeprecatedOsPageViewModel>().SingleInstance().AsSelf().AsImplementedInterfaces();
+
+            // Register services
+            builder.RegisterType<Services.ArchiveExtractionService>().SingleInstance().AsSelf().AsImplementedInterfaces();
+            builder.RegisterType<Services.VsCodeInstallationService>().SingleInstance().AsSelf().AsImplementedInterfaces();
+            builder.RegisterType<Services.ToolInstallationService>().SingleInstance().AsSelf().AsImplementedInterfaces();
+            builder.RegisterType<Services.ShortcutService>().SingleInstance().AsSelf().AsImplementedInterfaces();
+
             builder.RegisterInstance(this).AsImplementedInterfaces();
 
             Container = builder.Build();
