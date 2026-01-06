@@ -260,27 +260,141 @@ namespace WPILibInstaller
 
         private async Task DownloadAndPrepareVsCodeAsync(CancellationToken token)
         {
-            Console.WriteLine("\nDownloading VS Code...");
-
             var currentPlatform = PlatformUtils.CurrentPlatform;
             var platformData = VsCodeModel.Platforms[currentPlatform];
 
-            // Download VS Code using utility
-            (MemoryStream stream, byte[] hash) = await VsCodeDownloadUtils.DownloadVsCodeForPlatformAsync(
-                currentPlatform,
-                platformData.DownloadUrl,
-                progress => Console.WriteLine($"  Downloading VS Code... {progress:F2}%"),
-                token);
+            // Try to download VS Code
+            Console.WriteLine("\nDownloading VS Code...");
 
-            Console.WriteLine("  Verifying hash...");
-            if (!hash.AsSpan().SequenceEqual(platformData.Sha256Hash))
+            try
             {
-                throw new InvalidOperationException(
-                    $"VS Code hash mismatch. Expected {Convert.ToHexString(platformData.Sha256Hash)}, got {Convert.ToHexString(hash)}");
+                (MemoryStream stream, byte[] hash) = await VsCodeDownloadUtils.DownloadVsCodeForPlatformAsync(
+                    currentPlatform,
+                    platformData.DownloadUrl,
+                    progress => Console.WriteLine($"  Downloading VS Code... {progress:F2}%"),
+                    token);
+
+                Console.WriteLine("  Verifying hash...");
+                if (!hash.AsSpan().SequenceEqual(platformData.Sha256Hash))
+                {
+                    throw new InvalidOperationException(
+                        $"VS Code hash mismatch. Expected {Convert.ToHexString(platformData.Sha256Hash)}, got {Convert.ToHexString(hash)}");
+                }
+
+                // Prepare the model for extraction
+                VsCodeDownloadUtils.PrepareVsCodeModelForInstallation(VsCodeModel, stream, currentPlatform);
+                Console.WriteLine("  VS Code ready for installation");
+            }
+            catch (Exception ex) when (ex is HttpRequestException || ex is TaskCanceledException)
+            {
+                // Network error - try offline archive
+                Console.WriteLine($"  Download failed: {ex.Message}");
+                Console.WriteLine("  Checking for offline VS Code archive...");
+
+                if (TryFindOfflineVsCodeArchive(currentPlatform, out string? vsCodeArchivePath))
+                {
+                    Console.WriteLine($"  Found offline VS Code archive: {Path.GetFileName(vsCodeArchivePath)}");
+                    await LoadOfflineVsCodeArchive(vsCodeArchivePath!, currentPlatform, platformData.Sha256Hash.ToArray(), token);
+                }
+                else
+                {
+                    Console.Error.WriteLine("\n  Error: Could not download VS Code and no offline archive found.");
+                    throw;
+                }
+            }
+        }
+
+        private bool TryFindOfflineVsCodeArchive(Platform platform, out string? archivePath)
+        {
+            archivePath = null;
+
+            // Determine expected filename and extension
+            var platformData = VsCodeModel.Platforms[platform];
+            var expectedName = platformData.NameInZip;
+
+            // Search in current directory and standard locations
+            var searchDirs = new List<string>
+            {
+                Directory.GetCurrentDirectory()
+            };
+
+            if (OperatingSystem.IsMacOS())
+            {
+                searchDirs.Add("/Volumes/WPILibInstaller");
+            }
+
+            foreach (var dir in searchDirs)
+            {
+                if (!Directory.Exists(dir)) continue;
+
+                // 1. Check for exact filename match from config
+                var exactPath = Path.Combine(dir, expectedName);
+                if (File.Exists(exactPath))
+                {
+                    archivePath = exactPath;
+                    return true;
+                }
+
+                // 2. Check for simple "vscode.zip" or "vscode.tar.gz"
+                var simpleZip = Path.Combine(dir, "vscode.zip");
+                if (File.Exists(simpleZip))
+                {
+                    archivePath = simpleZip;
+                    return true;
+                }
+
+                var simpleTarGz = Path.Combine(dir, "vscode.tar.gz");
+                if (File.Exists(simpleTarGz))
+                {
+                    archivePath = simpleTarGz;
+                    return true;
+                }
+
+                // 3. Look for any file containing "vscode" (fallback)
+                foreach (var file in Directory.EnumerateFiles(dir))
+                {
+                    var name = Path.GetFileName(file);
+                    if (name.Contains("vscode", StringComparison.OrdinalIgnoreCase) ||
+                        name.Contains("VSCode", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var ext = Path.GetExtension(file).ToLowerInvariant();
+                        if (ext == ".zip" || ext == ".gz")
+                        {
+                            archivePath = file;
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private async Task LoadOfflineVsCodeArchive(string archivePath, Platform platform, byte[] expectedHash, CancellationToken token)
+        {
+            Console.WriteLine("  Loading from offline archive...");
+
+            // Read file into memory stream
+            using var fileStream = File.OpenRead(archivePath);
+            var ms = new MemoryStream();
+            await fileStream.CopyToAsync(ms, token);
+            ms.Position = 0;
+
+            // Verify hash
+            Console.WriteLine("  Verifying hash...");
+            using var sha = SHA256.Create();
+            var hash = await sha.ComputeHashAsync(ms, token);
+
+            if (!hash.AsSpan().SequenceEqual(expectedHash))
+            {
+                Console.WriteLine($"  WARNING: Hash mismatch for offline VS Code archive!");
+                Console.WriteLine($"  Expected: {Convert.ToHexString(expectedHash)}");
+                Console.WriteLine($"  Got:      {Convert.ToHexString(hash)}");
+                Console.WriteLine("  Continuing anyway (use at your own risk)...");
             }
 
             // Prepare the model for extraction
-            VsCodeDownloadUtils.PrepareVsCodeModelForInstallation(VsCodeModel, stream, currentPlatform);
+            VsCodeDownloadUtils.PrepareVsCodeModelForInstallation(VsCodeModel, ms, platform);
             Console.WriteLine("  VS Code ready for installation");
         }
     }

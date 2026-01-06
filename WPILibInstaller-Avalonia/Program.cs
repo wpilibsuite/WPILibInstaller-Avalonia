@@ -45,6 +45,11 @@ namespace WPILibInstaller
             System.Console.WriteLine("                             - tools: Tools only (JDK + WPILib tools)");
             System.Console.WriteLine("  -h, --help                 Show this help message");
             System.Console.WriteLine();
+            System.Console.WriteLine("Offline Installation:");
+            System.Console.WriteLine("  If VS Code download fails, the installer will automatically check for an");
+            System.Console.WriteLine("  offline archive named 'vscode.zip' or 'vscode.tar.gz' in the same directory.");
+            System.Console.WriteLine("  You can pre-download VS Code and save it with this name for offline installs.");
+            System.Console.WriteLine();
             System.Console.WriteLine("Examples:");
             System.Console.WriteLine("  WPILibInstaller --install");
             System.Console.WriteLine("  WPILibInstaller --install --all-users");
