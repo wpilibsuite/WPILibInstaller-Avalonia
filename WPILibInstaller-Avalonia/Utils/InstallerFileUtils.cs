@@ -15,11 +15,14 @@ namespace WPILibInstaller.Utils
 
             foreach (var dir in CandidateSearchDirectories())
             {
+                Console.WriteLine($"Trying to autoload install files in {dir}...");
                 if (!Directory.Exists(dir)) continue;
 
                 foreach (var file in Directory.EnumerateFiles(dir))
                 {
                     var name = Path.GetFileName(file);
+
+                    Console.WriteLine($"Checking {file}...");
 
                     if (resourcesFile == null &&
                         name.Contains("-resources", StringComparison.OrdinalIgnoreCase) &&
