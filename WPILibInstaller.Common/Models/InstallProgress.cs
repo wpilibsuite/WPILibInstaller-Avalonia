@@ -1,4 +1,4 @@
-namespace WPILibInstaller.Models
+﻿namespace WPILibInstaller.Models
 {
     /// <summary>
     ///  Represents the progress of an installation process, including the percentage completed and a status message.
