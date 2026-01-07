@@ -16,7 +16,7 @@ using WPILibInstaller.Models;
 using WPILibInstaller.Utils;
 using File = System.IO.File;
 
-namespace WPILibInstaller
+namespace WPILibInstaller.CLI
 {
     /// <summary>
     /// CLI entrypoint installer. Implements IConfigurationProvider, IToInstallProvider, IVsCodeInstallLocationProvider

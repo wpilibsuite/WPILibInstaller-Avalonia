@@ -32,6 +32,10 @@
     <None Remove="Views\VSCodePage.xaml" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\WPILibInstaller.Common\WPILibInstaller.Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Autofac" Version="8.4.0" />
 
     <PackageReference Include="Avalonia" Version="11.3.7" />
