@@ -246,7 +246,7 @@ def generateFullResourcesTask = tasks.register('generateFullResources', project.
 
 // Creates the main installer application.
 def dotnetInstallerTask = tasks.register('createInstaller', Exec) {
-    workingDir = "$projectDir/WPILibInstaller-Avalonia"
+    workingDir = "$projectDir/WPILibInstaller.GUI"
 
     def macRuntimeId = "osx-x64"
     if (project.hasProperty("macBuildArm")) {
@@ -274,13 +274,13 @@ def versionFileTask = tasks.register('writeVersionNumber', Task) {
     }
 }
 
-def installerProj = new XmlParser().parse("$projectDir/WPILibInstaller-Avalonia/WPILibInstaller-Avalonia.csproj")
+def installerProj = new XmlParser().parse("$projectDir/WPILibInstaller.GUI/WPILibInstaller.GUI.csproj")
 
 def dotnetVersion = installerProj.PropertyGroup.TargetFramework.text()
 
 // Copies the main application to build/outputs.
-def installDirectory = "$projectDir/WPILibInstaller-Avalonia/bin/Release/$dotnetVersion/$dotnetRuntime/publish"
-def macIcon = "$projectDir/WPILibInstaller-Avalonia/wpilib.icns"
+def installDirectory = "$projectDir/WPILibInstaller.GUI/bin/Release/$dotnetVersion/$dotnetRuntime/publish"
+def macIcon = "$projectDir/WPILibInstaller.GUI/wpilib.icns"
 def copyInstallerFiles = tasks.register('copyInstallerFiles', Copy) {
     if (!project.hasProperty("macBuild") && !project.hasProperty("macBuildArm")) {
         from(installDirectory) {

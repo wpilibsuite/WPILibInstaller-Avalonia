@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <AssemblyName>WPILibInstaller</AssemblyName>
     <RootNamespace>WPILibInstaller</RootNamespace>
@@ -31,6 +31,10 @@
     <None Remove="Views\StartPage.xaml" />
     <None Remove="Views\VSCodePage.xaml" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\WPILibInstaller.Common\WPILibInstaller.Common.csproj" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Autofac" Version="8.4.0" />
 
