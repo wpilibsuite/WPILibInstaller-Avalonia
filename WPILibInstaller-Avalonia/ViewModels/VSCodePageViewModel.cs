@@ -385,16 +385,24 @@ namespace WPILibInstaller.ViewModels
 
         private async Task DownloadForPlatform(string downloadUrl, Stream outputStream, Action<double> progressChanged)
         {
-            using var client = new HttpClientDownloadWithProgress(downloadUrl, outputStream);
-            client.ProgressChanged += (totalFileSize, totalBytesDownloaded, progressPercentage) =>
+            try
             {
-                if (progressPercentage != null)
+                using var client = new HttpClientDownloadWithProgress(downloadUrl, outputStream);
+                client.ProgressChanged += (totalFileSize, totalBytesDownloaded, progressPercentage) =>
                 {
-                    progressChanged?.Invoke(progressPercentage.Value);
-                }
-            };
+                    if (progressPercentage != null)
+                    {
+                        progressChanged?.Invoke(progressPercentage.Value);
+                    }
+                };
 
-            await client.StartDownload();
+                await client.StartDownload();
+            }
+            catch (Exception ex)
+            {
+                var errorMessage = $"Failed to download VS Code from: {downloadUrl}\n\nError: {ex.Message}";
+                throw new IOException(errorMessage, ex);
+            }
         }
 
         public override PageViewModelBase MoveNext()
