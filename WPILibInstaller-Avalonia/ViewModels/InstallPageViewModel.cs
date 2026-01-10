@@ -950,7 +950,7 @@ StartupWMClass={wmClass}
             shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "ShuffleBoard.exe"), $"{frcYear} WPILib Tools/Shuffleboard {frcYear}", $"Shuffleboard {frcYear}", wpilibIconLocation));
             shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "SmartDashboard.exe"), $"{frcYear} WPILib Tools/SmartDashboard {frcYear}", $"SmartDashboard {frcYear}", wpilibIconLocation));
             shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "sysid.exe"), $"{frcYear} WPILib Tools/SysId {frcYear}", $"SysId {frcYear}", ""));
-            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "roborioteambumbersetter.exe"), $"{frcYear} WPILib Tools/roboRIO Team Number Setter {frcYear}", $"roboRIO Team Number Setter {frcYear}", ""));
+            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "roborioteamnumbersetter.exe"), $"{frcYear} WPILib Tools/roboRIO Team Number Setter {frcYear}", $"roboRIO Team Number Setter {frcYear}", ""));
             shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "datalogtool.exe"), $"{frcYear} WPILib Tools/Data Log Tool {frcYear}", $"Data Log Tool {frcYear}", ""));
             shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "tools", "wpical.exe"), $"{frcYear} WPILib Tools/WPIcal {frcYear}", $"WPIcal {frcYear}", ""));
             shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "advantagescope", "AdvantageScope (WPILib).exe"), $"{frcYear} WPILib Tools/AdvantageScope (WPILib) {frcYear}", $"AdvantageScope (WPILib) {frcYear}", ""));
