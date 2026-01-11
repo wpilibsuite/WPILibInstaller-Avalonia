@@ -32,6 +32,7 @@ ext.msBuildExtraSetup = { AbstractArchiveTask zip->
   zip.from (toolsUpdaterOutputDir) {
     into '/tools'
     exclude '**/*.pdb'
+    filePermissions { unix(0755) }
   }
 
   if (project.ext.isUnix == true) {
