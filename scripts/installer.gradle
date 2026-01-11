@@ -44,23 +44,4 @@ ext.msBuildExtraSetup = { AbstractArchiveTask zip->
       into '/maven'
     }
   }
-<<<<<<< HEAD
-=======
-
-  zip.from (project(':apps:ToolsUpdater').shadowJar.archiveFile) {
-    into '/tools'
-    rename { 'ToolsUpdater.jar' }
-  }
-
-  if (project.ext.isUnix == true) {
-    zip.from(toolsUpdaterSh) {
-      into '/tools'
-      filePermissions { unix(0755) }
-    }
-  } else {
-    zip.from(toolsUpdaterBatch) {
-      into '/tools'
-    }
-  }
->>>>>>> wpilibsuite/2027
 }
