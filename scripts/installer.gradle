@@ -16,7 +16,7 @@ def toolsUpdaterTask = tasks.register('toolsUpdater', Exec) {
 
 ext.msBuildExtraSetup = { AbstractArchiveTask zip->
   //zip.dependsOn msbuild
-  zip.inputs.file project(':apps:MavenMetaDataFixer').shadowJar.archivePath
+  zip.inputs.file project(':apps:MavenMetaDataFixer').shadowJar.archiveFile
   zip.inputs.file metaDataScriptBatch
   zip.inputs.file metaDataScriptSh
   zip.inputs.dir toolsUpdaterOutputDir
