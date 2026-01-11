@@ -1,5 +1,3 @@
-evaluationDependsOn(':gradleriobase')
-
 def otherDeps = []
 
 apply plugin: 'de.undercouch.download'
@@ -34,124 +32,118 @@ def skipLinuxArm64PlatformTools = [
 def skipTools = []
 
 dependencies {
-    documentationCpp "edu.wpi.first.wpilibc:documentation:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}@zip"
-    documentationJava "edu.wpi.first.wpilibj:documentation:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}@zip"
+    documentationCpp "edu.wpi.first.wpilibc:documentation:${project.ext.gradlerioMetadata.wpilibVersion}@zip"
+    documentationJava "edu.wpi.first.wpilibj:documentation:${project.ext.gradlerioMetadata.wpilibVersion}@zip"
     if (project.ext.buildClassifier == 'Windows') {
-        runtimex64 "edu.wpi.first.msvc:runtime:${project(':gradleriobase').wpi.versions.wpilibVersion.get()}:x64@zip"
+        runtimex64 "edu.wpi.first.msvc:runtime:${project.ext.gradlerioMetadata.wpilibVersion}:x64@zip"
     }
 }
 
-def lazyEvaluator = tasks.register('lazyModelEvaluation') {
+dependencies {
+  project.ext.gradlerioMetadata.dependencies.each { dep->
+    def foundTool = false
 
-  dependsOn ':gradleriobase:build'
-  doLast {
-    def gradleRioDeps = project(':gradleriobase').getGradleRioDependencies()
-    dependencies {
-      gradleRioDeps.deps.each { dep->
-        def foundTool = false
+    skipTools.each { tool->
+      if ("$dep.groupId:$dep.artifactId" == tool) {
+        def depString = "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
+        println "Skipping " + depString
+        foundTool = true
+        return
+      }
+    }
 
-        skipTools.each { tool->
-          if ("$dep.groupId:$dep.artifactId" == tool) {
-            def depString = "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
-            println "Skipping " + depString
-            foundTool = true
-            return
-          }
-        }
+    if (foundTool) {
+      return
+    }
 
-        if (foundTool) {
+    if (project.hasProperty('macBuildArm') || project.hasProperty('linuxBuildArm64')) {
+      skipNewPlatformTools.each { tool->
+        if ("$dep.groupId:$dep.artifactId" == tool) {
+          def depString = "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
+          println "Skipping because arm " + depString
+          foundTool = true
           return
         }
-
-        if (project.hasProperty('macBuildArm') || project.hasProperty('linuxBuildArm64')) {
-          skipNewPlatformTools.each { tool->
-            if ("$dep.groupId:$dep.artifactId" == tool) {
-              def depString = "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
-              println "Skipping because arm " + depString
-              foundTool = true
-              return
-            }
-          }
-        }
-        if (project.hasProperty('linuxBuildArm64')) {
-          skipLinuxArm64PlatformTools.each { tool->
-            if ("$dep.groupId:$dep.artifactId" == tool) {
-              def depString = "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
-              println "Skipping because arm " + depString
-              foundTool = true
-              return
-            }
-          }
-        }
-
-        if (foundTool) {
+      }
+    }
+    if (project.hasProperty('linuxBuildArm64')) {
+      skipLinuxArm64PlatformTools.each { tool->
+        if ("$dep.groupId:$dep.artifactId" == tool) {
+          def depString = "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
+          println "Skipping because arm " + depString
+          foundTool = true
           return
         }
+      }
+    }
 
-        cppToolsArtifacts.each { tool->
-          if ("$dep.groupId:$dep.artifactId" == tool) {
+    if (foundTool) {
+      return
+    }
+
+    cppToolsArtifacts.each { tool->
+      if ("$dep.groupId:$dep.artifactId" == tool) {
+        def depString = "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
+        cppTools depString
+        println depString
+        foundTool = true
+        return
+      }
+    }
+
+    if (foundTool) {
+      return
+    }
+
+    toolArtifacts.each { tool->
+      if ("$dep.groupId:$dep.artifactId" == tool) {
+        if (dep.classifier == null) {
+          def depString = "$dep.groupId:$dep.artifactId:$dep.version:@$dep.extension"
+          tools depString
+          println depString
+          foundTool = true
+          return
+        } else {
+          if (dep.classifier != 'sources' && dep.classifier != 'javadoc') {
             def depString = "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
-            cppTools depString
+            tools depString
             println depString
             foundTool = true
             return
           }
         }
-
-        if (foundTool) {
-          return
-        }
-
-        toolArtifacts.each { tool->
-          if ("$dep.groupId:$dep.artifactId" == tool) {
-            if (dep.classifier == null) {
-              def depString = "$dep.groupId:$dep.artifactId:$dep.version:@$dep.extension"
-              tools depString
-              println depString
-              foundTool = true
-              return
-            } else {
-              if (dep.classifier != 'sources' && dep.classifier != 'javadoc') {
-                def depString = "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
-                tools depString
-                println depString
-                foundTool = true
-                return
-              }
-            }
-          }
-        }
-
-        if (foundTool) {
-          return
-        }
-
-        println dep
-        if (dep.classifier == null) {
-         offline "$dep.groupId:$dep.artifactId:$dep.version:@$dep.extension"
-        } else if (dep.classifier.startsWith(project.ext.currentClassifier)) {
-          def newClassifier = dep.classifier.replace(project.ext.currentClassifier, project.ext.forceNativeClassifier)
-          offline "$dep.groupId:$dep.artifactId:$dep.version:$newClassifier@$dep.extension"
-        } else if (dep.classifier.contains('systemcore')) {
-         offline "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
-        } else if (dep.classifier.contains('headers')) {
-         offline "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
-        } else if (dep.classifier.contains('sources')) {
-         offline "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
-        }
       }
+    }
+
+    if (foundTool) {
+      return
+    }
+
+    println dep
+    if (dep.classifier == null) {
+      offline "$dep.groupId:$dep.artifactId:$dep.version:@$dep.extension"
+    } else if (dep.classifier.startsWith(project.ext.currentClassifier)) {
+      def newClassifier = dep.classifier.replace(project.ext.currentClassifier, project.ext.forceNativeClassifier)
+      offline "$dep.groupId:$dep.artifactId:$dep.version:$newClassifier@$dep.extension"
+    } else if (dep.classifier.contains('systemcore')) {
+      offline "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
+    } else if (dep.classifier.contains('headers')) {
+      offline "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
+    } else if (dep.classifier.contains('sources')) {
+      offline "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
     }
   }
 }
+
 repositories {
-    project(':gradleriobase').getGradleRioUrls().each { gUrl->
+    project.ext.gradlerioMetadata.urls.each { gUrl->
       maven {
         url = gUrl
       }
     }
     maven {
-      name 'artifactory'
-      url 'https://frcmaven.wpi.edu/artifactory/plugins'
+      name = 'artifactory'
+      url = 'https://frcmaven.wpi.edu/artifactory/plugins'
     }
 }
 
@@ -160,19 +152,18 @@ def cleanoffline = tasks.register("cleanOfflineRepository", Delete) {
 }
 
 updateOfflineRepository.dependsOn cleanoffline
-updateOfflineRepository.dependsOn lazyEvaluator
 
 offlineDependencies {
   repositories {
     // You'll have to add your buildscript repositories here too
-    project(':gradleriobase').getGradleRioUrls().each { gUrl->
+    project.ext.gradlerioMetadata.urls.each { gUrl->
       maven {
         url = gUrl
       }
     }
     maven {
-      name 'artifactory'
-      url 'https://frcmaven.wpi.edu/artifactory/plugins'
+      name = 'artifactory'
+      url = 'https://frcmaven.wpi.edu/artifactory/plugins'
     }
   }
 
@@ -207,8 +198,15 @@ def downloadPythonAPI = tasks.register('downloadPythonAPI', Download) {
   overwrite false
 }
 
-def downloadNewCommands = tasks.register('downloadNewCommands', Download) {
+def downloadCommandsv2 = tasks.register('downloadCommandsv2', Download) {
   src 'https://raw.githubusercontent.com/wpilibsuite/allwpilib/2027/commandsv2/CommandsV2.json'
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite false
+}
+
+def downloadCommandsv3 = tasks.register('downloadCommandsv3', Download) {
+  src 'https://raw.githubusercontent.com/wpilibsuite/allwpilib/2027/commandsv3/CommandsV3.json'
   def fileName = file(src.file).name
   dest "$buildDir/downloads/$fileName"
   overwrite false
@@ -235,11 +233,16 @@ ext.mavenZipSetup = { AbstractArchiveTask zip->
     into '/maven'
   }
 
-  zip.dependsOn downloadNewCommands
+  zip.dependsOn downloadCommandsv2
+  zip.dependsOn downloadCommandsv3
   zip.dependsOn downloadReadTheDocs
   zip.dependsOn downloadPythonAPI
 
-  zip.from(downloadNewCommands.get().outputFiles.first()) {
+  zip.from(downloadCommandsv2.get().outputFiles.first()) {
+    into '/vendordeps'
+  }
+
+  zip.from(downloadCommandsv3.get().outputFiles.first()) {
     into '/vendordeps'
   }
 

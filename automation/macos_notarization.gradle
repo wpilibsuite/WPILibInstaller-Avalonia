@@ -1,13 +1,19 @@
 import groovy.json.JsonSlurper
 
+interface ExecOperationsProvider {
+   @javax.inject.Inject
+   ExecOperations getExecOperations()
+}
+def execOperations = objects.newInstance(ExecOperationsProvider).execOperations
+
 ext.notarize = { File application, String id, String username, String teamid, String password ->
     // Step 1: archive the application.
     println "Archiving application..."
-    exec { commandLine "ditto", "-c", "-k", "--keepParent", application.getAbsolutePath(), "/tmp/archive.zip" }
+    execOperations.exec { commandLine "ditto", "-c", "-k", "--keepParent", application.getAbsolutePath(), "/tmp/archive.zip" }
 
     // Step 2: submit application for notarization.
     println "Submitting application to notarization service..."
-    def result = exec {
+    def result = execOperations.exec {
         commandLine "xcrun", "notarytool", "submit", "--wait",
                 "--apple-id", username, "--team-id", teamid, "--password", password, "/tmp/archive.zip"
         ignoreExitValue(true)
@@ -19,5 +25,5 @@ ext.notarize = { File application, String id, String username, String teamid, St
 
     // Step 3: staple the notarization ticket.
     println "Stapling notarization ticket..."
-    exec { commandLine "xcrun", "stapler", "staple", "-v", application.getAbsolutePath() }
+    execOperations.exec { commandLine "xcrun", "stapler", "staple", "-v", application.getAbsolutePath() }
 }

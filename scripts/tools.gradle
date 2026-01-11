@@ -13,8 +13,6 @@ def elasticScriptUnixFile = file("files/Elastic.sh")
 
 def toolsJsonTask = tasks.register('toolsJson', Task) {
 
-  dependsOn tasks.named('lazyModelEvaluation')
-
   doLast {
     def resolvedDeps = configurations.tools.resolvedConfiguration.resolvedArtifacts.toList()
     def config = []
@@ -116,22 +114,22 @@ ext.toolsSetup = { AbstractArchiveTask zip->
   } else {
     zip.from (scriptBaseUnixFile) {
       into '/tools'
-      fileMode 0755
+      filePermissions { unix(0755) }
     }
 
     zip.from (scriptBaseCppUnixFile) {
       into '/tools'
-      fileMode 0755
+      filePermissions { unix(0755) }
     }
 
     zip.from (advantageScopeScriptUnixFile) {
       into '/tools'
-      fileMode 0755
+      filePermissions { unix(0755) }
     }
 
     zip.from (elasticScriptUnixFile) {
       into '/tools'
-      fileMode 0755
+      filePermissions { unix(0755) }
     }
   }
 

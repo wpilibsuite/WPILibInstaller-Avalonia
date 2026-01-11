@@ -71,7 +71,7 @@ jobs:
 
       - name: Install SystemCore Toolchain
         shell: bash
-        run: ./gradlew installSystemCoreToolchain
+        run: ./gradlew emptyTask -PinstallToolchains
 
       - name: Build Installer (PR)
         shell: bash
