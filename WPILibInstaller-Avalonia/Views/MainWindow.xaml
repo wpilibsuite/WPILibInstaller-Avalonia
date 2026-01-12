@@ -24,8 +24,8 @@
         <views:ViewLocator />
       </ContentControl.DataTemplates>
     </ContentControl>
-    <Button FontSize="15" IsVisible="{Binding BackVisible, Mode=OneWay}" Content="{Binding BackName, Mode=OneWay}" Command="{Binding GoBack}" Padding="10" Grid.Row="1" HorizontalAlignment="Left" Margin="15" />
-    <Button FontSize="15" IsVisible="{Binding ForwardVisible, Mode=OneWay}" Content="{Binding ForwardName, Mode=OneWay}" Command="{Binding GoNext}" Padding="10" Grid.Row="1" HorizontalAlignment="Right" Margin="15" />
+    <Button FontSize="15" IsVisible="{Binding BackVisible, Mode=OneWay}" Content="{Binding BackName, Mode=OneWay}" Command="{Binding GoBackCommand}" Padding="10" Grid.Row="1" HorizontalAlignment="Left" Margin="15" />
+    <Button FontSize="15" IsVisible="{Binding ForwardVisible, Mode=OneWay}" Content="{Binding ForwardName, Mode=OneWay}" Command="{Binding GoNextCommand}" Padding="10" Grid.Row="1" HorizontalAlignment="Right" Margin="15" />
   </Grid>
 
 </Window>

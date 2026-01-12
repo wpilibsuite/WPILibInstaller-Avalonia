@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls.Platform;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using WPILibInstaller.Interfaces;
@@ -83,14 +85,14 @@ namespace WPILibInstaller.ViewModels
             };
 
             this.viewModelResolver = viewModelResolver;
-        }
 
-        // public RelayCommand<Unit, Unit> CreateCatchableButton(Func<Task> toRun)
-        // {
-        //     var command = RelayCommand.CreateFromTask(toRun);
-        //     command.ThrownExceptions.Subscribe(HandleException);
-        //     return command;
-        // }
+            Dispatcher.UIThread.UnhandledException += (s, e) =>
+            {
+                Console.WriteLine("UI thread unhandled exception: " + e.Exception);
+                HandleException(e.Exception);
+                e.Handled = true;
+            };
+        }
 
         public void Initialize()
         {

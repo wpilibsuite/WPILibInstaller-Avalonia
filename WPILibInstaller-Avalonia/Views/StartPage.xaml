@@ -30,11 +30,11 @@
                FontSize="20"/>
     <Button Margin="0, 10, 0, 0" Content="Select Artifacts File (-artifacts)"
             Height="45"
-            Command="{Binding SelectSupportFiles}"
+            Command="{Binding SelectSupportFilesCommand}"
             IsVisible="{Binding MissingSupportFiles}"/>
     <Button Margin="0,10,0,0" Content="Select Resourcs File (-resources)"
             Height="45"
-            Command="{Binding SelectResourceFiles}"
+            Command="{Binding SelectResourceFilesCommand}"
             IsVisible="{Binding MissingResourceFiles}"
             />
   </StackPanel>

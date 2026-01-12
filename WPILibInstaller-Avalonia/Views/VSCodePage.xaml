@@ -30,10 +30,10 @@ We strongly recommend using WPILib's VS Code instead of the system one or a sepa
         <ColumnDefinition Width="4*"/>
         <ColumnDefinition Width="2*"/>
       </Grid.ColumnDefinitions>
-      <Button Grid.Column="0" Grid.Row="0" Margin="0,0,5,5" IsEnabled="{Binding EnableSelectionButtons}" Content="{Binding SingleDownloadText}" Command="{Binding DownloadSingleVsCode}"></Button>
-      <Button Grid.Column="1" Grid.Row="0" Margin="5,0,0,5" IsEnabled="{Binding EnableSelectionButtons}" Content="{Binding SkipVsCodeText}" Command="{Binding SkipVsCode}"></Button>
-      <Button Grid.Column="0" Grid.Row="1" Margin="0,0,5,0" IsEnabled="{Binding EnableSelectionButtons}" Content="{Binding AllDownloadText}" Command="{Binding DownloadVsCode}"/>
-      <Button Grid.Column="1" Grid.Row="1" Margin="5,0,0,0" IsEnabled="{Binding EnableSelectionButtons}" Content="{Binding SelectText}" Command="{Binding SelectVsCode}"/>
+      <Button Grid.Column="0" Grid.Row="0" Margin="0,0,5,5" IsEnabled="{Binding EnableSelectionButtons}" Content="{Binding SingleDownloadText}" Command="{Binding DownloadSingleVsCodeCommand}"></Button>
+      <Button Grid.Column="1" Grid.Row="0" Margin="5,0,0,5" IsEnabled="{Binding EnableSelectionButtons}" Content="{Binding SkipVsCodeText}" Command="{Binding SkipVsCodeCommand}"></Button>
+      <Button Grid.Column="0" Grid.Row="1" Margin="0,0,5,0" IsEnabled="{Binding EnableSelectionButtons}" Content="{Binding AllDownloadText}" Command="{Binding DownloadVsCodeCommand}"/>
+      <Button Grid.Column="1" Grid.Row="1" Margin="5,0,0,0" IsEnabled="{Binding EnableSelectionButtons}" Content="{Binding SelectText}" Command="{Binding SelectVsCodeCommand}"/>
       <StackPanel Margin="5,0,0,0" Grid.Column="2" Grid.Row="0" Grid.RowSpan="2">
         <ProgressBar Value="{Binding ProgressBar1}" IsVisible="{Binding ProgressBar1Visible}" Margin="0,2,0,0" MinWidth="20" />
         <ProgressBar Value="{Binding ProgressBar2}" IsVisible="{Binding ProgressBarAllVisible}" Margin="0,2,0,0" MinWidth="20" />

@@ -1,11 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <AssemblyName>WPILibInstaller</AssemblyName>
     <RootNamespace>WPILibInstaller</RootNamespace>
     <ApplicationIcon>Assets\wpilib-256.ico</ApplicationIcon>
     <NoWarn>CA1805,CA1051,CA1816,CA1822,CA1835,CA1310,CA2249,CA1311,CA1725,CA1309,CA2201,CA1304,CA1068,CA1001,CA1852</NoWarn>
-    <TrimmerSingleWarn>false</TrimmerSingleWarn>
     <Win32Resource />
     <Nullable>enable</Nullable>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>

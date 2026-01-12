@@ -316,16 +316,14 @@ namespace WPILibInstaller.ViewModels
         [RelayCommand]
         public async Task SelectSupportFiles()
         {
-            await Task.Yield();
-            throw new InvalidOperationException("Not Implemented, use SelectSupportFilesWithFile");
-            // var file = await programWindow.ShowFilePicker("Select Artifact File", RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "zip" : "gz", Environment.GetFolderPath(Environment.SpecialFolder.Personal));
+            var file = await programWindow.ShowFilePicker("Select Artifact File", RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "zip" : "gz", Environment.GetFolderPath(Environment.SpecialFolder.Personal));
 
-            // if (file == null)
-            // {
-            //     return;
-            // }
+            if (file == null)
+            {
+                return;
+            }
 
-            // await SelectSupportFilesWithFile(file);
+            await SelectSupportFilesWithFile(file);
         }
 
         public VsCodeModel VsCodeModel
