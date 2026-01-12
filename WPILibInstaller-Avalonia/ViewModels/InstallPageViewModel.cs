@@ -12,7 +12,9 @@ using File = System.IO.File;
 
 namespace WPILibInstaller.ViewModels
 {
+#pragma warning disable CA1001 // Types that own disposable fields should be disposable
     public partial class InstallPageViewModel : PageViewModelBase
+#pragma warning restore CA1001 // Types that own disposable fields should be disposable
     {
         private readonly IViewModelResolver viewModelResolver;
         private readonly IToInstallProvider toInstallProvider;
@@ -30,7 +32,7 @@ namespace WPILibInstaller.ViewModels
         [ObservableProperty]
         private string _textTotal = "";
 
-        private async void CreateLinuxShortcut(String name, String frcYear, String wmClass, String iconName, CancellationToken token)
+        private async void CreateLinuxShortcut(string name, string frcYear, string wmClass, string iconName, CancellationToken token)
         {
             var launcherFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local/share/applications", $@"{name.Replace(' ', '_').Replace(")", "").Replace("(", "")}_{frcYear}.desktop");
             string contents;
@@ -76,7 +78,7 @@ StartupWMClass={wmClass}
             await File.WriteAllTextAsync(launcherFile, contents, token);
         }
 
-        public bool succeeded = false;
+        public bool Succeeded {get; private set; }
 
         private readonly Task runInstallTask;
 
@@ -115,12 +117,12 @@ StartupWMClass={wmClass}
 
         private async Task ExtractJDKAndTools(CancellationToken token)
         {
-            await ExtractArchive(token, new[] {
+            await ExtractArchive(new[] {
                 configurationProvider.JdkConfig.Folder + "/",
                 configurationProvider.UpgradeConfig.Tools.Folder + "/",
                 configurationProvider.AdvantageScopeConfig.Folder + "/",
                 configurationProvider.ElasticConfig.Folder + "/",
-                "installUtils/", "icons"});
+                "installUtils/", "icons"}, token);
         }
 
         private async Task InstallTools(CancellationToken token)
@@ -155,7 +157,7 @@ StartupWMClass={wmClass}
                 {
                     ProgressTotal = 0;
                     TextTotal = "Extracting";
-                    await ExtractArchive(token, null);
+                    await ExtractArchive(null, token);
                     if (token.IsCancellationRequested) break;
                     ProgressTotal = 11;
                     TextTotal = "Installing Gradle";
@@ -220,11 +222,11 @@ StartupWMClass={wmClass}
 
             if (source.IsCancellationRequested)
             {
-                succeeded = false;
+                Succeeded = false;
             }
             else
             {
-                succeeded = true;
+                Succeeded = true;
             }
 
             await viewModelResolver.ResolveMainWindow().ExecuteGoNext();
@@ -232,7 +234,7 @@ StartupWMClass={wmClass}
 
         public override PageViewModelBase MoveNext()
         {
-            if (succeeded)
+            if (Succeeded)
             {
                 return viewModelResolver.Resolve<FinalPageViewModel>();
             }
@@ -394,7 +396,7 @@ StartupWMClass={wmClass}
             if (settingsJson.ContainsKey("java.configuration.runtimes"))
             {
                 JsonArray? javaConfigEnv = settingsJson["java.configuration.runtimes"]?.AsArray();
-                Boolean javaFound = false;
+                bool javaFound = false;
                 if (javaConfigEnv != null)
                 {
                     foreach (JsonNode? result in javaConfigEnv)
@@ -403,7 +405,7 @@ StartupWMClass={wmClass}
                         JsonNode? name = result["name"];
                         if (name != null)
                         {
-                            if (name.ToString().Equals("JavaSE-17"))
+                            if (name.ToString().Equals("JavaSE-17", StringComparison.OrdinalIgnoreCase))
                             {
                                 result["path"] = Path.Combine(homePath, "jdk");
                                 result["default"] = true;
@@ -519,7 +521,7 @@ StartupWMClass={wmClass}
 
         }
 
-        private async Task ExtractArchive(CancellationToken token, string[]? filter)
+        private async Task ExtractArchive(string[]? filter, CancellationToken token)
         {
             Progress = 0;
             if (OperatingSystem.IsWindows())
@@ -602,7 +604,7 @@ StartupWMClass={wmClass}
                     bool skip = true;
                     foreach (var keep in filter)
                     {
-                        if (entryName.StartsWith(keep))
+                        if (entryName.StartsWith(keep, StringComparison.Ordinal))
                         {
                             skip = false;
                             break;

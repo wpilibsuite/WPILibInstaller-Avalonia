@@ -53,7 +53,7 @@ namespace WPILibInstaller.Views
             this.Close();
         }
 
-        public async Task<string?> ShowFilePicker(string title, string extensionFilter, string? initialiDirectory)
+        public async Task<string?> ShowFilePicker(string title, string extensionFilter, string? defaultPath)
         {
             var options = new FilePickerOpenOptions
             {
@@ -68,9 +68,9 @@ namespace WPILibInstaller.Views
                 }
             };
 
-            if (initialiDirectory != null)
+            if (defaultPath != null)
             {
-                options.SuggestedStartLocation = await StorageProvider.TryGetFolderFromPathAsync(initialiDirectory);
+                options.SuggestedStartLocation = await StorageProvider.TryGetFolderFromPathAsync(defaultPath);
             }
 
             var result = await StorageProvider.OpenFilePickerAsync(options);

@@ -14,7 +14,7 @@ namespace WPILibInstaller.ViewModels
 
         public override bool ForwardVisible => forwardVisible;
 
-        private bool forwardVisible = false;
+        private bool forwardVisible;
 
         private void SetLocalForwardVisible(bool value)
         {
@@ -68,7 +68,7 @@ namespace WPILibInstaller.ViewModels
             set => this.SetProperty(ref progressBar1, value);
         }
 
-        private double progressBar1 = 0;
+        private double progressBar1;
 
         public bool ProgressBar1Visible
         {
@@ -76,7 +76,7 @@ namespace WPILibInstaller.ViewModels
             set => this.SetProperty(ref progressBar1Visible, value);
         }
 
-        private bool progressBar1Visible = false;
+        private bool progressBar1Visible;
 
         public double ProgressBar2
         {
@@ -84,7 +84,7 @@ namespace WPILibInstaller.ViewModels
             set => this.SetProperty(ref progressBar2, value);
         }
 
-        private double progressBar2 = 0;
+        private double progressBar2;
 
         public bool ProgressBarAllVisible
         {
@@ -92,7 +92,7 @@ namespace WPILibInstaller.ViewModels
             set => this.SetProperty(ref progressBarAllVisible, value);
         }
 
-        private bool progressBarAllVisible = false;
+        private bool progressBarAllVisible;
 
         public double ProgressBar3
         {
@@ -100,7 +100,7 @@ namespace WPILibInstaller.ViewModels
             set => this.SetProperty(ref progressBar3, value);
         }
 
-        private double progressBar3 = 0;
+        private double progressBar3;
 
         public double ProgressBar4
         {
@@ -108,7 +108,7 @@ namespace WPILibInstaller.ViewModels
             set => this.SetProperty(ref progressBar4, value);
         }
 
-        private double progressBar4 = 0;
+        private double progressBar4;
 
         public string DoneText
         {
@@ -168,7 +168,7 @@ namespace WPILibInstaller.ViewModels
         public async Task SelectVsCode()
         {
             var currentPlatform = PlatformUtils.CurrentPlatform;
-            String extension;
+            string extension;
 
             if (currentPlatform == Platform.Linux64 || currentPlatform == Platform.LinuxArm64)
             {
@@ -360,7 +360,7 @@ namespace WPILibInstaller.ViewModels
             refresher.RefreshForwardBackProperties();
         }
 
-        private async Task<(MemoryStream stream, Platform platform, byte[] hash)> DownloadToMemoryStream(Platform platform, string downloadUrl, Action<double> progressChanged)
+        private static async Task<(MemoryStream stream, Platform platform, byte[] hash)> DownloadToMemoryStream(Platform platform, string downloadUrl, Action<double> progressChanged)
         {
             MemoryStream ms = new MemoryStream(100000000);
             await DownloadForPlatform(downloadUrl, ms, progressChanged);
@@ -370,7 +370,7 @@ namespace WPILibInstaller.ViewModels
             return (ms, platform, hash);
         }
 
-        private async Task DownloadForPlatform(string downloadUrl, Stream outputStream, Action<double> progressChanged)
+        private static async Task DownloadForPlatform(string downloadUrl, Stream outputStream, Action<double> progressChanged)
         {
             using var client = new HttpClientDownloadWithProgress(downloadUrl, outputStream);
             client.ProgressChanged += (totalFileSize, totalBytesDownloaded, progressPercentage) =>

@@ -28,6 +28,7 @@ namespace WPILibInstaller.Utils
 
         public void Dispose()
         {
+            GC.SuppressFinalize(this);
         }
 
         public bool MoveToNextEntry()

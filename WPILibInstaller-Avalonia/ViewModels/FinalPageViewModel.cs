@@ -44,28 +44,25 @@ namespace WPILibInstaller.ViewModels
         }
 
         [RelayCommand]
-        public Task OpenKnownIssues()
+        public static void OpenKnownIssues()
         {
             OpenBrowser("https://docs.wpilib.org/en/2027/docs/yearly-overview/known-issues.html");
-            return Task.CompletedTask;
         }
 
         [RelayCommand]
-        public Task OpenBetaDocs()
+        public static void OpenBetaDocs()
         {
             OpenBrowser("https://docs.wpilib.org/en/2027");
-            return Task.CompletedTask;
         }
 
         [RelayCommand]
-        public Task OpenBetaSite()
+        public static void OpenBetaSite()
         {
             OpenBrowser("https://github.com/wpilibsuite/SystemcoreTesting");
-            return Task.CompletedTask;
         }
 
         [RelayCommand]
-        public Task OpenChangelog()
+        public static void OpenChangelog()
         {
             string? verString = null;
             try
@@ -85,9 +82,6 @@ namespace WPILibInstaller.ViewModels
             {
                 OpenBrowser($"https://github.com/wpilibsuite/allwpilib/releases/");
             }
-
-
-            return Task.CompletedTask;
         }
 
         public override PageViewModelBase MoveNext()

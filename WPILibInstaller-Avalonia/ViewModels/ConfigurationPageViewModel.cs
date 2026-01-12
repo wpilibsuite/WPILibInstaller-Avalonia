@@ -14,7 +14,7 @@ namespace WPILibInstaller.ViewModels
 
         public override bool ForwardVisible => false;
 
-        public bool CanRunAsAdmin => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+        public bool CanRunAsAdmin { get; } = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
         public ConfigurationPageViewModel(IViewModelResolver viewModelResolver)
             : base("Install", "Back")

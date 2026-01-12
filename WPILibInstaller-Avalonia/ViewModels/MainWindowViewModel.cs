@@ -28,16 +28,16 @@ namespace WPILibInstaller.ViewModels
         private readonly Stack<PageViewModelBase> pages = new();
 
         [ObservableProperty]
-        public string? _forwardName;
+        private string? _forwardName;
 
         [ObservableProperty]
-        public string? _backName;
+        private string? _backName;
 
         [ObservableProperty]
-        public bool _forwardVisible;
+        private bool _forwardVisible;
 
         [ObservableProperty]
-        public bool _backVisible;
+        private bool _backVisible;
 
         public void HandleException(Exception e)
         {

@@ -18,7 +18,7 @@ namespace WPILibInstaller.ViewModels
         private readonly IMainWindowViewModel refresher;
 
         public override bool ForwardVisible => forwardVisible;
-        private bool forwardVisible = false;
+        private bool forwardVisible;
         public string VerString => verString;
 
         private readonly string verString = $"0.0.0";
@@ -35,12 +35,12 @@ namespace WPILibInstaller.ViewModels
             // Enumerate all files in base dir
             foreach (var file in Directory.EnumerateFiles(baseDir))
             {
-                if (file.EndsWith($"{verString}-resources.zip"))
+                if (file.EndsWith($"{verString}-resources.zip", StringComparison.Ordinal))
                 {
                     _ = SelectResourceFilesWithFile(file);
                     foundResources = true;
                 }
-                else if (file.EndsWith($"{verString}-artifacts.{extension}"))
+                else if (file.EndsWith($"{verString}-artifacts.{extension}", StringComparison.Ordinal))
                 {
                     _ = SelectSupportFilesWithFile(file);
                     foundSupport = true;
@@ -54,12 +54,12 @@ namespace WPILibInstaller.ViewModels
                 baseDir = Path.GetFullPath("/Volumes/WPILibInstaller");
                 foreach (var file in Directory.EnumerateFiles(baseDir))
                 {
-                    if (!foundResources && file.EndsWith($"{verString}-resources.zip"))
+                    if (!foundResources && file.EndsWith($"{verString}-resources.zip", StringComparison.Ordinal))
                     {
                         _ = SelectResourceFilesWithFile(file);
                         foundResources = true;
                     }
-                    else if (!foundSupport && file.EndsWith($"{verString}-artifacts.{extension}"))
+                    else if (!foundSupport && file.EndsWith($"{verString}-artifacts.{extension}", StringComparison.Ordinal))
                     {
                         _ = SelectSupportFilesWithFile(file);
                         foundSupport = true;
@@ -74,12 +74,12 @@ namespace WPILibInstaller.ViewModels
                 baseDir = Path.GetFullPath(Path.Join(baseDir, "..", "..", ".."));
                 foreach (var file in Directory.EnumerateFiles(baseDir))
                 {
-                    if (!foundResources && file.EndsWith($"{verString}-resources.zip"))
+                    if (!foundResources && file.EndsWith($"{verString}-resources.zip", StringComparison.Ordinal))
                     {
                         _ = SelectResourceFilesWithFile(file);
                         foundResources = true;
                     }
-                    else if (!foundSupport && file.EndsWith($"{verString}-artifacts.{extension}"))
+                    else if (!foundSupport && file.EndsWith($"{verString}-artifacts.{extension}", StringComparison.Ordinal))
                     {
                         _ = SelectSupportFilesWithFile(file);
                         foundSupport = true;
@@ -295,9 +295,9 @@ namespace WPILibInstaller.ViewModels
                 }
 
                 // Make sure they match.
-                if (!s.Equals(hash.ToUpper()))
+                if (!s.Equals(StringComparison.OrdinalIgnoreCase))
                 {
-                    viewModelResolver.ResolveMainWindow().HandleException(new Exception("The artifacts file was damaged.\nThis is either caused by a bad download,\nor on macOS you originally download the wrong dmg\nand its still mounted. Make sure to eject\nall dmg's and try again (And maybe reboot)."));
+                    viewModelResolver.ResolveMainWindow().HandleException(new InvalidDataException("The artifacts file was damaged.\nThis is either caused by a bad download,\nor on macOS you originally download the wrong dmg\nand its still mounted. Make sure to eject\nall dmg's and try again (And maybe reboot)."));
                     return false;
                 }
                 MissingHash = false;
