@@ -477,7 +477,7 @@ StartupWMClass={wmClass}
             double totalSize = archive.TotalUncompressSize;
             long currentSize = 0;
 
-            while (extractor.MoveToNextEntry())
+            while (await extractor.MoveToNextEntryAsync())
             {
                 if (token.IsCancellationRequested)
                 {
@@ -508,8 +508,7 @@ StartupWMClass={wmClass}
                 }
 
                 {
-                    using FileStream writer = File.Create(fullZipToPath);
-                    await extractor.CopyToStreamAsync(writer);
+                    await extractor.CopyToFileAsync(fullZipToPath, token);
                 }
 
                 if (extractor.EntryIsExecutable && !OperatingSystem.IsWindows())
@@ -589,7 +588,7 @@ StartupWMClass={wmClass}
 
             string intoPath = configurationProvider.InstallDirectory;
 
-            while (extractor.MoveToNextEntry())
+            while (await extractor.MoveToNextEntryAsync())
             {
                 if (token.IsCancellationRequested)
                 {
@@ -640,8 +639,7 @@ StartupWMClass={wmClass}
                 }
 
                 {
-                    using FileStream writer = File.Create(fullZipToPath);
-                    await extractor.CopyToStreamAsync(writer);
+                    await extractor.CopyToFileAsync(fullZipToPath, token);
                 }
 
                 if (extractor.EntryIsExecutable && !OperatingSystem.IsWindows())
