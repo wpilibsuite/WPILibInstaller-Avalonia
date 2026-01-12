@@ -315,12 +315,12 @@ def dotnetInstallerTask = tasks.register('createInstaller', Exec) {
     }
 
     if (project.hasProperty("macBuild") || project.hasProperty("macBuildArm")) {
-        commandLine 'dotnet', 'publish', '-c', 'Release', '-r', dotnetRuntime, '--self-contained',
+        commandLine 'dotnet', 'publish', '-c', 'Release', '-r', dotnetRuntime,
                 "/p:Version=$pubVersion", "/t:BundleApp", "-p:RuntimeIdentifier=${macRuntimeId}",
                 "-p:CFBundleShortVersionString=$pubVersion", "-p:CFBundleVersion=$pubVersion"
     } else {
-        commandLine 'dotnet', 'publish', '-c', 'Release', '-r', dotnetRuntime, '/p:PublishSingleFile=true',
-                 "/p:Version=$pubVersion", '--self-contained'
+        commandLine 'dotnet', 'publish', '-c', 'Release', '-r', dotnetRuntime,
+                 "/p:Version=$pubVersion"
     }
 }
 
