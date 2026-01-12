@@ -3,7 +3,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="640" d:DesignHeight="400"
-             x:Class="WPILibInstaller.Views.ConfigurationPage">
+             x:Class="WPILibInstaller.Views.ConfigurationPage"
+             xmlns:vm="using:WPILibInstaller.ViewModels"
+             x:DataType="vm:ConfigurationPageViewModel">
   <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
     <TextBlock Margin="0,0,0,20" FontSize="20" FontWeight="Bold">Select the install mode you would like.</TextBlock>
     <RadioButton FontSize="15" IsChecked="{Binding Model.InstallTools}">Tools Only</RadioButton>

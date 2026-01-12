@@ -1,30 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Reactive;
-using System.Reactive.Linq;
 using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
-using DynamicData;
-using MsBox.Avalonia;
-using MsBox.Avalonia.Dto;
-using MsBox.Avalonia.Models;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using ReactiveUI;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using WPILibInstaller.Interfaces;
 using WPILibInstaller.Models;
 using WPILibInstaller.Utils;
-using static System.Net.WebRequestMethods;
 using File = System.IO.File;
+using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace WPILibInstaller.ViewModels
 {
-    public class InstallPageViewModel : PageViewModelBase
+    public partial class InstallPageViewModel : PageViewModelBase
     {
         private readonly IViewModelResolver viewModelResolver;
         private readonly IToInstallProvider toInstallProvider;
@@ -32,10 +20,15 @@ namespace WPILibInstaller.ViewModels
         private readonly IVsCodeInstallLocationProvider vsInstallProvider;
         private readonly IProgramWindow programWindow;
 
-        public int Progress { get; set; }
-        public string Text { get; set; } = "";
-        public int ProgressTotal { get; set; }
-        public string TextTotal { get; set; } = "";
+        [ObservableProperty]
+        private int _progress;
+
+        [ObservableProperty]
+        private string _text = "";
+        [ObservableProperty]
+        private int _progressTotal;
+        [ObservableProperty]
+        private string _textTotal = "";
 
         private async void CreateLinuxShortcut(String name, String frcYear, String wmClass, String iconName, CancellationToken token)
         {
@@ -83,31 +76,12 @@ StartupWMClass={wmClass}
             await File.WriteAllTextAsync(launcherFile, contents, token);
         }
 
-        public async Task UIUpdateTask(CancellationToken token)
-        {
-            while (!token.IsCancellationRequested)
-            {
-                this.RaisePropertyChanged(nameof(Progress));
-                this.RaisePropertyChanged(nameof(Text));
-                this.RaisePropertyChanged(nameof(ProgressTotal));
-                this.RaisePropertyChanged(nameof(TextTotal));
-                try
-                {
-                    await Task.Delay(100, token);
-                }
-                catch (OperationCanceledException)
-                {
-                    break;
-                }
-            }
-        }
-
         public bool succeeded = false;
 
         private readonly Task runInstallTask;
 
         public InstallPageViewModel(IViewModelResolver viewModelResolver, IToInstallProvider toInstallProvider, IConfigurationProvider configurationProvider, IVsCodeInstallLocationProvider vsInstallProvider,
-            IProgramWindow programWindow, ICatchableButtonFactory buttonFactory)
+            IProgramWindow programWindow)
             : base("", "")
         {
             this.viewModelResolver = viewModelResolver;
@@ -115,7 +89,6 @@ StartupWMClass={wmClass}
             this.configurationProvider = configurationProvider;
             this.vsInstallProvider = vsInstallProvider;
             this.programWindow = programWindow;
-            CancelInstall = buttonFactory.CreateCatchableButton(CancelInstallFunc);
             runInstallTask = installFunc();
 
             async Task installFunc()
@@ -133,9 +106,8 @@ StartupWMClass={wmClass}
 
         private CancellationTokenSource? source;
 
-        public ReactiveCommand<Unit, Unit> CancelInstall { get; }
-
-        public async Task CancelInstallFunc()
+        [RelayCommand]
+        public async Task CancelInstall()
         {
             source?.Cancel();
             await runInstallTask;
@@ -230,10 +202,6 @@ StartupWMClass={wmClass}
 
             await Task.Yield();
 
-            var updateSource = new CancellationTokenSource();
-
-            var updateTask = UIUpdateTask(updateSource.Token);
-
             try
             {
                 if (toInstallProvider.Model.InstallTools)
@@ -244,9 +212,6 @@ StartupWMClass={wmClass}
                 {
                     await InstallEverything(source.Token);
                 }
-
-                updateSource.Cancel();
-                await updateTask;
             }
             catch (OperationCanceledException)
             {
@@ -313,11 +278,22 @@ StartupWMClass={wmClass}
             return new ValueTask<string>(portableFolder);
         }
 
-        private static void SetIfNotSet(string key, object value, JObject settingsJson)
+        private static void SetIfNotSet(string key, object value, JsonObject settingsJson)
         {
             if (!settingsJson.ContainsKey(key))
             {
-                settingsJson[key] = JToken.FromObject(value);
+                if (value is string strValue)
+                {
+                    settingsJson[key] = strValue;
+                }
+                else if (value is bool boolValue)
+                {
+                    settingsJson[key] = boolValue;
+                }
+                else
+                {
+                    throw new ArgumentException($"Unsupported value type for JSON: {value.GetType()}", nameof(value));
+                }
             }
         }
 
@@ -352,10 +328,10 @@ StartupWMClass={wmClass}
 
             }
 
-            JObject settingsJson = new JObject();
+            JsonObject settingsJson = new JsonObject();
             if (File.Exists(settingsFile))
             {
-                settingsJson = (JObject)JsonConvert.DeserializeObject(await File.ReadAllTextAsync(settingsFile))!;
+                settingsJson = JsonNode.Parse(await File.ReadAllTextAsync(settingsFile))?.AsObject() ?? new JsonObject();
             }
 
             SetIfNotSet("java.jdt.ls.java.home", Path.Combine(homePath, "jdk"), settingsJson);
@@ -386,7 +362,7 @@ StartupWMClass={wmClass}
 
             if (!settingsJson.ContainsKey("terminal.integrated.env." + os))
             {
-                JObject terminalProps = new JObject
+                JsonObject terminalProps = new JsonObject
                 {
                     ["JAVA_HOME"] = Path.Combine(homePath, "jdk"),
                     ["PATH"] = Path.Combine(homePath, "jdk", "bin") + path_seperator + "${env:PATH}"
@@ -397,9 +373,9 @@ StartupWMClass={wmClass}
             }
             else
             {
-                JToken terminalEnv = settingsJson["terminal.integrated.env." + os]!;
+                JsonNode? terminalEnv = settingsJson["terminal.integrated.env." + os]!;
                 terminalEnv["JAVA_HOME"] = Path.Combine(homePath, "jdk");
-                JToken? path = terminalEnv["PATH"];
+                JsonNode? path = terminalEnv["PATH"];
                 if (path == null)
                 {
                     terminalEnv["PATH"] = Path.Combine(homePath, "jdk", "bin") + path_seperator + "${env:PATH}";
@@ -410,58 +386,62 @@ StartupWMClass={wmClass}
                     if (!path.ToString().Contains(binPath))
                     {
                         path = binPath + path_seperator + path;
-                        terminalEnv["PATH"] = path;
+                        terminalEnv["PATH"] = path.ToString();
                     }
                 }
             }
 
             if (settingsJson.ContainsKey("java.configuration.runtimes"))
             {
-                JArray javaConfigEnv = (JArray)settingsJson["java.configuration.runtimes"]!;
+                JsonArray? javaConfigEnv = settingsJson["java.configuration.runtimes"]?.AsArray();
                 Boolean javaFound = false;
-                foreach (JToken result in javaConfigEnv)
+                if (javaConfigEnv != null)
                 {
-                    JToken? name = result["name"];
-                    if (name != null)
+                    foreach (JsonNode? result in javaConfigEnv)
                     {
-                        if (name.ToString().Equals("JavaSE-17"))
+                        if (result == null) continue;
+                        JsonNode? name = result["name"];
+                        if (name != null)
                         {
-                            result["path"] = Path.Combine(homePath, "jdk");
-                            result["default"] = true;
-                            javaFound = true;
-                        }
-                        else
-                        {
-                            result["default"] = false;
+                            if (name.ToString().Equals("JavaSE-17"))
+                            {
+                                result["path"] = Path.Combine(homePath, "jdk");
+                                result["default"] = true;
+                                javaFound = true;
+                            }
+                            else
+                            {
+                                result["default"] = false;
+                            }
                         }
                     }
-                }
-                if (!javaFound)
-                {
-                    JObject javaConfigProp = new JObject
+                    if (!javaFound)
                     {
-                        ["name"] = "JavaSE-17",
-                        ["path"] = Path.Combine(homePath, "jdk"),
-                        ["default"] = true
-                    };
-                    javaConfigEnv.Add(javaConfigProp);
-                    settingsJson["java.configuration.runtimes"] = javaConfigEnv;
+                        JsonObject javaConfigProp = new JsonObject
+                        {
+                            ["name"] = "JavaSE-17",
+                            ["path"] = Path.Combine(homePath, "jdk"),
+                            ["default"] = true
+                        };
+                        javaConfigEnv.Add((JsonNode)javaConfigProp);
+                        settingsJson["java.configuration.runtimes"] = javaConfigEnv;
+                    }
                 }
             }
             else
             {
-                JArray javaConfigProps = new JArray();
-                JObject javaConfigProp = new JObject
+                JsonArray javaConfigProps = new JsonArray();
+                JsonObject javaConfigProp = new JsonObject
                 {
                     ["name"] = "JavaSE-17",
                     ["path"] = Path.Combine(homePath, "jdk"),
                     ["default"] = true
                 };
-                javaConfigProps.Add(javaConfigProp);
+                javaConfigProps.Add((JsonNode)javaConfigProp);
                 settingsJson["java.configuration.runtimes"] = javaConfigProps;
             }
 
-            var serialized = JsonConvert.SerializeObject(settingsJson, Formatting.Indented);
+            var serialized = settingsJson.ToJsonString(new JsonSerializerOptions { WriteIndented = true });
             await File.WriteAllTextAsync(settingsFile, serialized);
         }
 
@@ -940,7 +920,7 @@ StartupWMClass={wmClass}
                 shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(frcHomePath, "documentation", "rtd", "frc-docs-latest", "index.html"), $"Programs/{frcYear} WPILib Documentation", $"{frcYear} WPILib Documentation", wpilibIconLocation));
             }
 
-            var serializedData = JsonConvert.SerializeObject(shortcutData);
+            var serializedData = JsonSerializer.Serialize(shortcutData, SourceGenerationContext.Default.ShortcutData);
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {

@@ -3,7 +3,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="640" d:DesignHeight="400"
-             x:Class="WPILibInstaller.Views.FinalPage">
+             x:Class="WPILibInstaller.Views.FinalPage"
+             xmlns:vm="using:WPILibInstaller.ViewModels"
+             x:DataType="vm:FinalPageViewModel">
   <StackPanel VerticalAlignment="Center">
     <TextBlock FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center">
       Finished installing! Press finish to exit.

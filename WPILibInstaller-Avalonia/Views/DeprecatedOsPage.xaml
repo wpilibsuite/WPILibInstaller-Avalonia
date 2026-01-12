@@ -3,7 +3,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="640" d:DesignHeight="400"
-             x:Class="WPILibInstaller.Views.DeprecatedOsPage">
+             x:Class="WPILibInstaller.Views.DeprecatedOsPage"
+             xmlns:vm="using:WPILibInstaller.ViewModels"
+             x:DataType="vm:DeprecatedOsPageViewModel">
     <StackPanel HorizontalAlignment="Center"
               VerticalAlignment="Center">
         <TextBlock Text="You are using an out of date Operating System or Architecture"
@@ -27,7 +29,7 @@
                VerticalAlignment="Center" />
         <TextBlock
                HorizontalAlignment="Center"
-               VerticalAlignment="Center" 
-               Text="{Binding CurrentSystem, Mode=OneWay}" /> 
+               VerticalAlignment="Center"
+               Text="{Binding CurrentSystem, Mode=OneWay}" />
     </StackPanel>
 </UserControl>

@@ -1,44 +1,51 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Autofac;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
-using Avalonia.ReactiveUI;
 using WPILibInstaller.Interfaces;
 using WPILibInstaller.ViewModels;
 
 namespace WPILibInstaller.Views
 {
-    public class MainWindow : ReactiveWindow<MainWindowViewModel>, IProgramWindow, IViewModelResolver
+    public class MainWindow : Window, IProgramWindow, IViewModelResolver
     {
-        public IContainer Container { get; }
+        public IServiceProvider ServiceProvider { get; }
 
         public Window Window => this;
+
+        private readonly MainWindowViewModel? viewModel;
 
         public MainWindow()
         {
             // Initialize our DI
-            ContainerBuilder builder = new ContainerBuilder();
+            var services = new ServiceCollection();
 
-            builder.RegisterType<CanceledPageViewModel>().SingleInstance().AsSelf().AsImplementedInterfaces();
-            builder.RegisterType<ConfigurationPageViewModel>().SingleInstance().AsSelf().AsImplementedInterfaces();
-            builder.RegisterType<FailedPageViewModel>().SingleInstance().AsSelf().AsImplementedInterfaces();
-            builder.RegisterType<FinalPageViewModel>().SingleInstance().AsSelf().AsImplementedInterfaces();
-            builder.RegisterType<InstallPageViewModel>().SingleInstance().AsSelf().AsImplementedInterfaces();
-            builder.RegisterType<MainWindowViewModel>().SingleInstance().AsSelf().AsImplementedInterfaces();
-            builder.RegisterType<StartPageViewModel>().SingleInstance().AsSelf().AsImplementedInterfaces();
-            builder.RegisterType<VSCodePageViewModel>().SingleInstance().AsSelf().AsImplementedInterfaces();
-            builder.RegisterType<DeprecatedOsPageViewModel>().SingleInstance().AsSelf().AsImplementedInterfaces();
-            builder.RegisterInstance(this).AsImplementedInterfaces();
+            // Register ViewModels as singletons
+            services.AddSingleton<CanceledPageViewModel>();
+            services.AddSingleton<ConfigurationPageViewModel>();
+            services.AddSingleton<FailedPageViewModel>();
+            services.AddSingleton<FinalPageViewModel>();
+            services.AddSingleton<InstallPageViewModel>();
+            services.AddSingleton<MainWindowViewModel>();
+            services.AddSingleton<StartPageViewModel>();
+            services.AddSingleton<VSCodePageViewModel>();
+            services.AddSingleton<DeprecatedOsPageViewModel>();
 
-            Container = builder.Build();
+            // Register this window as interfaces
+            services.AddSingleton<IProgramWindow>(this);
+            services.AddSingleton<IViewModelResolver>(this);
+            services.AddSingleton<IMainWindowViewModel>(sp => sp.GetRequiredService<MainWindowViewModel>());
+            services.AddSingleton<IConfigurationProvider>(sp => sp.GetRequiredService<StartPageViewModel>());
+            services.AddSingleton<IToInstallProvider>(sp => sp.GetRequiredService<ConfigurationPageViewModel>());
+            services.AddSingleton<IVsCodeInstallLocationProvider>(sp => sp.GetRequiredService<VSCodePageViewModel>());
 
-            ViewModel = Container.Resolve<MainWindowViewModel>();
-            DataContext = ViewModel;
-            ViewModel.Initialize();
+            ServiceProvider = services.BuildServiceProvider();
 
             InitializeComponent();
+
+            viewModel = ServiceProvider.GetRequiredService<MainWindowViewModel>();
+            DataContext = viewModel;
+            viewModel.Initialize();
         }
 
         public void CloseProgram()
@@ -95,12 +102,12 @@ namespace WPILibInstaller.Views
 
         public T Resolve<T>() where T : notnull, PageViewModelBase
         {
-            return Container.Resolve<T>();
+            return ServiceProvider.GetRequiredService<T>();
         }
 
         public IMainWindowViewModel ResolveMainWindow()
         {
-            return ViewModel!;
+            return viewModel!;
         }
     }
 }

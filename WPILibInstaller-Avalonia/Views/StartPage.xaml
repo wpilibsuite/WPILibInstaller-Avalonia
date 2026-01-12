@@ -3,7 +3,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="640" d:DesignHeight="400"
-             x:Class="WPILibInstaller.Views.StartPage">
+             x:Class="WPILibInstaller.Views.StartPage"
+             xmlns:vm="using:WPILibInstaller.ViewModels"
+             x:DataType="vm:StartPageViewModel">
   <StackPanel HorizontalAlignment="Center"
               VerticalAlignment="Center">
     <Image Source="resm:WPILibInstaller.Assets.wpilib-generic-75.png?assembly=WPILibInstaller"

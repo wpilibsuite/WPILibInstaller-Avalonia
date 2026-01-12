@@ -1,5 +1,4 @@
 ﻿using Avalonia;
-using Avalonia.ReactiveUI;
 
 namespace WPILibInstaller
 {
@@ -16,8 +15,7 @@ namespace WPILibInstaller
         {
             return AppBuilder.Configure<App>()
                 .UsePlatformDetect()
-                .LogToTrace()
-                .UseReactiveUI();
+                .LogToTrace();
         }
     }
 }

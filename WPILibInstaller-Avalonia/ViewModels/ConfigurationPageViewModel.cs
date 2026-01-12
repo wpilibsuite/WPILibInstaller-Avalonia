@@ -1,14 +1,12 @@
-﻿using System.Reactive;
-using System.Reactive.Linq;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using ReactiveUI;
+using CommunityToolkit.Mvvm.Input;
 using WPILibInstaller.Interfaces;
 using WPILibInstaller.Models;
 
 namespace WPILibInstaller.ViewModels
 {
-    public class ConfigurationPageViewModel : PageViewModelBase, IToInstallProvider
+    public partial class ConfigurationPageViewModel : PageViewModelBase, IToInstallProvider
     {
         private readonly IViewModelResolver viewModelResolver;
 
@@ -18,24 +16,21 @@ namespace WPILibInstaller.ViewModels
 
         public bool CanRunAsAdmin => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
-        public ConfigurationPageViewModel(IViewModelResolver viewModelResolver, ICatchableButtonFactory buttonFactory)
+        public ConfigurationPageViewModel(IViewModelResolver viewModelResolver)
             : base("Install", "Back")
         {
             this.viewModelResolver = viewModelResolver;
-            InstallLocalUser = buttonFactory.CreateCatchableButton(InstallLocalUserFunc);
-            InstallAdmin = buttonFactory.CreateCatchableButton(InstallAdminFunc);
         }
 
-        public ReactiveCommand<Unit, Unit> InstallLocalUser { get; }
-        public ReactiveCommand<Unit, Unit> InstallAdmin { get; }
-
-        private async Task InstallLocalUserFunc()
+        [RelayCommand]
+        public async Task InstallLocalUser()
         {
             Model.InstallAsAdmin = false;
             await viewModelResolver.ResolveMainWindow().ExecuteGoNext();
         }
 
-        private async Task InstallAdminFunc()
+        [RelayCommand]
+        public async Task InstallAdmin()
         {
             Model.InstallAsAdmin = true;
             await viewModelResolver.ResolveMainWindow().ExecuteGoNext();
