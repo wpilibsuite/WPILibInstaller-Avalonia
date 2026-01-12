@@ -3,6 +3,8 @@ import org.gradle.internal.os.OperatingSystem
 
 evaluationDependsOn(':apps:MavenMetaDataFixer')
 
+def execOperations = objects.newInstance(ExecOperationsProvider).execOperations
+
 def metaDataScriptBatch = file("$rootDir/files/MavenMetaDataFixer.bat")
 def metaDataScriptSh = file("$rootDir/files/MavenMetaDataFixer.sh")
 def toolsUpdaterOutputDir = file("$buildDir/toolsUpdater")
@@ -12,6 +14,17 @@ def toolsUpdaterTask = tasks.register('toolsUpdater', Exec) {
   workingDir = "$projectDir/apps/ToolsUpdater"
 
   commandLine 'dotnet', 'publish', '-c', 'Release', '-r', dotnetRuntime, "/p:Version=$pubVersion", "-o", toolsUpdaterOutputDir
+
+  doLast {
+    // We can sign the app because we have a Developer ID.
+    if (project.hasProperty("developerID")) {
+        println "Received a Developer ID -- signing the tools binary..."
+        String identity = project.property("developerID")
+        execOperations.exec {
+            commandLine "sh", "-c", "automation/macos_codesign.sh ${identity} $toolsUpdaterOutputDir/ToolsUpdater"
+        }
+    }
+  }
 }
 
 ext.msBuildExtraSetup = { AbstractArchiveTask zip->
