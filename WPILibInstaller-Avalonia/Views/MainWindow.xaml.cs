@@ -1,7 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
+using Microsoft.Extensions.DependencyInjection;
 using WPILibInstaller.Interfaces;
 using WPILibInstaller.ViewModels;
 
