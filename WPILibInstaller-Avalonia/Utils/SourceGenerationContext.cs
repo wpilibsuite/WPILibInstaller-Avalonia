@@ -5,7 +5,6 @@ namespace WPILibInstaller.Utils;
 
 [JsonSourceGenerationOptions(
     WriteIndented = false,
-    PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,
     DefaultIgnoreCondition = JsonIgnoreCondition.Never,
     UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow)]
 [JsonSerializable(typeof(VsCodeConfig))]

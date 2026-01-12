@@ -57,7 +57,7 @@ namespace WPILibInstaller.Utils
                     continue;
                 }
 
-                await _destinationStream.WriteAsync(buffer);
+                await _destinationStream.WriteAsync(buffer.AsMemory(0, bytesRead));
 
                 totalBytesRead += bytesRead;
                 readCount += 1;

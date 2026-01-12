@@ -4,7 +4,7 @@ using DiscUtils.Iso9660;
 
 Option<FileInfo> InputOption = new(name: "--input");
 Option<FileInfo> OutputOption = new(name: "--output");
-Option<string> VersionOption = new(name: "--version");
+Option<string> VersionOption = new(name: "--installerversion");
 
 RootCommand rootCommand = new("ISO Creator for WPILib Installer")
 {
@@ -19,7 +19,7 @@ rootCommand.SetAction(parseResult =>
     FileInfo outputFile = parseResult.GetRequiredValue(OutputOption);
     string version = parseResult.GetRequiredValue(VersionOption);
 
-    if (!inputFile.Exists || (inputFile.Attributes & FileAttributes.Directory) == 0)
+    if (!Directory.Exists(inputFile.FullName) || (inputFile.Attributes & FileAttributes.Directory) == 0)
     {
         Console.WriteLine("Input must be a directory and must exist");
         return 1;
@@ -43,4 +43,4 @@ rootCommand.SetAction(parseResult =>
 });
 
 ParseResult parseResult = rootCommand.Parse(args);
-return await parseResult.InvokeAsync();
+return parseResult.Invoke();

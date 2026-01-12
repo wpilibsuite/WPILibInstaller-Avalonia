@@ -2,7 +2,7 @@
 
 namespace ToolsUpdater;
 
-[JsonSourceGenerationOptions(WriteIndented = true)]
+[JsonSourceGenerationOptions(WriteIndented = true, PropertyNameCaseInsensitive = true)]
 [JsonSerializable(typeof(ToolConfig[]))]
 internal sealed partial class ToolConfigContext : JsonSerializerContext
 {

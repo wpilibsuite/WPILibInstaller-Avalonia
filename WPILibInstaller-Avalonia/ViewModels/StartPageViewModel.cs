@@ -32,17 +32,20 @@ namespace WPILibInstaller.ViewModels
             bool foundResources = false;
             bool foundSupport = false;
 
+            Task? selectResources = null;
+            Task? selectSupport = null;
+
             // Enumerate all files in base dir
             foreach (var file in Directory.EnumerateFiles(baseDir))
             {
                 if (file.EndsWith($"{verString}-resources.zip", StringComparison.Ordinal))
                 {
-                    _ = SelectResourceFilesWithFile(file);
+                    selectResources = SelectResourceFilesWithFile(file);
                     foundResources = true;
                 }
                 else if (file.EndsWith($"{verString}-artifacts.{extension}", StringComparison.Ordinal))
                 {
-                    _ = SelectSupportFilesWithFile(file);
+                    selectSupport = SelectSupportFilesWithFile(file);
                     foundSupport = true;
                 }
             }
@@ -56,12 +59,12 @@ namespace WPILibInstaller.ViewModels
                 {
                     if (!foundResources && file.EndsWith($"{verString}-resources.zip", StringComparison.Ordinal))
                     {
-                        _ = SelectResourceFilesWithFile(file);
+                        selectResources = SelectResourceFilesWithFile(file);
                         foundResources = true;
                     }
                     else if (!foundSupport && file.EndsWith($"{verString}-artifacts.{extension}", StringComparison.Ordinal))
                     {
-                        _ = SelectSupportFilesWithFile(file);
+                        selectSupport = SelectSupportFilesWithFile(file);
                         foundSupport = true;
                     }
                 }
@@ -76,16 +79,35 @@ namespace WPILibInstaller.ViewModels
                 {
                     if (!foundResources && file.EndsWith($"{verString}-resources.zip", StringComparison.Ordinal))
                     {
-                        _ = SelectResourceFilesWithFile(file);
+                        selectResources = SelectResourceFilesWithFile(file);
                         foundResources = true;
                     }
                     else if (!foundSupport && file.EndsWith($"{verString}-artifacts.{extension}", StringComparison.Ordinal))
                     {
-                        _ = SelectSupportFilesWithFile(file);
+                        selectSupport = SelectSupportFilesWithFile(file);
                         foundSupport = true;
                     }
                 }
             }
+
+            List<Task> awaitingTasks = [];
+            if (selectResources != null)
+            {
+                awaitingTasks.Add(selectResources);
+            }
+            if (selectSupport != null)
+            {
+                awaitingTasks.Add(selectSupport);
+            }
+
+            _ = Task.WhenAll(awaitingTasks).ContinueWith(t =>
+            {
+                if (t.IsFaulted)
+                {
+                    Console.WriteLine("Error during initialization: " + t.Exception);
+                    viewModelResolver.ResolveMainWindow().HandleException(t.Exception);
+                }
+            });
         }
 
         public StartPageViewModel(IMainWindowViewModel mainRefresher, IProgramWindow mainWindow, IViewModelResolver viewModelResolver)
