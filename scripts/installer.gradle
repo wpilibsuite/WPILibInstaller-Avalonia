@@ -3,6 +3,10 @@ import org.gradle.internal.os.OperatingSystem
 
 evaluationDependsOn(':apps:MavenMetaDataFixer')
 
+interface ExecOperationsProvider {
+   @javax.inject.Inject
+   ExecOperations getExecOperations()
+}
 def execOperations = objects.newInstance(ExecOperationsProvider).execOperations
 
 def metaDataScriptBatch = file("$rootDir/files/MavenMetaDataFixer.bat")
