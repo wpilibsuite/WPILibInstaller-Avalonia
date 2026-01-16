@@ -1,4 +1,4 @@
-using Avalonia.Media.Fonts;
+﻿using Avalonia.Media.Fonts;
 
 namespace WPILibInstaller.Fonts;
 
