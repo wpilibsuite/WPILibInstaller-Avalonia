@@ -10,6 +10,10 @@ namespace WPILibInstaller
     {
         public override void Initialize()
         {
+#if DEBUG
+            Console.WriteLine("Debug build - enabling developer tools");
+            this.AttachDeveloperTools();
+#endif
             // Register our view model locator
             // TODO view model locator
 

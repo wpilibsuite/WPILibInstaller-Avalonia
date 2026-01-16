@@ -7,7 +7,7 @@ using WPILibInstaller.ViewModels;
 
 namespace WPILibInstaller.Views
 {
-    public class MainWindow : Window, IProgramWindow, IViewModelResolver
+    public partial class MainWindow : Window, IProgramWindow, IViewModelResolver
     {
         public IServiceProvider ServiceProvider { get; }
 

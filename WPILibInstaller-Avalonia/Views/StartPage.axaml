@@ -8,7 +8,7 @@
              x:DataType="vm:StartPageViewModel">
   <StackPanel HorizontalAlignment="Center"
               VerticalAlignment="Center">
-    <Image Source="resm:WPILibInstaller.Assets.wpilib-generic-75.png?assembly=WPILibInstaller"
+    <Image Source="avares://WPILibInstaller/Assets/wpilib-generic-75.png"
            Stretch="None"
            Margin="40"/>
     <TextBlock Text="Welcome to the WPILib Installer!"

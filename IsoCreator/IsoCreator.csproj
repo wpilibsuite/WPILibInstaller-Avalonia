@@ -5,8 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Discutils" Version="0.16.13" />
-    <PackageReference Include="System.CommandLine" Version="2.0.0" />
+    <PackageReference Include="Discutils" />
+    <PackageReference Include="System.CommandLine" />
   </ItemGroup>
 
 </Project>
