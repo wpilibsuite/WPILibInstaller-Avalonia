@@ -1,10 +1,10 @@
-﻿using Avalonia.Markup.Xaml;
-using Avalonia.ReactiveUI;
+﻿using Avalonia.Controls;
+using Avalonia.Markup.Xaml;
 using WPILibInstaller.ViewModels;
 
 namespace WPILibInstaller.Views
 {
-    public class FailedPage : ReactiveUserControl<FailedPageViewModel>
+    public partial class FailedPage : UserControl
     {
         public FailedPage()
         {

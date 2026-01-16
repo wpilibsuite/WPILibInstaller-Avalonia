@@ -2,8 +2,6 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using ReactiveUI;
-using Splat;
 using WPILibInstaller.Views;
 
 namespace WPILibInstaller
@@ -13,7 +11,7 @@ namespace WPILibInstaller
         public override void Initialize()
         {
             // Register our view model locator
-            Locator.CurrentMutable.RegisterViewsForViewModels(Assembly.GetExecutingAssembly());
+            // TODO view model locator
 
             AvaloniaXamlLoader.Load(this);
         }

@@ -1,10 +1,10 @@
-﻿using Avalonia.Markup.Xaml;
-using Avalonia.ReactiveUI;
+﻿using Avalonia.Controls;
+using Avalonia.Markup.Xaml;
 using WPILibInstaller.ViewModels;
 
 namespace WPILibInstaller.Views
 {
-    public class InstallPage : ReactiveUserControl<InstallPageViewModel>
+    public partial class InstallPage : UserControl
     {
         public InstallPage()
         {

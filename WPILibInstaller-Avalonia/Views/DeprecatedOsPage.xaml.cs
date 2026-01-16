@@ -1,11 +1,11 @@
 ﻿using System;
+using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
-using Avalonia.ReactiveUI;
 using WPILibInstaller.ViewModels;
 
 namespace WPILibInstaller.Views
 {
-    public class DeprecatedOsPage : ReactiveUserControl<DeprecatedOsPageViewModel>
+    public partial class DeprecatedOsPage : UserControl
     {
         public DeprecatedOsPage()
         {
