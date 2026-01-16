@@ -317,7 +317,7 @@ namespace WPILibInstaller.ViewModels
                 }
 
                 // Make sure they match.
-                if (!s.Equals(StringComparison.OrdinalIgnoreCase))
+                if (!s.Equals(hash, StringComparison.OrdinalIgnoreCase))
                 {
                     viewModelResolver.ResolveMainWindow().HandleException(new InvalidDataException("The artifacts file was damaged.\nThis is either caused by a bad download,\nor on macOS you originally download the wrong dmg\nand its still mounted. Make sure to eject\nall dmg's and try again (And maybe reboot)."));
                     return false;
