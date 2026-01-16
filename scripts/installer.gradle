@@ -21,7 +21,7 @@ def toolsUpdaterTask = tasks.register('toolsUpdater', Exec) {
 
   doLast {
     // We can sign the app because we have a Developer ID.
-    if (project.hasProperty("developerID")) {
+    if (project.hasProperty("developerID") && (project.hasProperty('macBuild') || project.hasProperty('macBuildArm'))) {
         println "Received a Developer ID -- signing the tools binary..."
         String identity = project.property("developerID")
         execOperations.exec {
