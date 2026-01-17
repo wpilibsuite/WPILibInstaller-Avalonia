@@ -1,4 +1,5 @@
 ﻿using Avalonia;
+using WPILibInstaller.Fonts;
 
 namespace WPILibInstaller
 {
@@ -15,6 +16,10 @@ namespace WPILibInstaller
         {
             return AppBuilder.Configure<App>()
                 .UsePlatformDetect()
+                .ConfigureFonts(fonts =>
+                {
+                    fonts.AddFontCollection(new RobotoFontCollection());
+                })
                 .LogToTrace();
         }
     }
