@@ -9,7 +9,7 @@ buildscript {
 plugins {
     id "java"
     id 'cpp'
-    id "edu.wpi.first.GradleRIO2027"
+    id "org.wpilib.GradleRIO"
 }
 
 deploy {
@@ -75,11 +75,12 @@ dependencies {
     // simulation wpi.deps.sim.ws_client(wpi.platforms.desktop, true)
 
     // commands
-    implementation "edu.wpi.first.wpilibNewCommands:wpilibNewCommands-java:${wpi.versions.wpilibVersion.get()}"
-    implementation "edu.wpi.first.xrpVendordep:xrpVendordep-java:${wpi.versions.wpilibVersion.get()}"
-    implementation "edu.wpi.first.romiVendordep:romiVendordep-java:${wpi.versions.wpilibVersion.get()}"
+    implementation "org.wpilib.commandsv2:commandsv2-java:${wpi.versions.wpilibVersion.get()}"
+    implementation "org.wpilib:commands3-java:${wpi.versions.wpilibVersion.get()}"
+    implementation "org.wpilib.xrpVendordep:xrpVendordep-java:${wpi.versions.wpilibVersion.get()}"
+    implementation "org.wpilib.romiVendordep:romiVendordep-java:${wpi.versions.wpilibVersion.get()}"
     if (project.ext.buildClassifier == 'Windows') {
-        implementation "edu.wpi.first.msvc:runtime:${wpi.versions.wpilibVersion.get()}:x64@zip"
+        implementation "org.wpilib.msvc:runtime:${wpi.versions.wpilibVersion.get()}:x64@zip"
     }
 }
 
@@ -107,9 +108,9 @@ def wpilibFoundVersion = wpi.versions.wpilibVersion.get()
 
 nativeUtils {
     nativeDependencyContainer {
-        wpilibnewcommands(getNativeDependencyTypeClass('WPISharedMavenDependency')) {
-            groupId = "edu.wpi.first.wpilibNewCommands"
-            artifactId = "wpilibNewCommands-cpp"
+        wpilibcommandsv2(getNativeDependencyTypeClass('WPISharedMavenDependency')) {
+            groupId = "org.wpilib.commandsv2"
+            artifactId = "commandsv2-cpp"
             headerClassifier = "headers"
             sourceClassifier = "sources"
             ext = "zip"
@@ -122,7 +123,7 @@ nativeUtils {
 nativeUtils {
     nativeDependencyContainer {
         xrpvendordep(getNativeDependencyTypeClass('WPISharedMavenDependency')) {
-            groupId = "edu.wpi.first.xrpVendordep"
+            groupId = "org.wpilib.xrpVendordep"
             artifactId = "xrpVendordep-cpp"
             headerClassifier = "headers"
             sourceClassifier = "sources"
@@ -136,7 +137,7 @@ nativeUtils {
 nativeUtils {
     nativeDependencyContainer {
         romivendordep(getNativeDependencyTypeClass('WPISharedMavenDependency')) {
-            groupId = "edu.wpi.first.romiVendordep"
+            groupId = "org.wpilib.romiVendordep"
             artifactId = "romiVendordep-cpp"
             headerClassifier = "headers"
             sourceClassifier = "sources"
@@ -160,7 +161,7 @@ model {
             wpi.cpp.deps.wpilib(it)
             wpi.cpp.deps.googleTest(it)
 
-            wpi.cpp.deps.useLibrary(it, 'wpilibnewcommands')
+            wpi.cpp.deps.useLibrary(it, 'wpilibcommandsv2')
             wpi.cpp.deps.useLibrary(it, 'xrpvendordep')
             wpi.cpp.deps.useLibrary(it, 'romivendordep')
         }
