@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.IO.Compression;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Security.Cryptography;
@@ -397,6 +396,11 @@ namespace WPILibInstaller.ViewModels
                 };
 
                 await client.StartDownload();
+
+                if (outputStream.Length == 0)
+                {
+                    throw new Exception("0 bytes downloaded");
+                }
             }
             catch (Exception ex)
             {
