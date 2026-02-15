@@ -8,7 +8,7 @@ def downloadUrlWindows = baseUrl + fileNameWindows
 def fileNameWindowsArm = "QDash-Windows-$qdashGitTag-arm64-msvc-standard.zip"
 def downloadUrlWindowsArm = baseUrl + fileNameWindows
 
-def fileNameMacArm = "QDash-macOS-$qdashGitTag.tar.gz"
+def fileNameMacArm = "QDash-macOS-${qdashGitTag}.tar.gz"
 def downloadUrlMacArm = baseUrl + fileNameMacArm
 
 def fileNameLinux = "QDash-Linux-$qdashGitTag-amd64-gcc-standard.AppImage"
