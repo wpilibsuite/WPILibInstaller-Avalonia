@@ -47,8 +47,8 @@ def downloadTaskLinux = tasks.register('downloadQDashLinux', Download) {
   overwrite true
 }
 
-def downloadTaskLinuxArm64 = tasks.register('downloadQDashLinuxArm64', Download) {
-  src downloadUrlLinuxArm64
+def downloadTaskLinuxArm = tasks.register('downloadQDashLinuxArm', Download) {
+  src downloadUrlLinuxArm
   def fileName = file(src.file).name
   dest "$buildDir/downloads/$fileName"
   overwrite true
@@ -95,11 +95,11 @@ ext.qdashZipSetup = { AbstractArchiveTask zip->
       includeEmptyDirs = false
     }
   } else if (project.hasProperty('linuxBuildArm64')) {
-    zip.dependsOn downloadTaskLinuxArm64
+    zip.dependsOn downloadTaskLinuxArm
 
-    zip.inputs.files downloadTaskLinuxArm64.get().outputFiles
+    zip.inputs.files downloadTaskLinuxArm.get().outputFiles
 
-    zip.from(project.zipTree(downloadTaskLinuxArm64.get().outputFiles.first())) {
+    zip.from(project.zipTree(downloadTaskLinuxArm.get().outputFiles.first())) {
       into '/qdash'
       includeEmptyDirs = false
     }
