@@ -1,0 +1,136 @@
+apply from: 'scripts/versions.gradle'
+
+def baseUrl = "https://git.crueter.xyz/QFRC/QDash/releases/download/$qdashGitTag/"
+
+def fileNameWindows = "QDash-Windows-$qdashGitTag-amd64-msvc-standard.zip"
+def downloadUrlWindows = baseUrl + fileNameWindows
+
+def fileNameWindowsArm = "QDash-Windows-$qdashGitTag-arm64-msvc-standard.zip"
+def downloadUrlWindowsArm = baseUrl + fileNameWindows
+
+def fileNameMacArm = "QDash-macOS-$qdashGitTag.tar.gz"
+def downloadUrlMacArm = baseUrl + fileNameMacArm
+
+def fileNameLinux = "QDash-Linux-$qdashGitTag-amd64-gcc-standard.AppImage"
+def downloadUrlLinux = baseUrl + fileNameLinux
+
+def fileNameLinuxArm = "QDash-Linux-$qdashGitTag-aarch64-gcc-standard.AppImage"
+def downloadUrlLinuxArm = baseUrl + fileNameLinux
+
+apply plugin: 'de.undercouch.download'
+
+def downloadTaskWindows = tasks.register('downloadQDashWindows', Download) {
+  src downloadUrlWindows
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite true
+}
+
+def downloadTaskWindowsArm = tasks.register('downloadQDashWindowsArm', Download) {
+  src downloadUrlWindowsArm
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite true
+}
+
+def downloadTaskMacArm = tasks.register('downloadQDashMacArm', Download) {
+  src downloadUrlMacArm
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite true
+}
+
+def downloadTaskLinux = tasks.register('downloadQDashLinux', Download) {
+  src downloadUrlLinux
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite true
+}
+
+def downloadTaskLinuxArm64 = tasks.register('downloadQDashLinuxArm64', Download) {
+  src downloadUrlLinuxArm64
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite true
+}
+
+def qdashConfigFile = file("$buildDir/qdashConfig.json")
+
+def qdashConfigFileTask = tasks.register('qdashConfigFile') {
+  it.outputs.file qdashConfigFile
+
+  doLast {
+    def config = [:]
+    config['folder'] = 'qdash'
+    config['zipFile'] = 'qdash.zip'
+
+    def gbuilder = getGsonBuilder()
+
+    gbuilder.setPrettyPrinting()
+    def json = gbuilder.create().toJson(config)
+
+    qdashConfigFile.parentFile.mkdirs()
+
+    qdashConfigFile.text = json
+  }
+}
+
+ext.qdashConfigFileSetup = { AbstractArchiveTask zip->
+  zip.dependsOn qdashConfigFileTask
+  zip.inputs.file qdashConfigFile
+
+  zip.from(qdashConfigFile) {
+        rename { 'qdashConfig.json' }
+  }
+}
+
+ext.qdashZipSetup = { AbstractArchiveTask zip->
+  if (project.hasProperty('linuxBuild')) {
+    zip.dependsOn downloadTaskLinux
+
+    zip.inputs.files downloadTaskLinux.get().outputFiles
+
+    zip.from(project.zipTree(downloadTaskLinux.get().outputFiles.first())) {
+      into '/qdash'
+      includeEmptyDirs = false
+    }
+  } else if (project.hasProperty('linuxBuildArm64')) {
+    zip.dependsOn downloadTaskLinuxArm64
+
+    zip.inputs.files downloadTaskLinuxArm64.get().outputFiles
+
+    zip.from(project.zipTree(downloadTaskLinuxArm64.get().outputFiles.first())) {
+      into '/qdash'
+      includeEmptyDirs = false
+    }
+  } else if (project.hasProperty('macBuildArm')) {
+    zip.dependsOn downloadTaskMacArm
+
+    zip.inputs.files downloadTaskMacArm.get().outputFiles
+
+    // Cannot extract, otherwise breaks mac
+    zip.from(downloadTaskMacArm.get().outputFiles.first()) {
+      into '/qdash'
+    }
+  // TODO: Windows/ARM builds aren't supported yet...
+  } else if (project.hasProperty('windowsBuildArm')) {
+    zip.dependsOn downloadTaskWindowsArm
+
+    zip.inputs.files downloadTaskWindowsArm.get().outputFiles
+
+    zip.from(project.zipTree(downloadTaskWindowsArm.get().outputFiles.first())) {
+      into '/qdash'
+      includeEmptyDirs = false
+    }
+  } else {
+    zip.dependsOn downloadTaskWindows
+
+    zip.inputs.files downloadTaskWindows.get().outputFiles
+
+    zip.from(project.zipTree(downloadTaskWindows.get().outputFiles.first())) {
+      into '/qdash'
+      includeEmptyDirs = false
+    }
+  }
+}
+

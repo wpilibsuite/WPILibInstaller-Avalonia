@@ -150,6 +150,36 @@ public class Program {
     }
   }
 
+  private static void installQDash(String toolsPath) {
+    // TODO: QDash uses a versioned file for macOS...
+    if (SystemUtils.IS_OS_MAC) {
+      String archiveFileName = "QDash-macOS-2026.1.0.tar.gz";
+      String qdashFolder = Paths.get(new File(toolsPath).getParent(), "qdash").toString();
+      Path archivePath = Paths.get(qdashFolder, archiveFileName);
+
+      try {
+        Runtime.getRuntime().exec(new String[] {
+          "tar", "-xzf", archivePath.toString(), "-C", qdashFolder
+        }).waitFor();
+
+      } catch (IOException | InterruptedException e) {
+        System.out.println(e.toString());
+        e.printStackTrace();
+      }
+    }
+    try {
+      if (SystemUtils.IS_OS_WINDOWS) {
+        Files.copy(Paths.get(toolsPath, "processstarter.exe"), Paths.get(toolsPath, "QDash.exe"), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
+      // TODO: AppImage?
+      } else {
+        Files.copy(Paths.get(toolsPath, "processstarter"), Paths.get(toolsPath, "QDash"), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
+      }
+    } catch (IOException e) {
+        System.out.println(e.toString());
+        e.printStackTrace();
+    }
+  }
+
   private static void installUtility(String toolsPath) {
     if (SystemUtils.IS_OS_MAC) {
       String archiveFileName = "wpilibutility-mac.tar.gz";
@@ -184,6 +214,8 @@ public class Program {
           installAdvantageScope(toolsPath);
         } else if (tool.name.equals("Elastic")) {
           installElastic(toolsPath);
+        } else if (tool.name.equals("QDash")) {
+          installQDash(toolsPath);
         } else if (tool.name.equals("Utility")) {
           installUtility(toolsPath);
         } else if (tool.artifact != null) {
