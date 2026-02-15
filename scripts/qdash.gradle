@@ -90,18 +90,16 @@ ext.qdashZipSetup = { AbstractArchiveTask zip->
 
     zip.inputs.files downloadTaskLinux.get().outputFiles
 
-    zip.from(project.zipTree(downloadTaskLinux.get().outputFiles.first())) {
+    zip.from(downloadTaskLinux.get().outputFiles.first()) {
       into '/qdash'
-      includeEmptyDirs = false
     }
   } else if (project.hasProperty('linuxBuildArm64')) {
     zip.dependsOn downloadTaskLinuxArm
 
     zip.inputs.files downloadTaskLinuxArm.get().outputFiles
 
-    zip.from(project.zipTree(downloadTaskLinuxArm.get().outputFiles.first())) {
+    zip.from(downloadTaskLinuxArm.get().outputFiles.first()) {
       into '/qdash'
-      includeEmptyDirs = false
     }
   } else if (project.hasProperty('macBuildArm')) {
     zip.dependsOn downloadTaskMacArm
