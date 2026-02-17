@@ -405,7 +405,7 @@ StartupWMClass={wmClass}
                         JsonNode? name = result["name"];
                         if (name != null)
                         {
-                            if (name.ToString().Equals("JavaSE-17", StringComparison.OrdinalIgnoreCase))
+                            if (name.ToString().Equals("JavaSE-21", StringComparison.OrdinalIgnoreCase))
                             {
                                 result["path"] = Path.Combine(homePath, "jdk");
                                 result["default"] = true;
@@ -421,7 +421,7 @@ StartupWMClass={wmClass}
                     {
                         JsonObject javaConfigProp = new JsonObject
                         {
-                            ["name"] = "JavaSE-17",
+                            ["name"] = "JavaSE-21",
                             ["path"] = Path.Combine(homePath, "jdk"),
                             ["default"] = true
                         };
