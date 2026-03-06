@@ -18,6 +18,8 @@ namespace WPILibInstaller.Interfaces
 
         ElasticConfig ElasticConfig { get; }
 
+        QDashConfig QDashConfig { get; }
+
         VsCodeConfig VsCodeConfig { get; }
 
         string InstallDirectory { get; }

@@ -110,6 +110,7 @@ apply from: 'scripts/maven.gradle'
 
 apply from: 'scripts/advantagescope.gradle'
 apply from: 'scripts/elastic.gradle'
+apply from: 'scripts/qdash.gradle'
 
 // Tools must happen after maven
 apply from: 'scripts/tools.gradle'
@@ -229,6 +230,7 @@ def generateFullResourcesTask = tasks.register('generateFullResources', project.
 
     advantageScopeZipSetup(it)
     elasticZipSetup(it)
+    qdashZipSetup(it)
 
     if (OperatingSystem.current().isWindows()) {
         def task = it
@@ -334,6 +336,7 @@ def generateConfigFiles = tasks.register('generateCommonResources', Zip) {
 
     advantageScopeConfigFileSetup(zip)
     elasticConfigFileSetup(zip)
+    qdashConfigFileSetup(zip)
 
     vscodeConfigZipSetup(zip)
 }

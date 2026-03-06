@@ -50,6 +50,11 @@ def toolsJsonTask = tasks.register('toolsJson', Task) {
     elasticItem['version'] = elasticGitTag
     config << elasticItem
 
+    def qdashItem = [:]
+    qdashItem['name'] = "QDash"
+    qdashItem['version'] = qdashGitTag
+    config << qdashItem
+
     def utilityItem = [:]
     utilityItem['name'] = "Utility"
     utilityItem['version'] = wpilibVersion
