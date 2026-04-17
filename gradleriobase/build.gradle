@@ -19,14 +19,14 @@ deploy {
             debug = false
 
             artifacts {
-                frcJava(getArtifactTypeClass('FRCJavaArtifact')) {
+                wpilibJava(getArtifactTypeClass('WPILibJavaArtifact')) {
                 }
 
-                frcCpp(getArtifactTypeClass('FRCNativeArtifact')) {
+                wpilibCpp(getArtifactTypeClass('WPILibNativeArtifact')) {
                 }
 
                 // Static files artifact
-                frcStaticFileDeploy(getArtifactTypeClass('FileTreeArtifact')) {
+                wpilibStaticFileDeploy(getArtifactTypeClass('FileTreeArtifact')) {
                     files = project.fileTree('src/main/deploy')
                     directory = '/home/lvuser/deploy'
                 }
@@ -35,8 +35,8 @@ deploy {
     }
 }
 
-def deployJavaArtifact = deploy.targets.systemcore.artifacts.frcJava
-def deployCppArtifact = deploy.targets.systemcore.artifacts.frcCpp
+def deployJavaArtifact = deploy.targets.systemcore.artifacts.wpilibJava
+def deployCppArtifact = deploy.targets.systemcore.artifacts.wpilibCpp
 
 wpi.java.debugJni = false
 
@@ -147,7 +147,7 @@ nativeUtils {
 
 model {
     components {
-        frcUserProgram(NativeExecutableSpec) {
+        wpilibUserProgram(NativeExecutableSpec) {
             targetPlatform wpi.platforms.systemcore
             targetPlatform wpi.platforms.desktop
 
