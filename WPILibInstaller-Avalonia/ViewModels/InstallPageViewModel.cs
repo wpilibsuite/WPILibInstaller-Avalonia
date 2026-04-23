@@ -431,7 +431,7 @@ StartupWMClass={wmClass}
                         JsonNode? name = result["name"];
                         if (name != null)
                         {
-                            if (name.ToString().Equals("JavaSE-17", StringComparison.OrdinalIgnoreCase))
+                            if (name.ToString().Equals("JavaSE-25", StringComparison.OrdinalIgnoreCase))
                             {
                                 result["path"] = Path.Combine(homePath, "jdk");
                                 result["default"] = true;
@@ -447,7 +447,7 @@ StartupWMClass={wmClass}
                     {
                         JsonObject javaConfigProp = new JsonObject
                         {
-                            ["name"] = "JavaSE-17",
+                            ["name"] = "JavaSE-25",
                             ["path"] = Path.Combine(homePath, "jdk"),
                             ["default"] = true
                         };
@@ -455,42 +455,46 @@ StartupWMClass={wmClass}
                         settingsJson["java.configuration.runtimes"] = javaConfigEnv;
                     }
                 }
-                else
+            }
+            else
+            {
+                JsonArray javaConfigProps = new JsonArray();
+                JsonObject javaConfigProp = new JsonObject
                 {
-                    JsonArray javaConfigProps = new JsonArray();
-                    JsonObject javaConfigProp = new JsonObject
-                    {
-                        ["name"] = "JavaSE-17",
-                        ["path"] = Path.Combine(homePath, "jdk"),
-                        ["default"] = true
-                    };
-                    javaConfigProps.Add((JsonNode)javaConfigProp);
-                    settingsJson["java.configuration.runtimes"] = javaConfigProps;
-                }
+                    ["name"] = "JavaSE-25",
+                    ["path"] = Path.Combine(homePath, "jdk"),
+                    ["default"] = true
+                };
+                javaConfigProps.Add((JsonNode)javaConfigProp);
+                settingsJson["java.configuration.runtimes"] = javaConfigProps;
+            }
 
-                if (settingsJson.ContainsKey("settingsSync.ignoredExtensions"))
+            if (settingsJson.ContainsKey("settingsSync.ignoredExtensions"))
+            {
+                JsonArray ignoredExtensions = settingsJson["settingsSync.ignoredExtensions"]?.AsArray() ?? new JsonArray();
+                Boolean keyFound = false;
+                foreach (JsonNode? result in ignoredExtensions)
                 {
-                    JsonArray ignoredExtensions = settingsJson["settingsSync.ignoredExtensions"]?.AsArray() ?? new JsonArray();
-                    Boolean keyFound = false;
-                    foreach (JsonNode? result in ignoredExtensions)
+                    if (result != null && result.ToString() == "wpilibsuite.vscode-wpilib")
                     {
-                        if (result != null && result.ToString() == "wpilibsuite.vscode-wpilib")
-                        {
-                            keyFound = true;
-                        }
-                    }
-                    if (!keyFound)
-                    {
-                        ignoredExtensions.Add((JsonNode)"wpilibsuite.vscode-wpilib");
-                        settingsJson["settingsSync.ignoredExtensions"] = ignoredExtensions;
+                        keyFound = true;
                     }
                 }
-                else
+                if (!keyFound)
                 {
-                    JsonArray ignoredExtensions = new JsonArray("wpilibsuite.vscode-wpilib");
+                    ignoredExtensions.Add((JsonNode)"wpilibsuite.vscode-wpilib");
                     settingsJson["settingsSync.ignoredExtensions"] = ignoredExtensions;
                 }
             }
+            else
+            {
+                JsonArray ignoredExtensions = new JsonArray("wpilibsuite.vscode-wpilib");
+                settingsJson["settingsSync.ignoredExtensions"] = ignoredExtensions;
+            }
+
+            SetIfNotSetIgnoreSync("update.enableWindowsBackgroundUpdates", false, settingsJson);
+            SetIfNotSetIgnoreSync("workbench.welcomePage.experimentalOnboarding", false, settingsJson);
+
             var serialized = settingsJson.ToJsonString(new JsonSerializerOptions { WriteIndented = true });
             await File.WriteAllTextAsync(settingsFile, serialized);
         }
