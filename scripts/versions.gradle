@@ -24,4 +24,4 @@ ext.elasticGitTag = 'v2027.0.0-alpha7'
 
 ext.frcYear = '2027_alpha4'
 
-ext.gradleWrapperVersion = '9.2.0'
+ext.gradleWrapperVersion = '9.4.1'
