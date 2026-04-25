@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Threading.Tasks;
-using Avalonia;
-using Avalonia.Controls.Platform;
-using Avalonia.Threading;
+﻿using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using WPILibInstaller.Interfaces;
@@ -28,16 +22,16 @@ namespace WPILibInstaller.ViewModels
         private readonly Stack<PageViewModelBase> pages = new();
 
         [ObservableProperty]
-        private string? _forwardName;
+        public partial string? ForwardName { get; set; }
 
         [ObservableProperty]
-        private string? _backName;
+        public partial string? BackName { get; set; }
 
         [ObservableProperty]
-        private bool _forwardVisible;
+        public partial bool ForwardVisible { get; set; }
 
         [ObservableProperty]
-        private bool _backVisible;
+        public partial bool BackVisible { get; set; }
 
         public void HandleException(Exception e)
         {
@@ -96,16 +90,6 @@ namespace WPILibInstaller.ViewModels
 
         public void Initialize()
         {
-            if (OperatingSystem.IsWindows())
-            {
-                bool isWindows10 = OperatingSystem.IsWindowsVersionAtLeast(10);
-                bool is64Bit = IntPtr.Size == 8;
-                if (!isWindows10 || !is64Bit)
-                {
-                    CurrentPage = viewModelResolver.Resolve<DeprecatedOsPageViewModel>();
-                    return;
-                }
-            }
             var startPage = viewModelResolver.Resolve<StartPageViewModel>();
             CurrentPage = startPage;
             startPage.Initialize();
