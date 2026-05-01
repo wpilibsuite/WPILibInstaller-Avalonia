@@ -2,6 +2,10 @@ name: CI
 
 on: [ push, pull_request, workflow_dispatch ]
 
+env:
+  MAIN_REPO_BUILD: ${{ github.repository_owner == 'wpilibsuite' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') }}
+  TAGGED_BUILD: ${{ github.repository_owner == 'wpilibsuite' && startsWith(github.ref, 'refs/tags/v') }}
+
 jobs:
   build:
     strategy:
@@ -29,6 +33,7 @@ jobs:
     steps:
       - name: Free Disk Space
         uses: jlumbroso/free-disk-space@v1.3.1
+        if: runner.os == 'Linux'
         with:
           tool-cache: false
           android: true
@@ -37,7 +42,7 @@ jobs:
           large-packages: false
           docker-images: false
           swap-storage: false
-        if: (matrix.artifact-name == 'Linux' || matrix.artifact-name == 'LinuxArm64')
+
       - uses: actions/checkout@v6
       - uses: gradle/actions/wrapper-validation@v6
       - uses: actions/setup-dotnet@v5
@@ -51,34 +56,27 @@ jobs:
 
       - name: Import Developer ID Certificate
         uses: wpilibsuite/import-signing-certificate@v3
+        if: runner.os == 'macOS' && env.MAIN_REPO_BUILD == 'true'
         with:
           certificate-data: ${{ secrets.APPLE_CERTIFICATE_DATA }}
           certificate-passphrase: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
           keychain-password: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
-        if: |
-          (matrix.artifact-name == 'macOS' || matrix.artifact-name == 'macOSArm') &&
-          github.repository_owner == 'wpilibsuite' &&
-          (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
 
       - name: Set Keychain Lock Timeout
+        if: runner.os == 'macOS' && env.MAIN_REPO_BUILD == 'true'
         run: security set-keychain-settings -lut 2700
-        if: |
-          (matrix.artifact-name == 'macOS' || matrix.artifact-name == 'macOSArm') &&
-          github.repository_owner == 'wpilibsuite' &&
-          (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
 
       - name: Install SystemCore Toolchain
         shell: bash
         run: ./gradlew emptyTask -PinstallToolchains
 
       - name: Build Installer (PR)
+        if: env.MAIN_REPO_BUILD == 'true'
         shell: bash
         run: ./gradlew generateInstallers -PjenkinsBuild ${{ matrix.build-options }}
-        if: |
-          github.repository_owner != 'wpilibsuite' ||
-          (github.event_name != 'push' && github.event_name != 'workflow_dispatch')
 
       - name: Build Installer (Main)
+        if: env.MAIN_REPO_BUILD == 'true'
         shell: bash
         run: |
           ./gradlew generateInstallers -PjenkinsBuild ${{ matrix.build-options }} \
@@ -86,9 +84,6 @@ jobs:
           -Pnotarization-username=${{ secrets.APPLE_NOTARIZATION_USERNAME }} \
           -Pnotarization-teamid=${{ secrets.APPLE_NOTARIZATION_TEAMID }} \
           -Pnotarization-password=${{ secrets.APPLE_NOTARIZATION_PASSWORD }}
-        if: |
-          github.repository_owner == 'wpilibsuite' &&
-          (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
 
       - uses: actions/upload-artifact@v7
         with:
@@ -105,25 +100,24 @@ jobs:
         run: |
           md5sum **/*
           sha256sum **/*
+
       - uses: jfrog/setup-jfrog-cli@v5
+        if: env.TAGGED_BUILD == 'true'
         with:
           disable-auto-build-publish: true
-        if: |
-          github.repository_owner == 'wpilibsuite' &&
-          startsWith(github.ref, 'refs/tags/v')
         env:
           JF_ENV_1: ${{ secrets.ARTIFACTORY_CLI_SECRET }}
+
       - name: Upload to Artifactory
-        if: |
-          github.repository_owner == 'wpilibsuite' &&
-          startsWith(github.ref, 'refs/tags/v')
+        if: env.TAGGED_BUILD == 'true'
         run: jfrog rt u "**/*" "installer/${GITHUB_REF#refs/tags/}/"
+
       - name: Setup Rclone
+        if: env.TAGGED_BUILD == 'true'
         uses: AnimMouse/setup-rclone@v1
+
       - name: Upload to Cloudflare
-        if: |
-          github.repository_owner == 'wpilibsuite' &&
-          startsWith(github.ref, 'refs/tags/v')
+        if: env.TAGGED_BUILD == 'true'
         run: |
           rclone copy "." "s3:wpilib1-enam/installer/${GITHUB_REF#refs/tags/}/"
         env:
