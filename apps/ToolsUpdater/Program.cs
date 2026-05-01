@@ -13,6 +13,15 @@ async Task InstallElastic(string toolsPath)
         var archivePath = Path.Combine(elasticFolder, archiveFileName);
         await TarFile.ExtractToDirectoryAsync(archivePath, elasticFolder, overwriteFiles: true);
     }
+    if (OperatingSystem.IsLinux())
+    {
+        var elasticExePath = Path.Combine(Path.GetDirectoryName(toolsPath)!, "elastic", "elastic_dashboard");
+        var wrapperPath = Path.Combine(toolsPath, "Elastic");
+        await File.WriteAllTextAsync(wrapperPath,
+            $"#!/bin/bash\nexec \"{elasticExePath}\" \"$@\"\n");
+        var chmod = Process.Start("chmod", $"+x \"{wrapperPath}\"");
+        await chmod!.WaitForExitAsync();
+    }
     Console.WriteLine("Installed Elastic");
 }
 
@@ -25,6 +34,15 @@ async Task InstallAdvantageScope(string toolsPath)
         var advantageScopeFolder = Path.Combine(Path.GetDirectoryName(toolsPath)!, "advantagescope");
         var archivePath = Path.Combine(advantageScopeFolder, archiveFileName);
         await TarFile.ExtractToDirectoryAsync(archivePath, advantageScopeFolder, overwriteFiles: true);
+    }
+    if (OperatingSystem.IsLinux())
+    {
+        var asExePath = Path.Combine(Path.GetDirectoryName(toolsPath)!, "advantagescope", "advantagescope-wpilib");
+        var wrapperPath = Path.Combine(toolsPath, "AdvantageScope");
+        await File.WriteAllTextAsync(wrapperPath,
+            $"#!/bin/bash\nexec \"{asExePath}\" \"$@\"\n");
+        var chmod = Process.Start("chmod", $"+x \"{wrapperPath}\"");
+        await chmod!.WaitForExitAsync();
     }
     Console.WriteLine("Installed AdvantageScope");
 }
@@ -134,7 +152,7 @@ foreach (var tool in tools)
     {
         installTasks.Add(InstallAdvantageScope(toolsPath));
     }
-    else if (tool.Name == "CMake")
+    else if (tool.Name == "Elastic")
     {
         installTasks.Add(InstallElastic(toolsPath));
     }
