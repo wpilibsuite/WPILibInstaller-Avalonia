@@ -2,6 +2,7 @@ import com.google.gson.GsonBuilder
 import groovy.json.JsonSlurper
 import io.pry.gradle.offline_dependencies.OfflineDependenciesPlugin
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 import groovy.xml.XmlParser
 import org.gradle.api.provider.ValueSourceParameters
 import org.gradle.api.provider.ValueSource
@@ -42,14 +43,27 @@ if (pubVersion == '') {
 
 println pubVersion
 
+def archName = DefaultNativePlatform.getCurrentArchitecture().getName()
+println archName
+
+def isX86 = archName == "x86-64"
+def isArm = archname == "aarch64"
+
 project.ext.setProperty('toolchain-optional-systemCore', '')
 
-if (OperatingSystem.current().isWindows()) {
+if (OperatingSystem.current().isWindows() && isX86) {
     project.ext.currentClassifier = 'windowsx86-64'
+} else if (OperatingSystem.current().isWindows() && isArm) {
+    project.ext.currentClassifier = 'windowsarm64'
 } else if (OperatingSystem.current().isMacOsX()) {
     project.ext.currentClassifier = 'osxuniversal'
-} else {
+} else if (OperatingSystem.current().isLinux() && isX86) {
     project.ext.currentClassifier = 'linuxx86-64'
+} else if (OperatingSystem.current().isLinux() && isArm) {
+    project.ext.currentClassifier = 'linuxarm64'
+} else {
+    // TODO: What should be done here?
+    project.ext.currentClassifier = 'unknown'
 }
 
 if (project.hasProperty('linuxBuild')) {
@@ -92,6 +106,16 @@ if (project.hasProperty('linuxBuild')) {
     project.ext.archiveType = Tar
     project.ext.isUnix = true
     project.ext.dotnetRuntime = 'osx-arm64'
+} else if (project.hasProperty('windowsBuildArm')) {
+    project.ext.forcePlatform = 'windows'
+    project.ext.forceNativeClassifier = 'windowsarm64'
+    project.ext.forceToolsClassifier = 'winarm64'
+    project.ext.forceCppToolsClassifier = 'windowsarm64'
+    project.ext.buildClassifier = 'WindowsArm'
+    offlineRepositoryRoot = "$buildDir/dependencies/windows"
+    project.ext.archiveType = Zip
+    project.ext.isUnix = false
+    project.ext.dotnetRuntime = 'win-arm64'
 } else {
     project.ext.forcePlatform = 'windows'
     project.ext.forceNativeClassifier = 'windowsx86-64'
