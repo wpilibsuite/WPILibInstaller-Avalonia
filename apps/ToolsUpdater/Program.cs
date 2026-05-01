@@ -1,8 +1,8 @@
-﻿using System.Formats.Tar;
+﻿using System.Diagnostics;
+using System.Formats.Tar;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
 using System.Text.Json;
-using System.Diagnostics;
 using ToolsUpdater;
 
 async Task InstallElastic(string toolsPath)
