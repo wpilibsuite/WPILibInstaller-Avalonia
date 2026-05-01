@@ -71,7 +71,7 @@ jobs:
         run: ./gradlew emptyTask -PinstallToolchains
 
       - name: Build Installer (PR)
-        if: env.MAIN_REPO_BUILD == 'true'
+        if: env.MAIN_REPO_BUILD != 'true'
         shell: bash
         run: ./gradlew generateInstallers -PjenkinsBuild ${{ matrix.build-options }}
 
