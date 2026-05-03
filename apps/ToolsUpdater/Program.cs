@@ -44,8 +44,8 @@ async Task InstallAdvantageScope(string toolsPath)
             var chmod = Process.Start("chmod", $"+x \"{asExePath}\"");
             await chmod!.WaitForExitAsync();
         }
-        Console.WriteLine("Installed AdvantageScope");
     }
+    Console.WriteLine("Installed AdvantageScope");
 }
 
 static string DesktopArch()
