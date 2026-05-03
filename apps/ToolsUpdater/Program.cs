@@ -46,128 +46,129 @@ async Task InstallAdvantageScope(string toolsPath)
         }
         Console.WriteLine("Installed AdvantageScope");
     }
+}
 
-    static string DesktopArch()
+static string DesktopArch()
+{
+    if (OperatingSystem.IsMacOS())
     {
-        if (OperatingSystem.IsMacOS())
-        {
-            return "universal";
-        }
-        string archName = RuntimeInformation.ProcessArchitecture == Architecture.Arm64 ? "arm64" : "x86-64";
-        return archName;
+        return "universal";
     }
+    string archName = RuntimeInformation.ProcessArchitecture == Architecture.Arm64 ? "arm64" : "x86-64";
+    return archName;
+}
 
-    static string DesktopOS()
+static string DesktopOS()
+{
+    return OperatingSystem.IsWindows() ? "windows" : OperatingSystem.IsMacOS() ? "osx" : "linux";
+}
+
+static string GetPlatformPath()
+{
+    return DesktopOS() + "/" + DesktopArch();
+}
+
+async Task InstallJavaTool(ToolConfig tool, string toolsPath)
+{
+    ArtifactConfig artifact = tool.Artifact!;
+    string artifactFileName = $"{artifact.ArtifactId}-{tool.Version}";
+    if (!string.IsNullOrWhiteSpace(artifact.Classifier))
     {
-        return OperatingSystem.IsWindows() ? "windows" : OperatingSystem.IsMacOS() ? "osx" : "linux";
+        artifactFileName += $"-{artifact.Classifier}";
     }
+    artifactFileName += $".{artifact.Extension}";
 
-    static string GetPlatformPath()
+    var artifactPath = Path.Combine(toolsPath, "artifacts", artifactFileName);
+    Console.WriteLine("Copying from " + artifactPath);
+    if (File.Exists(artifactPath))
     {
-        return DesktopOS() + "/" + DesktopArch();
+        var destPath = Path.Combine(toolsPath, $"{tool.Name}.jar");
+        await Task.Run(() => File.Copy(artifactPath, destPath, overwrite: true));
     }
+}
 
-    async Task InstallJavaTool(ToolConfig tool, string toolsPath)
+async Task InstallCppTool(ToolConfig tool, string toolsPath)
+{
+    ArtifactConfig artifact = tool.Artifact!;
+    var artifactFileName = $"{artifact.ArtifactId}-{tool.Version}-{artifact.Classifier}.{artifact.Extension}";
+
+    var artifactPath = Path.Combine(toolsPath, "artifacts", artifactFileName);
+    Console.WriteLine("Extracting from " + artifactPath);
+    if (File.Exists(artifactPath))
     {
-        ArtifactConfig artifact = tool.Artifact!;
-        string artifactFileName = $"{artifact.ArtifactId}-{tool.Version}";
-        if (!string.IsNullOrWhiteSpace(artifact.Classifier))
+        using (var archive = ZipFile.OpenRead(artifactPath))
         {
-            artifactFileName += $"-{artifact.Classifier}";
-        }
-        artifactFileName += $".{artifact.Extension}";
-
-        var artifactPath = Path.Combine(toolsPath, "artifacts", artifactFileName);
-        Console.WriteLine("Copying from " + artifactPath);
-        if (File.Exists(artifactPath))
-        {
-            var destPath = Path.Combine(toolsPath, $"{tool.Name}.jar");
-            await Task.Run(() => File.Copy(artifactPath, destPath, overwrite: true));
-        }
-    }
-
-    async Task InstallCppTool(ToolConfig tool, string toolsPath)
-    {
-        ArtifactConfig artifact = tool.Artifact!;
-        var artifactFileName = $"{artifact.ArtifactId}-{tool.Version}-{artifact.Classifier}.{artifact.Extension}";
-
-        var artifactPath = Path.Combine(toolsPath, "artifacts", artifactFileName);
-        Console.WriteLine("Extracting from " + artifactPath);
-        if (File.Exists(artifactPath))
-        {
-            using (var archive = ZipFile.OpenRead(artifactPath))
+            var subDir = GetPlatformPath() + "/"; // e.g., "osx/universal/"
+            foreach (var entry in archive.Entries)
             {
-                var subDir = GetPlatformPath() + "/"; // e.g., "osx/universal/"
-                foreach (var entry in archive.Entries)
+                if (entry.FullName.StartsWith(subDir, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(entry.Name))
                 {
-                    if (entry.FullName.StartsWith(subDir, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(entry.Name))
-                    {
-                        var relativePath = entry.FullName.Substring(subDir.Length);
-                        var destinationPath = Path.Combine(toolsPath, relativePath);
-                        Directory.CreateDirectory(Path.GetDirectoryName(destinationPath)!);
-                        entry.ExtractToFile(destinationPath, overwrite: true);
-                    }
+                    var relativePath = entry.FullName.Substring(subDir.Length);
+                    var destinationPath = Path.Combine(toolsPath, relativePath);
+                    Directory.CreateDirectory(Path.GetDirectoryName(destinationPath)!);
+                    entry.ExtractToFile(destinationPath, overwrite: true);
                 }
             }
         }
     }
+}
 
-    var toolsPath = Path.GetDirectoryName(Environment.ProcessPath);
-    if (toolsPath is null)
-    {
-        Console.WriteLine("Could not determine tools directory");
-        return 1;
-    }
+var toolsPath = Path.GetDirectoryName(Environment.ProcessPath);
+if (toolsPath is null)
+{
+    Console.WriteLine("Could not determine tools directory");
+    return 1;
+}
 
-    var jsonFile = Path.Combine(toolsPath, "tools.json");
+var jsonFile = Path.Combine(toolsPath, "tools.json");
 
-    if (!File.Exists(jsonFile))
-    {
-        Console.WriteLine("Could not find tools.json");
-        return 1;
-    }
+if (!File.Exists(jsonFile))
+{
+    Console.WriteLine("Could not find tools.json");
+    return 1;
+}
 
-    var json = await File.ReadAllTextAsync(jsonFile);
-    var tools = JsonSerializer.Deserialize(json, ToolConfigContext.Default.ToolConfigArray);
+var json = await File.ReadAllTextAsync(jsonFile);
+var tools = JsonSerializer.Deserialize(json, ToolConfigContext.Default.ToolConfigArray);
 
-    if (tools is null || tools.Length == 0)
-    {
-        Console.WriteLine("No tools to update");
-        return 0;
-    }
-
-    List<Task> installTasks = [];
-
-    foreach (var tool in tools)
-    {
-        if (!tool.IsValid)
-        {
-            Console.WriteLine($"Tool {tool.Name} is not valid, skipping");
-            continue;
-        }
-
-        Console.WriteLine($"Updating tool {tool.Name} to version {tool.Version}");
-
-        if (tool.Name == "AdvantageScope")
-        {
-            installTasks.Add(InstallAdvantageScope(toolsPath));
-        }
-        else if (tool.Name == "Elastic")
-        {
-            installTasks.Add(InstallElastic(toolsPath));
-        }
-        else if (tool.Artifact is not null)
-        {
-            if (tool.Cpp)
-            {
-                installTasks.Add(InstallCppTool(tool, toolsPath));
-            }
-            else
-            {
-                installTasks.Add(InstallJavaTool(tool, toolsPath));
-            }
-        }
-    }
-
-    await Task.WhenAll(installTasks);
+if (tools is null || tools.Length == 0)
+{
+    Console.WriteLine("No tools to update");
     return 0;
+}
+
+List<Task> installTasks = [];
+
+foreach (var tool in tools)
+{
+    if (!tool.IsValid)
+    {
+        Console.WriteLine($"Tool {tool.Name} is not valid, skipping");
+        continue;
+    }
+
+    Console.WriteLine($"Updating tool {tool.Name} to version {tool.Version}");
+
+    if (tool.Name == "AdvantageScope")
+    {
+        installTasks.Add(InstallAdvantageScope(toolsPath));
+    }
+    else if (tool.Name == "Elastic")
+    {
+        installTasks.Add(InstallElastic(toolsPath));
+    }
+    else if (tool.Artifact is not null)
+    {
+        if (tool.Cpp)
+        {
+            installTasks.Add(InstallCppTool(tool, toolsPath));
+        }
+        else
+        {
+            installTasks.Add(InstallJavaTool(tool, toolsPath));
+        }
+    }
+}
+
+await Task.WhenAll(installTasks);
+return 0;
