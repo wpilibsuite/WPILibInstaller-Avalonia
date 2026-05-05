@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Formats.Tar;
+﻿using System.Formats.Tar;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
 using System.Text.Json;
@@ -14,15 +13,6 @@ async Task InstallElastic(string toolsPath)
         var archivePath = Path.Combine(elasticFolder, archiveFileName);
         await TarFile.ExtractToDirectoryAsync(archivePath, elasticFolder, overwriteFiles: true);
     }
-    if (OperatingSystem.IsLinux())
-    {
-        var elasticExePath = Path.Combine(Path.GetDirectoryName(toolsPath)!, "elastic", "elastic_dashboard");
-        if (File.Exists(elasticExePath))
-        {
-            var chmod = Process.Start("chmod", $"+x \"{elasticExePath}\"");
-            await chmod!.WaitForExitAsync();
-        }
-    }
     Console.WriteLine("Installed Elastic");
 }
 
@@ -35,15 +25,6 @@ async Task InstallAdvantageScope(string toolsPath)
         var advantageScopeFolder = Path.Combine(Path.GetDirectoryName(toolsPath)!, "advantagescope");
         var archivePath = Path.Combine(advantageScopeFolder, archiveFileName);
         await TarFile.ExtractToDirectoryAsync(archivePath, advantageScopeFolder, overwriteFiles: true);
-    }
-    if (OperatingSystem.IsLinux())
-    {
-        var asExePath = Path.Combine(Path.GetDirectoryName(toolsPath)!, "advantagescope", "advantagescope-wpilib");
-        if (File.Exists(asExePath))
-        {
-            var chmod = Process.Start("chmod", $"+x \"{asExePath}\"");
-            await chmod!.WaitForExitAsync();
-        }
     }
     Console.WriteLine("Installed AdvantageScope");
 }
