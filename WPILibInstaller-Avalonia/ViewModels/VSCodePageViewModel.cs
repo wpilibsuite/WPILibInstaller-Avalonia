@@ -142,7 +142,17 @@ namespace WPILibInstaller.ViewModels
                 Model.AlreadyInstalled = true;
             }
             SingleDownloadText += $" (Download Size: {Model.Platforms[PlatformUtils.CurrentPlatform].Size / 1024 / 1024} MB)";
-            AllDownloadText += $" (Download Size: {Model.Platforms.Values.Sum(p => p.Size) / 1024 / 1024} MB)";
+            long allDownloadSize = 0;
+            foreach (var platform in Model.Platforms)
+            {
+                // Don't include macOS Intel in the total download size since it's the universal file and is the same file as macOS Arm.
+                if (platform.Key == Platform.Mac64)
+                {
+                    continue;
+                }
+                allDownloadSize += platform.Value.Size;
+            }
+            AllDownloadText += $" (Download Size: {allDownloadSize / 1024 / 1024} MB)";
         }
 
         [RelayCommand]
