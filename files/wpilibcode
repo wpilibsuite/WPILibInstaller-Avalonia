@@ -6,5 +6,5 @@ CODE_PATH="$(realpath "$(find "$SCRIPT_PATH/../vscode" -type f -name code | grep
 if [ "$(sysctl -n kernel.apparmor_restrict_unprivileged_userns)" -eq "0" ] || [ "$(stat -c "%U" "$SANDBOX_PATH")" == "root" ] || [ -f "/etc/apparmor.wpilibcode" ]; then
 	"$CODE_PATH" "$@"
 else
-        "$CODE_PATH" --no-sandbox $@
+        "$CODE_PATH" --no-sandbox "$@"
 fi
