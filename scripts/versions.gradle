@@ -10,6 +10,8 @@ ext.javaExtVersion = '1.54.0'
 ext.javaExtPatchVersion = '923'
 ext.javaDebugVersion = '0.59.0'
 ext.javaDependencyVersion = '0.27.2'
+ext.uvToolkitVersion = '0.1.11'
+ext.tyVersion = '2026.60.0'
 
 ext.wpilibVersion = gradleRioVersion
 
