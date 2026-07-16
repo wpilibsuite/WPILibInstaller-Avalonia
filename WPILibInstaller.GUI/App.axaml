@@ -1,0 +1,13 @@
+﻿<Application
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="WPILibInstaller.App"
+    RequestedThemeVariant="Default">
+    <Application.Styles>
+        <FluentTheme>
+            <FluentTheme.Palettes>
+                <ColorPaletteResources x:Key="Dark" RegionColor="#FF181818" />
+            </FluentTheme.Palettes>
+        </FluentTheme>
+    </Application.Styles>
+</Application>
