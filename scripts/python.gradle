@@ -1,0 +1,84 @@
+import groovy.json.JsonSlurper
+import groovy.json.JsonOutput
+
+apply from: 'scripts/versions.gradle'
+
+def baseUrl = "https://www.python.org/ftp/python/${pythonVersion}/"
+
+def pythonWindowsFile = "python-${pythonVersion}-amd64.exe"
+
+def pythonWindowsURL = baseUrl + pythonWindowsFile
+
+def pythonMacFile = "python-${pythonVersion}-macos11.pkg"
+
+def pythonMacURL = baseUrl + pythonMacFile
+
+def pythonWindowsDownload = tasks.register("pythonWindowsDownload", Download) {
+    src pythonWindowsURL
+    def fileName = file(src.file).name
+    dest "$buildDir/downloads/$fileName"
+    overwrite false
+}
+
+def pythonMacDownload = tasks.register("pythonMacDownload", Download) {
+    src pythonMacURL
+    def fileName = file(src.file).name
+    dest "$buildDir/downloads/$fileName"
+    overwrite false
+}
+
+def pythonDownloadTask
+if(project.hasProperty('windowsBuild')) {
+    pythonDownloadTask = pythonWindowsDownload
+} else if (project.hasProperty('macBuild')) {
+    pythonDownloadTask = pythonMacDownload
+}
+
+def pythonConfigFile = file("$buildDir/pythonconfig.json")
+
+def pythonTask = tasks.register('pythonConfig', Task) {
+    dependsOn pythonDownloadTask
+
+    inputs.files pythonDownloadTask.get().outputFiles
+
+    it.outputs.file pythonConfigFile
+
+    doLast {
+        def config = [:]
+        config['folder'] = 'python'
+        config['exeFile'] = "python-" + pythonVersion + "-amd64.exe"
+        config['pkgFile'] = "python-" + pythonVersion + "-macos11.pkg"
+
+        def gbuilder = getGsonBuilder()
+
+        gbuilder.setPrettyPrinting()
+        def json = gbuilder.create().toJson(config)
+
+        pythonConfigFile.parentFile.mkdirs()
+
+        pythonConfigFile.text = json
+    }
+}
+
+ext.pythonConfigFileSetup = {AbstractArchiveTask zip->
+    zip.dependsOn pythonTask
+    zip.inputs.file pythonConfigFile
+
+    zip.from(pythonConfigFile) {
+        rename {'pythonConfig.json'}
+    }
+}
+
+ext.pythonZipSetup = { AbstractArchiveTask zip-> 
+    zip.dependsOn pythonDownloadTask
+    zip.dependsOn pythonTask
+
+    zip.from(pythonDownloadTask.get().outputFiles.first()) {
+        into '/python'
+    }
+
+    zip.from(pythonConfigFile) {
+        into '/installUtils'
+        rename {'pythonConfig.json'}
+    }
+}

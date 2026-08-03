@@ -1,0 +1,78 @@
+import groovy.json.JsonSlurper
+
+apply from: 'scripts/versions.gradle'
+
+def robotpyPyURL = "https://pypi.org/pypi/robotpy/${robotpyVersion}/json"
+
+def getRobotPyWheelUrl = tasks.register('getRobotPyWheelUrl') {
+    def jsonText = new URL(robotpyPyURL).text
+    def parsedJson = new JsonSlurper().parseText(jsonText)
+
+    def wheelEntry = parsedJson.urls.find { it.packagetype == 'bdist_wheel' }
+        
+    ext.wheelDownloadURL = wheelEntry.url
+}
+
+def downloadRobotPyWheel = tasks.register("downloadRobotPyWheel", Download) {
+    dependsOn getRobotPyWheelUrl
+
+    src { getRobotPyWheelUrl.get().wheelDownloadURL }
+
+    def fileName = {
+        def url = getRobotPyWheelUrl.get().wheelDownloadURL
+        url.substring(url.lastIndexOf('/') + 1)
+    }
+
+    dest { "$buildDir/downloads/${fileName()}" }
+    overwrite false
+}
+
+
+def robotpyConfigFile = file("$buildDir/robotpyconfig.json")
+
+def robotpyTask = tasks.register('robotpyConfig', Task) {
+    dependsOn getRobotPyWheelUrl
+    dependsOn downloadRobotPyWheel
+
+    inputs.files downloadRobotPyWheel.get().outputFiles
+
+    it.outputs.file robotpyConfigFile
+
+    doLast {
+        def config = [:]
+        config['folder'] = 'robotpy'
+        config['whlFile'] = getRobotPyWheelUrl.get().wheelDownloadURL.substring(getRobotPyWheelUrl.get().wheelDownloadURL.lastIndexOf('/') + 1)
+
+        def gbuilder = getGsonBuilder()
+
+        gbuilder.setPrettyPrinting()
+        def json = gbuilder.create().toJson(config)
+
+        robotpyConfigFile.parentFile.mkdirs()
+
+        robotpyConfigFile.text = json
+    }
+}
+
+ext.robotpyConfigFileSetup = {AbstractArchiveTask zip->
+    zip.dependsOn robotpyTask
+    zip.inputs.file robotpyConfigFile
+
+    zip.from(robotpyConfigFile) {
+        rename {'robotpyConfig.json'}
+    }
+}
+
+ext.robotpyZipSetup = { AbstractArchiveTask zip->
+    zip.dependsOn downloadRobotPyWheel
+    zip.dependsOn robotpyTask
+
+    zip.from(downloadRobotPyWheel.get().outputFiles.first()) {
+        into '/robotpy'
+    }
+
+    zip.from(robotpyConfigFile) {
+        into '/installUtils'
+        rename {'robotpyConfig.json'}
+    }
+}

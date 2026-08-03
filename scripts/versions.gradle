@@ -27,3 +27,7 @@ ext.elasticGitTag = 'v2027.0.0-alpha8'
 ext.wpilibYear = '2027_alpha5'
 
 ext.gradleWrapperVersion = '9.4.1'
+
+ext.robotpyVersion = '2027.0.0a6.post1'
+
+ext.pythonVersion = '3.14.6'

@@ -20,6 +20,10 @@ namespace WPILibInstaller.Interfaces
 
         VsCodeConfig VsCodeConfig { get; }
 
+        PythonConfig PythonConfig { get; }
+
+        RobotpyConfig RobotpyConfig { get; }
+
         string InstallDirectory { get; }
     }
 }

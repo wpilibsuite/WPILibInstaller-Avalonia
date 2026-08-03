@@ -224,6 +224,8 @@ apply from: 'scripts/elastic.gradle'
 apply from: 'scripts/tools.gradle'
 apply from: 'scripts/vscode.gradle'
 apply from: 'scripts/vars.gradle'
+apply from: 'scripts/python.gradle'
+apply from: 'scripts/robotpy.gradle'
 
 ext.getGsonBuilder = {
     return new GsonBuilder()
@@ -279,6 +281,9 @@ def commonResources = { AbstractArchiveTask zip ->
     mavenZipSetup(zip)
     vscodeZipSetup(zip)
     varsZipSetup(zip)
+
+    pythonZipSetup(zip)
+    robotpyZipSetup(zip)
 }
 
 def fullConfigFile = file("$buildDir/fullConfig.json")
@@ -471,6 +476,9 @@ def generateConfigFiles = tasks.register('generateCommonResources', Zip) {
     elasticConfigFileSetup(zip)
 
     vscodeConfigZipSetup(zip)
+
+    pythonConfigFileSetup(zip)
+    robotpyConfigFileSetup(zip)
 }
 
 // Generates the Info.plist file.
