@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Text.RegularExpressions;
 using WPILibInstaller.Interfaces;
 using WPILibInstaller.Models;
 using WPILibInstaller.Utils;
@@ -11,7 +10,7 @@ namespace WPILibInstaller.Services
         private readonly IConfigurationProvider configurationProvider;
         private readonly string pythonWindowsDir;
         private readonly string pythonPkgDir;
-        private readonly string robotpyDir;
+        private readonly string pythonVersion;
         private readonly string robotpyWhlFile;
         private readonly Boolean isAdmin;
         public RobotPyInstallationService(IConfigurationProvider configurationProvider,
@@ -20,8 +19,8 @@ namespace WPILibInstaller.Services
             this.configurationProvider = configurationProvider;
             pythonWindowsDir = Path.Join(configurationProvider.InstallDirectory, configurationProvider.PythonConfig.Folder, configurationProvider.PythonConfig.ExeFile);
             pythonPkgDir = Path.Join(configurationProvider.InstallDirectory, configurationProvider.PythonConfig.Folder, configurationProvider.PythonConfig.PkgFile);
-            robotpyDir = Path.Join(configurationProvider.InstallDirectory, configurationProvider.RobotpyConfig.Folder);
-            robotpyWhlFile = Path.Join(robotpyDir, configurationProvider.RobotpyConfig.WhlFile);
+            pythonVersion = configurationProvider.PythonConfig.Version;
+            robotpyWhlFile = Path.Join(configurationProvider.InstallDirectory, configurationProvider.RobotpyConfig.Folder, configurationProvider.RobotpyConfig.WhlFile);
             isAdmin = toInstallProvider.Model.InstallAsAdmin;
         }
 
@@ -30,58 +29,32 @@ namespace WPILibInstaller.Services
             progress?.Report(new InstallProgress(50, "Installing Python"));
 
             var currentPlatform = PlatformUtils.CurrentPlatform;
+            var tempFile = Path.GetTempFileName();
 
             switch (currentPlatform)
             {
                 case Platform.Win64:
-                    var tempFile = Path.GetTempFileName();
-                    var startInfo = new ProcessStartInfo(pythonWindowsDir, $"\"{tempFile}\" /passive InstallAllUsers=0 Include_pip=1")
-                    {
-                        WorkingDirectory = Environment.CurrentDirectory,
-                    };
-                    await RunCommand(startInfo);
+                    await RunCommand(pythonWindowsDir, $"\"{tempFile}\" /quiet InstallAllUsers=0 Include_pip=1");
+                    await RunCommand("cmd.exe", "/c powershell -ExecutionPolicy ByPass -c \"irm https://astral.sh/uv/install.ps1 | iex\"");
+                    await RunCommand("cmd.exe", $"/c uv python install {pythonVersion} --default");
                     break;
                 case Platform.MacArm64:
                 case Platform.Mac64:
-                    startInfo = new ProcessStartInfo("/bin/bash", "-c sudo installer -pkg ./" + configurationProvider.PythonConfig.PkgFile + " -target \\")
-                    {
-                        RedirectStandardOutput = true,
-                        UseShellExecute = false,
-                        CreateNoWindow = false
-                    };
-                    await RunCommand(startInfo);
+                    await RunCommand("/bin/bash", "-c sudo installer -pkg ./" + pythonPkgDir + " -target \\");
+                    await RunCommand("/bin/sh", "-c curl -LsSf https://astral.sh/uv/install.sh | sh");
+                    await RunCommand("/bin/sh", $"-c uv python install {pythonVersion} --default");
                     break;
                 case Platform.Linux64:
-                    startInfo = new ProcessStartInfo("/bin/sh", "-c sudo apt-get update -y")
-                    {
-                        RedirectStandardOutput = true,
-                        UseShellExecute = false,
-                        CreateNoWindow = false
-                    };
-                    await RunCommand(startInfo);
-                    startInfo = new ProcessStartInfo("/bin/sh", "-c sudo apt-get install -y python3 python3-pip python3-venv")
-                    {
-                        RedirectStandardOutput = true,
-                        UseShellExecute = false,
-                        CreateNoWindow = false
-                    };
-                    await RunCommand(startInfo);
+                    await RunCommand("/bin/sh", "-c sudo apt-get update -y");
+                    await RunCommand("/bin/sh", "-c sudo apt-get install -y python3 python3-pip python3-venv");
+                    await RunCommand("/bin/sh", "-c curl -LsSf https://astral.sh/uv/install.sh | sh");
+                    await RunCommand("/bin/sh", $"-c uv python install {pythonVersion} --default");
                     break;
                 case Platform.LinuxArm64:
-                    startInfo = new ProcessStartInfo("/bin/sh", "-c sudo apt-get update -y")
-                    {
-                        RedirectStandardOutput = true,
-                        UseShellExecute = false,
-                        CreateNoWindow = false
-                    };
-                    await RunCommand(startInfo);
-                    startInfo = new ProcessStartInfo("/bin/sh", "-c sudo apt-get install -y python3 python3-pip python3-venv python3-wheel pipx")
-                    {
-                        RedirectStandardOutput = true,
-                        UseShellExecute = false,
-                        CreateNoWindow = false
-                    };
-                    await RunCommand(startInfo);
+                    await RunCommand("/bin/sh", "-c sudo apt-get update -y");
+                    await RunCommand("/bin/sh", "-c sudo apt-get install -y python3 python3-pip python3-venv");
+                    await RunCommand("/bin/sh", "-c curl -LsSf https://astral.sh/uv/install.sh | sh");
+                    await RunCommand("/bin/sh", $"-c uv python install {pythonVersion} --default");
                     break;
                 default:
                     throw new PlatformNotSupportedException("Invalid platform");
@@ -96,45 +69,21 @@ namespace WPILibInstaller.Services
             switch (currentPlatform)
             {
                 case Platform.Win64:
-                    startInfo = new ProcessStartInfo("cmd.exe")
-                    {
-                        Arguments = $"/c python -m pip install \"{robotpyWhlFile}\"",
-                        RedirectStandardOutput = false,
-                        UseShellExecute = true,
-                        CreateNoWindow = false
-                    };
-                    await RunCommand(startInfo);
+                    await RunCommand("cmd.exe", $"/c python -m pip install \"{robotpyWhlFile}\"");
+                    await RunCommand("cmd.exe", $"/c uvx pip install \"{robotpyWhlFile}\"");
                     break;
                 case Platform.MacArm64:
                 case Platform.Mac64:
-                    startInfo = new ProcessStartInfo("python3")
-                    {
-                        Arguments = $"-m pip3 install \"{robotpyWhlFile}\"",
-                        RedirectStandardOutput = false,
-                        UseShellExecute = true,
-                        CreateNoWindow = false
-                    };
-                    await RunCommand(startInfo);
+                    await RunCommand("python3", $"-m pip3 install \"{robotpyWhlFile}\"");
+                    await RunCommand("/bin/sh", $"-c uvx pip install \"{robotpyWhlFile}\"");
                     break;
                 case Platform.Linux64:
-                    startInfo = new ProcessStartInfo("/bin/sh")
-                    {
-                        Arguments = $"-c pipx install \"{robotpyWhlFile}\"",
-                        RedirectStandardOutput = false,
-                        UseShellExecute = true,
-                        CreateNoWindow = false
-                    };
-                    await RunCommand(startInfo);
+                    await RunCommand("/bin/sh", $"-c pipx install \"{robotpyWhlFile}\"");
+                    await RunCommand("/bin/sh", $"-c uvx pip install \"{robotpyWhlFile}\"");
                     break;
                 case Platform.LinuxArm64:
-                    startInfo = new ProcessStartInfo("/bin/sh")
-                    {
-                        Arguments = $"-c pipx install \"{robotpyWhlFile}\"",
-                        RedirectStandardOutput = false,
-                        UseShellExecute = true,
-                        CreateNoWindow = false
-                    };
-                    await RunCommand(startInfo);
+                    await RunCommand("/bin/sh", $"-c pipx install \"{robotpyWhlFile}\"");
+                    await RunCommand("/bin/sh", $"-c uvx pip install \"{robotpyWhlFile}\"");
                     break;
                 default:
                     throw new PlatformNotSupportedException("Invalid platform");
@@ -142,8 +91,15 @@ namespace WPILibInstaller.Services
 
         }
 
-        public static async Task RunCommand(ProcessStartInfo startInfo)
+        public static async Task RunCommand(string fileName, string cmd)
         {
+            var currentPlatform = PlatformUtils.CurrentPlatform;
+            ProcessStartInfo startInfo = new ProcessStartInfo(fileName, cmd)
+            {
+                RedirectStandardOutput = false,
+                UseShellExecute = true,
+                CreateNoWindow = false
+            };
             try
             {
                 using var process = Process.Start(startInfo);

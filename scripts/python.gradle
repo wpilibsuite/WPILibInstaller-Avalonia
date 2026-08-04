@@ -48,6 +48,7 @@ def pythonTask = tasks.register('pythonConfig', Task) {
         config['folder'] = 'python'
         config['exeFile'] = "python-" + pythonVersion + "-amd64.exe"
         config['pkgFile'] = "python-" + pythonVersion + "-macos11.pkg"
+        config['version'] = pythonVersion
 
         def gbuilder = getGsonBuilder()
 
