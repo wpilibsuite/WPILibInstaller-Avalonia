@@ -10,6 +10,7 @@ namespace WPILibInstaller.Services
         private readonly IConfigurationProvider configurationProvider;
         private readonly string pythonWindowsDir;
         private readonly string pythonPkgDir;
+        private readonly string pythonVersion;
         private readonly string robotpyWhlFile;
         private readonly Boolean isAdmin;
         public RobotPyInstallationService(IConfigurationProvider configurationProvider,
@@ -18,6 +19,7 @@ namespace WPILibInstaller.Services
             this.configurationProvider = configurationProvider;
             pythonWindowsDir = Path.Join(configurationProvider.InstallDirectory, configurationProvider.PythonConfig.Folder, configurationProvider.PythonConfig.ExeFile);
             pythonPkgDir = Path.Join(configurationProvider.InstallDirectory, configurationProvider.PythonConfig.Folder, configurationProvider.PythonConfig.PkgFile);
+            pythonVersion = configurationProvider.PythonConfig.Version;
             robotpyWhlFile = Path.Join(configurationProvider.InstallDirectory, configurationProvider.RobotpyConfig.Folder, configurationProvider.RobotpyConfig.WhlFile);
             isAdmin = toInstallProvider.Model.InstallAsAdmin;
         }
@@ -33,18 +35,22 @@ namespace WPILibInstaller.Services
             {
                 case Platform.Win64:
                     await RunCommand(pythonWindowsDir, $"\"{tempFile}\" /quiet InstallAllUsers=0 Include_pip=1");
+                    await RunCommand("cmd.exe", "/c powershell -ExecutionPolicy ByPass -c \"irm https://astral.sh/uv/install.ps1 | iex\"");
                     break;
                 case Platform.MacArm64:
                 case Platform.Mac64:
-                    await RunCommand("/bin/bash", "-c sudo installer -pkg ./" + pythonPkgDir + " -target \\");
+                    await RunCommand("/bin/bash", $"-c installer -pkg '{pythonPkgDir}' -target CurrentUserHomeDirectory");
+                    await RunCommand("/bin/sh", "-c curl -LsSf https://astral.sh/uv/install.sh | sh");
                     break;
                 case Platform.Linux64:
-                    await RunCommand("/bin/sh", "-c sudo apt-get update -y");
-                    await RunCommand("/bin/sh", "-c sudo apt-get install -y python3 python3-pip python3-venv");
+                    await RunCommand("/bin/sh", "-c python3 -m pip install --user pipx");
+                    await RunCommand("/bin/sh", "-c python3 -m pipx ensurepath");
+                    await RunCommand("/bin/sh", "-c curl -LsSf https://astral.sh/uv/install.sh | sh");
                     break;
                 case Platform.LinuxArm64:
-                    await RunCommand("/bin/sh", "-c sudo apt-get update -y");
-                    await RunCommand("/bin/sh", "-c sudo apt-get install -y python3 python3-pip python3-venv");
+                    await RunCommand("/bin/sh", "-c python3 -m pip install --user pipx");
+                    await RunCommand("/bin/sh", "-c python3 -m pipx ensurepath");
+                    await RunCommand("/bin/sh", "-c curl -LsSf https://astral.sh/uv/install.sh | sh");
                     break;
                 default:
                     throw new PlatformNotSupportedException("Invalid platform");
@@ -55,7 +61,7 @@ namespace WPILibInstaller.Services
         {
             progress?.Report(new InstallProgress(50, "Installing robotpy"));
             var currentPlatform = PlatformUtils.CurrentPlatform;
-            ProcessStartInfo startInfo = new ProcessStartInfo();
+            
             switch (currentPlatform)
             {
                 case Platform.Win64:
@@ -63,7 +69,7 @@ namespace WPILibInstaller.Services
                     break;
                 case Platform.MacArm64:
                 case Platform.Mac64:
-                    await RunCommand("python3", $"-m pip3 install \"{robotpyWhlFile}\"");
+                    await RunCommand("python3", $"-m pip install \"{robotpyWhlFile}\"");
                     break;
                 case Platform.Linux64:
                     await RunCommand("/bin/sh", $"-c pipx install \"{robotpyWhlFile}\"");
