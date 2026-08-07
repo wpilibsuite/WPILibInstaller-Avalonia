@@ -27,6 +27,10 @@ namespace WPILibInstaller.CLI
 
         public VsCodeConfig VsCodeConfig { get; private set; } = null!;
 
+        public PythonConfig PythonConfig { get; private set; } = null!;
+
+        public RobotpyConfig RobotpyConfig { get; private set; } = null!;
+
         public string InstallDirectory { get; private set; } = "";
 
         public InstallSelectionModel Model { get; } = new();
@@ -111,6 +115,7 @@ namespace WPILibInstaller.CLI
                 var toolService = new ToolInstallationService(this);
                 var vsCodeService = new VsCodeInstallationService(this, this);
                 var shortcutService = new ShortcutService(this, this, this);
+                var robotpyService = new RobotPyInstallationService(this, this);
 
                 var progress = new Progress<InstallProgress>(p =>
                 {
@@ -122,31 +127,37 @@ namespace WPILibInstaller.CLI
 
                 if (Model.InstallEverything)
                 {
-                    Console.WriteLine("[1/9] Extracting archive...");
+                    Console.WriteLine("[1/11] Extracting archive...");
                     await archiveService.ExtractArchive(cancellation.Token, null, progress);
 
-                    Console.WriteLine("[2/9] Setting up Gradle...");
+                    Console.WriteLine("[2/11] Setting up Gradle...");
                     await toolService.RunGradleSetup(progress);
 
-                    Console.WriteLine("[3/9] Setting up tools...");
+                    Console.WriteLine("[3/11] Setting up tools...");
                     await toolService.RunToolSetup(progress);
 
-                    Console.WriteLine("[4/9] Setting up C++...");
+                    Console.WriteLine("[4/11] Setting up C++...");
                     await toolService.RunCppSetup(progress);
 
-                    Console.WriteLine("[5/9] Fixing Maven metadata...");
+                    Console.WriteLine("[5/11] Fixing Maven metadata...");
                     await toolService.RunMavenMetaDataFixer(progress);
 
-                    Console.WriteLine("[6/9] Installing VS Code...");
+                    Console.WriteLine("[6/11] Installing VS Code...");
                     await vsCodeService.RunVsCodeSetup(cancellation.Token, progress);
 
-                    Console.WriteLine("[7/9] Configuring VS Code settings...");
+                    Console.WriteLine("[7/11] Configuring VS Code settings...");
                     await vsCodeService.ConfigureVsCodeSettings();
 
-                    Console.WriteLine("[8/9] Installing VS Code extensions...");
+                    Console.WriteLine("[8/11] Installing VS Code extensions...");
                     await vsCodeService.RunVsCodeExtensionsSetup(progress);
 
-                    Console.WriteLine("[9/9] Creating shortcuts...");
+                    Console.WriteLine("[9/11] Installing Python...");
+                    await robotpyService.InstallPython(progress);
+
+                    Console.WriteLine("[10/11] Installing RobotPy...");
+                    await robotpyService.InstallRobotPy(progress);
+
+                    Console.WriteLine("[11/11] Creating shortcuts...");
                     await shortcutService.RunShortcutCreator(cancellation.Token);
                 }
                 else
@@ -194,6 +205,8 @@ namespace WPILibInstaller.CLI
             JdkConfig = configuration.JdkConfig;
             AdvantageScopeConfig = configuration.AdvantageScopeConfig;
             ElasticConfig = configuration.ElasticConfig;
+            PythonConfig = configuration.PythonConfig;
+            RobotpyConfig = configuration.RobotpyConfig;
             FullConfig = configuration.FullConfig;
             UpgradeConfig = configuration.UpgradeConfig;
             VsCodeModel = InstallerResources.BuildVsCodeModel(VsCodeConfig);

@@ -1,0 +1,105 @@
+import groovy.json.JsonSlurper
+import org.gradle.internal.os.OperatingSystem
+
+apply from: 'scripts/versions.gradle'
+
+def targetDir = "$buildDir\\downloads\\robotpy\\"
+
+def robotpyWindowsCmd = "py -3 -m pip download robotpy==${robotpyVersion} -d ${targetDir}"
+
+def robotpyLinuxCmd = "pip download --destination-directory ${targetDir} robotpy==${robotpyVersion}"
+
+def robotpyMacCmd = "python3 -m pip download robotpy==${robotpyVersion} -d ${targetDir}"
+
+
+def downloadRobotPyWheelWindows = tasks.register("downloadRobotPyWheelWindows", Exec) {
+    workingDir "$buildDir/downloads"
+
+    doFirst {
+        file("$buildDir/downloads/robotpy").mkdirs()
+    }
+
+    commandLine 'cmd.exe', '/d', '/c', robotpyWindowsCmd
+
+    outputs.dir targetDir
+}
+
+def downloadRobotPyWheelLinux = tasks.register("downloadRobotPyWheelLinux", Exec) {
+    workingDir "$buildDir/downloads"
+
+    doFirst {
+        file("$buildDir/downloads/robotpy").mkdirs()
+    }
+
+    commandLine '/bin/sh', '-c', robotpyLinuxCmd
+
+    outputs.dir targetDir
+}
+
+def downloadRobotPyWheelMac = tasks.register("downloadRobotPyWheelMac", Exec) {
+    workingDir "$buildDir/downloads"
+
+    doFirst {
+        file("$buildDir/downloads/robotpy").mkdirs()
+    }
+
+    commandLine '/bin/bash', '-c', robotpyMacCmd
+
+    outputs.dir targetDir
+}
+
+def wheelDownloadTask
+if(project.hasProperty('windowsBuild')) {
+    wheelDownloadTask = downloadRobotPyWheelWindows
+} else if (project.hasProperty('macBuild')) {
+    wheelDownloadTask = downloadRobotPyWheelMac
+} else {
+    wheelDownloadTask = downloadRobotPyWheelLinux
+}
+
+def robotpyConfigFile = file("$buildDir/robotpyconfig.json")
+
+def robotpyTask = tasks.register('robotpyConfig', Task) {
+    dependsOn wheelDownloadTask
+
+    it.outputs.file robotpyConfigFile
+
+    doLast {
+        def config = [:]
+        config['folder'] = 'robotpy'
+
+        def gbuilder = getGsonBuilder()
+
+        gbuilder.setPrettyPrinting()
+        def json = gbuilder.create().toJson(config)
+
+        robotpyConfigFile.parentFile.mkdirs()
+
+        robotpyConfigFile.text = json
+    }
+}
+
+ext.robotpyConfigFileSetup = {AbstractArchiveTask zip->
+    zip.dependsOn robotpyTask
+    zip.inputs.file robotpyConfigFile
+
+    zip.from(robotpyConfigFile) {
+        rename {'robotpyConfig.json'}
+    }
+}
+
+ext.robotpyZipSetup = { AbstractArchiveTask zip->
+    zip.dependsOn wheelDownloadTask
+    zip.dependsOn robotpyTask
+    zip.inputs.dir targetDir
+
+    zip.from(targetDir) {
+        include '*.whl'
+        into '/robotpy'
+    }
+
+    zip.from(robotpyConfigFile) {
+        into '/installUtils'
+        rename {'robotpyConfig.json'}
+    }
+}

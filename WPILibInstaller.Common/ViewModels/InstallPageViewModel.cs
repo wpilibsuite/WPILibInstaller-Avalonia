@@ -15,6 +15,7 @@ namespace WPILibInstaller.ViewModels
         private readonly IVsCodeInstallationService vsCodeInstallationService;
         private readonly IToolInstallationService toolInstallationService;
         private readonly IShortcutService shortcutService;
+        private readonly IRobotPyInstallationService robotpyService;
 
         [ObservableProperty]
         public partial int Progress { get; set; }
@@ -40,7 +41,8 @@ namespace WPILibInstaller.ViewModels
             IArchiveExtractionService archiveExtractionService,
             IVsCodeInstallationService vsCodeInstallationService,
             IToolInstallationService toolInstallationService,
-            IShortcutService shortcutService)
+            IShortcutService shortcutService,
+            IRobotPyInstallationService robotpyService)
             : base("", "")
         {
             this.viewModelResolver = viewModelResolver;
@@ -49,6 +51,7 @@ namespace WPILibInstaller.ViewModels
             this.vsCodeInstallationService = vsCodeInstallationService;
             this.toolInstallationService = toolInstallationService;
             this.shortcutService = shortcutService;
+            this.robotpyService = robotpyService;
             runInstallTask = InstallFunc();
 
             async Task InstallFunc()
@@ -100,14 +103,28 @@ namespace WPILibInstaller.ViewModels
                         break;
                     }
 
-                    SetOverallProgress(33, "Installing Tools");
+                    SetOverallProgress(20, "Installing Tools");
                     await toolInstallationService.RunToolSetup(progress);
                     if (token.IsCancellationRequested)
                     {
                         break;
                     }
 
-                    SetOverallProgress(66, "Creating Shortcuts");
+                    SetOverallProgress(40, "Installing Python");
+                    await robotpyService.InstallPython(progress);
+                    if (token.IsCancellationRequested)
+                    {
+                        break;
+                    }
+
+                    SetOverallProgress(60, "Installing RobotPy");
+                    await robotpyService.InstallRobotPy(progress);
+                    if (token.IsCancellationRequested)
+                    {
+                        break;
+                    }
+
+                    SetOverallProgress(80, "Creating Shortcuts");
                     await shortcutService.RunShortcutCreator(token);
                 }
                 while (false);
@@ -132,56 +149,70 @@ namespace WPILibInstaller.ViewModels
                         break;
                     }
 
-                    SetOverallProgress(11, "Installing Gradle");
+                    SetOverallProgress(9, "Installing Gradle");
                     await toolInstallationService.RunGradleSetup(progress);
                     if (token.IsCancellationRequested)
                     {
                         break;
                     }
 
-                    SetOverallProgress(22, "Installing Tools");
+                    SetOverallProgress(19, "Installing Tools");
                     await toolInstallationService.RunToolSetup(progress);
                     if (token.IsCancellationRequested)
                     {
                         break;
                     }
 
-                    SetOverallProgress(33, "Installing CPP");
+                    SetOverallProgress(28, "Installing CPP");
                     await toolInstallationService.RunCppSetup(progress);
                     if (token.IsCancellationRequested)
                     {
                         break;
                     }
 
-                    SetOverallProgress(44, "Fixing Maven");
+                    SetOverallProgress(37, "Fixing Maven");
                     await toolInstallationService.RunMavenMetaDataFixer(progress);
                     if (token.IsCancellationRequested)
                     {
                         break;
                     }
 
-                    SetOverallProgress(55, "Installing VS Code");
+                    SetOverallProgress(46, "Installing VS Code");
                     await vsCodeInstallationService.RunVsCodeSetup(token, progress);
                     if (token.IsCancellationRequested)
                     {
                         break;
                     }
 
-                    SetOverallProgress(66, "Configuring VS Code");
+                    SetOverallProgress(55, "Configuring VS Code");
                     await vsCodeInstallationService.ConfigureVsCodeSettings();
                     if (token.IsCancellationRequested)
                     {
                         break;
                     }
 
-                    SetOverallProgress(77, "Installing VS Code Extensions");
+                    SetOverallProgress(65, "Installing VS Code Extensions");
                     await vsCodeInstallationService.RunVsCodeExtensionsSetup(progress);
                     if (token.IsCancellationRequested)
                     {
                         break;
                     }
 
-                    SetOverallProgress(88, "Creating Shortcuts");
+                    SetOverallProgress(74, "Installing Python");
+                    await robotpyService.InstallPython(progress);
+                    if (token.IsCancellationRequested)
+                    {
+                        break;
+                    }
+
+                    SetOverallProgress(83, "Installing RobotPy");
+                    await robotpyService.InstallRobotPy(progress);
+                    if (token.IsCancellationRequested)
+                    {
+                        break;
+                    }
+
+                    SetOverallProgress(92, "Creating Shortcuts");
                     await shortcutService.RunShortcutCreator(token);
                 }
                 while (false);

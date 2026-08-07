@@ -33,6 +33,18 @@ def javaLangUrl = "https://github.com/redhat-developer/vscode-java/releases/down
 
 def javaDepUrl = "https://open-vsx.org/api/vscjava/vscode-java-dependency/${javaDependencyVersion}/file/vscjava.vscode-java-dependency-${javaDependencyVersion}.vsix"
 
+def pythonUV = "https://open-vsx.org/api/the0807/uv-toolkit/${uvToolkitVersion}/file/the0807.uv-toolkit-${uvToolkitVersion}.vsix"
+
+def pythonTyWindowsUrl = "https://open-vsx.org/api/astral-sh/ty/win32-x64/${tyVersion}/file/astral-sh.ty-${tyVersion}@win32-x64.vsix"
+
+def pythonTyLinuxUrl = "https://open-vsx.org/api/astral-sh/ty/linux-x64/${tyVersion}/file/astral-sh.ty-${tyVersion}@linux-x64.vsix"
+
+def pythonTyLinuxArm64Url = "https://open-vsx.org/api/astral-sh/ty/linux-arm64/${tyVersion}/file/astral-sh.ty-${tyVersion}@linux-arm64.vsix"
+
+def pythonTyMacUrl = "https://open-vsx.org/api/astral-sh/ty/darwin-x64/${tyVersion}/file/astral-sh.ty-${tyVersion}@darwin-x64.vsix"
+
+def pythonTyMacArmUrl = "https://open-vsx.org/api/astral-sh/ty/darwin-arm64/${tyVersion}/file/astral-sh.ty-${tyVersion}@darwin-arm64.vsix"
+
 def vscodeWindowsDownload = tasks.register("vscodeWindowsDownload", Download) {
   src vscodeWindowsUrl
   dest "$buildDir/downloads/$vscodeWindowsZipName"
@@ -159,6 +171,48 @@ def javaDepExtensionDownload = tasks.register("javaDepExtensionDownload", Downlo
   overwrite false
 }
 
+def pythonUVExtensionDownload = tasks.register("pythonUVExtensionDownload", Download) {
+  src pythonUV
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite false
+}
+
+def pythonTyWindowsDownload = tasks.register("pythonTyWindowsDownload", Download) {
+  src pythonTyWindowsUrl
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite false
+}
+
+def pythonTyLinuxDownload = tasks.register("pythonTyLinuxDownload", Download) {
+  src pythonTyLinuxUrl
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite false
+}
+
+def pythonTyLinuxArmDownload = tasks.register("pythonTyLinuxArmDownload", Download) {
+  src pythonTyLinuxArm64Url
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite false
+}
+
+def pythonTyMacDownload = tasks.register("pythonTyMacDownload", Download) {
+  src pythonTyMacUrl
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite false
+}
+
+def pythonTyMacArmDownload = tasks.register("pythonTyMacArmDownload", Download) {
+  src pythonTyMacArmUrl
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite false
+}
+
 
 def cppDownloadTask
 if (project.hasProperty('linuxBuild')) {
@@ -173,6 +227,19 @@ if (project.hasProperty('linuxBuild')) {
   cppDownloadTask = cppExtensionDownload
 }
 
+def tyDownloadTask
+if (project.hasProperty('linuxBuild')) {
+  tyDownloadTask = pythonTyLinuxDownload
+} else if (project.hasProperty('linuxBuildArm64')) {
+  tyDownloadTask = pythonTyLinuxArmDownload
+} else if (project.hasProperty('macBuild')) {
+  tyDownloadTask = pythonTyMacDownload
+} else if (project.hasProperty('macBuildArm64')) {
+  tyDownloadTask = pythonTyMacArmDownload
+} else {
+  tyDownloadTask = pythonTyWindowsDownload
+}
+
 def getInformationOfVsix = { vsix, map->
   def pkg = vsix.matching { include '**/extension/package.json' }.files.asList()[0]
   def packageJson = new groovy.json.JsonSlurper().parseText(pkg.text)
@@ -183,6 +250,8 @@ def getInformationOfVsix = { vsix, map->
 def vscodeTask = tasks.register('vscodeConfig', Task) {
   dependsOn wpilibExtensionDownload
   dependsOn cppDownloadTask
+  dependsOn tyDownloadTask
+  dependsOn pythonUVExtensionDownload
   dependsOn javaLangExtensionDownload
   dependsOn javaDebugExtensionDownload
   dependsOn javaDepExtensionDownload
@@ -193,6 +262,8 @@ def vscodeTask = tasks.register('vscodeConfig', Task) {
 
   inputs.files wpilibExtensionDownload.get().outputFiles
   inputs.files cppDownloadTask.get().outputFiles
+  inputs.files tyDownloadTask.get().outputFiles
+  inputs.files pythonUVExtensionDownload.get().outputFiles
   inputs.files javaLangExtensionDownload.get().outputFiles
   inputs.files javaDebugExtensionDownload.get().outputFiles
   inputs.files javaDepExtensionDownload.get().outputFiles
@@ -211,6 +282,12 @@ def vscodeTask = tasks.register('vscodeConfig', Task) {
     def cppMap = [:]
     cppMap['vsix'] = cppDownloadTask.get().outputFiles.first().name
     getInformationOfVsix(zipTree(cppDownloadTask.get().outputFiles.first()), cppMap)
+    def pyTyMap = [:]
+    pyTyMap['vsix'] = tyDownloadTask.get().outputFiles.first().name
+    getInformationOfVsix(zipTree(tyDownloadTask.get().outputFiles.first()), pyTyMap)
+    def pyUVMap = [:]
+    pyUVMap['vsix'] = pythonUVExtensionDownload.get().outputFiles.first().name
+    getInformationOfVsix(zipTree(pythonUVExtensionDownload.get().outputFiles.first()), pyUVMap)
     def javaLangMap = [:]
     javaLangMap['vsix'] = javaLangExtensionDownload.get().outputFiles.first().name
     getInformationOfVsix(zipTree(javaLangExtensionDownload.get().outputFiles.first()), javaLangMap)
@@ -245,6 +322,8 @@ def vscodeTask = tasks.register('vscodeConfig', Task) {
 
     config['thirdPartyExtensions'] = [
       cppMap,
+      pyTyMap,
+      pyUVMap,
       javaLangMap,
       javaDebugMap,
       javaDepMap,
@@ -279,6 +358,10 @@ ext.vscodeZipSetup = { AbstractArchiveTask zip->
     into '/installUtils'
   }
 
+  zip.from(pythonUVExtensionDownload.get().outputFiles.first()) {
+    into '/vsCodeExtensions'
+  }
+
   zip.from (javaLangExtensionDownload.get().outputFiles.first()) {
     into '/vsCodeExtensions'
   }
@@ -286,6 +369,9 @@ ext.vscodeZipSetup = { AbstractArchiveTask zip->
     into '/vsCodeExtensions'
   }
   zip.from (cppDownloadTask.get().outputFiles.first()) {
+    into '/vsCodeExtensions'
+  }
+  zip.from (tyDownloadTask.get().outputFiles.first()) {
     into '/vsCodeExtensions'
   }
   zip.from (wpilibExtensionDownload.get().outputFiles.first()) {
