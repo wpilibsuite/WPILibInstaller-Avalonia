@@ -162,19 +162,13 @@ namespace WPILibInstaller.CLI
                 }
                 else
                 {
-                    Console.WriteLine("[1/5] Extracting JDK and tools...");
+                    Console.WriteLine("[1/3] Extracting JDK and tools...");
                     await archiveService.ExtractJDKAndTools(cancellation.Token, progress);
 
-                    Console.WriteLine("[2/5] Setting up tools...");
+                    Console.WriteLine("[2/3] Setting up tools...");
                     await toolService.RunToolSetup(progress);
 
-                    Console.WriteLine("[3/5] Installing Python...");
-                    await robotpyService.InstallPython(progress);
-
-                    Console.WriteLine("[4/5] Installing RobotPy...");
-                    await robotpyService.InstallRobotPy(progress);
-
-                    Console.WriteLine("[5/5] Creating shortcuts...");
+                    Console.WriteLine("[3/3] Creating shortcuts...");
                     await shortcutService.RunShortcutCreator(cancellation.Token);
                 }
 

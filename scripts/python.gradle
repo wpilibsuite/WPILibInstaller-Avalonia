@@ -5,6 +5,12 @@ apply from: 'scripts/versions.gradle'
 
 def baseUrl = "https://www.python.org/ftp/python/${pythonVersion}/"
 
+def uvBaseURL = "https://github.com/astral-sh/uv/releases/download/${uvVersion}/"
+
+def uvWindowsURL = uvBaseURL + "uv-installer.ps1"
+
+def uvURL = uvBaseURL + "uv-installer.sh"
+
 def pythonWindowsFile = "python-${pythonVersion}-amd64.exe"
 
 def pythonWindowsURL = baseUrl + pythonWindowsFile
@@ -27,19 +33,41 @@ def pythonMacDownload = tasks.register("pythonMacDownload", Download) {
     overwrite false
 }
 
+def getUvWindowsDownload = tasks.register("getUvWindowsDownload", Download) {
+    src uvWindowsURL
+    def fileName = file(src.file).name
+    dest "$buildDir/downloads/$fileName"
+    overwrite false
+}
+
+def getUvDownload = tasks.register("getUvDownload", Download) {
+    src uvURL
+    def fileName = file(src.file).name
+    dest "$buildDir/downloads/$fileName"
+    overwrite false 
+}
+
 def pythonDownloadTask
 if(project.hasProperty('windowsBuild')) {
     pythonDownloadTask = pythonWindowsDownload
-} else if (project.hasProperty('macBuild')) {
+} else {
     pythonDownloadTask = pythonMacDownload
+}
+
+def uvDownloadTask
+if(project.hasProperty('windowsBuild')) {
+    uvDownloadTask = getUvWindowsDownload
+} else {
+    uvDownloadTask = getUvDownload
 }
 
 def pythonConfigFile = file("$buildDir/pythonconfig.json")
 
 def pythonTask = tasks.register('pythonConfig', Task) {
     dependsOn pythonDownloadTask
+    dependsOn uvDownloadTask
 
-    inputs.files pythonDownloadTask.get().outputFiles
+    inputs.files uvDownloadTask.get().outputFiles
 
     it.outputs.file pythonConfigFile
 
@@ -49,6 +77,7 @@ def pythonTask = tasks.register('pythonConfig', Task) {
         config['exeFile'] = "python-" + pythonVersion + "-amd64.exe"
         config['pkgFile'] = "python-" + pythonVersion + "-macos11.pkg"
         config['version'] = pythonVersion
+        config['uvInstallFile'] = uvDownloadTask.get().outputFiles.first().name
 
         def gbuilder = getGsonBuilder()
 
@@ -72,9 +101,14 @@ ext.pythonConfigFileSetup = {AbstractArchiveTask zip->
 
 ext.pythonZipSetup = { AbstractArchiveTask zip-> 
     zip.dependsOn pythonDownloadTask
+    zip.dependsOn uvDownloadTask
     zip.dependsOn pythonTask
 
     zip.from(pythonDownloadTask.get().outputFiles.first()) {
+        into '/python'
+    }
+
+    zip.from(uvDownloadTask.get().outputFiles) {
         into '/python'
     }
 

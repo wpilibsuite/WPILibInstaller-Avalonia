@@ -31,3 +31,5 @@ ext.gradleWrapperVersion = '9.4.1'
 ext.robotpyVersion = '2027.0.0a6.post1'
 
 ext.pythonVersion = '3.14.6'
+
+ext.uvVersion = '0.12.2'

@@ -14,5 +14,7 @@ namespace WPILibInstaller.Models
         public string Version { get; set; }
         [JsonPropertyName("folder")]
         public string Folder { get; set; }
+        [JsonPropertyName("uvInstallFile")]
+        public string UvInstallFile { get; set; }
     }
 }

@@ -10,18 +10,16 @@ namespace WPILibInstaller.Services
         private readonly IConfigurationProvider configurationProvider;
         private readonly string pythonWindowsDir;
         private readonly string pythonPkgDir;
-        private readonly string pythonVersion;
-        private readonly string robotpyWhlFile;
-        private readonly Boolean isAdmin;
+        private readonly string robotpyDir;
+        private readonly string uvDir;
         public RobotPyInstallationService(IConfigurationProvider configurationProvider,
             IToInstallProvider toInstallProvider)
         {
             this.configurationProvider = configurationProvider;
             pythonWindowsDir = Path.Join(configurationProvider.InstallDirectory, configurationProvider.PythonConfig.Folder, configurationProvider.PythonConfig.ExeFile);
             pythonPkgDir = Path.Join(configurationProvider.InstallDirectory, configurationProvider.PythonConfig.Folder, configurationProvider.PythonConfig.PkgFile);
-            pythonVersion = configurationProvider.PythonConfig.Version;
-            robotpyWhlFile = Path.Join(configurationProvider.InstallDirectory, configurationProvider.RobotpyConfig.Folder, configurationProvider.RobotpyConfig.WhlFile);
-            isAdmin = toInstallProvider.Model.InstallAsAdmin;
+            uvDir = Path.Join(configurationProvider.InstallDirectory, configurationProvider.PythonConfig.Folder, configurationProvider.PythonConfig.UvInstallFile);
+            robotpyDir = Path.Join(configurationProvider.InstallDirectory, configurationProvider.RobotpyConfig.Folder);
         }
 
         public async Task InstallPython(IProgress<InstallProgress>? progress = null)
@@ -35,22 +33,21 @@ namespace WPILibInstaller.Services
             {
                 case Platform.Win64:
                     await RunCommand(pythonWindowsDir, $"\"{tempFile}\" /quiet InstallAllUsers=0 Include_pip=1");
-                    await RunCommand("cmd.exe", "/c powershell -ExecutionPolicy ByPass -c \"irm https://astral.sh/uv/install.ps1 | iex\"");
+                    await RunCommand("cmd.exe", $"/c PowerShell.exe -ExecutionPolicy ByPass -File \"{uvDir}\"");
                     break;
                 case Platform.MacArm64:
                 case Platform.Mac64:
                     await RunCommand("/bin/bash", $"-c installer -pkg '{pythonPkgDir}' -target CurrentUserHomeDirectory");
-                    await RunCommand("/bin/sh", "-c curl -LsSf https://astral.sh/uv/install.sh | sh");
+                    await RunCommand("/bin/sh", $"-c chmod +x \"{uvDir}\"");
+                    await RunCommand("/bin/sh", $"-c ./\"{uvDir}\"");
                     break;
                 case Platform.Linux64:
-                    await RunCommand("/bin/sh", "-c python3 -m pip install --user pipx");
-                    await RunCommand("/bin/sh", "-c python3 -m pipx ensurepath");
-                    await RunCommand("/bin/sh", "-c curl -LsSf https://astral.sh/uv/install.sh | sh");
+                    await RunCommand("/bin/sh", $"-c chmod +x \"{uvDir}\"");
+                    await RunCommand("/bin/sh", $"-c ./\"{uvDir}\"");
                     break;
                 case Platform.LinuxArm64:
-                    await RunCommand("/bin/sh", "-c python3 -m pip install --user pipx");
-                    await RunCommand("/bin/sh", "-c python3 -m pipx ensurepath");
-                    await RunCommand("/bin/sh", "-c curl -LsSf https://astral.sh/uv/install.sh | sh");
+                    await RunCommand("/bin/sh", $"-c chmod +x \"{uvDir}\"");
+                    await RunCommand("/bin/sh", $"-c ./\"{uvDir}\"");
                     break;
                 default:
                     throw new PlatformNotSupportedException("Invalid platform");
@@ -60,22 +57,23 @@ namespace WPILibInstaller.Services
         public async Task InstallRobotPy(IProgress<InstallProgress>? progress = null)
         {
             progress?.Report(new InstallProgress(50, "Installing robotpy"));
+            string[] whlFiles = Directory.GetFiles(robotpyDir, "*.whl");
             var currentPlatform = PlatformUtils.CurrentPlatform;
             
             switch (currentPlatform)
             {
                 case Platform.Win64:
-                    await RunCommand("cmd.exe", $"/c python -m pip install \"{robotpyWhlFile}\"");
+                    await RunCommand("cmd.exe", $"/c for %w in (\"{robotpyDir}\\*.whl\") do py -3 -m pip install --user --no-index \"%w\"");
                     break;
                 case Platform.MacArm64:
                 case Platform.Mac64:
-                    await RunCommand("python3", $"-m pip install \"{robotpyWhlFile}\"");
+                    await RunCommand("python3", $"-c pip install --user --no-index --find-links={robotpyDir} {robotpyDir}/*.whl --break-system-packages");
                     break;
                 case Platform.Linux64:
-                    await RunCommand("/bin/sh", $"-c pipx install \"{robotpyWhlFile}\"");
+                    await RunCommand("/bin/sh", $"-c pip install --user --no-index --find-links={robotpyDir} {robotpyDir}/*.whl --break-system-packages");
                     break;
                 case Platform.LinuxArm64:
-                    await RunCommand("/bin/sh", $"-c pipx install \"{robotpyWhlFile}\"");
+                    await RunCommand("/bin/sh", $"-c pip install --user --no-index --find-links={robotpyDir} {robotpyDir}/*.whl --break-system-packages");
                     break;
                 default:
                     throw new PlatformNotSupportedException("Invalid platform");

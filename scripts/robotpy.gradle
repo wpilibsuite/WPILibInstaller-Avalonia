@@ -1,47 +1,72 @@
 import groovy.json.JsonSlurper
+import org.gradle.internal.os.OperatingSystem
 
 apply from: 'scripts/versions.gradle'
 
-def robotpyPyURL = "https://pypi.org/pypi/robotpy/${robotpyVersion}/json"
+def targetDir = "$buildDir\\downloads\\robotpy\\"
 
-def getRobotPyWheelUrl = tasks.register('getRobotPyWheelUrl') {
-    def jsonText = new URL(robotpyPyURL).text
-    def parsedJson = new JsonSlurper().parseText(jsonText)
+def robotpyWindowsCmd = "py -3 -m pip download robotpy==${robotpyVersion} -d ${targetDir}"
 
-    def wheelEntry = parsedJson.urls.find { it.packagetype == 'bdist_wheel' }
-        
-    ext.wheelDownloadURL = wheelEntry.url
-}
+def robotpyLinuxCmd = "pip download --destination-directory ${targetDir} robotpy==${robotpyVersion}"
 
-def downloadRobotPyWheel = tasks.register("downloadRobotPyWheel", Download) {
-    dependsOn getRobotPyWheelUrl
+def robotpyMacCmd = "python3 -m pip download robotpy==${robotpyVersion} -d ${targetDir}"
 
-    src { getRobotPyWheelUrl.get().wheelDownloadURL }
 
-    def fileName = {
-        def url = getRobotPyWheelUrl.get().wheelDownloadURL
-        url.substring(url.lastIndexOf('/') + 1)
+def downloadRobotPyWheelWindows = tasks.register("downloadRobotPyWheelWindows", Exec) {
+    workingDir "$buildDir/downloads"
+
+    doFirst {
+        file("$buildDir/downloads/robotpy").mkdirs()
     }
 
-    dest { "$buildDir/downloads/${fileName()}" }
-    overwrite false
+    commandLine 'cmd.exe', '/d', '/c', robotpyWindowsCmd
+
+    outputs.dir targetDir
 }
 
+def downloadRobotPyWheelLinux = tasks.register("downloadRobotPyWheelLinux", Exec) {
+    workingDir "$buildDir/downloads"
+
+    doFirst {
+        file("$buildDir/downloads/robotpy").mkdirs()
+    }
+
+    commandLine '/bin/sh', '-c', robotpyLinuxCmd
+
+    outputs.dir targetDir
+}
+
+def downloadRobotPyWheelMac = tasks.register("downloadRobotPyWheelMac", Exec) {
+    workingDir "$buildDir/downloads"
+
+    doFirst {
+        file("$buildDir/downloads/robotpy").mkdirs()
+    }
+
+    commandLine '/bin/bash', '-c', robotpyMacCmd
+
+    outputs.dir targetDir
+}
+
+def wheelDownloadTask
+if(project.hasProperty('windowsBuild')) {
+    wheelDownloadTask = downloadRobotPyWheelWindows
+} else if (project.hasProperty('macBuild')) {
+    wheelDownloadTask = downloadRobotPyWheelMac
+} else {
+    wheelDownloadTask = downloadRobotPyWheelLinux
+}
 
 def robotpyConfigFile = file("$buildDir/robotpyconfig.json")
 
 def robotpyTask = tasks.register('robotpyConfig', Task) {
-    dependsOn getRobotPyWheelUrl
-    dependsOn downloadRobotPyWheel
-
-    inputs.files downloadRobotPyWheel.get().outputFiles
+    dependsOn wheelDownloadTask
 
     it.outputs.file robotpyConfigFile
 
     doLast {
         def config = [:]
         config['folder'] = 'robotpy'
-        config['whlFile'] = getRobotPyWheelUrl.get().wheelDownloadURL.substring(getRobotPyWheelUrl.get().wheelDownloadURL.lastIndexOf('/') + 1)
 
         def gbuilder = getGsonBuilder()
 
@@ -64,10 +89,12 @@ ext.robotpyConfigFileSetup = {AbstractArchiveTask zip->
 }
 
 ext.robotpyZipSetup = { AbstractArchiveTask zip->
-    zip.dependsOn downloadRobotPyWheel
+    zip.dependsOn wheelDownloadTask
     zip.dependsOn robotpyTask
+    zip.inputs.dir targetDir
 
-    zip.from(downloadRobotPyWheel.get().outputFiles.first()) {
+    zip.from(targetDir) {
+        include '*.whl'
         into '/robotpy'
     }
 
