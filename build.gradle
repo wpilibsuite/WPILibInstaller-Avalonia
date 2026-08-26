@@ -413,7 +413,7 @@ def versionFileTask = tasks.register('writeVersionNumber', Task) {
 
 // Copies the main application to build/outputs.
 def copyInstallerFiles = tasks.register('copyInstallerFiles', Copy) {
-    if (!project.hasProperty("macBuild") && !project.hasProperty("macBuildArm")) {
+    if (!project.hasProperty("macBuild") && !project.hasProperty("macBuildArm64")) {
         from(installDirectory) {
             exclude('WPILibInstaller', 'WPILibInstaller.app')
             exclude('**/*.pdb') // Exclude all PDBs
