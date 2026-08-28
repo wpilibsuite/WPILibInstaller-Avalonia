@@ -26,6 +26,7 @@ ext.varsZipSetup = { AbstractArchiveTask zip->
   zip.inputs.file codefile
   zip.inputs.file codefileCmd
   zip.inputs.file codeAppArmorFile
+  zip.inputs.file advantagescopeAppArmorFile
 
   if (project.ext.buildClassifier == 'Windows' || project.ext.buildClassifier == 'WindowsArm64') {
     zip.from (varsfile) {
@@ -72,7 +73,7 @@ ext.varsZipSetup = { AbstractArchiveTask zip->
     into "/$iconfolder"
   }
 
-  if (project.ext.buildClassifier == 'Linux') {
+  if (project.ext.buildClassifier == 'Linux' || project.ext.buildClassifier == 'LinuxArm64') {
     zip.from (codeAppArmorFile) {
       into "/$pathfolder/AppArmor"
       rename {

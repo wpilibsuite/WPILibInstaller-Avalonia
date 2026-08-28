@@ -203,19 +203,30 @@ StartupWMClass=code
             }
 
             var installDir = configurationProvider.InstallDirectory;
-            await CreateLinuxShortcut("AdvantageScope (WPILib)", $"{installDir}/advantagescope/advantagescope-wpilib", wpilibYear, "AdvantageScope (WPILib)", "advantagescope.png", token);
-            await CreateLinuxShortcut("Elastic (WPILib)", $"{installDir}/elastic/elastic_dashboard", wpilibYear, "elastic_dashboard", "elastic.png", token);
-            await CreateLinuxShortcut("Glass", "glass", wpilibYear, "Glass - DISCONNECTED", "glass.png", token);
-            await CreateLinuxShortcut("OutlineViewer", "outlineviewer", wpilibYear, "OutlineViewer - DISCONNECTED", "outlineviewer.png", token);
-            await CreateLinuxShortcut("DataLogTool", "datalogtool", wpilibYear, "Datalog Tool", "datalogtool.png", token);
-            await CreateLinuxShortcut("SysId", "sysid", wpilibYear, "System Identification", "sysid.png", token);
-            await CreateLinuxShortcut("WPIcal", "wpical", wpilibYear, "WPIcal", "wpical.png", token);
+            await CreateLinuxShortcutIfInstalled("AdvantageScope (WPILib)", $"{installDir}/advantagescope/advantagescope-wpilib", wpilibYear, "AdvantageScope (WPILib)", "advantagescope.png", token);
+            await CreateLinuxShortcutIfInstalled("Elastic (WPILib)", $"{installDir}/elastic/elastic_dashboard", wpilibYear, "elastic_dashboard", "elastic.png", token);
+            await CreateLinuxShortcutIfInstalled("Glass", "glass", wpilibYear, "Glass - DISCONNECTED", "glass.png", token);
+            await CreateLinuxShortcutIfInstalled("OutlineViewer", "outlineviewer", wpilibYear, "OutlineViewer - DISCONNECTED", "outlineviewer.png", token);
+            await CreateLinuxShortcutIfInstalled("DataLogTool", "datalogtool", wpilibYear, "Datalog Tool", "datalogtool.png", token);
+            await CreateLinuxShortcutIfInstalled("SysId", "sysid", wpilibYear, "System Identification", "sysid.png", token);
+            await CreateLinuxShortcutIfInstalled("WPIcal", "wpical", wpilibYear, "WPIcal", "wpical.png", token);
 
             if (toInstallProvider.Model.InstallEverything)
             {
                 var docsPath = Path.Combine(installDir, "documentation", "frc-docs", "index.html");
                 await CreateLinuxShortcut("WPILib Documentation", $"xdg-open \"{docsPath}\"", wpilibYear, "WPILib Documentation", "wpilib-icon-256.png", token);
             }
+        }
+
+        private Task CreateLinuxShortcutIfInstalled(string name, string executableName, string wpilibYear, string wmClass, string iconName, CancellationToken token)
+        {
+            var executablePath = Path.IsPathRooted(executableName)
+                ? executableName
+                : Path.Combine(configurationProvider.InstallDirectory, "tools", executableName);
+
+            return File.Exists(executablePath)
+                ? CreateLinuxShortcut(name, executableName, wpilibYear, wmClass, iconName, token)
+                : Task.CompletedTask;
         }
 
         private async Task CreateLinuxShortcut(string name, string executableName, string wpilibYear, string wmClass, string iconName, CancellationToken token)

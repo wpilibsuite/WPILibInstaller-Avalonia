@@ -246,6 +246,7 @@ def upgradeConfigFile = file("$buildDir/upgradeConfig.json")
 def upgradeConfigFileTask = tasks.register('generateUpgradeConfigFile', Task) { Task task ->
     task.outputs.file upgradeConfigFile
     def classifier = project.ext.buildClassifier
+    task.inputs.property 'classifier', classifier
 
     def configurations = []
     configurations << toolsConfig()
