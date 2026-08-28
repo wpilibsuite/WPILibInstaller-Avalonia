@@ -2,8 +2,6 @@ apply from: 'scripts/versions.gradle'
 
 def vscodeFile = file("$buildDir/vscodeConfig.json")
 
-def wpilibVersion = '2027.0.0-alpha-6'
-
 def vscodeWindowsZipName = "VSCode-${vsCodeVersion}-Windows.zip".toString()
 def vscodeLinuxZipName = "VSCode-${vsCodeVersion}-Linux.tar.gz".toString()
 def vscodeLinuxArm64ZipName = "VSCode-${vsCodeVersion}-LinuxArm64.tar.gz".toString()
