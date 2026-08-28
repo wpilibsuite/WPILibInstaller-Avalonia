@@ -526,7 +526,8 @@ def windowsCreateImageTask = tasks.register('createWindowsImage', Exec) {
     inputs.dir "$buildDir/outputs"
     outputs.upToDateWhen { false }
 
-    def file = "$buildDir/pubOutputs/WPILib_" + buildClassifier + '-' + pubVersion + '.iso'
+    def diskArch = project.hasProperty('windowsBuildArm64') ? 'Windows-Arm64' : 'Windows-x64'
+    def file = "$buildDir/pubOutputs/WPILib_" + diskArch + '-' + pubVersion + '.iso'
 
     outputs.file file
 
@@ -544,9 +545,11 @@ def linuxCreateImageTask = tasks.register('createLinuxImage', Tar) {
 
     inputs.dir "$buildDir/outputs"
 
-    archiveBaseName = 'WPILib_' + buildClassifier + '-' + pubVersion + ''
+    def diskArch = project.hasProperty('linuxBuildArm64') ? 'Linux-Arm64' : 'Linux-x64'
 
-    into 'WPILib_' + buildClassifier + '-' + pubVersion + ''
+    archiveBaseName = 'WPILib_' + diskArch + '-' + pubVersion + ''
+
+    into 'WPILib_' + diskArch + '-' + pubVersion + ''
 
     destinationDirectory = file("$buildDir/pubOutputs")
 
