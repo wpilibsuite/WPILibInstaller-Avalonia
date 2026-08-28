@@ -226,6 +226,20 @@ def downloadXrpVendor = tasks.register('downloadXrpVendor', Download) {
   overwrite false
 }
 
+def downloadAprilTagVendor = tasks.register('downloadAprilTagVendor', Download) {
+  src 'https://raw.githubusercontent.com/wpilibsuite/allwpilib/main/apriltag/AprilTag.json'
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite false
+}
+
+def downloadCameraServerVendor = tasks.register('downloadCameraServerVendor', Download) {
+  src 'https://raw.githubusercontent.com/wpilibsuite/allwpilib/main/cameraserver/CameraServer.json'
+  def fileName = file(src.file).name
+  dest "$buildDir/downloads/$fileName"
+  overwrite false
+}
+
 ext.mavenZipSetup = { AbstractArchiveTask zip->
   zip.dependsOn updateOfflineRepository
   zip.inputs.dir offlineRepositoryRoot
@@ -235,6 +249,10 @@ ext.mavenZipSetup = { AbstractArchiveTask zip->
 
   zip.dependsOn downloadCommandsv2
   zip.dependsOn downloadCommandsv3
+  zip.dependsOn downloadRomiVendor
+  zip.dependsOn downloadXrpVendor
+  zip.dependsOn downloadAprilTagVendor
+  zip.dependsOn downloadCameraServerVendor
   zip.dependsOn downloadReadTheDocs
   zip.dependsOn downloadPythonAPI
 
@@ -251,6 +269,14 @@ ext.mavenZipSetup = { AbstractArchiveTask zip->
   }
 
   zip.from(downloadXrpVendor.get().outputFiles.first()) {
+    into '/vendordeps'
+  }
+
+  zip.from(downloadAprilTagVendor.get().outputFiles.first()) {
+    into '/vendordeps'
+  }
+
+  zip.from(downloadCameraServerVendor.get().outputFiles.first()) {
     into '/vendordeps'
   }
 
