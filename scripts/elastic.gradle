@@ -79,7 +79,9 @@ ext.elasticConfigFileSetup = { AbstractArchiveTask zip->
 }
 
 ext.elasticZipSetup = { AbstractArchiveTask zip->
-  if (project.hasProperty('linuxBuild')) {
+  if (project.hasProperty('linuxBuildArm64')) {
+    // Elastic does not currently publish a Linux ARM64 binary.
+  } else if (project.hasProperty('linuxBuild')) {
     zip.dependsOn downloadTaskLinux
 
     zip.inputs.files downloadTaskLinux.get().outputFiles

@@ -58,7 +58,17 @@ namespace WPILibInstaller.Views
                 MinWidth = 75,
                 Padding = new Avalonia.Thickness(10, 5)
             };
-            button.Click += (_, _) => Close(result);
+            button.Click += (_, _) =>
+            {
+                if (Owner == null)
+                {
+                    Close();
+                }
+                else
+                {
+                    Close(result);
+                }
+            };
             panel.Children.Add(button);
         }
 

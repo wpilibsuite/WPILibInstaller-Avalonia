@@ -43,10 +43,12 @@ def toolsJsonTask = tasks.register('toolsJson', Task) {
     advantageScopeItem['version'] = advantagescopeGitTag
     config << advantageScopeItem
 
-    def elasticItem = [:]
-    elasticItem['name'] = "Elastic"
-    elasticItem['version'] = elasticGitTag
-    config << elasticItem
+    if (!project.hasProperty('linuxBuildArm64')) {
+      def elasticItem = [:]
+      elasticItem['name'] = "Elastic"
+      elasticItem['version'] = elasticGitTag
+      config << elasticItem
+    }
 
     def gbuilder = getGsonBuilder()
     gbuilder.setPrettyPrinting()

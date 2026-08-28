@@ -8,7 +8,7 @@ configurations {
   cppTools
   documentationJava
   documentationCpp
-  runtimex64
+  msvcRuntime
 }
 
 def toolArtifacts = [
@@ -25,17 +25,15 @@ def cppToolsArtifacts = [
 def skipNewPlatformTools = [
 ]
 
-def skipLinuxArm64PlatformTools = [
-  'org.wpilib.tools:wpical'
-]
-
 def skipTools = []
 
 dependencies {
     documentationCpp "org.wpilib.wpilibc:documentation:${project.ext.gradlerioMetadata.wpilibVersion}@zip"
     documentationJava "org.wpilib.wpilibj:documentation:${project.ext.gradlerioMetadata.wpilibVersion}@zip"
     if (project.ext.buildClassifier == 'Windows') {
-        runtimex64 "org.wpilib.msvc:runtime:${project.ext.gradlerioMetadata.wpilibVersion}:x64@zip"
+        msvcRuntime "org.wpilib.msvc:runtime:${project.ext.gradlerioMetadata.wpilibVersion}:x64@zip"
+    } else if (project.ext.buildClassifier == 'WindowsArm64') {
+        msvcRuntime "org.wpilib.msvc:runtime:${project.ext.gradlerioMetadata.wpilibVersion}:arm64@zip"
     }
 }
 
@@ -66,17 +64,6 @@ dependencies {
             }
           }
         }
-        if (project.hasProperty('linuxBuildArm64')) {
-          skipLinuxArm64PlatformTools.each { tool->
-            if ("$dep.groupId:$dep.artifactId" == tool) {
-              def depString = "$dep.groupId:$dep.artifactId:$dep.version:$dep.classifier@$dep.extension"
-              println "Skipping because arm " + depString
-              foundTool = true
-              return
-            }
-          }
-        }
-
         if (foundTool) {
           return
         }
@@ -295,8 +282,8 @@ ext.mavenZipSetup = { AbstractArchiveTask zip->
     into '/tools/artifacts'
   }
 
-  if (project.ext.buildClassifier == 'Windows') {
-    zip.from(project.zipTree(configurations.runtimex64.resolvedConfiguration.resolvedArtifacts.first().file)) {
+  if (project.ext.buildClassifier == 'Windows' || project.ext.buildClassifier == 'WindowsArm64') {
+    zip.from(project.zipTree(configurations.msvcRuntime.resolvedConfiguration.resolvedArtifacts.first().file)) {
       into '/tools'
     }
   }

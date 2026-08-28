@@ -18,7 +18,7 @@ def fileNameLinux = "arm64-systemcore-2027-x86_64-linux-gnu-Toolchain-${gccVersi
 
 def downloadUrlLinux = baseUrl + fileNameLinux
 
-def fileNameLinuxArm64 = "arm64-systemcore-2027-aarch64-bookworm-linux-gnu-Toolchain-${gccVersion}.tgz"
+def fileNameLinuxArm64 = "arm64-systemcore-2027-aarch64-trixie-linux-gnu-Toolchain-${gccVersion}.tgz"
 
 def downloadUrlLinuxArm64 = baseUrl + fileNameLinuxArm64
 

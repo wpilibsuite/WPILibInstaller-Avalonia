@@ -41,14 +41,24 @@ if (pubVersion == '') {
 
 println pubVersion
 
+def os_arch = System.getProperty("os.arch")
+
+if (os_arch == 'amd64' || os_arch == 'x86_64') {
+    os_arch = 'x86-64'
+} else if (os_arch == 'aarch64' || os_arch == 'arm64') {
+    os_arch = 'arm64'
+}
+
 project.ext.setProperty('toolchain-optional-systemCore', '')
 
 if (OperatingSystem.current().isWindows()) {
-    project.ext.currentClassifier = 'windowsx86-64'
+    project.ext.currentClassifier = "windows$os_arch"
 } else if (OperatingSystem.current().isMacOsX()) {
     project.ext.currentClassifier = 'osxuniversal'
+} else if (OperatingSystem.current().isLinux()) {
+    project.ext.currentClassifier = "linux$os_arch"
 } else {
-    project.ext.currentClassifier = 'linuxx86-64'
+    throw new GradleException("Unsupported platform: " + OperatingSystem.current() + " " + os_arch)
 }
 
 def buildFlags = ['linuxBuild', 'linuxBuildArm64', 'macBuild', 'macBuildArm64', 'windowsBuild', 'windowsBuildArm64']
@@ -62,15 +72,6 @@ if (setBuildFlags.size() > 1) {
 if (setBuildFlags.size() == 0) {
     println "Automatically setting build type"
     // No property set, we want to set the correct one.
-    def os_arch = System.getProperty("os.arch")
-
-    if (os_arch == 'amd64') {
-        os_arch = 'x86_64'
-    } else if (os_arch == 'aarch64' || os_arch == 'arm64') {
-        os_arch = 'arm64'
-    }
-
-
     if (OperatingSystem.current().isWindows()) {
         if (os_arch == 'arm64') {
             project.ext.windowsBuildArm64 = true
@@ -137,6 +138,17 @@ if (project.hasProperty('linuxBuild')) {
     project.ext.archiveType = Tar
     project.ext.isUnix = true
     project.ext.dotnetRuntime = 'osx-arm64'
+} else if (project.hasProperty('windowsBuildArm64')) {
+    println "Building for Windows Arm64"
+    project.ext.forcePlatform = 'windows'
+    project.ext.forceNativeClassifier = 'windowsarm64'
+    project.ext.forceToolsClassifier = 'winarm64'
+    project.ext.forceCppToolsClassifier = 'windowsarm64'
+    project.ext.buildClassifier = 'WindowsArm64'
+    offlineRepositoryRoot = "$buildDir/dependencies/windows"
+    project.ext.archiveType = Zip
+    project.ext.isUnix = false
+    project.ext.dotnetRuntime = 'win-arm64'
 } else if (project.hasProperty('windowsBuild')) {
     println "Building for Windows x64"
     project.ext.forcePlatform = 'windows'
@@ -234,6 +246,7 @@ def upgradeConfigFile = file("$buildDir/upgradeConfig.json")
 def upgradeConfigFileTask = tasks.register('generateUpgradeConfigFile', Task) { Task task ->
     task.outputs.file upgradeConfigFile
     def classifier = project.ext.buildClassifier
+    task.inputs.property 'classifier', classifier
 
     def configurations = []
     configurations << toolsConfig()
@@ -513,7 +526,8 @@ def windowsCreateImageTask = tasks.register('createWindowsImage', Exec) {
     inputs.dir "$buildDir/outputs"
     outputs.upToDateWhen { false }
 
-    def file = "$buildDir/pubOutputs/WPILib_" + buildClassifier + '-' + pubVersion + '.iso'
+    def diskArch = project.hasProperty('windowsBuildArm64') ? 'Windows-Arm64' : 'Windows-x64'
+    def file = "$buildDir/pubOutputs/WPILib_" + diskArch + '-' + pubVersion + '.iso'
 
     outputs.file file
 
@@ -531,9 +545,11 @@ def linuxCreateImageTask = tasks.register('createLinuxImage', Tar) {
 
     inputs.dir "$buildDir/outputs"
 
-    archiveBaseName = 'WPILib_' + buildClassifier + '-' + pubVersion + ''
+    def diskArch = project.hasProperty('linuxBuildArm64') ? 'Linux-Arm64' : 'Linux-x64'
 
-    into 'WPILib_' + buildClassifier + '-' + pubVersion + ''
+    archiveBaseName = 'WPILib_' + diskArch + '-' + pubVersion + ''
+
+    into 'WPILib_' + diskArch + '-' + pubVersion + ''
 
     destinationDirectory = file("$buildDir/pubOutputs")
 
