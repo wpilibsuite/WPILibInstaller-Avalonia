@@ -198,13 +198,25 @@ namespace WPILibInstaller.CLI
             UpgradeConfig = configuration.UpgradeConfig;
             VsCodeModel = InstallerResources.BuildVsCodeModel(VsCodeConfig);
 
-            if (!await InstallerResources.MacArtifactsChecksumMatchesAsync(artifactsPath, AppContext.BaseDirectory))
+            if (!await InstallerResources.MacArtifactsChecksumMatchesAsync(artifactsPath, GetResourcesRootDirectory()))
             {
                 throw new InvalidDataException("The artifacts file was damaged. Make sure the correct macOS installer image is mounted and try again.");
             }
 
             artifactsStream = File.OpenRead(artifactsPath);
             ZipArchive = ArchiveUtils.OpenArchive(artifactsStream);
+        }
+
+        private static string GetResourcesRootDirectory()
+        {
+            if (OperatingSystem.IsMacOS())
+            {
+                return Path.Combine(AppContext.BaseDirectory, "WPILibInstaller.app", "Contents", "MacOS");
+            }
+            else
+            {
+                return AppContext.BaseDirectory;
+            }
         }
 
         private static bool TryResolveInstallerFiles(
@@ -231,8 +243,10 @@ namespace WPILibInstaller.CLI
                 return true;
             }
 
-            var version = InstallerResources.ReadInstallerVersion(AppContext.BaseDirectory);
-            var discoveredFiles = InstallerResources.FindInstallerFiles(version, AppContext.BaseDirectory);
+            var resourcesRoot = GetResourcesRootDirectory();
+
+            var version = InstallerResources.ReadInstallerVersion(resourcesRoot);
+            var discoveredFiles = InstallerResources.FindInstallerFiles(version, resourcesRoot);
             resourcesFile = providedResourcesFile ?? discoveredFiles.ResourcesFile ?? "";
             artifactsFile = providedArtifactsFile ?? discoveredFiles.ArtifactsFile ?? "";
 
