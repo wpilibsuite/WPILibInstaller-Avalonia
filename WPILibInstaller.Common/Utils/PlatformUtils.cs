@@ -15,6 +15,38 @@ namespace WPILibInstaller.Utils
 
     public class PlatformUtils
     {
+        public static string? GetArchitectureMismatchMessage()
+        {
+            var processArchitecture = RuntimeInformation.ProcessArchitecture;
+            var osArchitecture = RuntimeInformation.OSArchitecture;
+            if (processArchitecture == osArchitecture)
+            {
+                return null;
+            }
+
+            var operatingSystem = OperatingSystem.IsWindows() ? "Windows"
+                : OperatingSystem.IsMacOS() ? "macOS"
+                : OperatingSystem.IsLinux() ? "Linux"
+                : "this operating system";
+            var processArchitectureName = GetArchitectureName(processArchitecture);
+            var osArchitectureName = GetArchitectureName(osArchitecture);
+
+            return $"This is the {processArchitectureName} WPILib installer, but it is running on {operatingSystem} {osArchitectureName}. "
+                + $"Download and run the {operatingSystem} {osArchitectureName} installer instead.";
+        }
+
+        private static string GetArchitectureName(Architecture architecture)
+        {
+            return architecture switch
+            {
+                Architecture.X64 => "x64",
+                Architecture.Arm64 => "ARM64",
+                Architecture.X86 => "x86",
+                Architecture.Arm => "ARM",
+                _ => architecture.ToString()
+            };
+        }
+
         static PlatformUtils()
         {
             CurrentPlatform = Platform.Invalid;
@@ -53,10 +85,6 @@ namespace WPILibInstaller.Utils
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                // Since this program ships with an x64 .NET runtime, if it is running on ARM64
-                // we can safely assume that x64 emulation is available and working. This means
-                // everything else (except kernel drivers) can run as x64 ("Win64" in the local
-                // Platform enum).
                 if (currentArch == Architecture.X64)
                 {
                     CurrentPlatform = Platform.Win64;
