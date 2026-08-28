@@ -169,6 +169,11 @@ public static class InstallerResources
     {
         if (OperatingSystem.IsWindows())
         {
+            if (PlatformUtils.CurrentPlatform == Platform.WinArm64)
+            {
+                return upgradeConfig.InstallerType == UpgradeConfig.WindowsArm64InstallerType ? null : UpgradeConfig.WindowsArm64InstallerType;
+            }
+
             return upgradeConfig.InstallerType == UpgradeConfig.WindowsInstallerType ? null : UpgradeConfig.WindowsInstallerType;
         }
 
