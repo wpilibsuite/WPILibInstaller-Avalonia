@@ -2,9 +2,9 @@ import com.google.gson.GsonBuilder
 
 plugins {
     id "java"
+    id "application"
     id 'cpp'
     id "org.wpilib.GradleRIO"
-    id "com.gradleup.shadow" version "9.3.0"
 }
 
 deploy {
@@ -15,6 +15,7 @@ deploy {
 
             artifacts {
                 wpilibJava(getArtifactTypeClass('WPILibJavaArtifact')) {
+                    debugJni = false
                 }
 
                 wpilibCpp(getArtifactTypeClass('WPILibNativeArtifact')) {
@@ -33,7 +34,7 @@ deploy {
 def deployJavaArtifact = deploy.targets.systemcore.artifacts.wpilibJava
 def deployCppArtifact = deploy.targets.systemcore.artifacts.wpilibCpp
 
-wpi.java.debugJni = false
+wpi.java.runSimWithDebugJni = false
 
 dependencies {
     annotationProcessor wpi.java.deps.wpilibAnnotations()
@@ -68,7 +69,7 @@ dependencies {
 
     // commands
     implementation "org.wpilib.commandsv2:commandsv2-java:${wpi.versions.wpilibVersion.get()}"
-    implementation "org.wpilib:commands3-java:${wpi.versions.wpilibVersion.get()}"
+    implementation "org.wpilib:commandsv3-java:${wpi.versions.wpilibVersion.get()}"
     implementation "org.wpilib.xrpVendordep:xrpVendordep-java:${wpi.versions.wpilibVersion.get()}"
     implementation "org.wpilib.romiVendordep:romiVendordep-java:${wpi.versions.wpilibVersion.get()}"
     if (project.ext.buildClassifier == 'Windows') {
@@ -95,8 +96,8 @@ wpi.sim.addWebsocketsServer().defaultEnabled = true
 wpi.sim.addWebsocketsClient().defaultEnabled = true
 wpi.sim.addXRPClient().defaultEnabled = true
 
-deployJavaArtifact.jarTask = shadowJar
-wpi.java.configureExecutableTasks(shadowJar)
+deployJavaArtifact.configureApplication(application)
+wpi.java.configureApplication(application)
 
 def wpilibFoundVersion = wpi.versions.wpilibVersion.get()
 
@@ -153,22 +154,12 @@ model {
 
             // Defining the dependencies.
             wpi.cpp.deps.wpilib(it)
-            wpi.cpp.deps.googleTest(it)
+            wpi.cpp.deps.catch2(it)
 
             wpi.cpp.deps.useLibrary(it, 'wpilibcommandsv2')
             wpi.cpp.deps.useLibrary(it, 'xrpvendordep')
             wpi.cpp.deps.useLibrary(it, 'romivendordep')
         }
-        // frcUserProgramStatic(NativeExecutableSpec) {
-        //     targetPlatform wpi.platforms.systemcore
-        //     targetPlatform wpi.platforms.desktop
-
-        //     // Defining the dependencies.
-        //     wpi.cpp.deps.wpilibStatic(it)
-        //     wpi.cpp.deps.googleTest(it)
-
-        //     wpi.cpp.deps.useLibrary(it, 'wpilib_new_commands_static')
-        // }
     }
 }
 

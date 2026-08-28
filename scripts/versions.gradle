@@ -1,29 +1,29 @@
-ext.vsCodeVersion = '1.116.0'
+ext.vsCodeVersion = '1.134.0'
 
-ext.vscodeLinuxHash = 'ce87b613dc65a40304e100fc21a82271b023ef5837700f5797299041030524ba'
-ext.vscodeMacHash = 'df4f20c287dfcf33f5ad49e8dc472c8874bd924ead40e4913c4b9753fe52944b'
-ext.vscodeWindowsHash = '365c3d275deb3a1c0a1aa626f274824b8db15ee150d567a7323b8dbce2cdfa8f'
-ext.vscodeWindowsArm64Hash = '6712506c9541823e2c9a52aec6efcfb2f95df4247606eaa9fbade2b08df84fe7'
-ext.vscodeLinuxArm64Hash = '29047acc3fb79be3a0788092b372e45a8ee40b63b1a85e976b1f014536ba4184'
+ext.vscodeLinuxHash = '9336170079f527f1ca62dad39947b020db06bd3e8cae7e1e6097bea594f37733'
+ext.vscodeMacHash = 'eb9d7865ce4d7041e5b971846a00cea71a01db07b3d559537e1a9b8388718d77'
+ext.vscodeWindowsHash = '59d3e1816961abb53d3bcc264083ee7e3f2282a6ff1004c4a1a8411b92a7a45d'
+ext.vscodeWindowsArm64Hash = 'd1829928593cfd6d959433dd96b6c24a73a83dacb62ca445cc0d070aa2801caf'
+ext.vscodeLinuxArm64Hash = 'a5581220fedf9c734114af64b2c8b549e0ae5e82d71cf5c951e3b4d425104b99'
 
-ext.cppToolsVersion = '1.31.4'
-ext.javaExtVersion = '1.54.0'
-ext.javaExtPatchVersion = '923'
+ext.cppToolsVersion = '1.33.8'
+ext.javaExtVersion = '1.55.0'
+ext.javaExtPatchVersion = '995'
 ext.javaDebugVersion = '0.59.0'
-ext.javaDependencyVersion = '0.27.2'
+ext.javaDependencyVersion = '0.27.6'
 
 ext.wpilibVersion = gradleRioVersion
 
-ext.gccVersion = '12.2.0'
-ext.toolchainGitTag = 'v2025-2'
+ext.gccVersion = '14.3.0'
+ext.toolchainGitTag = 'v2027-1'
 
-ext.jdkVersion = '25.0.2+10'
+ext.jdkVersion = '25.0.4.1+1'
 ext.jdkWinArmVersion = '25.0.3'
 
-ext.advantagescopeGitTag = 'v27.0.0-alpha-4'
+ext.advantagescopeGitTag = 'v27.0.0-alpha-6'
 
 ext.elasticGitTag = 'v2027.0.0-alpha8'
 
-ext.wpilibYear = '2027_alpha5'
+ext.wpilibYear = '2027_alpha7'
 
 ext.gradleWrapperVersion = '9.4.1'

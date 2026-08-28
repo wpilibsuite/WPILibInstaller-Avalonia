@@ -138,6 +138,7 @@ namespace WPILibInstaller.Services
             SetIfNotSetIgnoreSync("update.showReleaseNotes", false, settingsJson);
             SetIfNotSetIgnoreSync("java.completion.matchCase", "off", settingsJson);
             SetIfNotSetIgnoreSync("workbench.secondarySideBar.defaultVisibility", "hidden", settingsJson);
+            SetIfNotSetIgnoreSync("security.workspace.trust.startupPrompt", "once", settingsJson);
 
             string os;
             string pathSeparator;

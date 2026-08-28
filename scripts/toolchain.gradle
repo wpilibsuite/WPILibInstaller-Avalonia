@@ -2,23 +2,23 @@ apply from: 'scripts/versions.gradle'
 
 def baseUrl = "https://github.com/wpilibsuite/opensdk/releases/download/$toolchainGitTag/"
 
-def fileNameWindows = "arm64-bookworm-2025-x86_64-w64-mingw32-Toolchain-${gccVersion}.zip"
+def fileNameWindows = "arm64-systemcore-2027-x86_64-w64-mingw32-Toolchain-${gccVersion}.tgz"
 
 def downloadUrlWindows = baseUrl + fileNameWindows
 
-def fileNameMac = "arm64-bookworm-2025-x86_64-apple-darwin-Toolchain-${gccVersion}.tgz"
+def fileNameMac = "arm64-systemcore-2027-x86_64-apple-darwin-Toolchain-${gccVersion}.tgz"
 
 def downloadUrlMac = baseUrl + fileNameMac
 
-def fileNameMacArm = "arm64-bookworm-2025-arm64-apple-darwin-Toolchain-${gccVersion}.tgz"
+def fileNameMacArm = "arm64-systemcore-2027-arm64-apple-darwin-Toolchain-${gccVersion}.tgz"
 
 def downloadUrlMacArm = baseUrl + fileNameMacArm
 
-def fileNameLinux = "arm64-bookworm-2025-x86_64-linux-gnu-Toolchain-${gccVersion}.tgz"
+def fileNameLinux = "arm64-systemcore-2027-x86_64-linux-gnu-Toolchain-${gccVersion}.tgz"
 
 def downloadUrlLinux = baseUrl + fileNameLinux
 
-def fileNameLinuxArm64 = "arm64-bookworm-2025-aarch64-bookworm-linux-gnu-Toolchain-${gccVersion}.tgz"
+def fileNameLinuxArm64 = "arm64-systemcore-2027-aarch64-bookworm-linux-gnu-Toolchain-${gccVersion}.tgz"
 
 def downloadUrlLinuxArm64 = baseUrl + fileNameLinuxArm64
 
@@ -87,10 +87,6 @@ ext.toolchainZipSetup = { AbstractArchiveTask zip->
 
     zip.from(project.tarTree(project.resources.gzip(actualLinuxTask.get().outputFiles.first()))) {
 
-      eachFile { f->
-        f.path = f.path.replace('bookworm/', 'systemcore/')
-      }
-
       includeEmptyDirs = false
     }
 
@@ -101,22 +97,14 @@ ext.toolchainZipSetup = { AbstractArchiveTask zip->
 
     zip.from(project.tarTree(project.resources.gzip(downloadTaskMac.get().outputFiles.first()))) {
 
-      eachFile { f->
-        f.path = f.path.replace('bookworm/', 'systemcore/')
-      }
-
       includeEmptyDirs = false
     }
-  } else if (project.hasProperty('macBuildArm')) {
+  } else if (project.hasProperty('macBuildArm64')) {
     zip.dependsOn downloadTaskMacArm
 
     zip.inputs.files downloadTaskMacArm.get().outputFiles
 
     zip.from(project.tarTree(project.resources.gzip(downloadTaskMacArm.get().outputFiles.first()))) {
-
-      eachFile { f->
-        f.path = f.path.replace('bookworm/', 'systemcore/')
-      }
 
       includeEmptyDirs = false
     }
@@ -125,12 +113,7 @@ ext.toolchainZipSetup = { AbstractArchiveTask zip->
 
     zip.inputs.files downloadTaskWindows.get().outputFiles
 
-    zip.from(project.zipTree(downloadTaskWindows.get().outputFiles.first())) {
-
-      eachFile { f->
-        f.path = f.path.replace('bookworm/', 'systemcore/')
-      }
-
+    zip.from(project.tarTree(project.resources.gzip(downloadTaskWindows.get().outputFiles.first()))) {
       includeEmptyDirs = false
     }
   }

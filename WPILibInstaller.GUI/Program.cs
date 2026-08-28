@@ -1,4 +1,6 @@
 ﻿using Avalonia;
+using Avalonia.Media;
+using Avalonia.Rendering.Composition;
 using WPILibInstaller.Fonts;
 
 namespace WPILibInstaller
@@ -14,11 +16,26 @@ namespace WPILibInstaller
         // Avalonia configuration, don't remove; also used by visual designer.
         public static AppBuilder BuildAvaloniaApp()
         {
-            return AppBuilder.Configure<App>()
-                .UsePlatformDetect()
+            AppBuilder builder = AppBuilder.Configure<App>()
+                .UsePlatformDetect();
+
+            if (!File.Exists(Path.Combine(AppContext.BaseDirectory, "ForceX11.txt")))
+            {
+                builder.UseWaylandWithFallback();
+            }
+
+            return builder
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFontCollection(new RobotoFontCollection());
+                })
+                .With(new FontManagerOptions
+                {
+                    DefaultFamilyName = "avares://WPILibInstaller/Assets/Fonts#Roboto"
+                })
+                .With(new CompositionOptions()
+                {
+                    UseRegionDirtyRectClipping = false
                 })
                 .LogToTrace();
         }

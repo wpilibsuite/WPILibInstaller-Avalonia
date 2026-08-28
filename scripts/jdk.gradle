@@ -301,7 +301,7 @@ ext.jdkZipSetup = { AbstractArchiveTask zip ->
     jdkZipSetupLinuxArm64(zip)
   } else if (project.hasProperty('macBuild')) {
     jdkZipSetupMac(zip)
-  } else if (project.hasProperty('macBuildArm')) {
+  } else if (project.hasProperty('macBuildArm64')) {
     jdkZipSetupMacArm(zip)
   } else if (project.hasProperty('windowsBuildArm64')) {
     jdkZipSetupWindowsArm64(zip)

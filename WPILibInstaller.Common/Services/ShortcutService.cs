@@ -210,6 +210,12 @@ StartupWMClass=code
             await CreateLinuxShortcut("DataLogTool", "datalogtool", wpilibYear, "Datalog Tool", "datalogtool.png", token);
             await CreateLinuxShortcut("SysId", "sysid", wpilibYear, "System Identification", "sysid.png", token);
             await CreateLinuxShortcut("WPIcal", "wpical", wpilibYear, "WPIcal", "wpical.png", token);
+
+            if (toInstallProvider.Model.InstallEverything)
+            {
+                var docsPath = Path.Combine(installDir, "documentation", "frc-docs", "index.html");
+                await CreateLinuxShortcut("WPILib Documentation", $"xdg-open \"{docsPath}\"", wpilibYear, "WPILib Documentation", "wpilib-icon-256.png", token);
+            }
         }
 
         private async Task CreateLinuxShortcut(string name, string executableName, string wpilibYear, string wmClass, string iconName, CancellationToken token)
