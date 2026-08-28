@@ -196,20 +196,30 @@ public static class InstallerResources
 
     public static string GetDefaultInstallDirectory(UpgradeConfig upgradeConfig)
     {
-        var publicFolder = Environment.GetEnvironmentVariable("PUBLIC");
-        if (publicFolder == null)
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            var publicFolder = Environment.GetEnvironmentVariable("PUBLIC");
+            if (string.IsNullOrWhiteSpace(publicFolder))
             {
                 publicFolder = "C:\\Users\\Public";
             }
-            else
+
+            return Path.Combine(publicFolder, "wpilib", upgradeConfig.WpilibYear);
+        }
+
+        var userFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        var installRoot = Path.Combine(userFolder, ".wpilib");
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            installRoot = Path.Combine(userFolder, ".local", "share", "wpilib");
+            var xdgDataHome = Environment.GetEnvironmentVariable("XDG_DATA_HOME");
+            if (!string.IsNullOrWhiteSpace(xdgDataHome))
             {
-                publicFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                installRoot = Path.Combine(xdgDataHome, "wpilib");
             }
         }
 
-        return Path.Combine(publicFolder, "wpilib", upgradeConfig.WpilibYear);
+        return Path.Combine(installRoot, upgradeConfig.WpilibYear);
     }
 
     public static async Task<bool> MacArtifactsChecksumMatchesAsync(string artifactsFile, string baseDirectory)
