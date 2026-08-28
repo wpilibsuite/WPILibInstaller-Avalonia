@@ -47,21 +47,21 @@ def downloadWindowsJdkArm64 = tasks.register('downloadWindowsJdkArm64', Download
 }
 
 configurations {
-  runtimex64
+  msvcRuntime
 }
 
 dependencies {
     if (project.ext.buildClassifier == 'Windows') {
-        runtimex64 "org.wpilib.msvc:runtime:${project.ext.gradlerioMetadata.wpilibVersion}:x64@zip"
+        msvcRuntime "org.wpilib.msvc:runtime:${project.ext.gradlerioMetadata.wpilibVersion}:x64@zip"
     } else if (project.ext.buildClassifier == 'WindowsArm64') {
-        runtimex64 "org.wpilib.msvc:runtime:${project.ext.gradlerioMetadata.wpilibVersion}:x64@zip" // NEEDS TO BE MOVED TO ARM64
+        msvcRuntime "org.wpilib.msvc:runtime:${project.ext.gradlerioMetadata.wpilibVersion}:arm64@zip"
     }
 }
 
 def runtimeExtractTask = tasks.register('copyAndExtractRuntime', Copy) {
   into 'build/runtime'
   if (project.ext.buildClassifier == 'Windows' || project.ext.buildClassifier == 'WindowsArm64') {
-    from(project.zipTree(configurations.runtimex64.resolvedConfiguration.resolvedArtifacts.first().file))
+    from(project.zipTree(configurations.msvcRuntime.resolvedConfiguration.resolvedArtifacts.first().file))
   }
 }
 

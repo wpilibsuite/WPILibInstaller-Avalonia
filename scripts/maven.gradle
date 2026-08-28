@@ -8,7 +8,7 @@ configurations {
   cppTools
   documentationJava
   documentationCpp
-  runtimex64
+  msvcRuntime
 }
 
 def toolArtifacts = [
@@ -35,9 +35,9 @@ dependencies {
     documentationCpp "org.wpilib.wpilibc:documentation:${project.ext.gradlerioMetadata.wpilibVersion}@zip"
     documentationJava "org.wpilib.wpilibj:documentation:${project.ext.gradlerioMetadata.wpilibVersion}@zip"
     if (project.ext.buildClassifier == 'Windows') {
-        runtimex64 "org.wpilib.msvc:runtime:${project.ext.gradlerioMetadata.wpilibVersion}:x64@zip"
+        msvcRuntime "org.wpilib.msvc:runtime:${project.ext.gradlerioMetadata.wpilibVersion}:x64@zip"
     } else if (project.ext.buildClassifier == 'WindowsArm64') {
-        runtimex64 "org.wpilib.msvc:runtime:${project.ext.gradlerioMetadata.wpilibVersion}:x64@zip" // NEEDS TO BE MOVED TO ARM64
+        msvcRuntime "org.wpilib.msvc:runtime:${project.ext.gradlerioMetadata.wpilibVersion}:arm64@zip"
     }
 }
 
@@ -298,7 +298,7 @@ ext.mavenZipSetup = { AbstractArchiveTask zip->
   }
 
   if (project.ext.buildClassifier == 'Windows' || project.ext.buildClassifier == 'WindowsArm64') {
-    zip.from(project.zipTree(configurations.runtimex64.resolvedConfiguration.resolvedArtifacts.first().file)) {
+    zip.from(project.zipTree(configurations.msvcRuntime.resolvedConfiguration.resolvedArtifacts.first().file)) {
       into '/tools'
     }
   }
