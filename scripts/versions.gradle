@@ -22,7 +22,7 @@ ext.jdkWinArmVersion = '25.0.3'
 
 ext.advantagescopeGitTag = 'v27.0.0-alpha-6'
 
-ext.elasticGitTag = 'v2027.0.0-alpha8'
+ext.elasticGitTag = 'v2027.0.0-alpha9'
 
 ext.wpilibYear = '2027_alpha7'
 
