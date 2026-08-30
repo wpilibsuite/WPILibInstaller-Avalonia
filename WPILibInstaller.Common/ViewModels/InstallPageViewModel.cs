@@ -245,42 +245,70 @@ namespace WPILibInstaller.ViewModels
                     return;
                 }
 
-                var legacyPath = Path.Combine(userFolder, "wpilib");
-                var installRoot = Path.GetDirectoryName(configurationProvider.InstallDirectory);
-                if (string.IsNullOrWhiteSpace(installRoot))
-                {
-                    return;
-                }
-
-                installRoot = Path.GetFullPath(installRoot);
-                Directory.CreateDirectory(installRoot);
-
-                var legacyInfo = new DirectoryInfo(legacyPath);
-                if (legacyInfo.LinkTarget != null)
-                {
-                    var existingTarget = Path.GetFullPath(legacyInfo.LinkTarget, userFolder);
-                    var comparison = OperatingSystem.IsMacOS() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
-                    if (string.Equals(
-                        Path.TrimEndingDirectorySeparator(existingTarget),
-                        Path.TrimEndingDirectorySeparator(installRoot),
-                        comparison))
-                    {
-                        return;
-                    }
-
-                    Directory.Delete(legacyPath);
-                }
-                else if (Directory.Exists(legacyPath) || File.Exists(legacyPath))
-                {
-                    return;
-                }
-
-                Directory.CreateSymbolicLink(legacyPath, installRoot);
+                CreateLegacyInstallSymlink(
+                    userFolder,
+                    configurationProvider.InstallDirectory,
+                    configurationProvider.UpgradeConfig.WpilibYear);
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException)
             {
                 // Leave existing user data alone if the compatibility link cannot be created.
             }
+        }
+
+        private static void CreateLegacyInstallSymlink(string userFolder, string installDirectory, string wpilibYear)
+        {
+            var legacyPath = Path.Combine(userFolder, "wpilib");
+            var installRoot = Path.GetDirectoryName(installDirectory);
+            if (string.IsNullOrWhiteSpace(installRoot))
+            {
+                return;
+            }
+
+            installRoot = Path.GetFullPath(installRoot);
+            Directory.CreateDirectory(installRoot);
+
+            var legacyInfo = new DirectoryInfo(legacyPath);
+            if (legacyInfo.LinkTarget == null && Directory.Exists(legacyPath))
+            {
+                var legacyYearPath = Path.Combine(legacyPath, wpilibYear);
+                CreateOrUpdateSymlink(legacyYearPath, Path.GetFullPath(installDirectory));
+            }
+            else
+            {
+                CreateOrUpdateSymlink(legacyPath, installRoot);
+            }
+        }
+
+        private static void CreateOrUpdateSymlink(string linkPath, string targetPath)
+        {
+            var linkInfo = new DirectoryInfo(linkPath);
+            if (linkInfo.LinkTarget != null)
+            {
+                var linkParent = Path.GetDirectoryName(linkPath);
+                if (string.IsNullOrWhiteSpace(linkParent))
+                {
+                    return;
+                }
+
+                var existingTarget = Path.GetFullPath(linkInfo.LinkTarget, linkParent);
+                var comparison = OperatingSystem.IsMacOS() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+                if (string.Equals(
+                    Path.TrimEndingDirectorySeparator(existingTarget),
+                    Path.TrimEndingDirectorySeparator(targetPath),
+                    comparison))
+                {
+                    return;
+                }
+
+                Directory.Delete(linkPath);
+            }
+            else if (Directory.Exists(linkPath) || File.Exists(linkPath))
+            {
+                return;
+            }
+
+            Directory.CreateSymbolicLink(linkPath, targetPath);
         }
 
         public override PageViewModelBase MoveNext()
