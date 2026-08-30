@@ -259,25 +259,20 @@ namespace WPILibInstaller.ViewModels
         private static void CreateLegacyInstallSymlink(string userFolder, string installDirectory, string wpilibYear)
         {
             var legacyPath = Path.Combine(userFolder, "wpilib");
-            var installRoot = Path.GetDirectoryName(installDirectory);
-            if (string.IsNullOrWhiteSpace(installRoot))
+            var legacyInfo = new DirectoryInfo(legacyPath);
+            if (legacyInfo.LinkTarget != null)
+            {
+                return;
+            }
+            else if (File.Exists(legacyPath))
             {
                 return;
             }
 
-            installRoot = Path.GetFullPath(installRoot);
-            Directory.CreateDirectory(installRoot);
+            Directory.CreateDirectory(legacyPath);
 
-            var legacyInfo = new DirectoryInfo(legacyPath);
-            if (legacyInfo.LinkTarget == null && Directory.Exists(legacyPath))
-            {
-                var legacyYearPath = Path.Combine(legacyPath, wpilibYear);
-                CreateOrUpdateSymlink(legacyYearPath, Path.GetFullPath(installDirectory));
-            }
-            else
-            {
-                CreateOrUpdateSymlink(legacyPath, installRoot);
-            }
+            var legacyYearPath = Path.Combine(legacyPath, wpilibYear);
+            CreateOrUpdateSymlink(legacyYearPath, Path.GetFullPath(installDirectory));
         }
 
         private static void CreateOrUpdateSymlink(string linkPath, string targetPath)
