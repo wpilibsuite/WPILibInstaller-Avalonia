@@ -4,7 +4,6 @@ def varsfilesh = file("files/wpilibvars.sh")
 def codefile = file("files/wpilibcode")
 def codefileCmd = file("files/wpilibcode.cmd")
 def icoFile = file("WPILibInstaller.GUI/Assets/wpilib-256.ico")
-def codeAppArmorFile = file("files/wpilibcode.AppArmor")
 def advantagescopeAppArmorFile = file("files/advantagescope.AppArmor")
 
 def pathfolder = 'wpilibcode'
@@ -25,7 +24,6 @@ ext.varsZipSetup = { AbstractArchiveTask zip->
   zip.inputs.file icoFile
   zip.inputs.file codefile
   zip.inputs.file codefileCmd
-  zip.inputs.file codeAppArmorFile
   zip.inputs.file advantagescopeAppArmorFile
 
   if (project.ext.buildClassifier == 'Windows' || project.ext.buildClassifier == 'WindowsArm64') {
@@ -74,13 +72,6 @@ ext.varsZipSetup = { AbstractArchiveTask zip->
   }
 
   if (project.ext.buildClassifier == 'Linux' || project.ext.buildClassifier == 'LinuxArm64') {
-    zip.from (codeAppArmorFile) {
-      into "/$pathfolder/AppArmor"
-      rename {
-        "wpilibcode"
-      }
-    }
-
     zip.from (advantagescopeAppArmorFile) {
       into "/$pathfolder/AppArmor"
       rename {
