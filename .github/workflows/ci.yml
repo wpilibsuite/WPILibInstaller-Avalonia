@@ -138,7 +138,7 @@ jobs:
           github.repository_owner == 'wpilibsuite' &&
           startsWith(github.ref, 'refs/tags/v')
         run: |
-          rclone copy "." "s3:wpilib1-enam/installer/${GITHUB_REF#refs/tags/}/" --s3-chunk-size=128M --s3-upload-cutoff=128M --s3-upload-concurrency=4 --stats 15s --stats-one-line --stats-log-level NOTICE
+          rclone copy "." "s3:wpilib1-enam/installer/${GITHUB_REF#refs/tags/}/" --s3-chunk-size=128M --s3-upload-cutoff=128M --s3-upload-concurrency=4 --stats 15s --stats-one-line --stats-log-level NOTICE --verbose
         env:
           RCLONE_CONFIG_S3_TYPE: s3
           RCLONE_CONFIG_S3_PROVIDER: Cloudflare
