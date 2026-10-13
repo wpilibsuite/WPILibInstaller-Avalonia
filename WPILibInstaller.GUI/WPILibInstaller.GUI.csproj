@@ -3,6 +3,7 @@
     <OutputType>WinExe</OutputType>
     <AssemblyName>WPILibInstaller</AssemblyName>
     <RootNamespace>WPILibInstaller</RootNamespace>
+    <ApplicationId>WPILibInstaller</ApplicationId>
     <ApplicationIcon>Assets\wpilib-256.ico</ApplicationIcon>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
   </PropertyGroup>
