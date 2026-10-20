@@ -18,6 +18,7 @@ namespace WPILibInstaller.Models
     public class UpgradeConfig
     {
         public string WpilibYear { get; set; }
+        public string wpilibYearFolder { get; set; }
         public string InstallerType { get; set; }
 
         public const string WindowsInstallerType = "Windows";

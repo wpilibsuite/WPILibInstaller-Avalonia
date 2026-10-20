@@ -24,6 +24,7 @@ ext.advantagescopeGitTag = 'v27.0.0-alpha-6'
 
 ext.elasticGitTag = 'v2027.0.0-alpha9'
 
-ext.wpilibYear = '2027_alpha7'
+ext.wpilibYear = '2027_alpha7'       // The displayed year for WPILib. Should be a shortened version of 
+ext.wpilibYearFolder = '2027_alpha7' // Folder name for WPILib installation. Used for the WPILib Year for vendordeps and import detection.
 
 ext.gradleWrapperVersion = '9.4.1'
