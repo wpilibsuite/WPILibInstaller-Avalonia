@@ -22,10 +22,12 @@ namespace WPILibInstaller.Services
             string gradleZipLoc = Path.Combine(extractFolder, "installUtils", config.Gradle.ZipName);
 
             string userFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            string gradleUserHome = Environment.GetEnvironmentVariable("GRADLE_USER_HOME") ?? Path.Combine(userFolder, ".gradle");
+
             List<Task> tasks = new();
             foreach (var extractLocation in config.Gradle.ExtractLocations)
             {
-                string toFolder = Path.Combine(userFolder, ".gradle", extractLocation, Path.GetFileNameWithoutExtension(config.Gradle.ZipName), config.Gradle.Hash);
+                string toFolder = Path.Combine(gradleUserHome, extractLocation, Path.GetFileNameWithoutExtension(config.Gradle.ZipName), config.Gradle.Hash);
                 string toFile = Path.Combine(toFolder, config.Gradle.ZipName);
                 tasks.Add(Task.Run(() =>
                 {
