@@ -160,7 +160,8 @@ namespace WPILibInstaller.Services
             if (vsInstallProvider.Model.InstallingVsCode)
             {
                 var desktopFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Desktop", $@"WPILib VS Code {wpilibYear}.desktop");
-                var launcherFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local/share/applications", $@"WPILib_VS_Code_{wpilibYear}.desktop");
+                var desktopName = VsCodeInstallationService.LinuxDesktopName(wpilibYear);
+                var launcherFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local/share/applications", $@"{desktopName}.desktop");
                 string contents = $@"#!/usr/bin/env xdg-open
 [Desktop Entry]
 Version=1.0
@@ -172,7 +173,7 @@ Exec={configurationProvider.InstallDirectory}/wpilibcode/wpilibcode{wpilibYear}
 Icon={configurationProvider.InstallDirectory}/icons/wpilib-icon-256.png
 Terminal=false
 StartupNotify=true
-StartupWMClass=code
+StartupWMClass={desktopName}
 ".ReplaceLineEndings("\n");
 
                 var desktopPath = Path.GetDirectoryName(desktopFile);
