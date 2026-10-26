@@ -40,7 +40,12 @@ namespace WPILibInstaller.Services
 
             shortcutData.IsAdmin = toInstallProvider.Model.InstallAsAdmin;
 
-            if (vsInstallProvider.Model.InstallingVsCode)
+            var startMenuFolder = Environment.GetFolderPath(shortcutData.IsAdmin
+                ? Environment.SpecialFolder.CommonStartMenu
+                : Environment.SpecialFolder.StartMenu);
+            var vsCodeStartMenuShortcut = Path.Join(startMenuFolder, "Programs", $"{wpilibYear} WPILib VS Code.lnk");
+            if (vsInstallProvider.Model.InstallingVsCode
+                || (vsInstallProvider.Model.AlreadyInstalled && !File.Exists(vsCodeStartMenuShortcut)))
             {
                 shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(wpilibHomePath, "vscode", "Code.exe"), $"{wpilibYear} WPILib VS Code", $"{wpilibYear} WPILib VS Code", wpilibIconLocation));
                 shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(wpilibHomePath, "vscode", "Code.exe"), $"Programs/{wpilibYear} WPILib VS Code", $"{wpilibYear} WPILib VS Code", wpilibIconLocation));
@@ -157,11 +162,12 @@ namespace WPILibInstaller.Services
 
         private async Task CreateLinuxShortcuts(string wpilibYear, CancellationToken token)
         {
-            if (vsInstallProvider.Model.InstallingVsCode)
+            var desktopFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Desktop", $@"WPILib VS Code {wpilibYear}.desktop");
+            var desktopName = VsCodeInstallationService.LinuxDesktopName(wpilibYear);
+            var launcherFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local/share/applications", $@"{desktopName}.desktop");
+            if (vsInstallProvider.Model.InstallingVsCode
+                || (vsInstallProvider.Model.AlreadyInstalled && !File.Exists(launcherFile)))
             {
-                var desktopFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Desktop", $@"WPILib VS Code {wpilibYear}.desktop");
-                var desktopName = VsCodeInstallationService.LinuxDesktopName(wpilibYear);
-                var launcherFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local/share/applications", $@"{desktopName}.desktop");
                 string contents = $@"#!/usr/bin/env xdg-open
 [Desktop Entry]
 Version=1.0
