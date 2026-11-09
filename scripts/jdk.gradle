@@ -40,7 +40,7 @@ def downloadWindowsJdk = tasks.register('downloadWindowsJdk', Download) {
 }
 
 def downloadWindowsJdkArm64 = tasks.register('downloadWindowsJdkArm64', Download) {
-  src "https://aka.ms/download-jdk/microsoft-jdk-${jdkWinArmVersion}-windows-aarch64.zip" // TODO get this correct
+  src "https://aka.ms/download-jdk/microsoft-jdk-${jdkWinArmVersion}-windows-aarch64.zip"
   def fileName = file(src.file).name
   dest "$buildDir/downloads/$fileName"
   overwrite false
