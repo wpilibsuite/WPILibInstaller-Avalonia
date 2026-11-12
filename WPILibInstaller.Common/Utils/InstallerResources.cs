@@ -215,7 +215,7 @@ public static class InstallerResources
         }
 
         var userFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-        var installRoot = Path.Combine(userFolder, ".wpilib");
+        var installRoot = Path.Combine(userFolder, "wpilib");
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
             installRoot = Path.Combine(userFolder, ".local", "share", "wpilib");
