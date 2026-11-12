@@ -80,7 +80,7 @@ jobs:
           github.repository_owner == 'wpilibsuite' &&
           (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
 
-      - name: Install SystemCore Toolchain
+      - name: Install Systemcore Toolchain
         shell: bash
         run: ./gradlew emptyTask -PinstallToolchains
 
