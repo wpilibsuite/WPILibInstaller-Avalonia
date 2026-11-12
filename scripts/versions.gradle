@@ -1,30 +1,33 @@
-ext.vsCodeVersion = '1.116.0'
+ext.vsCodeVersion = '1.145.2'
 
-ext.vscodeLinuxHash = 'ce87b613dc65a40304e100fc21a82271b023ef5837700f5797299041030524ba'
-ext.vscodeMacHash = 'df4f20c287dfcf33f5ad49e8dc472c8874bd924ead40e4913c4b9753fe52944b'
-ext.vscodeWindowsHash = '365c3d275deb3a1c0a1aa626f274824b8db15ee150d567a7323b8dbce2cdfa8f'
-ext.vscodeLinuxArm64Hash = '29047acc3fb79be3a0788092b372e45a8ee40b63b1a85e976b1f014536ba4184'
+ext.vscodeLinuxHash = '3b01286639fa026fd860944b811d418f7b93bc5dc447d9e607b0cd1377cfbaa2'
+ext.vscodeMacHash = 'cf10fbb9e72f5fb192167f67430f655a4645b863799f2708c0b822eb4d813fef'
+ext.vscodeWindowsHash = '33cf166a751090fe7d244bf0e594e3c69c832d5ae2af1769140ad82a35ea1e0b'
+ext.vscodeWindowsArm64Hash = '38416c4db00c7f01dfbd786b1b80a1a060b014c11df02044c3871141f48147c0'
+ext.vscodeLinuxArm64Hash = '6260317ec6e39bdafc11c4402b003ac0379f2e55951b7bf897dc357894e126f4'
 
-ext.cppToolsVersion = '1.31.4'
-ext.javaExtVersion = '1.54.0'
-ext.javaExtPatchVersion = '923'
-ext.javaDebugVersion = '0.59.0'
-ext.javaDependencyVersion = '0.27.2'
+ext.cppToolsVersion = '1.35.6'
+ext.javaExtVersion = '1.57.0'
+ext.javaExtPatchVersion = '1110'
+ext.javaDebugVersion = '0.60.0'
+ext.javaDependencyVersion = '0.27.7'
 ext.uvToolkitVersion = '0.1.11'
 ext.tyVersion = '2026.60.0'
 
 ext.wpilibVersion = gradleRioVersion
 
-ext.gccVersion = '12.2.0'
-ext.toolchainGitTag = 'v2025-2'
+ext.gccVersion = '14.3.0'
+ext.toolchainGitTag = 'v2027-1'
 
-ext.jdkVersion = '25.0.2+10'
+ext.jdkVersion = '25.0.5+8'
+ext.jdkWinArmVersion = '25.0.5.0.2'
 
-ext.advantagescopeGitTag = 'v27.0.0-alpha-4'
+ext.advantagescopeGitTag = 'v27.0.0-alpha-6'
 
-ext.elasticGitTag = 'v2027.0.0-alpha8'
+ext.elasticGitTag = 'v2027.0.0-alpha10'
 
-ext.wpilibYear = '2027_alpha5'
+ext.wpilibYear = '2027_beta1'       // The displayed year for WPILib. Should be a shortened version of the gradleRIOversion.
+ext.wpilibYearFolder = '2027_beta1' // Folder name for WPILib installation. Used for the WPILib Year for vendordeps and import detection.
 
 ext.gradleWrapperVersion = '9.4.1'
 

@@ -1,4 +1,5 @@
 ﻿using System.CommandLine;
+using WPILibInstaller.Utils;
 
 namespace WPILibInstaller.CLI
 {
@@ -6,6 +7,13 @@ namespace WPILibInstaller.CLI
     {
         public static async Task<int> Main(string[] args)
         {
+            var architectureMismatch = PlatformUtils.GetArchitectureMismatchMessage();
+            if (architectureMismatch != null)
+            {
+                Console.Error.WriteLine($"Error: {architectureMismatch}");
+                return 1;
+            }
+
             var allUsersOption = new Option<bool>("--all-users")
             {
                 Description = "Create Windows shortcuts with elevation when needed"

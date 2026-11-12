@@ -90,6 +90,33 @@ namespace WPILibInstaller.Services
                     File.SetUnixFileMode(fullZipToPath, currentMode | UnixFileMode.GroupExecute | UnixFileMode.UserExecute | UnixFileMode.OtherExecute);
                 }
             }
+
+            if (OperatingSystem.IsLinux())
+            {
+                await SetLinuxDesktopName(token);
+            }
+        }
+
+        public static string LinuxDesktopName(string wpilibYear) => $"WPILib_VS_Code_{wpilibYear}";
+
+        // Sets the Wayland app_id and X11 WM_CLASS so desktops match the window to the WPILib launcher, not another VS Code.
+        private async Task SetLinuxDesktopName(CancellationToken token)
+        {
+            var appDir = Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(GetVsCodeExecutable()))!, "resources", "app");
+            var options = new JsonSerializerOptions { WriteIndented = true };
+
+            var packageFile = Path.Combine(appDir, "package.json");
+            var packageJson = JsonNode.Parse(await File.ReadAllTextAsync(packageFile, token))!.AsObject();
+            packageJson["desktopName"] = $"{LinuxDesktopName(configurationProvider.UpgradeConfig.WpilibYear)}.desktop";
+            await File.WriteAllTextAsync(packageFile, packageJson.ToJsonString(options), token);
+
+            // VS Code 1.139+ switches to this name when a system VS Code is installed.
+            var productFile = Path.Combine(appDir, "product.json");
+            var productJson = JsonNode.Parse(await File.ReadAllTextAsync(productFile, token))!.AsObject();
+            if (productJson.Remove("linuxDesktopName"))
+            {
+                await File.WriteAllTextAsync(productFile, productJson.ToJsonString(options), token);
+            }
         }
 
         public async Task ConfigureVsCodeSettings()
@@ -138,6 +165,7 @@ namespace WPILibInstaller.Services
             SetIfNotSetIgnoreSync("update.showReleaseNotes", false, settingsJson);
             SetIfNotSetIgnoreSync("java.completion.matchCase", "off", settingsJson);
             SetIfNotSetIgnoreSync("workbench.secondarySideBar.defaultVisibility", "hidden", settingsJson);
+            SetIfNotSetIgnoreSync("security.workspace.trust.startupPrompt", "once", settingsJson);
 
             string os;
             string pathSeparator;
@@ -297,6 +325,7 @@ namespace WPILibInstaller.Services
             switch (currentPlatform)
             {
                 case Platform.Win64:
+                case Platform.WinArm64:
                     portableFolder = Path.Combine(portableFolder, "data");
                     break;
                 case Platform.MacArm64:
@@ -330,6 +359,7 @@ namespace WPILibInstaller.Services
             switch (currentPlatform)
             {
                 case Platform.Win64:
+                case Platform.WinArm64:
                     return Path.Combine(configurationProvider.InstallDirectory, "vscode", "bin", "code.cmd");
                 case Platform.MacArm64:
                 case Platform.Mac64:

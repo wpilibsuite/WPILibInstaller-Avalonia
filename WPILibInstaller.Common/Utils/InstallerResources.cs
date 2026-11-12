@@ -167,6 +167,7 @@ public static class InstallerResources
     {
         VsCodeModel model = new(config.VsCodeVersion);
         model.Platforms.Add(Platform.Win64, new VsCodeModel.PlatformData(config.VsCodeWindowsUrl, config.VsCodeWindowsName, config.VsCodeWindowsHash, config.VsCodeWindowsSize));
+        model.Platforms.Add(Platform.WinArm64, new VsCodeModel.PlatformData(config.VsCodeWindowsArm64Url, config.VsCodeWindowsArm64Name, config.VsCodeWindowsArm64Hash, config.VsCodeWindowsArm64Size));
         model.Platforms.Add(Platform.Linux64, new VsCodeModel.PlatformData(config.VsCodeLinuxUrl, config.VsCodeLinuxName, config.VsCodeLinuxHash, config.VsCodeLinuxSize));
         model.Platforms.Add(Platform.LinuxArm64, new VsCodeModel.PlatformData(config.VsCodeLinuxArm64Url, config.VsCodeLinuxArm64Name, config.VsCodeLinuxArm64Hash, config.VsCodeLinuxArm64Size));
         model.Platforms.Add(Platform.Mac64, new VsCodeModel.PlatformData(config.VsCodeMacUrl, config.VsCodeMacName, config.VsCodeMacHash, config.VsCodeMacSize));
@@ -178,6 +179,11 @@ public static class InstallerResources
     {
         if (OperatingSystem.IsWindows())
         {
+            if (PlatformUtils.CurrentPlatform == Platform.WinArm64)
+            {
+                return upgradeConfig.InstallerType == UpgradeConfig.WindowsArm64InstallerType ? null : UpgradeConfig.WindowsArm64InstallerType;
+            }
+
             return upgradeConfig.InstallerType == UpgradeConfig.WindowsInstallerType ? null : UpgradeConfig.WindowsInstallerType;
         }
 
@@ -206,20 +212,31 @@ public static class InstallerResources
 
     public static string GetDefaultInstallDirectory(UpgradeConfig upgradeConfig)
     {
-        var publicFolder = Environment.GetEnvironmentVariable("PUBLIC");
-        if (publicFolder == null)
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            var publicFolder = Environment.GetEnvironmentVariable("PUBLIC");
+            if (string.IsNullOrWhiteSpace(publicFolder))
             {
                 publicFolder = "C:\\Users\\Public";
             }
-            else
+
+            return Path.Combine(publicFolder, "wpilib", upgradeConfig.wpilibYearFolder);
+        }
+
+        var userFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        var installRoot = Path.Combine(userFolder, "wpilib");
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            installRoot = Path.Combine(userFolder, ".local", "share", "wpilib");
+            var xdgDataHome = Environment.GetEnvironmentVariable("XDG_DATA_HOME");
+            if (!string.IsNullOrWhiteSpace(xdgDataHome))
             {
-                publicFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                installRoot = Path.Combine(xdgDataHome, "wpilib");
             }
         }
 
-        return Path.Combine(publicFolder, "wpilib", upgradeConfig.WpilibYear);
+        return Path.Combine(installRoot, upgradeConfig.wpilibYearFolder);
     }
 
     public static async Task<bool> MacArtifactsChecksumMatchesAsync(string artifactsFile, string baseDirectory)

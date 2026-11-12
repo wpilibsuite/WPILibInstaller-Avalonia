@@ -11,6 +11,7 @@ namespace WPILibInstaller.ViewModels
     {
         private readonly IViewModelResolver viewModelResolver;
         private readonly IToInstallProvider toInstallProvider;
+        private readonly IConfigurationProvider configurationProvider;
         private readonly IArchiveExtractionService archiveExtractionService;
         private readonly IVsCodeInstallationService vsCodeInstallationService;
         private readonly IToolInstallationService toolInstallationService;
@@ -38,6 +39,7 @@ namespace WPILibInstaller.ViewModels
         public InstallPageViewModel(
             IViewModelResolver viewModelResolver,
             IToInstallProvider toInstallProvider,
+            IConfigurationProvider configurationProvider,
             IArchiveExtractionService archiveExtractionService,
             IVsCodeInstallationService vsCodeInstallationService,
             IToolInstallationService toolInstallationService,
@@ -47,6 +49,7 @@ namespace WPILibInstaller.ViewModels
         {
             this.viewModelResolver = viewModelResolver;
             this.toInstallProvider = toInstallProvider;
+            this.configurationProvider = configurationProvider;
             this.archiveExtractionService = archiveExtractionService;
             this.vsCodeInstallationService = vsCodeInstallationService;
             this.toolInstallationService = toolInstallationService;
@@ -245,9 +248,93 @@ namespace WPILibInstaller.ViewModels
                 // Ignore, as we just want to continue.
             }
 
-            Succeeded = !source.IsCancellationRequested;
+            if (source.IsCancellationRequested)
+            {
+                Succeeded = false;
+            }
+            else
+            {
+                CreateLegacyInstallSymlink();
+                Succeeded = true;
+            }
 
             await viewModelResolver.ResolveMainWindow().ExecuteGoNext();
+        }
+
+        private void CreateLegacyInstallSymlink()
+        {
+            if (OperatingSystem.IsWindows())
+            {
+                return;
+            }
+
+            try
+            {
+                var userFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                if (string.IsNullOrWhiteSpace(userFolder))
+                {
+                    return;
+                }
+
+                CreateLegacyInstallSymlink(
+                    userFolder,
+                    configurationProvider.InstallDirectory,
+                    configurationProvider.UpgradeConfig.wpilibYearFolder);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException)
+            {
+                // Leave existing user data alone if the compatibility link cannot be created.
+            }
+        }
+
+        private static void CreateLegacyInstallSymlink(string userFolder, string installDirectory, string wpilibYearFolder)
+        {
+            var legacyPath = Path.Combine(userFolder, "wpilib");
+            var legacyInfo = new DirectoryInfo(legacyPath);
+            if (legacyInfo.LinkTarget != null)
+            {
+                return;
+            }
+            else if (File.Exists(legacyPath))
+            {
+                return;
+            }
+
+            Directory.CreateDirectory(legacyPath);
+
+            var legacyFolderPath = Path.Combine(legacyPath, wpilibYearFolder);
+            CreateOrUpdateSymlink(legacyFolderPath, Path.GetFullPath(installDirectory));
+        }
+
+        private static void CreateOrUpdateSymlink(string linkPath, string targetPath)
+        {
+            var linkInfo = new DirectoryInfo(linkPath);
+            if (linkInfo.LinkTarget != null)
+            {
+                var linkParent = Path.GetDirectoryName(linkPath);
+                if (string.IsNullOrWhiteSpace(linkParent))
+                {
+                    return;
+                }
+
+                var existingTarget = Path.GetFullPath(linkInfo.LinkTarget, linkParent);
+                var comparison = OperatingSystem.IsMacOS() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+                if (string.Equals(
+                    Path.TrimEndingDirectorySeparator(existingTarget),
+                    Path.TrimEndingDirectorySeparator(targetPath),
+                    comparison))
+                {
+                    return;
+                }
+
+                Directory.Delete(linkPath);
+            }
+            else if (Directory.Exists(linkPath) || File.Exists(linkPath))
+            {
+                return;
+            }
+
+            Directory.CreateSymbolicLink(linkPath, targetPath);
         }
 
         public override PageViewModelBase MoveNext()

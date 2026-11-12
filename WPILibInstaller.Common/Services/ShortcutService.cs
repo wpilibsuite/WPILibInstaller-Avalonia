@@ -40,7 +40,12 @@ namespace WPILibInstaller.Services
 
             shortcutData.IsAdmin = toInstallProvider.Model.InstallAsAdmin;
 
-            if (vsInstallProvider.Model.InstallingVsCode)
+            var startMenuFolder = Environment.GetFolderPath(shortcutData.IsAdmin
+                ? Environment.SpecialFolder.CommonStartMenu
+                : Environment.SpecialFolder.StartMenu);
+            var vsCodeStartMenuShortcut = Path.Join(startMenuFolder, "Programs", $"{wpilibYear} WPILib VS Code.lnk");
+            if (vsInstallProvider.Model.InstallingVsCode
+                || (vsInstallProvider.Model.AlreadyInstalled && !File.Exists(vsCodeStartMenuShortcut)))
             {
                 shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(wpilibHomePath, "vscode", "Code.exe"), $"{wpilibYear} WPILib VS Code", $"{wpilibYear} WPILib VS Code", wpilibIconLocation));
                 shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(wpilibHomePath, "vscode", "Code.exe"), $"Programs/{wpilibYear} WPILib VS Code", $"{wpilibYear} WPILib VS Code", wpilibIconLocation));
@@ -157,10 +162,12 @@ namespace WPILibInstaller.Services
 
         private async Task CreateLinuxShortcuts(string wpilibYear, CancellationToken token)
         {
-            if (vsInstallProvider.Model.InstallingVsCode)
+            var desktopFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Desktop", $@"WPILib VS Code {wpilibYear}.desktop");
+            var desktopName = VsCodeInstallationService.LinuxDesktopName(wpilibYear);
+            var launcherFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local/share/applications", $@"{desktopName}.desktop");
+            if (vsInstallProvider.Model.InstallingVsCode
+                || (vsInstallProvider.Model.AlreadyInstalled && !File.Exists(launcherFile)))
             {
-                var desktopFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Desktop", $@"WPILib VS Code {wpilibYear}.desktop");
-                var launcherFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local/share/applications", $@"WPILib_VS_Code_{wpilibYear}.desktop");
                 string contents = $@"#!/usr/bin/env xdg-open
 [Desktop Entry]
 Version=1.0
@@ -172,7 +179,7 @@ Exec={configurationProvider.InstallDirectory}/wpilibcode/wpilibcode{wpilibYear}
 Icon={configurationProvider.InstallDirectory}/icons/wpilib-icon-256.png
 Terminal=false
 StartupNotify=true
-StartupWMClass=code
+StartupWMClass={desktopName}
 ".ReplaceLineEndings("\n");
 
                 var desktopPath = Path.GetDirectoryName(desktopFile);
@@ -203,13 +210,30 @@ StartupWMClass=code
             }
 
             var installDir = configurationProvider.InstallDirectory;
-            await CreateLinuxShortcut("AdvantageScope (WPILib)", $"{installDir}/advantagescope/advantagescope-wpilib", wpilibYear, "AdvantageScope (WPILib)", "advantagescope.png", token);
-            await CreateLinuxShortcut("Elastic (WPILib)", $"{installDir}/elastic/elastic_dashboard", wpilibYear, "elastic_dashboard", "elastic.png", token);
-            await CreateLinuxShortcut("Glass", "glass", wpilibYear, "Glass - DISCONNECTED", "glass.png", token);
-            await CreateLinuxShortcut("OutlineViewer", "outlineviewer", wpilibYear, "OutlineViewer - DISCONNECTED", "outlineviewer.png", token);
-            await CreateLinuxShortcut("DataLogTool", "datalogtool", wpilibYear, "Datalog Tool", "datalogtool.png", token);
-            await CreateLinuxShortcut("SysId", "sysid", wpilibYear, "System Identification", "sysid.png", token);
-            await CreateLinuxShortcut("WPIcal", "wpical", wpilibYear, "WPIcal", "wpical.png", token);
+            await CreateLinuxShortcutIfInstalled("AdvantageScope (WPILib)", $"{installDir}/advantagescope/advantagescope-wpilib", wpilibYear, "AdvantageScope (WPILib)", "advantagescope.png", token);
+            await CreateLinuxShortcutIfInstalled("Elastic (WPILib)", $"{installDir}/elastic/elastic_dashboard", wpilibYear, "elastic_dashboard", "elastic.png", token);
+            await CreateLinuxShortcutIfInstalled("Glass", "glass", wpilibYear, "Glass - DISCONNECTED", "glass.png", token);
+            await CreateLinuxShortcutIfInstalled("OutlineViewer", "outlineviewer", wpilibYear, "OutlineViewer - DISCONNECTED", "outlineviewer.png", token);
+            await CreateLinuxShortcutIfInstalled("DataLogTool", "datalogtool", wpilibYear, "Datalog Tool", "datalogtool.png", token);
+            await CreateLinuxShortcutIfInstalled("SysId", "sysid", wpilibYear, "System Identification", "sysid.png", token);
+            await CreateLinuxShortcutIfInstalled("WPIcal", "wpical", wpilibYear, "WPIcal", "wpical.png", token);
+
+            if (toInstallProvider.Model.InstallEverything)
+            {
+                var docsPath = Path.Combine(installDir, "documentation", "frc-docs", "index.html");
+                await CreateLinuxShortcut("WPILib Documentation", $"xdg-open \"{docsPath}\"", wpilibYear, "WPILib Documentation", "wpilib-icon-256.png", token);
+            }
+        }
+
+        private Task CreateLinuxShortcutIfInstalled(string name, string executableName, string wpilibYear, string wmClass, string iconName, CancellationToken token)
+        {
+            var executablePath = Path.IsPathRooted(executableName)
+                ? executableName
+                : Path.Combine(configurationProvider.InstallDirectory, "tools", executableName);
+
+            return File.Exists(executablePath)
+                ? CreateLinuxShortcut(name, executableName, wpilibYear, wmClass, iconName, token)
+                : Task.CompletedTask;
         }
 
         private async Task CreateLinuxShortcut(string name, string executableName, string wpilibYear, string wmClass, string iconName, CancellationToken token)

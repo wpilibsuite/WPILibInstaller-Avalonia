@@ -16,8 +16,15 @@ namespace WPILibInstaller
         // Avalonia configuration, don't remove; also used by visual designer.
         public static AppBuilder BuildAvaloniaApp()
         {
-            return AppBuilder.Configure<App>()
-                .UsePlatformDetect()
+            AppBuilder builder = AppBuilder.Configure<App>()
+                .UsePlatformDetect();
+
+            if (!File.Exists(Path.Combine(AppContext.BaseDirectory, "ForceX11.txt")))
+            {
+                builder.UseWaylandWithFallback();
+            }
+
+            return builder
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFontCollection(new RobotoFontCollection());
