@@ -1,83 +1,49 @@
-import groovy.json.JsonSlurper
-import groovy.json.JsonOutput
-
+apply plugin: 'de.undercouch.download'
 apply from: 'scripts/versions.gradle'
 
-def baseUrl = "https://www.python.org/ftp/python/${pythonVersion}/"
+def targetTriples = [
+    'Windows'   : 'x86_64-pc-windows-msvc',
+    'Linux'     : 'x86_64-unknown-linux-gnu',
+    'LinuxArm64': 'aarch64-unknown-linux-gnu',
+    'Mac'       : 'x86_64-apple-darwin',
+    'MacArm'    : 'aarch64-apple-darwin',
+]
 
-def uvBaseURL = "https://github.com/astral-sh/uv/releases/download/${uvVersion}/"
+def targetTriple = targetTriples[project.ext.buildClassifier]
 
-def uvWindowsURL = uvBaseURL + "uv-installer.ps1"
+def pythonArchiveName = "cpython-${pythonVersion}+${pythonStandaloneRelease}-${targetTriple}-install_only_stripped.tar.gz".toString()
+def pythonUrl = "https://github.com/astral-sh/python-build-standalone/releases/download/${pythonStandaloneRelease}/${pythonArchiveName}"
 
-def uvURL = uvBaseURL + "uv-installer.sh"
+def uvIsZip = project.ext.buildClassifier == 'Windows'
+def uvArchiveName = "uv-${targetTriple}.${uvIsZip ? 'zip' : 'tar.gz'}".toString()
+def uvUrl = "https://github.com/astral-sh/uv/releases/download/${uvVersion}/${uvArchiveName}"
 
-def pythonWindowsFile = "python-${pythonVersion}-amd64.exe"
-
-def pythonWindowsURL = baseUrl + pythonWindowsFile
-
-def pythonMacFile = "python-${pythonVersion}-macos11.pkg"
-
-def pythonMacURL = baseUrl + pythonMacFile
-
-def pythonWindowsDownload = tasks.register("pythonWindowsDownload", Download) {
-    src pythonWindowsURL
-    def fileName = file(src.file).name
-    dest "$buildDir/downloads/$fileName"
+def pythonDownload = tasks.register('pythonDownload', Download) {
+    src pythonUrl
+    dest "$buildDir/downloads/$pythonArchiveName"
     overwrite false
 }
 
-def pythonMacDownload = tasks.register("pythonMacDownload", Download) {
-    src pythonMacURL
-    def fileName = file(src.file).name
-    dest "$buildDir/downloads/$fileName"
+def uvDownload = tasks.register('uvDownload', Download) {
+    src uvUrl
+    dest "$buildDir/downloads/$uvArchiveName"
     overwrite false
-}
-
-def getUvWindowsDownload = tasks.register("getUvWindowsDownload", Download) {
-    src uvWindowsURL
-    def fileName = file(src.file).name
-    dest "$buildDir/downloads/$fileName"
-    overwrite false
-}
-
-def getUvDownload = tasks.register("getUvDownload", Download) {
-    src uvURL
-    def fileName = file(src.file).name
-    dest "$buildDir/downloads/$fileName"
-    overwrite false 
-}
-
-def pythonDownloadTask
-if(project.hasProperty('windowsBuild')) {
-    pythonDownloadTask = pythonWindowsDownload
-} else {
-    pythonDownloadTask = pythonMacDownload
-}
-
-def uvDownloadTask
-if(project.hasProperty('windowsBuild')) {
-    uvDownloadTask = getUvWindowsDownload
-} else {
-    uvDownloadTask = getUvDownload
 }
 
 def pythonConfigFile = file("$buildDir/pythonconfig.json")
 
 def pythonTask = tasks.register('pythonConfig', Task) {
-    dependsOn pythonDownloadTask
-    dependsOn uvDownloadTask
-
-    inputs.files uvDownloadTask.get().outputFiles
+    inputs.property 'pythonArchiveName', pythonArchiveName
 
     it.outputs.file pythonConfigFile
 
     doLast {
         def config = [:]
         config['folder'] = 'python'
-        config['exeFile'] = "python-" + pythonVersion + "-amd64.exe"
-        config['pkgFile'] = "python-" + pythonVersion + "-macos11.pkg"
         config['version'] = pythonVersion
-        config['uvInstallFile'] = uvDownloadTask.get().outputFiles.first().name
+        config['archiveFolder'] = 'pythondist'
+        config['archiveFile'] = pythonArchiveName
+        config['uvFolder'] = 'uv'
 
         def gbuilder = getGsonBuilder()
 
@@ -90,30 +56,39 @@ def pythonTask = tasks.register('pythonConfig', Task) {
     }
 }
 
-ext.pythonConfigFileSetup = {AbstractArchiveTask zip->
+ext.pythonConfigFileSetup = { AbstractArchiveTask zip ->
     zip.dependsOn pythonTask
     zip.inputs.file pythonConfigFile
 
     zip.from(pythonConfigFile) {
-        rename {'pythonConfig.json'}
+        rename { 'pythonConfig.json' }
     }
 }
 
-ext.pythonZipSetup = { AbstractArchiveTask zip-> 
-    zip.dependsOn pythonDownloadTask
-    zip.dependsOn uvDownloadTask
+ext.pythonZipSetup = { AbstractArchiveTask zip ->
+    zip.dependsOn pythonDownload
+    zip.dependsOn uvDownload
     zip.dependsOn pythonTask
 
-    zip.from(pythonDownloadTask.get().outputFiles.first()) {
-        into '/python'
+    zip.inputs.file pythonConfigFile
+
+    zip.from(pythonDownload.get().outputFiles.first()) {
+        into '/pythondist'
     }
 
-    zip.from(uvDownloadTask.get().outputFiles) {
-        into '/python'
+    def uvArchive = uvDownload.get().outputFiles.first()
+    def uvTree = uvIsZip ? project.zipTree(uvArchive) : project.tarTree(project.resources.gzip(uvArchive))
+    zip.from(uvTree) {
+        include '**/uv', '**/uvx', '**/uv.exe', '**/uvx.exe', '**/uvw.exe'
+        eachFile { f ->
+            f.path = "uv/${f.name}"
+        }
+        filePermissions { unix(0755) }
+        includeEmptyDirs = false
     }
 
     zip.from(pythonConfigFile) {
         into '/installUtils'
-        rename {'pythonConfig.json'}
+        rename { 'pythonConfig.json' }
     }
 }

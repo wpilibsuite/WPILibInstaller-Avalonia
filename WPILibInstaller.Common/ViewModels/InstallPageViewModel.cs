@@ -111,14 +111,14 @@ namespace WPILibInstaller.ViewModels
                     }
 
                     SetOverallProgress(40, "Installing Python");
-                    await robotpyService.InstallPython(progress);
+                    await robotpyService.InstallPython(token, progress);
                     if (token.IsCancellationRequested)
                     {
                         break;
                     }
 
                     SetOverallProgress(60, "Installing RobotPy");
-                    await robotpyService.InstallRobotPy(progress);
+                    await robotpyService.InstallRobotPy(token, progress);
                     if (token.IsCancellationRequested)
                     {
                         break;
@@ -199,14 +199,14 @@ namespace WPILibInstaller.ViewModels
                     }
 
                     SetOverallProgress(74, "Installing Python");
-                    await robotpyService.InstallPython(progress);
+                    await robotpyService.InstallPython(token, progress);
                     if (token.IsCancellationRequested)
                     {
                         break;
                     }
 
                     SetOverallProgress(83, "Installing RobotPy");
-                    await robotpyService.InstallRobotPy(progress);
+                    await robotpyService.InstallRobotPy(token, progress);
                     if (token.IsCancellationRequested)
                     {
                         break;

@@ -6,15 +6,19 @@ namespace WPILibInstaller.Models
 {
     public class PythonConfig
     {
-        [JsonPropertyName("exeFile")]
-        public string ExeFile { get; set; }
-        [JsonPropertyName("pkgFile")]
-        public string PkgFile { get; set; }
-        [JsonPropertyName("version")]
-        public string Version { get; set; }
         [JsonPropertyName("folder")]
         public string Folder { get; set; }
-        [JsonPropertyName("uvInstallFile")]
-        public string UvInstallFile { get; set; }
+
+        [JsonPropertyName("version")]
+        public string Version { get; set; }
+
+        [JsonPropertyName("archiveFolder")]
+        public string ArchiveFolder { get; set; }
+
+        [JsonPropertyName("archiveFile")]
+        public string ArchiveFile { get; set; }
+
+        [JsonPropertyName("uvFolder")]
+        public string UvFolder { get; set; }
     }
 }

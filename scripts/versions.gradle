@@ -32,4 +32,8 @@ ext.robotpyVersion = '2027.0.0a6.post1'
 
 ext.pythonVersion = '3.14.6'
 
+// most recent python-build-standalone release tag
+// that contains a build of pythonVersion
+ext.pythonStandaloneRelease = '20260728'
+
 ext.uvVersion = '0.12.2'

@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Formats.Tar;
+using System.IO.Compression;
 using WPILibInstaller.Interfaces;
 using WPILibInstaller.Models;
 using WPILibInstaller.Utils;
@@ -8,106 +9,96 @@ namespace WPILibInstaller.Services
     public sealed class RobotPyInstallationService : IRobotPyInstallationService
     {
         private readonly IConfigurationProvider configurationProvider;
-        private readonly string pythonWindowsDir;
-        private readonly string pythonPkgDir;
-        private readonly string robotpyDir;
-        private readonly string uvDir;
-        public RobotPyInstallationService(IConfigurationProvider configurationProvider,
-            IToInstallProvider toInstallProvider)
+
+        public RobotPyInstallationService(IConfigurationProvider configurationProvider)
         {
             this.configurationProvider = configurationProvider;
-            pythonWindowsDir = Path.Join(configurationProvider.InstallDirectory, configurationProvider.PythonConfig.Folder, configurationProvider.PythonConfig.ExeFile);
-            pythonPkgDir = Path.Join(configurationProvider.InstallDirectory, configurationProvider.PythonConfig.Folder, configurationProvider.PythonConfig.PkgFile);
-            uvDir = Path.Join(configurationProvider.InstallDirectory, configurationProvider.PythonConfig.Folder, configurationProvider.PythonConfig.UvInstallFile);
-            robotpyDir = Path.Join(configurationProvider.InstallDirectory, configurationProvider.RobotpyConfig.Folder);
         }
 
-        public async Task InstallPython(IProgress<InstallProgress>? progress = null)
+        public static string GetPythonDirectory(IConfigurationProvider configurationProvider)
         {
-            progress?.Report(new InstallProgress(50, "Installing Python"));
+            return Path.Join(configurationProvider.InstallDirectory, configurationProvider.PythonConfig.Folder);
+        }
 
-            var currentPlatform = PlatformUtils.CurrentPlatform;
-            var tempFile = Path.GetTempFileName();
+        public static string GetPythonExecutable(IConfigurationProvider configurationProvider)
+        {
+            var pythonDirectory = GetPythonDirectory(configurationProvider);
+            return OperatingSystem.IsWindows()
+                ? Path.Join(pythonDirectory, "python.exe")
+                : Path.Join(pythonDirectory, "bin", "python3");
+        }
 
-            switch (currentPlatform)
+        public static IEnumerable<string> GetPathDirectories(IConfigurationProvider configurationProvider)
+        {
+            var pythonDirectory = GetPythonDirectory(configurationProvider);
+            if (OperatingSystem.IsWindows())
             {
-                case Platform.Win64:
-                    await RunCommand(pythonWindowsDir, $"\"{tempFile}\" /quiet InstallAllUsers=0 Include_pip=1");
-                    await RunCommand("cmd.exe", $"/c PowerShell.exe -ExecutionPolicy ByPass -File \"{uvDir}\"");
-                    break;
-                case Platform.MacArm64:
-                case Platform.Mac64:
-                    await RunCommand("/bin/bash", $"-c installer -pkg '{pythonPkgDir}' -target CurrentUserHomeDirectory");
-                    await RunCommand("/bin/sh", $"-c chmod +x \"{uvDir}\"");
-                    await RunCommand("/bin/sh", $"-c ./\"{uvDir}\"");
-                    break;
-                case Platform.Linux64:
-                    await RunCommand("/bin/sh", $"-c chmod +x \"{uvDir}\"");
-                    await RunCommand("/bin/sh", $"-c ./\"{uvDir}\"");
-                    break;
-                case Platform.LinuxArm64:
-                    await RunCommand("/bin/sh", $"-c chmod +x \"{uvDir}\"");
-                    await RunCommand("/bin/sh", $"-c ./\"{uvDir}\"");
-                    break;
-                default:
-                    throw new PlatformNotSupportedException("Invalid platform");
+                yield return pythonDirectory;
+                yield return Path.Join(pythonDirectory, "Scripts");
             }
-        }
-
-        public async Task InstallRobotPy(IProgress<InstallProgress>? progress = null)
-        {
-            progress?.Report(new InstallProgress(50, "Installing robotpy"));
-            string[] whlFiles = Directory.GetFiles(robotpyDir, "*.whl");
-            var currentPlatform = PlatformUtils.CurrentPlatform;
-            
-            switch (currentPlatform)
+            else
             {
-                case Platform.Win64:
-                    await RunCommand("cmd.exe", $"/c for %w in (\"{robotpyDir}\\*.whl\") do py -3 -m pip install --user --no-index \"%w\"");
-                    break;
-                case Platform.MacArm64:
-                case Platform.Mac64:
-                    await RunCommand("python3", $"-c pip install --user --no-index --find-links={robotpyDir} {robotpyDir}/*.whl --break-system-packages");
-                    break;
-                case Platform.Linux64:
-                    await RunCommand("/bin/sh", $"-c pip install --user --no-index --find-links={robotpyDir} {robotpyDir}/*.whl --break-system-packages");
-                    break;
-                case Platform.LinuxArm64:
-                    await RunCommand("/bin/sh", $"-c pip install --user --no-index --find-links={robotpyDir} {robotpyDir}/*.whl --break-system-packages");
-                    break;
-                default:
-                    throw new PlatformNotSupportedException("Invalid platform");
+                yield return Path.Join(pythonDirectory, "bin");
             }
 
+            yield return Path.Join(configurationProvider.InstallDirectory, configurationProvider.PythonConfig.UvFolder);
         }
 
-        public static async Task RunCommand(string fileName, string cmd)
+        public async Task InstallPython(CancellationToken token, IProgress<InstallProgress>? progress = null)
         {
-            var currentPlatform = PlatformUtils.CurrentPlatform;
-            ProcessStartInfo startInfo = new ProcessStartInfo(fileName, cmd)
+            var config = configurationProvider.PythonConfig;
+            var installDirectory = configurationProvider.InstallDirectory;
+            var archiveDirectory = Path.Join(installDirectory, config.ArchiveFolder);
+
+            progress?.Report(new InstallProgress(0, $"Extracting Python {config.Version}"));
+
+            await Task.Run(async () =>
             {
-                RedirectStandardOutput = false,
-                UseShellExecute = true,
-                CreateNoWindow = false
-            };
+                await using var fileStream = File.OpenRead(Path.Join(archiveDirectory, config.ArchiveFile));
+                await using var gzipStream = new GZipStream(fileStream, CompressionMode.Decompress);
+                await TarFile.ExtractToDirectoryAsync(gzipStream, installDirectory, overwriteFiles: true, token);
+            }, token);
+
             try
             {
-                using var process = Process.Start(startInfo);
-                process!.WaitForExit();
-                if (process.ExitCode == 0)
-                {
-                    Console.WriteLine("Installed successfully");
-                }
-                else
-                {
-                    Console.WriteLine("Installation failed");
-                }
+                Directory.Delete(archiveDirectory, recursive: true);
             }
-            catch
+            catch (IOException)
             {
-                Console.WriteLine("Error with Installation");
+            }
+            catch (UnauthorizedAccessException)
+            {
             }
 
+            progress?.Report(new InstallProgress(100, $"Installed Python {config.Version}"));
+        }
+
+        public async Task InstallRobotPy(CancellationToken token, IProgress<InstallProgress>? progress = null)
+        {
+            var config = configurationProvider.RobotpyConfig;
+
+            progress?.Report(new InstallProgress(0, $"Installing RobotPy {config.Version}"));
+
+            var result = await ProcessExecutionUtils.RunProcessAsync(
+                GetPythonExecutable(configurationProvider),
+                [
+                    "-I", "-m", "pip", "--isolated", "install",
+                    "--no-index",
+                    "--find-links", Path.Join(configurationProvider.InstallDirectory, config.Folder),
+                    "--disable-pip-version-check",
+                    "--no-input",
+                    "--no-warn-script-location",
+                    $"robotpy=={config.Version}",
+                ],
+                line => progress?.Report(new InstallProgress(0, line)),
+                token);
+
+            if (result.ExitCode != 0)
+            {
+                throw new InvalidOperationException($"RobotPy installation failed with exit code {result.ExitCode}:{Environment.NewLine}{result.Output}");
+            }
+
+            progress?.Report(new InstallProgress(100, $"Installed RobotPy {config.Version}"));
         }
     }
 }

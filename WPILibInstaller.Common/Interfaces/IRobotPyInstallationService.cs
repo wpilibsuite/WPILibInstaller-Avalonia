@@ -4,8 +4,8 @@ namespace WPILibInstaller.Interfaces
 {
     public interface IRobotPyInstallationService
     {
-        Task InstallPython(IProgress<InstallProgress>? progress = null);
+        Task InstallPython(CancellationToken token, IProgress<InstallProgress>? progress = null);
 
-        Task InstallRobotPy(IProgress<InstallProgress>? progress = null);
+        Task InstallRobotPy(CancellationToken token, IProgress<InstallProgress>? progress = null);
     }
 }

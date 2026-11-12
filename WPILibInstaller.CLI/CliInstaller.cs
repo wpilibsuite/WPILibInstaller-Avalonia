@@ -115,7 +115,7 @@ namespace WPILibInstaller.CLI
                 var toolService = new ToolInstallationService(this);
                 var vsCodeService = new VsCodeInstallationService(this, this);
                 var shortcutService = new ShortcutService(this, this, this);
-                var robotpyService = new RobotPyInstallationService(this, this);
+                var robotpyService = new RobotPyInstallationService(this);
 
                 var progress = new Progress<InstallProgress>(p =>
                 {
@@ -152,23 +152,29 @@ namespace WPILibInstaller.CLI
                     await vsCodeService.RunVsCodeExtensionsSetup(progress);
 
                     Console.WriteLine("[9/11] Installing Python...");
-                    await robotpyService.InstallPython(progress);
+                    await robotpyService.InstallPython(cancellation.Token, progress);
 
                     Console.WriteLine("[10/11] Installing RobotPy...");
-                    await robotpyService.InstallRobotPy(progress);
+                    await robotpyService.InstallRobotPy(cancellation.Token, progress);
 
                     Console.WriteLine("[11/11] Creating shortcuts...");
                     await shortcutService.RunShortcutCreator(cancellation.Token);
                 }
                 else
                 {
-                    Console.WriteLine("[1/3] Extracting JDK and tools...");
+                    Console.WriteLine("[1/5] Extracting JDK and tools...");
                     await archiveService.ExtractJDKAndTools(cancellation.Token, progress);
 
-                    Console.WriteLine("[2/3] Setting up tools...");
+                    Console.WriteLine("[2/5] Setting up tools...");
                     await toolService.RunToolSetup(progress);
 
-                    Console.WriteLine("[3/3] Creating shortcuts...");
+                    Console.WriteLine("[3/5] Installing Python...");
+                    await robotpyService.InstallPython(cancellation.Token, progress);
+
+                    Console.WriteLine("[4/5] Installing RobotPy...");
+                    await robotpyService.InstallRobotPy(cancellation.Token, progress);
+
+                    Console.WriteLine("[5/5] Creating shortcuts...");
                     await shortcutService.RunShortcutCreator(cancellation.Token);
                 }
 
