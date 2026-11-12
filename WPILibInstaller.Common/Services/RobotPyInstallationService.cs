@@ -49,8 +49,14 @@ namespace WPILibInstaller.Services
             var config = configurationProvider.PythonConfig;
             var installDirectory = configurationProvider.InstallDirectory;
             var archiveDirectory = Path.Join(installDirectory, config.ArchiveFolder);
+            var pythonDirectory = GetPythonDirectory(configurationProvider);
 
             progress?.Report(new InstallProgress(0, $"Extracting Python {config.Version}"));
+
+            if (Directory.Exists(pythonDirectory))
+            {
+                Directory.Delete(pythonDirectory, recursive: true);
+            }
 
             await Task.Run(async () =>
             {
@@ -59,16 +65,7 @@ namespace WPILibInstaller.Services
                 await TarFile.ExtractToDirectoryAsync(gzipStream, installDirectory, overwriteFiles: true, token);
             }, token);
 
-            try
-            {
-                Directory.Delete(archiveDirectory, recursive: true);
-            }
-            catch (IOException)
-            {
-            }
-            catch (UnauthorizedAccessException)
-            {
-            }
+            TryDeleteDirectory(archiveDirectory);
 
             progress?.Report(new InstallProgress(100, $"Installed Python {config.Version}"));
         }
@@ -76,6 +73,7 @@ namespace WPILibInstaller.Services
         public async Task InstallRobotPy(CancellationToken token, IProgress<InstallProgress>? progress = null)
         {
             var config = configurationProvider.RobotpyConfig;
+            var wheelDirectory = Path.Join(configurationProvider.InstallDirectory, config.Folder);
 
             progress?.Report(new InstallProgress(0, $"Installing RobotPy {config.Version}"));
 
@@ -84,7 +82,7 @@ namespace WPILibInstaller.Services
                 [
                     "-I", "-m", "pip", "--isolated", "install",
                     "--no-index",
-                    "--find-links", Path.Join(configurationProvider.InstallDirectory, config.Folder),
+                    "--find-links", wheelDirectory,
                     "--disable-pip-version-check",
                     "--no-input",
                     "--no-warn-script-location",
@@ -98,7 +96,26 @@ namespace WPILibInstaller.Services
                 throw new InvalidOperationException($"RobotPy installation failed with exit code {result.ExitCode}:{Environment.NewLine}{result.Output}");
             }
 
+            TryDeleteDirectory(wheelDirectory);
+
             progress?.Report(new InstallProgress(100, $"Installed RobotPy {config.Version}"));
+        }
+
+        private static void TryDeleteDirectory(string path)
+        {
+            try
+            {
+                if (Directory.Exists(path))
+                {
+                    Directory.Delete(path, recursive: true);
+                }
+            }
+            catch (IOException)
+            {
+            }
+            catch (UnauthorizedAccessException)
+            {
+            }
         }
     }
 }
