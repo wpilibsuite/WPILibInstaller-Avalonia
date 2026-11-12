@@ -24,6 +24,8 @@ def wheelPlatforms = [
     'LinuxArm64': manylinuxTags('aarch64'),
     'Mac'       : ["macosx_${minMacosVersion}_x86_64"],
     'MacArm'    : ["macosx_${minMacosVersion}_arm64"],
+    // No win_arm64 wheels are published; see python.gradle.
+    'WindowsArm64': ['win_amd64'],
 ][project.ext.buildClassifier]
 
 def hostPython = OperatingSystem.current().isWindows() ? ['py', '-3'] : ['python3']

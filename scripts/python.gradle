@@ -7,6 +7,9 @@ def targetTriples = [
     'LinuxArm64': 'aarch64-unknown-linux-gnu',
     'Mac'       : 'x86_64-apple-darwin',
     'MacArm'    : 'aarch64-apple-darwin',
+    // RobotPy does not publish win_arm64 wheels, so Windows ARM64 uses the
+    // x64 Python + uv (run under x64 emulation) to match the win_amd64 wheels.
+    'WindowsArm64': 'x86_64-pc-windows-msvc',
 ]
 
 def targetTriple = targetTriples[project.ext.buildClassifier]
@@ -14,7 +17,7 @@ def targetTriple = targetTriples[project.ext.buildClassifier]
 def pythonArchiveName = "cpython-${pythonVersion}+${pythonStandaloneRelease}-${targetTriple}-install_only_stripped.tar.gz".toString()
 def pythonUrl = "https://github.com/astral-sh/python-build-standalone/releases/download/${pythonStandaloneRelease}/${pythonArchiveName}"
 
-def uvIsZip = project.ext.buildClassifier == 'Windows'
+def uvIsZip = project.ext.buildClassifier.startsWith('Windows')
 def uvArchiveName = "uv-${targetTriple}.${uvIsZip ? 'zip' : 'tar.gz'}".toString()
 def uvUrl = "https://github.com/astral-sh/uv/releases/download/${uvVersion}/${uvArchiveName}"
 
