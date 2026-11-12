@@ -192,7 +192,7 @@ public abstract class GradleRioValueSource implements ValueSource<Object, Gradle
         execOperations.exec {
             it.args = ['writeMetadataFile', "-PgradleRioVersion=${getParameters().getGradlerioVersion().get()}", "-PbuildClassifier=${getParameters().getBuildClassifier().get()}", "-PforceNativeClassifier=${getParameters().getForceNativeClassifier().get()}", "-PforceToolsClassifier=${getParameters().getForceToolsClassifier().get()}", "-PforceCppToolsClassifier=${getParameters().getForceCppToolsClassifier().get()}", "--warning-mode", "all"]
             if (installToolchains) {
-                it.args += ['installSystemCoreToolchain']
+                it.args += ['installSystemcoreToolchain']
             }
             it.workingDir = gradlerioBuildFolder
             it.executable = gradlew.absolutePath
