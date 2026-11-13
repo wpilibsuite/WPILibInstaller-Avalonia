@@ -95,6 +95,8 @@ namespace WPILibInstaller.ViewModels
             ElasticConfig = configuration.ElasticConfig;
             FullConfig = configuration.FullConfig;
             UpgradeConfig = configuration.UpgradeConfig;
+            PythonConfig = configuration.PythonConfig;
+            RobotpyConfig = configuration.RobotpyConfig;
 
             string? neededInstaller = CheckInstallerType();
             if (neededInstaller == null)
@@ -215,6 +217,10 @@ namespace WPILibInstaller.ViewModels
         public ElasticConfig ElasticConfig { get; private set; } = null!;
 
         public VsCodeConfig VsCodeConfig { get; private set; } = null!;
+
+        public PythonConfig PythonConfig { get; private set; } = null!;
+
+        public RobotpyConfig RobotpyConfig { get; private set; } = null!;
 
     }
 }

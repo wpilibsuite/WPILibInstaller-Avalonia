@@ -11,6 +11,7 @@ ext.javaExtVersion = '1.57.0'
 ext.javaExtPatchVersion = '1110'
 ext.javaDebugVersion = '0.60.0'
 ext.javaDependencyVersion = '0.27.7'
+ext.tyVersion = '2026.60.0'
 
 ext.wpilibVersion = gradleRioVersion
 
@@ -28,3 +29,13 @@ ext.wpilibYear = '2027_beta1'       // The displayed year for WPILib. Should be 
 ext.wpilibYearFolder = '2027_beta1' // Folder name for WPILib installation. Used for the WPILib Year for vendordeps and import detection.
 
 ext.gradleWrapperVersion = '9.4.1'
+
+ext.robotpyVersion = '2027.0.0a8'
+
+ext.pythonVersion = '3.15.2'
+
+// most recent python-build-standalone release tag
+// that contains a build of pythonVersion
+ext.pythonStandaloneRelease = '20261110'
+
+ext.uvVersion = '0.12.2'

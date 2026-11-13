@@ -28,7 +28,9 @@ public sealed class InstallerConfiguration
         AdvantageScopeConfig advantageScopeConfig,
         ElasticConfig elasticConfig,
         FullConfig fullConfig,
-        UpgradeConfig upgradeConfig)
+        UpgradeConfig upgradeConfig,
+        RobotpyConfig robotpyConfig,
+        PythonConfig pythonConfig)
     {
         VsCodeConfig = vsCodeConfig;
         JdkConfig = jdkConfig;
@@ -36,6 +38,8 @@ public sealed class InstallerConfiguration
         ElasticConfig = elasticConfig;
         FullConfig = fullConfig;
         UpgradeConfig = upgradeConfig;
+        RobotpyConfig = robotpyConfig;
+        PythonConfig = pythonConfig;
     }
 
     public VsCodeConfig VsCodeConfig { get; }
@@ -49,6 +53,10 @@ public sealed class InstallerConfiguration
     public FullConfig FullConfig { get; }
 
     public UpgradeConfig UpgradeConfig { get; }
+
+    public RobotpyConfig RobotpyConfig { get; }
+
+    public PythonConfig PythonConfig { get; }
 }
 
 public static class InstallerResources
@@ -140,7 +148,9 @@ public static class InstallerResources
             await LoadJsonFromZipAsync(zipFile, "advantageScopeConfig.json", SourceGenerationContext.Default.AdvantageScopeConfig),
             await LoadJsonFromZipAsync(zipFile, "elasticConfig.json", SourceGenerationContext.Default.ElasticConfig),
             await LoadJsonFromZipAsync(zipFile, "fullConfig.json", SourceGenerationContext.Default.FullConfig),
-            await LoadJsonFromZipAsync(zipFile, "upgradeConfig.json", SourceGenerationContext.Default.UpgradeConfig));
+            await LoadJsonFromZipAsync(zipFile, "upgradeConfig.json", SourceGenerationContext.Default.UpgradeConfig),
+            await LoadJsonFromZipAsync(zipFile, "robotpyConfig.json", SourceGenerationContext.Default.RobotpyConfig),
+            await LoadJsonFromZipAsync(zipFile, "pythonConfig.json", SourceGenerationContext.Default.PythonConfig));
     }
 
     private static async Task<T> LoadJsonFromZipAsync<T>(ZipArchive archive, string entryName, JsonTypeInfo<T> jsonTypeInfo)
