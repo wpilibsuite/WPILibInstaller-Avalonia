@@ -28,6 +28,11 @@ namespace WPILibInstaller.Services
                 : Path.Join(pythonDirectory, "bin", "python3");
         }
 
+        public static string GetWheelDirectory(IConfigurationProvider configurationProvider)
+        {
+            return Path.Join(configurationProvider.InstallDirectory, configurationProvider.RobotpyConfig.Folder);
+        }
+
         public static IEnumerable<string> GetPathDirectories(IConfigurationProvider configurationProvider)
         {
             var pythonDirectory = GetPythonDirectory(configurationProvider);
@@ -73,7 +78,7 @@ namespace WPILibInstaller.Services
         public async Task InstallRobotPy(CancellationToken token, IProgress<InstallProgress>? progress = null)
         {
             var config = configurationProvider.RobotpyConfig;
-            var wheelDirectory = Path.Join(configurationProvider.InstallDirectory, config.Folder);
+            var wheelDirectory = GetWheelDirectory(configurationProvider);
 
             progress?.Report(new InstallProgress(0, $"Installing RobotPy {config.Version}"));
 
@@ -96,7 +101,6 @@ namespace WPILibInstaller.Services
                 throw new InvalidOperationException($"RobotPy installation failed with exit code {result.ExitCode}:{Environment.NewLine}{result.Output}");
             }
 
-            TryDeleteDirectory(wheelDirectory);
 
             progress?.Report(new InstallProgress(100, $"Installed RobotPy {config.Version}"));
         }

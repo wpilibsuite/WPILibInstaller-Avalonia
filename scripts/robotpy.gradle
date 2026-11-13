@@ -53,7 +53,7 @@ def downloadRobotPyWheels = tasks.register('downloadRobotPyWheels', Exec) {
         '--dest', robotpyDownloadDir.absolutePath,
     ]
     wheelPlatforms.each { pipArgs += ['--platform', it] }
-    pipArgs += ["robotpy==${robotpyVersion}"]
+    pipArgs += ["robotpy==${robotpyVersion}", 'pip']
 
     commandLine pipArgs
 }
