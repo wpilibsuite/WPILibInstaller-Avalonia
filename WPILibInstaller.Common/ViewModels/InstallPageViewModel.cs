@@ -106,28 +106,14 @@ namespace WPILibInstaller.ViewModels
                         break;
                     }
 
-                    SetOverallProgress(20, "Installing Tools");
+                    SetOverallProgress(33, "Installing Tools");
                     await toolInstallationService.RunToolSetup(progress);
                     if (token.IsCancellationRequested)
                     {
                         break;
                     }
 
-                    SetOverallProgress(40, "Installing Python");
-                    await robotpyService.InstallPython(token, progress);
-                    if (token.IsCancellationRequested)
-                    {
-                        break;
-                    }
-
-                    SetOverallProgress(60, "Installing RobotPy");
-                    await robotpyService.InstallRobotPy(token, progress);
-                    if (token.IsCancellationRequested)
-                    {
-                        break;
-                    }
-
-                    SetOverallProgress(80, "Creating Shortcuts");
+                    SetOverallProgress(66, "Creating Shortcuts");
                     await shortcutService.RunShortcutCreator(token);
                 }
                 while (false);
