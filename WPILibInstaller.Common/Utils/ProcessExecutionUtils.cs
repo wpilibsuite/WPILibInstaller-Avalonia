@@ -57,6 +57,75 @@ namespace WPILibInstaller.Utils
             }
         }
 
+        public sealed record ProcessResult(int ExitCode, string Output);
+        public static async Task<ProcessResult> RunProcessAsync(
+            string fileName,
+            IEnumerable<string> arguments,
+            Action<string>? onOutputLine = null,
+            CancellationToken token = default)
+        {
+            ProcessStartInfo startInfo = new(fileName)
+            {
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+            };
+
+            foreach (var argument in arguments)
+            {
+                startInfo.ArgumentList.Add(argument);
+            }
+
+            using var process = new Process { StartInfo = startInfo };
+            var output = new System.Text.StringBuilder();
+
+            void OnData(object sender, DataReceivedEventArgs e)
+            {
+                if (e.Data == null)
+                {
+                    return;
+                }
+
+                lock (output)
+                {
+                    output.AppendLine(e.Data);
+                }
+
+                onOutputLine?.Invoke(e.Data);
+            }
+
+            process.OutputDataReceived += OnData;
+            process.ErrorDataReceived += OnData;
+
+            process.Start();
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
+
+            try
+            {
+                await process.WaitForExitAsync(token);
+            }
+            catch (OperationCanceledException)
+            {
+                try
+                {
+                    process.Kill(entireProcessTree: true);
+                }
+                catch (InvalidOperationException)
+                {
+                    // Already exited.
+                }
+
+                throw;
+            }
+
+            lock (output)
+            {
+                return new ProcessResult(process.ExitCode, output.ToString());
+            }
+        }
+
         public static async Task<bool> RunScriptExecutable(string script, int timeoutMs, CancellationToken token = default, params string[] args)
         {
             ProcessStartInfo startInfo = new(script, string.Join(" ", args));

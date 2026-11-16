@@ -23,6 +23,9 @@ namespace WPILibInstaller.Services
                 configurationProvider.UpgradeConfig.Tools.Folder + "/",
                 configurationProvider.AdvantageScopeConfig.Folder + "/",
                 configurationProvider.ElasticConfig.Folder + "/",
+                configurationProvider.PythonConfig.ArchiveFolder + "/",
+                configurationProvider.PythonConfig.UvFolder + "/",
+                configurationProvider.RobotpyConfig.Folder + "/",
                 "installUtils/",
                 "icons",
             }, progress);

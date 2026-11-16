@@ -185,12 +185,21 @@ namespace WPILibInstaller.Services
                 pathSeparator = ":";
             }
 
+            List<string> binPaths = [Path.Combine(homePath, "jdk", "bin"), .. RobotPyInstallationService.GetPathDirectories(configurationProvider)];
+            // uv prefers its own managed interpreters over PATH, so pin it to the bundled Python.
+            string pythonExecutable = RobotPyInstallationService.GetPythonExecutable(configurationProvider);
+
+            string wheelDirectory = RobotPyInstallationService.GetWheelDirectory(configurationProvider);
+
             if (!settingsJson.ContainsKey("terminal.integrated.env." + os))
             {
                 JsonObject terminalProps = new()
                 {
                     ["JAVA_HOME"] = Path.Combine(homePath, "jdk"),
-                    ["PATH"] = Path.Combine(homePath, "jdk", "bin") + pathSeparator + "${env:PATH}",
+                    ["PATH"] = string.Join(pathSeparator, binPaths) + pathSeparator + "${env:PATH}",
+                    ["UV_PYTHON"] = pythonExecutable,
+                    ["UV_FIND_LINKS"] = wheelDirectory,
+                    ["PIP_FIND_LINKS"] = wheelDirectory,
                 };
 
                 settingsJson["terminal.integrated.env." + os] = terminalProps;
@@ -199,21 +208,19 @@ namespace WPILibInstaller.Services
             {
                 JsonNode? terminalEnv = settingsJson["terminal.integrated.env." + os]!;
                 terminalEnv["JAVA_HOME"] = Path.Combine(homePath, "jdk");
-                JsonNode? path = terminalEnv["PATH"];
-                if (path == null)
+                terminalEnv["UV_PYTHON"] = pythonExecutable;
+                terminalEnv["UV_FIND_LINKS"] = wheelDirectory;
+                terminalEnv["PIP_FIND_LINKS"] = wheelDirectory;
+                var path = terminalEnv["PATH"]?.ToString() ?? "${env:PATH}";
+                var existing = path.Split(pathSeparator);
+                var missing = binPaths.Where(p => !existing.Contains(p, StringComparer.Ordinal)).ToList();
+                if (missing.Count > 0)
                 {
-                    terminalEnv["PATH"] = Path.Combine(homePath, "jdk", "bin") + pathSeparator + "${env:PATH}";
-                }
-                else
-                {
-                    var binPath = Path.Combine(homePath, "jdk", "bin");
-                    if (!path.ToString().Contains(binPath, StringComparison.Ordinal))
-                    {
-                        path = binPath + pathSeparator + path;
-                        terminalEnv["PATH"] = path.ToString();
-                    }
+                    terminalEnv["PATH"] = string.Join(pathSeparator, missing) + pathSeparator + path;
                 }
             }
+
+            SetIfNotSet("python.defaultInterpreterPath", pythonExecutable, settingsJson);
 
             IgnoreSync("terminal.integrated.env." + os, settingsJson);
             ConfigureJavaRuntime(homePath, settingsJson);

@@ -43,6 +43,7 @@ namespace WPILibInstaller.Views
             services.AddSingleton<IArchiveExtractionService, ArchiveExtractionService>();
             services.AddSingleton<IToolInstallationService, ToolInstallationService>();
             services.AddSingleton<IVsCodeInstallationService, VsCodeInstallationService>();
+            services.AddSingleton<IRobotPyInstallationService, RobotPyInstallationService>();
             services.AddSingleton<IShortcutService, ShortcutService>();
 
             ServiceProvider = services.BuildServiceProvider();

@@ -1,0 +1,108 @@
+import org.gradle.internal.os.OperatingSystem
+
+apply from: 'scripts/versions.gradle'
+
+def robotpyDownloadDir = file("$buildDir/downloads/robotpy")
+
+def pythonVersionParts = pythonVersion.tokenize('.')
+def pythonMajorMinor = "${pythonVersionParts[0]}.${pythonVersionParts[1]}"
+def pythonAbi = "cp${pythonVersionParts[0]}${pythonVersionParts[1]}"
+
+// https://docs.wpilib.org/en/latest/docs/software/what-is-wpilib.html#platform-support 
+// Linux 2027: Debian 13 Trixie (glibc 2.41) Ubuntu 26.04
+// macOS 2027: 15
+def minGlibcMinor = 41
+def minMacosVersion = '15_0'
+
+def manylinuxTags = { String arch ->
+    (17..minGlibcMinor).collect { "manylinux_2_${it}_${arch}" } + ["manylinux2014_${arch}"]
+}
+
+def wheelPlatforms = [
+    'Windows'   : ['win_amd64'],
+    'Linux'     : manylinuxTags('x86_64'),
+    'LinuxArm64': manylinuxTags('aarch64'),
+    'Mac'       : ["macosx_${minMacosVersion}_x86_64"],
+    'MacArm'    : ["macosx_${minMacosVersion}_arm64"],
+    // No win_arm64 wheels are published; see python.gradle.
+    'WindowsArm64': ['win_amd64'],
+][project.ext.buildClassifier]
+
+def hostPython = OperatingSystem.current().isWindows() ? ['py', '-3'] : ['python3']
+
+def downloadRobotPyWheels = tasks.register('downloadRobotPyWheels', Exec) {
+    inputs.property 'robotpyVersion', robotpyVersion
+    inputs.property 'pythonVersion', pythonMajorMinor
+    inputs.property 'platforms', wheelPlatforms
+
+    outputs.dir robotpyDownloadDir
+
+    doFirst {
+        robotpyDownloadDir.deleteDir()
+        robotpyDownloadDir.mkdirs()
+    }
+
+    def pipArgs = hostPython + [
+        '-m', 'pip', 'download',
+        '--disable-pip-version-check',
+        '--no-input',
+        '--only-binary=:all:',
+        '--implementation', 'cp',
+        '--python-version', pythonMajorMinor,
+        '--abi', pythonAbi,
+        '--dest', robotpyDownloadDir.absolutePath,
+    ]
+    wheelPlatforms.each { pipArgs += ['--platform', it] }
+    pipArgs += ["robotpy==${robotpyVersion}", 'pip']
+
+    commandLine pipArgs
+}
+
+def robotpyConfigFile = file("$buildDir/robotpyconfig.json")
+
+def robotpyTask = tasks.register('robotpyConfig', Task) {
+    inputs.property 'robotpyVersion', robotpyVersion
+
+    it.outputs.file robotpyConfigFile
+
+    doLast {
+        def config = [:]
+        config['folder'] = 'robotpy'
+        config['version'] = robotpyVersion
+
+        def gbuilder = getGsonBuilder()
+
+        gbuilder.setPrettyPrinting()
+        def json = gbuilder.create().toJson(config)
+
+        robotpyConfigFile.parentFile.mkdirs()
+
+        robotpyConfigFile.text = json
+    }
+}
+
+ext.robotpyConfigFileSetup = { AbstractArchiveTask zip ->
+    zip.dependsOn robotpyTask
+    zip.inputs.file robotpyConfigFile
+
+    zip.from(robotpyConfigFile) {
+        rename { 'robotpyConfig.json' }
+    }
+}
+
+ext.robotpyZipSetup = { AbstractArchiveTask zip ->
+    zip.dependsOn downloadRobotPyWheels
+    zip.dependsOn robotpyTask
+    zip.inputs.dir robotpyDownloadDir
+    zip.inputs.file robotpyConfigFile
+
+    zip.from(robotpyDownloadDir) {
+        include '*.whl'
+        into '/robotpy'
+    }
+
+    zip.from(robotpyConfigFile) {
+        into '/installUtils'
+        rename { 'robotpyConfig.json' }
+    }
+}
