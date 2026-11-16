@@ -80,6 +80,34 @@ jobs:
           github.repository_owner == 'wpilibsuite' &&
           (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
 
+      - name: Store Notarization Credentials
+        shell: bash
+        env:
+          APPLE_NOTARIZATION_API_KEY_BASE64: ${{ secrets.APPLE_NOTARIZATION_API_KEY_BASE64 }}
+          APPLE_NOTARIZATION_API_KEY_ID: ${{ secrets.APPLE_NOTARIZATION_API_KEY_ID }}
+          APPLE_NOTARIZATION_API_ISSUER_ID: ${{ secrets.APPLE_NOTARIZATION_API_ISSUER_ID }}
+        run: |
+          missing=0
+          for name in APPLE_NOTARIZATION_API_KEY_BASE64 APPLE_NOTARIZATION_API_KEY_ID APPLE_NOTARIZATION_API_ISSUER_ID; do
+            if [[ -z "${!name}" ]]; then
+              echo "::error::$name secret is not set"
+              missing=1
+            fi
+          done
+          [[ $missing -eq 0 ]] || exit 1
+          key_path="$RUNNER_TEMP/AuthKey.p8"
+          trap 'rm -f "$key_path"' EXIT
+          (umask 077 && printf '%s' "$APPLE_NOTARIZATION_API_KEY_BASE64" | base64 --decode > "$key_path")
+          xcrun notarytool store-credentials wpilib-notarization \
+            --key "$key_path" \
+            --key-id "$APPLE_NOTARIZATION_API_KEY_ID" \
+            --issuer "$APPLE_NOTARIZATION_API_ISSUER_ID"
+          echo "APPLE_NOTARIZATION_PROFILE=wpilib-notarization" >> "$GITHUB_ENV"
+        if: |
+          (matrix.artifact-name == 'macOS' || matrix.artifact-name == 'macOSArm') &&
+          github.repository_owner == 'wpilibsuite' &&
+          (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+
       - name: Install SystemCore Toolchain
         shell: bash
         run: ./gradlew emptyTask -PinstallToolchains
@@ -96,9 +124,7 @@ jobs:
         run: |
           ./gradlew generateInstallers -PjenkinsBuild ${{ matrix.build-options }} \
           -PdeveloperID=${{ secrets.APPLE_DEVELOPER_ID }} \
-          -Pnotarization-username=${{ secrets.APPLE_NOTARIZATION_USERNAME }} \
-          -Pnotarization-teamid=${{ secrets.APPLE_NOTARIZATION_TEAMID }} \
-          -Pnotarization-password=${{ secrets.APPLE_NOTARIZATION_PASSWORD }}
+          ${APPLE_NOTARIZATION_PROFILE:+"-Pnotarization-profile=$APPLE_NOTARIZATION_PROFILE"}
         if: |
           github.repository_owner == 'wpilibsuite' &&
           (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
