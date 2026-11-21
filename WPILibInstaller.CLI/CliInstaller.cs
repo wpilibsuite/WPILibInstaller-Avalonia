@@ -120,6 +120,9 @@ namespace WPILibInstaller.CLI
                     }
                 });
 
+                Console.WriteLine("Stopping Gradle daemons...");
+                await toolService.StopGradleDaemons(progress, cancellation.Token);
+
                 if (Model.InstallEverything)
                 {
                     Console.WriteLine("[1/9] Extracting archive...");

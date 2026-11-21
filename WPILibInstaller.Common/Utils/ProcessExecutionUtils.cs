@@ -28,6 +28,63 @@ namespace WPILibInstaller.Utils
             }
         }
 
+        public static async Task<bool> RunGradleStop(string gradleHome, string javaExecutable, string gradleUserHome, int timeoutMs, CancellationToken token = default)
+        {
+            string launcherJar = Directory
+                .EnumerateFiles(Path.Combine(gradleHome, "lib"), "gradle-launcher-*.jar")
+                .FirstOrDefault() ?? "";
+
+            if (launcherJar.Length == 0)
+            {
+                return false;
+            }
+
+            ProcessStartInfo startInfo = new(javaExecutable)
+            {
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = OperatingSystem.IsWindows(),
+                WorkingDirectory = gradleHome,
+            };
+            startInfo.Environment["GRADLE_USER_HOME"] = gradleUserHome;
+            startInfo.ArgumentList.Add("-classpath");
+            startInfo.ArgumentList.Add(launcherJar);
+            startInfo.ArgumentList.Add("org.gradle.launcher.GradleMain");
+            startInfo.ArgumentList.Add("--stop");
+
+            using var process = Process.Start(startInfo);
+            if (process == null)
+            {
+                return false;
+            }
+
+            Task<string> outputTask = process.StandardOutput.ReadToEndAsync(CancellationToken.None);
+            Task<string> errorTask = process.StandardError.ReadToEndAsync(CancellationToken.None);
+
+            using CancellationTokenSource timeoutSource = new(timeoutMs);
+            using CancellationTokenSource linkedSource = CancellationTokenSource.CreateLinkedTokenSource(token, timeoutSource.Token);
+
+            try
+            {
+                await process.WaitForExitAsync(linkedSource.Token);
+                await Task.WhenAll(outputTask, errorTask);
+                return true;
+            }
+            catch (OperationCanceledException) when (!token.IsCancellationRequested)
+            {
+                try
+                {
+                    process.Kill(true);
+                }
+                catch
+                {
+                }
+
+                return false;
+            }
+        }
+
         public static async Task<bool> RunJavaJar(string installDir, string jar, int timeoutMs)
         {
             string java = Path.Join(installDir, "jdk", "bin", "java");
