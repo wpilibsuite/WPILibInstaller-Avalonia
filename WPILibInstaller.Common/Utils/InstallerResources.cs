@@ -27,6 +27,7 @@ public sealed class InstallerConfiguration
         JdkConfig jdkConfig,
         AdvantageScopeConfig advantageScopeConfig,
         ElasticConfig elasticConfig,
+        LabVIEWConfig labviewConfig,
         FullConfig fullConfig,
         UpgradeConfig upgradeConfig)
     {
@@ -34,6 +35,7 @@ public sealed class InstallerConfiguration
         JdkConfig = jdkConfig;
         AdvantageScopeConfig = advantageScopeConfig;
         ElasticConfig = elasticConfig;
+        LabVIEWConfig = labviewConfig;
         FullConfig = fullConfig;
         UpgradeConfig = upgradeConfig;
     }
@@ -45,6 +47,8 @@ public sealed class InstallerConfiguration
     public AdvantageScopeConfig AdvantageScopeConfig { get; }
 
     public ElasticConfig ElasticConfig { get; }
+
+    public LabVIEWConfig LabVIEWConfig { get; }
 
     public FullConfig FullConfig { get; }
 
@@ -139,6 +143,7 @@ public static class InstallerResources
             await LoadJsonFromZipAsync(zipFile, "jdkConfig.json", SourceGenerationContext.Default.JdkConfig),
             await LoadJsonFromZipAsync(zipFile, "advantageScopeConfig.json", SourceGenerationContext.Default.AdvantageScopeConfig),
             await LoadJsonFromZipAsync(zipFile, "elasticConfig.json", SourceGenerationContext.Default.ElasticConfig),
+            await LoadJsonFromZipAsync(zipFile, "labviewConfig.json", SourceGenerationContext.Default.LabVIEWConfig),
             await LoadJsonFromZipAsync(zipFile, "fullConfig.json", SourceGenerationContext.Default.FullConfig),
             await LoadJsonFromZipAsync(zipFile, "upgradeConfig.json", SourceGenerationContext.Default.UpgradeConfig));
     }

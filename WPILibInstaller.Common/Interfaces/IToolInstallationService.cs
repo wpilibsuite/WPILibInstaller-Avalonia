@@ -13,5 +13,7 @@ namespace WPILibInstaller.Interfaces
         Task RunCppSetup(IProgress<InstallProgress>? progress = null);
 
         Task RunMavenMetaDataFixer(IProgress<InstallProgress>? progress = null);
+
+        Task RunLabVIEWSetup(IProgress<InstallProgress>? progress = null);
     }
 }

@@ -18,6 +18,8 @@ namespace WPILibInstaller.Interfaces
 
         ElasticConfig ElasticConfig { get; }
 
+        LabVIEWConfig LabVIEWConfig { get; }
+
         VsCodeConfig VsCodeConfig { get; }
 
         string InstallDirectory { get; }

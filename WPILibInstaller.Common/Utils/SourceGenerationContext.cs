@@ -11,6 +11,7 @@ namespace WPILibInstaller.Utils;
 [JsonSerializable(typeof(JdkConfig))]
 [JsonSerializable(typeof(AdvantageScopeConfig))]
 [JsonSerializable(typeof(ElasticConfig))]
+[JsonSerializable(typeof(LabVIEWConfig))]
 [JsonSerializable(typeof(FullConfig))]
 [JsonSerializable(typeof(UpgradeConfig))]
 [JsonSerializable(typeof(ShortcutData))]

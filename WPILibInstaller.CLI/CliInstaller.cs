@@ -25,6 +25,8 @@ namespace WPILibInstaller.CLI
 
         public ElasticConfig ElasticConfig { get; private set; } = null!;
 
+        public LabVIEWConfig LabVIEWConfig { get; private set; } = null!;
+
         public VsCodeConfig VsCodeConfig { get; private set; } = null!;
 
         public string InstallDirectory { get; private set; } = "";
@@ -125,42 +127,48 @@ namespace WPILibInstaller.CLI
 
                 if (Model.InstallEverything)
                 {
-                    Console.WriteLine("[1/9] Extracting archive...");
+                    Console.WriteLine("[1/10] Extracting archive...");
                     await archiveService.ExtractArchive(cancellation.Token, null, progress);
 
-                    Console.WriteLine("[2/9] Setting up Gradle...");
+                    Console.WriteLine("[2/10] Setting up Gradle...");
                     await toolService.RunGradleSetup(progress);
 
-                    Console.WriteLine("[3/9] Setting up tools...");
+                    Console.WriteLine("[3/10] Setting up tools...");
                     await toolService.RunToolSetup(progress);
 
-                    Console.WriteLine("[4/9] Setting up C++...");
+                    Console.WriteLine("[4/10] Installing LabVIEW add-ons...");
+                    await toolService.RunLabVIEWSetup(progress);
+
+                    Console.WriteLine("[5/10] Setting up C++...");
                     await toolService.RunCppSetup(progress);
 
-                    Console.WriteLine("[5/9] Fixing Maven metadata...");
+                    Console.WriteLine("[6/10] Fixing Maven metadata...");
                     await toolService.RunMavenMetaDataFixer(progress);
 
-                    Console.WriteLine("[6/9] Installing VS Code...");
+                    Console.WriteLine("[7/10] Installing VS Code...");
                     await vsCodeService.RunVsCodeSetup(cancellation.Token, progress);
 
-                    Console.WriteLine("[7/9] Configuring VS Code settings...");
+                    Console.WriteLine("[8/10] Configuring VS Code settings...");
                     await vsCodeService.ConfigureVsCodeSettings();
 
-                    Console.WriteLine("[8/9] Installing VS Code extensions...");
+                    Console.WriteLine("[9/10] Installing VS Code extensions...");
                     await vsCodeService.RunVsCodeExtensionsSetup(progress);
 
-                    Console.WriteLine("[9/9] Creating shortcuts...");
+                    Console.WriteLine("[10/10] Creating shortcuts...");
                     await shortcutService.RunShortcutCreator(cancellation.Token);
                 }
                 else
                 {
-                    Console.WriteLine("[1/3] Extracting JDK and tools...");
+                    Console.WriteLine("[1/4] Extracting JDK and tools...");
                     await archiveService.ExtractJDKAndTools(cancellation.Token, progress);
 
-                    Console.WriteLine("[2/3] Setting up tools...");
+                    Console.WriteLine("[2/4] Setting up tools...");
                     await toolService.RunToolSetup(progress);
 
-                    Console.WriteLine("[3/3] Creating shortcuts...");
+                    Console.WriteLine("[3/4] Installing LabVIEW add-ons...");
+                    await toolService.RunLabVIEWSetup(progress);
+
+                    Console.WriteLine("[4/4] Creating shortcuts...");
                     await shortcutService.RunShortcutCreator(cancellation.Token);
                 }
 
@@ -197,6 +205,7 @@ namespace WPILibInstaller.CLI
             JdkConfig = configuration.JdkConfig;
             AdvantageScopeConfig = configuration.AdvantageScopeConfig;
             ElasticConfig = configuration.ElasticConfig;
+            LabVIEWConfig = configuration.LabVIEWConfig;
             FullConfig = configuration.FullConfig;
             UpgradeConfig = configuration.UpgradeConfig;
             VsCodeModel = InstallerResources.BuildVsCodeModel(VsCodeConfig);

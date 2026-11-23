@@ -105,6 +105,14 @@ if (toolsPath is null)
     return 1;
 }
 
+// The installer runs "ToolsUpdater --install-labview" with administrator rights to install the
+// LabVIEW add-ons it extracted into labview/lvaddons; see LabVIEWAddons.
+if (args.Contains("--install-labview"))
+{
+    var labviewAddons = Path.Combine(Path.GetDirectoryName(toolsPath)!, "labview", "lvaddons");
+    return LabVIEWAddons.Install(labviewAddons, LabVIEWAddons.DefaultLocation) ? 0 : 1;
+}
+
 var jsonFile = Path.Combine(toolsPath, "tools.json");
 
 if (!File.Exists(jsonFile))
