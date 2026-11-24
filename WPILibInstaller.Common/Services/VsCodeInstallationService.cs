@@ -132,6 +132,9 @@ namespace WPILibInstaller.Services
             var settingsFile = Path.Combine(settingsDir, "settings.json");
 
             var homePath = configurationProvider.InstallDirectory;
+            var jdkFolder = ToPlatformPath(configurationProvider.JdkConfig.Folder);
+            var jdkHome = Path.Combine(homePath, jdkFolder);
+            var jdkBin = Path.Combine(jdkHome, "bin");
             var codeFolder = Path.Combine(homePath, configurationProvider.UpgradeConfig.PathFolder);
 
             try
@@ -156,7 +159,8 @@ namespace WPILibInstaller.Services
                 settingsJson = JsonNode.Parse(await File.ReadAllTextAsync(settingsFile))?.AsObject() ?? new JsonObject();
             }
 
-            SetIfNotSet("java.jdt.ls.java.home", Path.Combine(homePath, "jdk"), settingsJson);
+            // Always point at the installed JDK; upgrades from the old unversioned folder would otherwise keep a stale path.
+            settingsJson["java.jdt.ls.java.home"] = jdkHome;
             SetIfNotSetIgnoreSync("extensions.autoUpdate", false, settingsJson);
             SetIfNotSetIgnoreSync("extensions.autoCheckUpdates", false, settingsJson);
             SetIfNotSetIgnoreSync("extensions.ignoreRecommendations", true, settingsJson);
@@ -189,8 +193,8 @@ namespace WPILibInstaller.Services
             {
                 JsonObject terminalProps = new()
                 {
-                    ["JAVA_HOME"] = Path.Combine(homePath, "jdk"),
-                    ["PATH"] = Path.Combine(homePath, "jdk", "bin") + pathSeparator + "${env:PATH}",
+                    ["JAVA_HOME"] = jdkHome,
+                    ["PATH"] = jdkBin + pathSeparator + "${env:PATH}",
                 };
 
                 settingsJson["terminal.integrated.env." + os] = terminalProps;
@@ -198,25 +202,24 @@ namespace WPILibInstaller.Services
             else
             {
                 JsonNode? terminalEnv = settingsJson["terminal.integrated.env." + os]!;
-                terminalEnv["JAVA_HOME"] = Path.Combine(homePath, "jdk");
+                terminalEnv["JAVA_HOME"] = jdkHome;
                 JsonNode? path = terminalEnv["PATH"];
                 if (path == null)
                 {
-                    terminalEnv["PATH"] = Path.Combine(homePath, "jdk", "bin") + pathSeparator + "${env:PATH}";
+                    terminalEnv["PATH"] = jdkBin + pathSeparator + "${env:PATH}";
                 }
                 else
                 {
-                    var binPath = Path.Combine(homePath, "jdk", "bin");
-                    if (!path.ToString().Contains(binPath, StringComparison.Ordinal))
+                    if (!path.ToString().Contains(jdkBin, StringComparison.Ordinal))
                     {
-                        path = binPath + pathSeparator + path;
+                        path = jdkBin + pathSeparator + path;
                         terminalEnv["PATH"] = path.ToString();
                     }
                 }
             }
 
             IgnoreSync("terminal.integrated.env." + os, settingsJson);
-            ConfigureJavaRuntime(homePath, settingsJson);
+            ConfigureJavaRuntime(homePath, jdkFolder, settingsJson);
             IgnoreExtensionSync(settingsJson);
 
             SetIfNotSetIgnoreSync("update.enableWindowsBackgroundUpdates", false, settingsJson);
@@ -382,6 +385,12 @@ namespace WPILibInstaller.Services
             }
         }
 
+        private static string ToPlatformPath(string path)
+        {
+            var separator = Path.DirectorySeparatorChar;
+            return path.Replace('/', separator).Replace('\\', separator);
+        }
+
         private static void SetIfNotSet(string key, object value, JsonObject settingsJson)
         {
             if (settingsJson.ContainsKey(key))
@@ -439,7 +448,7 @@ namespace WPILibInstaller.Services
             }
         }
 
-        private static void ConfigureJavaRuntime(string homePath, JsonObject settingsJson)
+        private static void ConfigureJavaRuntime(string homePath, string jdkFolder, JsonObject settingsJson)
         {
             if (settingsJson.ContainsKey("java.configuration.runtimes"))
             {
@@ -459,7 +468,7 @@ namespace WPILibInstaller.Services
                         {
                             if (name.ToString().Equals("JavaSE-25", StringComparison.OrdinalIgnoreCase))
                             {
-                                result["path"] = Path.Combine(homePath, "jdk");
+                                result["path"] = Path.Combine(homePath, jdkFolder);
                                 result["default"] = true;
                                 javaFound = true;
                             }
@@ -475,7 +484,7 @@ namespace WPILibInstaller.Services
                         JsonObject javaConfigProp = new()
                         {
                             ["name"] = "JavaSE-25",
-                            ["path"] = Path.Combine(homePath, "jdk"),
+                            ["path"] = Path.Combine(homePath, jdkFolder),
                             ["default"] = true,
                         };
                         javaConfigEnv.Add((JsonNode)javaConfigProp);
@@ -489,7 +498,7 @@ namespace WPILibInstaller.Services
                 JsonObject javaConfigProp = new()
                 {
                     ["name"] = "JavaSE-25",
-                    ["path"] = Path.Combine(homePath, "jdk"),
+                    ["path"] = Path.Combine(homePath, jdkFolder),
                     ["default"] = true,
                 };
                 javaConfigProps.Add((JsonNode)javaConfigProp);

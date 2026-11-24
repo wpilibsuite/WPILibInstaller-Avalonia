@@ -85,9 +85,9 @@ namespace WPILibInstaller.Utils
             }
         }
 
-        public static async Task<bool> RunJavaJar(string installDir, string jar, int timeoutMs)
+        public static async Task<bool> RunJavaJar(string installDir, string jdkFolder, string jar, int timeoutMs)
         {
-            string java = Path.Join(installDir, "jdk", "bin", "java");
+            string java = Path.Join(installDir, jdkFolder, "bin", "java");
             if (OperatingSystem.IsWindows())
             {
                 java += ".exe";

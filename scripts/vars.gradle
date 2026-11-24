@@ -9,6 +9,11 @@ def advantagescopeAppArmorFile = file("files/advantagescope.AppArmor")
 def pathfolder = 'wpilibcode'
 def iconfolder = 'icons'
 
+// The launcher scripts are installed with a concrete JDK major version folder name.
+def substituteJdkFolder = { String line ->
+  line.replace('@JDK_FOLDER@', jdkMajorVersion)
+}
+
 ext.varConfigSetup = {
   return new Tuple2({ Task task ->
     task.inputs.property 'pathfolder', pathfolder
@@ -29,6 +34,7 @@ ext.varsZipSetup = { AbstractArchiveTask zip->
   if (project.ext.buildClassifier == 'Windows' || project.ext.buildClassifier == 'WindowsArm64') {
     zip.from (varsfile) {
       into "/$pathfolder"
+      filter(substituteJdkFolder)
       rename {
         "wpilibvars${wpilibYear}.bat"
       }
@@ -36,6 +42,7 @@ ext.varsZipSetup = { AbstractArchiveTask zip->
 
     zip.from (varsfilePS) {
       into "/$pathfolder"
+      filter(substituteJdkFolder)
       rename {
         "wpilibvars${wpilibYear}.ps1"
       }
@@ -43,6 +50,7 @@ ext.varsZipSetup = { AbstractArchiveTask zip->
 
     zip.from (codefileCmd) {
       into "/$pathfolder"
+      filter(substituteJdkFolder)
       rename {
         "wpilibcode${wpilibYear}.cmd"
       }
@@ -50,6 +58,7 @@ ext.varsZipSetup = { AbstractArchiveTask zip->
   } else {
     zip.from (varsfilesh) {
       into "/$pathfolder"
+      filter(substituteJdkFolder)
       rename {
         "wpilibvars${wpilibYear}.sh"
       }
@@ -57,6 +66,7 @@ ext.varsZipSetup = { AbstractArchiveTask zip->
 
     zip.from (codefile) {
       into "/$pathfolder"
+      filter(substituteJdkFolder)
       rename {
         "wpilibcode${wpilibYear}"
       }

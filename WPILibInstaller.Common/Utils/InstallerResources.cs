@@ -211,7 +211,7 @@ public static class InstallerResources
                 publicFolder = "C:\\Users\\Public";
             }
 
-            return Path.Combine(publicFolder, "wpilib", upgradeConfig.wpilibYearFolder);
+            return Path.Combine(publicFolder, "wpilib", upgradeConfig.WpilibYear);
         }
 
         var userFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
@@ -226,7 +226,7 @@ public static class InstallerResources
             }
         }
 
-        return Path.Combine(installRoot, upgradeConfig.wpilibYearFolder);
+        return Path.Combine(installRoot, upgradeConfig.WpilibYear);
     }
 
     public static async Task<bool> MacArtifactsChecksumMatchesAsync(string artifactsFile, string baseDirectory)

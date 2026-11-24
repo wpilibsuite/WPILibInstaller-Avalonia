@@ -1,1 +1,1 @@
-export JAVA_HOME="$( cd "$(dirname "$0")/../jdk" >/dev/null 2>&1 ; pwd -P )"
+export JAVA_HOME="$( cd "$(dirname "$0")/../jdk/@JDK_FOLDER@" >/dev/null 2>&1 ; pwd -P )"

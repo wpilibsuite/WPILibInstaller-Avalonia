@@ -19,12 +19,15 @@ ext.toolchainGitTag = 'v2027-1'
 
 ext.jdkVersion = '25.0.5+8'
 ext.jdkWinArmVersion = '25.0.5.0.2'
+ext.jdkMajorVersion = jdkVersion.tokenize('.')[0]
+if (jdkWinArmVersion.tokenize('.')[0] != jdkMajorVersion) {
+  throw new GradleException("JDK major versions do not match: $jdkVersion vs $jdkWinArmVersion")
+}
 
 ext.advantagescopeGitTag = 'v27.0.0-alpha-6'
 
 ext.elasticGitTag = 'v2027.0.0-alpha10'
 
-ext.wpilibYear = '2027_beta1'       // The displayed year for WPILib. Should be a shortened version of the gradleRIOversion.
-ext.wpilibYearFolder = '2027_beta1' // Folder name for WPILib installation. Used for the WPILib Year for vendordeps and import detection.
+ext.wpilibYear = '2027'
 
 ext.gradleWrapperVersion = '9.4.1'

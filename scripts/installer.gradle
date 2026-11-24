@@ -11,6 +11,10 @@ def execOperations = objects.newInstance(ExecOperationsProvider).execOperations
 
 def metaDataScriptBatch = file("$rootDir/files/MavenMetaDataFixer.bat")
 def metaDataScriptSh = file("$rootDir/files/MavenMetaDataFixer.sh")
+
+def substituteJdkFolder = { String line ->
+  line.replace('@JDK_FOLDER@', jdkMajorVersion)
+}
 def toolsUpdaterOutputDir = file("$buildDir/toolsUpdater")
 
 def toolsUpdaterTask = tasks.register('toolsUpdater', Exec) {
@@ -57,11 +61,13 @@ ext.msBuildExtraSetup = { AbstractArchiveTask zip->
   if (project.ext.isUnix == true) {
     zip.from(metaDataScriptSh) {
       into '/maven'
+      filter(substituteJdkFolder)
       filePermissions { unix(0755) }
     }
   } else {
     zip.from(metaDataScriptBatch) {
       into '/maven'
+      filter(substituteJdkFolder)
     }
   }
 }
