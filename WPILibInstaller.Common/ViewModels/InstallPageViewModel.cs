@@ -96,21 +96,28 @@ namespace WPILibInstaller.ViewModels
                 var progress = CreateProgressReporter();
                 do
                 {
-                    SetOverallProgress(0, "Extracting JDK and Tools");
+                    SetOverallProgress(0, "Stopping Gradle daemons");
+                    await toolInstallationService.StopGradleDaemons(progress, token);
+                    if (token.IsCancellationRequested)
+                    {
+                        break;
+                    }
+
+                    SetOverallProgress(25, "Extracting JDK and Tools");
                     await archiveExtractionService.ExtractJDKAndTools(token, progress);
                     if (token.IsCancellationRequested)
                     {
                         break;
                     }
 
-                    SetOverallProgress(33, "Installing Tools");
+                    SetOverallProgress(50, "Installing Tools");
                     await toolInstallationService.RunToolSetup(progress);
                     if (token.IsCancellationRequested)
                     {
                         break;
                     }
 
-                    SetOverallProgress(66, "Creating Shortcuts");
+                    SetOverallProgress(75, "Creating Shortcuts");
                     await shortcutService.RunShortcutCreator(token);
                 }
                 while (false);
@@ -128,63 +135,70 @@ namespace WPILibInstaller.ViewModels
                 var progress = CreateProgressReporter();
                 do
                 {
-                    SetOverallProgress(0, "Extracting");
+                    SetOverallProgress(0, "Stopping Gradle daemons");
+                    await toolInstallationService.StopGradleDaemons(progress, token);
+                    if (token.IsCancellationRequested)
+                    {
+                        break;
+                    }
+
+                    SetOverallProgress(10, "Extracting");
                     await archiveExtractionService.ExtractArchive(token, null, progress);
                     if (token.IsCancellationRequested)
                     {
                         break;
                     }
 
-                    SetOverallProgress(11, "Installing Gradle");
+                    SetOverallProgress(20, "Installing Gradle");
                     await toolInstallationService.RunGradleSetup(progress);
                     if (token.IsCancellationRequested)
                     {
                         break;
                     }
 
-                    SetOverallProgress(22, "Installing Tools");
+                    SetOverallProgress(30, "Installing Tools");
                     await toolInstallationService.RunToolSetup(progress);
                     if (token.IsCancellationRequested)
                     {
                         break;
                     }
 
-                    SetOverallProgress(33, "Installing CPP");
+                    SetOverallProgress(40, "Installing CPP");
                     await toolInstallationService.RunCppSetup(progress);
                     if (token.IsCancellationRequested)
                     {
                         break;
                     }
 
-                    SetOverallProgress(44, "Fixing Maven");
+                    SetOverallProgress(50, "Fixing Maven");
                     await toolInstallationService.RunMavenMetaDataFixer(progress);
                     if (token.IsCancellationRequested)
                     {
                         break;
                     }
 
-                    SetOverallProgress(55, "Installing VS Code");
+                    SetOverallProgress(60, "Installing VS Code");
                     await vsCodeInstallationService.RunVsCodeSetup(token, progress);
                     if (token.IsCancellationRequested)
                     {
                         break;
                     }
 
-                    SetOverallProgress(66, "Configuring VS Code");
+                    SetOverallProgress(70, "Configuring VS Code");
                     await vsCodeInstallationService.ConfigureVsCodeSettings();
                     if (token.IsCancellationRequested)
                     {
                         break;
                     }
 
-                    SetOverallProgress(77, "Installing VS Code Extensions");
+                    SetOverallProgress(80, "Installing VS Code Extensions");
                     await vsCodeInstallationService.RunVsCodeExtensionsSetup(progress);
                     if (token.IsCancellationRequested)
                     {
                         break;
                     }
 
-                    SetOverallProgress(88, "Creating Shortcuts");
+                    SetOverallProgress(90, "Creating Shortcuts");
                     await shortcutService.RunShortcutCreator(token);
                 }
                 while (false);
