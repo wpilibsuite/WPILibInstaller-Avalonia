@@ -68,6 +68,7 @@ namespace WPILibInstaller.Services
 
             await ProcessExecutionUtils.RunJavaJar(
                 configurationProvider.InstallDirectory,
+                configurationProvider.JdkConfig.Folder,
                 Path.Combine(
                     configurationProvider.InstallDirectory,
                     configurationProvider.UpgradeConfig.Maven.Folder,

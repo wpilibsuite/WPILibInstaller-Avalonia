@@ -4,7 +4,7 @@ SCRIPT_PATH="$(dirname "$(realpath "$0")")"
 SCRIPT_NAME="$(basename "$(realpath "$0")")"
 SCRIPT_BASE="$(basename -s .sh "$SCRIPT_NAME")"
 JAR_NAME="$SCRIPT_BASE.jar"
-JDK_DIR="$(realpath "$SCRIPT_PATH/../jdk/bin/java")"
+JDK_DIR="$(realpath "$SCRIPT_PATH/../jdk/@JDK_FOLDER@/bin/java")"
 
 if ! "$JDK_DIR" -jar "$JAR_NAME"; then
     echo "ERROR launching $SCRIPT_BASE using $JDK_DIR"

@@ -261,7 +261,6 @@ def upgradeConfigFileTask = tasks.register('generateUpgradeConfigFile', Task) { 
         def config = [:]
 
         config['WpilibYear'] = wpilibYear
-        config['wpilibYearFolder'] = wpilibYearFolder
 
         config['InstallerType'] = classifier
 

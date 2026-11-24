@@ -2,6 +2,10 @@ apply from: 'scripts/versions.gradle'
 
 def baseUrl = "https://github.com/wpilibsuite/opensdk/releases/download/$toolchainGitTag/"
 
+// place them under toolchain/<version>.
+ext.toolchainVersion = toolchainGitTag.startsWith('v') ? toolchainGitTag.substring(1) : toolchainGitTag
+def toolchainFolder = ('toolchain/' + toolchainVersion).toString()
+
 def fileNameWindows = "arm64-systemcore-2027-x86_64-w64-mingw32-Toolchain-${gccVersion}.tgz"
 
 def downloadUrlWindows = baseUrl + fileNameWindows
@@ -66,7 +70,6 @@ ext.toolchainConfigTaskSetup = {
     def toolchainConfig = [:];
 
     toolchainConfig['Version'] = gccVersion
-    toolchainConfig['Directory'] = 'systemcore'
 
     config['CppToolchain'] = toolchainConfig
   });
@@ -87,6 +90,7 @@ ext.toolchainZipSetup = { AbstractArchiveTask zip->
 
     zip.from(project.tarTree(project.resources.gzip(actualLinuxTask.get().outputFiles.first()))) {
 
+      into toolchainFolder
       includeEmptyDirs = false
     }
 
@@ -97,6 +101,7 @@ ext.toolchainZipSetup = { AbstractArchiveTask zip->
 
     zip.from(project.tarTree(project.resources.gzip(downloadTaskMac.get().outputFiles.first()))) {
 
+      into toolchainFolder
       includeEmptyDirs = false
     }
   } else if (project.hasProperty('macBuildArm64')) {
@@ -106,6 +111,7 @@ ext.toolchainZipSetup = { AbstractArchiveTask zip->
 
     zip.from(project.tarTree(project.resources.gzip(downloadTaskMacArm.get().outputFiles.first()))) {
 
+      into toolchainFolder
       includeEmptyDirs = false
     }
   } else {
@@ -114,6 +120,7 @@ ext.toolchainZipSetup = { AbstractArchiveTask zip->
     zip.inputs.files downloadTaskWindows.get().outputFiles
 
     zip.from(project.tarTree(project.resources.gzip(downloadTaskWindows.get().outputFiles.first()))) {
+      into toolchainFolder
       includeEmptyDirs = false
     }
   }

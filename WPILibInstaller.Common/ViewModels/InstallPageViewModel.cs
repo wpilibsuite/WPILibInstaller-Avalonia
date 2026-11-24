@@ -248,7 +248,7 @@ namespace WPILibInstaller.ViewModels
                 CreateLegacyInstallSymlink(
                     userFolder,
                     configurationProvider.InstallDirectory,
-                    configurationProvider.UpgradeConfig.wpilibYearFolder);
+                    configurationProvider.UpgradeConfig.WpilibYear);
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException)
             {
@@ -256,7 +256,7 @@ namespace WPILibInstaller.ViewModels
             }
         }
 
-        private static void CreateLegacyInstallSymlink(string userFolder, string installDirectory, string wpilibYearFolder)
+        private static void CreateLegacyInstallSymlink(string userFolder, string installDirectory, string wpilibYear)
         {
             var legacyPath = Path.Combine(userFolder, "wpilib");
             var legacyInfo = new DirectoryInfo(legacyPath);
@@ -271,7 +271,7 @@ namespace WPILibInstaller.ViewModels
 
             Directory.CreateDirectory(legacyPath);
 
-            var legacyFolderPath = Path.Combine(legacyPath, wpilibYearFolder);
+            var legacyFolderPath = Path.Combine(legacyPath, wpilibYear);
             CreateOrUpdateSymlink(legacyFolderPath, Path.GetFullPath(installDirectory));
         }
 

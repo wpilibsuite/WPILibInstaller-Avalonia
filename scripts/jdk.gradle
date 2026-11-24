@@ -73,7 +73,7 @@ def jdkConfigFileTask = tasks.register("jdkConfigFile") {
   doLast {
 
     def config = [:]
-    config['folder'] = 'jdk'
+    config['folder'] = ('jdk/' + jdkMajorVersion).toString()
     config['tarFile'] = 'jdk.tar.gz'
 
     def gbuilder = getGsonBuilder()
@@ -107,7 +107,7 @@ ext.jdkZipSetupWindows = { AbstractArchiveTask zip->
   zip.from(project.zipTree(downloadWindowsJdk.get().outputFiles.first())) {
 
     eachFile { f->
-      f.path = f.path.replace("jdk-${jdkVersion}/", 'jdk/')
+      f.path = f.path.replace("jdk-${jdkVersion}/", "jdk/${jdkMajorVersion}/")
     }
 
     eachFile { f->
@@ -128,7 +128,7 @@ ext.jdkZipSetupWindows = { AbstractArchiveTask zip->
   }
 
   zip.from (runtimeExtractTask.get()) {
-    into '/jdk/bin'
+    into "/jdk/${jdkMajorVersion}/bin"
   }
 
   zip.from(jdkConfigFile) {
@@ -149,7 +149,7 @@ ext.jdkZipSetupWindowsArm64 = { AbstractArchiveTask zip->
     eachFile { f->
       if (f.path.startsWith("jdk-")) {
         def oldPath = f.path
-        f.path = f.path.replaceFirst("jdk-[^/]+/", 'jdk/')
+        f.path = f.path.replaceFirst("jdk-[^/]+/", "jdk/${jdkMajorVersion}/")
       }
     }
 
@@ -171,7 +171,7 @@ ext.jdkZipSetupWindowsArm64 = { AbstractArchiveTask zip->
   }
 
   zip.from (runtimeExtractTask.get()) {
-    into '/jdk/bin'
+    into "/jdk/${jdkMajorVersion}/bin"
   }
 
   zip.from(jdkConfigFile) {
@@ -189,7 +189,7 @@ ext.jdkZipSetupLinux = { AbstractArchiveTask zip->
 
   zip.from(project.tarTree(project.resources.gzip(downloadLinuxJdk.get().outputFiles.first()))) {
     eachFile { f->
-      f.path = f.path.replace("jdk-${jdkVersion}/", 'jdk/')
+      f.path = f.path.replace("jdk-${jdkVersion}/", "jdk/${jdkMajorVersion}/")
     }
 
     exclude '**/bin/*.pdb'
@@ -216,7 +216,7 @@ ext.jdkZipSetupLinuxArm64 = { AbstractArchiveTask zip->
 
   zip.from(project.tarTree(project.resources.gzip(downloadLinuxArm64Jdk.get().outputFiles.first()))) {
     eachFile { f->
-      f.path = f.path.replace("jdk-${jdkVersion}/", 'jdk/')
+      f.path = f.path.replace("jdk-${jdkVersion}/", "jdk/${jdkMajorVersion}/")
     }
 
     exclude '**/bin/*.pdb'
@@ -243,7 +243,7 @@ ext.jdkZipSetupMac = { AbstractArchiveTask zip->
 
   zip.from(project.tarTree(project.resources.gzip(downloadMacJdk.get().outputFiles.first()))) {
     eachFile { f ->
-      f.path = f.path.replace("jdk-${jdkVersion}/Contents/Home/", 'jdk/')
+      f.path = f.path.replace("jdk-${jdkVersion}/Contents/Home/", "jdk/${jdkMajorVersion}/")
     }
 
     exclude "./jdk-${jdkVersion}/Contents/MacOS/**"
@@ -273,7 +273,7 @@ ext.jdkZipSetupMacArm = { AbstractArchiveTask zip->
 
   zip.from(project.tarTree(project.resources.gzip(downloadMacArmJdk.get().outputFiles.first()))) {
     eachFile { f ->
-      f.path = f.path.replace("jdk-${jdkVersion}/Contents/Home/", 'jdk/')
+      f.path = f.path.replace("jdk-${jdkVersion}/Contents/Home/", "jdk/${jdkMajorVersion}/")
     }
 
     exclude "./jdk-${jdkVersion}/Contents/MacOS/**"
