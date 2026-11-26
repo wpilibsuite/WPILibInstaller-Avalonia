@@ -19,7 +19,7 @@ namespace WPILibInstaller.Utils
 
         public string EntryKey => currentEntry.Name;
 
-        public int EntrySize => (int)currentEntry.Length;
+        public long EntrySize => currentEntry.Length;
 
         public bool EntryIsDirectory => currentEntry.EntryType == TarEntryType.Directory;
 
@@ -45,6 +45,11 @@ namespace WPILibInstaller.Utils
         public async Task CopyToFileAsync(string path, CancellationToken token)
         {
             await currentEntry.ExtractToFileAsync(path, true, token);
+        }
+
+        public Stream OpenEntryStream()
+        {
+            return currentEntry.DataStream ?? throw new InvalidOperationException("The current tar entry has no data stream.");
         }
 
         public bool EntryIsExecutable => currentEntry.Mode.HasFlag(UnixFileMode.UserExecute);

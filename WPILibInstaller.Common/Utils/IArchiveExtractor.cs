@@ -8,12 +8,14 @@
 
         string EntryKey { get; }
 
-        int EntrySize { get; }
+        long EntrySize { get; }
 
         bool EntryIsDirectory { get; }
 
         bool EntryIsExecutable { get; }
 
         Task CopyToFileAsync(string path, CancellationToken token);
+
+        Stream OpenEntryStream();
     }
 }

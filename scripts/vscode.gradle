@@ -203,6 +203,16 @@ def getInformationOfVsix = { vsix, map->
   map['version'] = packageJson.version
 }
 
+def getExtractedZipSize = { file ->
+  def size = zipTree(file).files.sum { it.length() } ?: 0L
+  return size as long
+}
+
+def getExtractedTarGzSize = { file ->
+  def size = tarTree(resources.gzip(file)).files.sum { it.length() } ?: 0L
+  return size as long
+}
+
 def vscodeTask = tasks.register('vscodeConfig', Task) {
   dependsOn wpilibExtensionDownload
   dependsOn cppDownloadTask
@@ -220,6 +230,11 @@ def vscodeTask = tasks.register('vscodeConfig', Task) {
   inputs.files javaLangExtensionDownload.get().outputFiles
   inputs.files javaDebugExtensionDownload.get().outputFiles
   inputs.files javaDepExtensionDownload.get().outputFiles
+  inputs.files vscodeWindowsDownload.get().outputFiles
+  inputs.files vscodeWindowsArm64Download.get().outputFiles
+  inputs.files vscodeMacDownload.get().outputFiles
+  inputs.files vscodeLinuxDownload.get().outputFiles
+  inputs.files vscodeLinuxArm64Download.get().outputFiles
 
   inputs.property 'linuxhash', vscodeLinuxHash
   inputs.property 'linuxarm64hash', vscodeLinuxArm64Hash
@@ -250,34 +265,46 @@ def vscodeTask = tasks.register('vscodeConfig', Task) {
     config['VsCodeWindowsName'] = vscodeWindowsZipName
     config['VsCodeWindowsHash'] = vscodeWindowsHash
     config['VsCodeWindowsSize'] = vscodeWindowsDownload.get().outputFiles.first().length()
+    config['VsCodeWindowsExtractedSize'] = getExtractedZipSize(vscodeWindowsDownload.get().outputFiles.first())
     config['VsCodeWindowsArm64Url'] = vscodeWindowsArm64Url
     config['VsCodeWindowsArm64Name'] = vscodeWindowsArm64ZipName
     config['VsCodeWindowsArm64Hash'] = vscodeWindowsArm64Hash
     config['VsCodeWindowsArm64Size'] = vscodeWindowsArm64Download.get().outputFiles.first().length()
+    config['VsCodeWindowsArm64ExtractedSize'] = getExtractedZipSize(vscodeWindowsArm64Download.get().outputFiles.first())
     config['VsCodeMacUrl'] = vscodeMacUrl
     config['VsCodeMacName'] = vscodeMacZipName
     config['VsCodeMacHash'] = vscodeMacHash
     config['VsCodeMacSize'] = vscodeMacDownload.get().outputFiles.first().length()
+    config['VsCodeMacExtractedSize'] = getExtractedZipSize(vscodeMacDownload.get().outputFiles.first())
     config['VsCodeLinuxUrl'] = vscodeLinuxUrl
     config['VsCodeLinuxName'] = vscodeLinuxZipName
     config['VsCodeLinuxHash'] = vscodeLinuxHash
     config['VsCodeLinuxSize'] = vscodeLinuxDownload.get().outputFiles.first().length()
+    config['VsCodeLinuxExtractedSize'] = getExtractedTarGzSize(vscodeLinuxDownload.get().outputFiles.first())
 
     config['VsCodeLinuxArm64Url'] = vscodeLinuxArm64Url
     config['VsCodeLinuxArm64Name'] = vscodeLinuxArm64ZipName
     config['VsCodeLinuxArm64Hash'] = vscodeLinuxArm64Hash
     config['VsCodeLinuxArm64Size'] = vscodeLinuxArm64Download.get().outputFiles.first().length()
+    config['VsCodeLinuxArm64ExtractedSize'] = getExtractedTarGzSize(vscodeLinuxArm64Download.get().outputFiles.first())
 
     config['VsCodeVersion'] = vsCodeVersion
 
     config['wpilibExtension'] = wpilibMap
 
-    config['thirdPartyExtensions'] = [
-      cppMap,
+    config['javaExtensions'] = [
       javaLangMap,
       javaDebugMap,
       javaDepMap,
     ]
+
+    config['cppExtensions'] = [
+      cppMap,
+    ]
+
+    // Reserved for the Python work in progress. Populate this list when Python
+    // extension VSIX downloads are added.
+    config['pythonExtensions'] = []
 
 
     def gbuilder = getGsonBuilder()

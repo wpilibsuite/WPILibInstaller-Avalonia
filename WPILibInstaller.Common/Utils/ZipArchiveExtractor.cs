@@ -11,7 +11,7 @@ namespace WPILibInstaller.Utils
         public ZipArchiveExtractor(Stream stream)
         {
             this.archive = new ZipArchive(stream);
-            TotalUncompressSize = (int)archive.Entries.Count;
+            TotalUncompressSize = archive.Entries.Sum(entry => entry.Length);
             entries = archive.Entries.GetEnumerator();
         }
 
@@ -19,7 +19,7 @@ namespace WPILibInstaller.Utils
 
         public string EntryKey => entries.Current.FullName;
 
-        public int EntrySize => 1;
+        public long EntrySize => entries.Current.Length;
 
         public bool EntryIsDirectory => entries.Current.Name == "";
 
@@ -36,6 +36,11 @@ namespace WPILibInstaller.Utils
         public Task CopyToFileAsync(string path, CancellationToken token)
         {
             return entries.Current.ExtractToFileAsync(path, true, token);
+        }
+
+        public Stream OpenEntryStream()
+        {
+            return entries.Current.Open();
         }
 
         public bool EntryIsExecutable => false;

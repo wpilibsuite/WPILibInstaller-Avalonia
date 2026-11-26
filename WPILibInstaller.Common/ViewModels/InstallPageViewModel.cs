@@ -16,6 +16,7 @@ namespace WPILibInstaller.ViewModels
         private readonly IVsCodeInstallationService vsCodeInstallationService;
         private readonly IToolInstallationService toolInstallationService;
         private readonly IShortcutService shortcutService;
+        private readonly IInstallSelectionStore installSelectionStore;
 
         [ObservableProperty]
         public partial int Progress { get; set; }
@@ -42,7 +43,8 @@ namespace WPILibInstaller.ViewModels
             IArchiveExtractionService archiveExtractionService,
             IVsCodeInstallationService vsCodeInstallationService,
             IToolInstallationService toolInstallationService,
-            IShortcutService shortcutService)
+            IShortcutService shortcutService,
+            IInstallSelectionStore installSelectionStore)
             : base("", "")
         {
             this.viewModelResolver = viewModelResolver;
@@ -52,6 +54,7 @@ namespace WPILibInstaller.ViewModels
             this.vsCodeInstallationService = vsCodeInstallationService;
             this.toolInstallationService = toolInstallationService;
             this.shortcutService = shortcutService;
+            this.installSelectionStore = installSelectionStore;
             runInstallTask = InstallFunc();
 
             async Task InstallFunc()
@@ -89,119 +92,88 @@ namespace WPILibInstaller.ViewModels
             TextTotal = status;
         }
 
-        private async Task InstallTools(CancellationToken token)
+        private async Task InstallSelected(CancellationToken token)
         {
             try
             {
                 var progress = CreateProgressReporter();
-                do
+                var selection = toInstallProvider.Model;
+                var steps = new List<(string Label, Func<Task> Run)>();
+
+                void Add(string label, Func<Task> run) => steps.Add((label, run));
+
+                bool anyLanguage = selection.InstallJava || selection.InstallCpp;
+
+                if (anyLanguage)
                 {
-                    SetOverallProgress(0, "Stopping Gradle daemons");
-                    await toolInstallationService.StopGradleDaemons(progress, token);
-                    if (token.IsCancellationRequested)
-                    {
-                        break;
-                    }
-
-                    SetOverallProgress(25, "Extracting JDK and Tools");
-                    await archiveExtractionService.ExtractJDKAndTools(token, progress);
-                    if (token.IsCancellationRequested)
-                    {
-                        break;
-                    }
-
-                    SetOverallProgress(50, "Installing Tools");
-                    await toolInstallationService.RunToolSetup(progress);
-                    if (token.IsCancellationRequested)
-                    {
-                        break;
-                    }
-
-                    SetOverallProgress(75, "Creating Shortcuts");
-                    await shortcutService.RunShortcutCreator(token);
+                    Add("Stopping Gradle daemons", () => toolInstallationService.StopGradleDaemons(progress, token));
                 }
-                while (false);
-            }
-            catch (OperationCanceledException)
-            {
-                // Ignore, as we just want to continue.
-            }
-        }
 
-        private async Task InstallEverything(CancellationToken token)
-        {
-            try
-            {
-                var progress = CreateProgressReporter();
-                do
+                if (anyLanguage)
                 {
-                    SetOverallProgress(0, "Stopping Gradle daemons");
-                    await toolInstallationService.StopGradleDaemons(progress, token);
-                    if (token.IsCancellationRequested)
-                    {
-                        break;
-                    }
-
-                    SetOverallProgress(10, "Extracting");
-                    await archiveExtractionService.ExtractArchive(token, null, progress);
-                    if (token.IsCancellationRequested)
-                    {
-                        break;
-                    }
-
-                    SetOverallProgress(20, "Installing Gradle");
-                    await toolInstallationService.RunGradleSetup(progress);
-                    if (token.IsCancellationRequested)
-                    {
-                        break;
-                    }
-
-                    SetOverallProgress(30, "Installing Tools");
-                    await toolInstallationService.RunToolSetup(progress);
-                    if (token.IsCancellationRequested)
-                    {
-                        break;
-                    }
-
-                    SetOverallProgress(40, "Installing CPP");
-                    await toolInstallationService.RunCppSetup(progress);
-                    if (token.IsCancellationRequested)
-                    {
-                        break;
-                    }
-
-                    SetOverallProgress(50, "Fixing Maven");
-                    await toolInstallationService.RunMavenMetaDataFixer(progress);
-                    if (token.IsCancellationRequested)
-                    {
-                        break;
-                    }
-
-                    SetOverallProgress(60, "Installing VS Code");
-                    await vsCodeInstallationService.RunVsCodeSetup(token, progress);
-                    if (token.IsCancellationRequested)
-                    {
-                        break;
-                    }
-
-                    SetOverallProgress(70, "Configuring VS Code");
-                    await vsCodeInstallationService.ConfigureVsCodeSettings();
-                    if (token.IsCancellationRequested)
-                    {
-                        break;
-                    }
-
-                    SetOverallProgress(80, "Installing VS Code Extensions");
-                    await vsCodeInstallationService.RunVsCodeExtensionsSetup(progress);
-                    if (token.IsCancellationRequested)
-                    {
-                        break;
-                    }
-
-                    SetOverallProgress(90, "Creating Shortcuts");
-                    await shortcutService.RunShortcutCreator(token);
+                    Add("Extracting", () => archiveExtractionService.ExtractArchive(token, null, progress));
                 }
-                while (false);
+                else if (selection.AnyToolsSelected)
+                {
+                    Add("Extracting selected tools", () => archiveExtractionService.ExtractSelectedTools(
+                        selection.InstallWPILibTools,
+                        selection.InstallElastic,
+                        selection.InstallAdvantageScope,
+                        token,
+                        progress));
+                }
+
+                if (selection.InstallJava || selection.InstallCpp)
+                {
+                    Add("Installing Gradle", () => toolInstallationService.RunGradleSetup(progress));
+                }
+
+                if (selection.AnyToolsSelected)
+                {
+                    Add("Installing Tools", () => toolInstallationService.RunToolSetup(
+                        selection.InstallWPILibTools,
+                        selection.InstallElastic,
+                        selection.InstallAdvantageScope,
+                        progress));
+                }
+
+                if (selection.InstallCpp)
+                {
+                    Add("Installing CPP", () => toolInstallationService.RunCppSetup(progress));
+                }
+
+                if (selection.InstallJava || selection.InstallCpp)
+                {
+                    Add("Fixing Maven", () => toolInstallationService.RunMavenMetaDataFixer(progress));
+                }
+
+                if (selection.UsesVsCode)
+                {
+                    Add("Installing VS Code", () => vsCodeInstallationService.RunVsCodeSetup(token, progress));
+                    Add("Configuring VS Code", () => vsCodeInstallationService.ConfigureVsCodeSettings());
+                    Add("Installing VS Code Extensions", () => vsCodeInstallationService.RunVsCodeExtensionsSetup(progress));
+                }
+
+                if (selection.HasAnySelection)
+                {
+                    Add("Creating Shortcuts", () => shortcutService.RunShortcutCreator(token));
+                }
+
+                for (int i = 0; i < steps.Count; i++)
+                {
+                    if (token.IsCancellationRequested)
+                    {
+                        break;
+                    }
+
+                    SetOverallProgress(i * 100 / steps.Count, steps[i].Label);
+                    await steps[i].Run();
+                }
+
+                if (!token.IsCancellationRequested)
+                {
+                    SetOverallProgress(100, "Install complete");
+                }
             }
             catch (OperationCanceledException)
             {
@@ -217,14 +189,7 @@ namespace WPILibInstaller.ViewModels
 
             try
             {
-                if (toInstallProvider.Model.InstallTools)
-                {
-                    await InstallTools(source.Token);
-                }
-                else
-                {
-                    await InstallEverything(source.Token);
-                }
+                await InstallSelected(source.Token);
             }
             catch (OperationCanceledException)
             {
@@ -237,6 +202,7 @@ namespace WPILibInstaller.ViewModels
             }
             else
             {
+                await installSelectionStore.SaveAsync(toInstallProvider.Model);
                 CreateLegacyInstallSymlink();
                 Succeeded = true;
             }

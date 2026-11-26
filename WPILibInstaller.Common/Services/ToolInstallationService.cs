@@ -125,16 +125,34 @@ namespace WPILibInstaller.Services
             return Task.WhenAll(tasks);
         }
 
-        public async Task RunToolSetup(IProgress<InstallProgress>? progress = null)
+        public async Task RunToolSetup(bool wpilibTools, bool elastic, bool advantageScope, IProgress<InstallProgress>? progress = null)
         {
             progress?.Report(new InstallProgress(50, "Configuring Tools"));
+
+            List<string> arguments = [];
+            if (wpilibTools)
+            {
+                arguments.Add("--wpilib-tools");
+            }
+
+            if (elastic)
+            {
+                arguments.Add("--elastic");
+            }
+
+            if (advantageScope)
+            {
+                arguments.Add("--advantagescope");
+            }
 
             await ProcessExecutionUtils.RunExecutable(
                 Path.Combine(
                     configurationProvider.InstallDirectory,
                     configurationProvider.UpgradeConfig.Tools.Folder,
                     configurationProvider.UpgradeConfig.Tools.UpdaterExe),
-                30000);
+                30000,
+                default,
+                [.. arguments]);
         }
 
         public async Task RunCppSetup(IProgress<InstallProgress>? progress = null)

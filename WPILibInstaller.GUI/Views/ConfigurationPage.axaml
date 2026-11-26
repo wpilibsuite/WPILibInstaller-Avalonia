@@ -6,13 +6,57 @@
              x:Class="WPILibInstaller.Views.ConfigurationPage"
              xmlns:vm="using:WPILibInstaller.ViewModels"
              x:DataType="vm:ConfigurationPageViewModel">
-  <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-    <TextBlock Margin="0,0,0,20" FontSize="20" FontWeight="Bold">Select the install mode you would like.</TextBlock>
-    <RadioButton FontSize="15" IsChecked="{Binding Model.InstallTools}">Tools Only</RadioButton>
-    <RadioButton FontSize="15" IsChecked="{Binding Model.InstallEverything}">Everything</RadioButton>
-    <Grid Margin="0, 20, 0, 0">
-      <Button HorizontalAlignment="Left" FontSize="15" Command="{Binding InstallLocalUserCommand}" Padding="10">Install for this User</Button>
-      <Button HorizontalAlignment="Right" FontSize="15" Padding="10" IsVisible="{Binding CanRunAsAdmin}" Command="{Binding InstallAdminCommand}">Install for all Users</Button>
+  <StackPanel HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="20,4">
+    <TextBlock Margin="0,0,0,6" FontSize="18" FontWeight="Bold">Select what you would like to install.</TextBlock>
+
+    <Grid ColumnDefinitions="180,*" Margin="0,0,0,2">
+      <CheckBox Grid.Column="0" Height="20" FontSize="13" VerticalAlignment="Center" IsChecked="{Binding Model.InstallJava}">Java</CheckBox>
+      <TextBlock Grid.Column="1" FontSize="11" Foreground="Gray" TextWrapping="Wrap" VerticalAlignment="Center">VS Code, JDK, Gradle, WPILib documentation</TextBlock>
+    </Grid>
+
+    <Grid ColumnDefinitions="180,*" Margin="0,0,0,2">
+      <CheckBox Grid.Column="0" Height="20" FontSize="13" VerticalAlignment="Center" IsChecked="{Binding Model.InstallCpp}">C++</CheckBox>
+      <TextBlock Grid.Column="1" FontSize="11" Foreground="Gray" TextWrapping="Wrap" VerticalAlignment="Center">VS Code, C++ toolchain, JDK, Gradle, WPILib documentation</TextBlock>
+    </Grid>
+
+    <Grid ColumnDefinitions="180,*" Margin="0,0,0,2">
+      <CheckBox Grid.Column="0" Height="20" FontSize="13" VerticalAlignment="Center" IsChecked="{Binding Model.InstallPython}" IsEnabled="False"
+                ToolTip.Tip="Python support is coming soon.">Python</CheckBox>
+      <TextBlock Grid.Column="1" FontSize="11" Foreground="Gray" TextWrapping="Wrap" VerticalAlignment="Center">VS Code, Python, RobotPy, WPILib documentation. Coming soon.</TextBlock>
+    </Grid>
+
+    <Grid ColumnDefinitions="180,*" Margin="0,0,0,2">
+      <CheckBox Grid.Column="0" Height="20" FontSize="13" VerticalAlignment="Center" IsChecked="{Binding Model.InstallLabView}" IsEnabled="False"
+                ToolTip.Tip="LabVIEW add-on support is coming soon.">LabVIEW Add-ons</CheckBox>
+      <TextBlock Grid.Column="1" FontSize="11" Foreground="Gray" TextWrapping="Wrap" VerticalAlignment="Center">Coming soon.</TextBlock>
+    </Grid>
+
+    <Grid ColumnDefinitions="180,*" Margin="0,0,0,2">
+      <CheckBox Grid.Column="0" Height="20" FontSize="13" VerticalAlignment="Center" IsChecked="{Binding Model.InstallWPILibTools}">WPILib Tools</CheckBox>
+      <TextBlock Grid.Column="1" FontSize="11" Foreground="Gray" TextWrapping="Wrap" VerticalAlignment="Center">Glass, OutlineViewer, SysId, Data Log Tool, and WPIcal.</TextBlock>
+    </Grid>
+
+    <Grid ColumnDefinitions="180,*" Margin="0,0,0,2">
+      <CheckBox Grid.Column="0" Height="20" FontSize="13" VerticalAlignment="Center" IsChecked="{Binding Model.InstallElastic}">Elastic</CheckBox>
+      <TextBlock Grid.Column="1" FontSize="11" Foreground="Gray" TextWrapping="Wrap" VerticalAlignment="Center">A driver focused dashboard.</TextBlock>
+    </Grid>
+
+    <Grid ColumnDefinitions="180,*" Margin="0,0,0,6">
+      <CheckBox Grid.Column="0" Height="20" FontSize="13" VerticalAlignment="Center" IsChecked="{Binding Model.InstallAdvantageScope}">AdvantageScope</CheckBox>
+      <TextBlock Grid.Column="1" FontSize="11" Foreground="Gray" TextWrapping="Wrap" VerticalAlignment="Center">A robot diagnostics, log review/analysis, and data visualization application.</TextBlock>
+    </Grid>
+
+    <Grid Margin="0,6,0,0" ColumnDefinitions="*,Auto">
+      <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,8,0">
+        <TextBlock FontSize="12" FontWeight="SemiBold" Text="{Binding TotalInstallSizeText}" />
+        <TextBlock Margin="0,1,0,0" FontSize="11" Foreground="Gray" Text="{Binding AvailableDiskSpaceText}" />
+        <TextBlock Margin="0,2,0,0" FontSize="11" Foreground="Red" TextWrapping="Wrap"
+                   IsVisible="{Binding HasInsufficientDiskSpace}" Text="{Binding DiskSpaceMessage}" />
+      </StackPanel>
+      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+        <Button FontSize="12" Padding="5" IsEnabled="{Binding CanContinue}" Command="{Binding InstallLocalUserCommand}">Install for this User</Button>
+        <Button FontSize="12" Padding="5" IsVisible="{Binding CanRunAsAdmin}" IsEnabled="{Binding CanContinue}" Command="{Binding InstallAdminCommand}">Install for all Users</Button>
+      </StackPanel>
     </Grid>
   </StackPanel>
 </UserControl>

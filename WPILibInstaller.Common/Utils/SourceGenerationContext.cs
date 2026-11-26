@@ -13,6 +13,7 @@ namespace WPILibInstaller.Utils;
 [JsonSerializable(typeof(ElasticConfig))]
 [JsonSerializable(typeof(FullConfig))]
 [JsonSerializable(typeof(UpgradeConfig))]
+[JsonSerializable(typeof(InstallSelectionSnapshot))]
 [JsonSerializable(typeof(ShortcutData))]
 [JsonSerializable(typeof(Extension))]
 [JsonSerializable(typeof(ArtifactConfig))]

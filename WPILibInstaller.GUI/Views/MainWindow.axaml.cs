@@ -44,6 +44,8 @@ namespace WPILibInstaller.Views
             services.AddSingleton<IToolInstallationService, ToolInstallationService>();
             services.AddSingleton<IVsCodeInstallationService, VsCodeInstallationService>();
             services.AddSingleton<IShortcutService, ShortcutService>();
+            services.AddSingleton<IInstallSelectionStore, InstallSelectionStore>();
+            services.AddSingleton<IInstallSizeCalculator, InstallSizeCalculator>();
 
             ServiceProvider = services.BuildServiceProvider();
 

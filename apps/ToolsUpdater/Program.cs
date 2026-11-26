@@ -122,6 +122,20 @@ if (tools is null || tools.Length == 0)
     return 0;
 }
 
+static bool HasArgument(string[] arguments, string name)
+{
+    return arguments.Any(argument => string.Equals(argument, name, StringComparison.OrdinalIgnoreCase));
+}
+
+// With no filter arguments, keep the legacy behavior of updating everything.
+bool filterSpecified = args.Any(argument =>
+    string.Equals(argument, "--wpilib-tools", StringComparison.OrdinalIgnoreCase)
+    || string.Equals(argument, "--elastic", StringComparison.OrdinalIgnoreCase)
+    || string.Equals(argument, "--advantagescope", StringComparison.OrdinalIgnoreCase));
+bool installWpilibTools = !filterSpecified || HasArgument(args, "--wpilib-tools");
+bool installElastic = !filterSpecified || HasArgument(args, "--elastic");
+bool installAdvantageScope = !filterSpecified || HasArgument(args, "--advantagescope");
+
 List<Task> installTasks = [];
 
 foreach (var tool in tools)
@@ -129,6 +143,18 @@ foreach (var tool in tools)
     if (!tool.IsValid)
     {
         Console.WriteLine($"Tool {tool.Name} is not valid, skipping");
+        continue;
+    }
+
+    bool selected = tool.Name switch
+    {
+        "AdvantageScope" => installAdvantageScope,
+        "Elastic" => installElastic,
+        _ => installWpilibTools,
+    };
+    if (!selected)
+    {
+        Console.WriteLine($"Skipping {tool.Name} (not selected)");
         continue;
     }
 

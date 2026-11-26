@@ -40,34 +40,47 @@ namespace WPILibInstaller.Services
 
             shortcutData.IsAdmin = toInstallProvider.Model.InstallAsAdmin;
 
+            var selection = toInstallProvider.Model;
             var startMenuFolder = Environment.GetFolderPath(shortcutData.IsAdmin
                 ? Environment.SpecialFolder.CommonStartMenu
                 : Environment.SpecialFolder.StartMenu);
             var vsCodeStartMenuShortcut = Path.Join(startMenuFolder, "Programs", $"{wpilibYear} WPILib VS Code.lnk");
-            if (vsInstallProvider.Model.InstallingVsCode
-                || (vsInstallProvider.Model.AlreadyInstalled && !File.Exists(vsCodeStartMenuShortcut)))
+            if (selection.UsesVsCode
+                && (vsInstallProvider.Model.InstallingVsCode
+                    || (vsInstallProvider.Model.AlreadyInstalled && !File.Exists(vsCodeStartMenuShortcut))))
             {
                 shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(wpilibHomePath, "vscode", "Code.exe"), $"{wpilibYear} WPILib VS Code", $"{wpilibYear} WPILib VS Code", wpilibIconLocation));
                 shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(wpilibHomePath, "vscode", "Code.exe"), $"Programs/{wpilibYear} WPILib VS Code", $"{wpilibYear} WPILib VS Code", wpilibIconLocation));
             }
 
-            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(wpilibHomePath, "tools", "glass.exe"), $"{wpilibYear} WPILib Tools/Glass {wpilibYear}", $"Glass {wpilibYear}", ""));
-            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(wpilibHomePath, "tools", "outlineviewer.exe"), $"{wpilibYear} WPILib Tools/OutlineViewer {wpilibYear}", $"OutlineViewer {wpilibYear}", ""));
-            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(wpilibHomePath, "tools", "sysid.exe"), $"{wpilibYear} WPILib Tools/SysId {wpilibYear}", $"SysId {wpilibYear}", ""));
-            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(wpilibHomePath, "tools", "datalogtool.exe"), $"{wpilibYear} WPILib Tools/Data Log Tool {wpilibYear}", $"Data Log Tool {wpilibYear}", ""));
-            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(wpilibHomePath, "tools", "wpical.exe"), $"{wpilibYear} WPILib Tools/WPIcal {wpilibYear}", $"WPIcal {wpilibYear}", ""));
-            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(wpilibHomePath, "advantagescope", "AdvantageScope (WPILib).exe"), $"{wpilibYear} WPILib Tools/AdvantageScope (WPILib) {wpilibYear}", $"AdvantageScope (WPILib) {wpilibYear}", ""));
-            shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(wpilibHomePath, "elastic", "elastic_dashboard.exe"), $"{wpilibYear} WPILib Tools/Elastic (WPILib) {wpilibYear}", $"Elastic (WPILib) {wpilibYear}", ""));
+            if (selection.InstallWPILibTools)
+            {
+                shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(wpilibHomePath, "tools", "glass.exe"), $"{wpilibYear} WPILib Tools/Glass {wpilibYear}", $"Glass {wpilibYear}", ""));
+                shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(wpilibHomePath, "tools", "outlineviewer.exe"), $"{wpilibYear} WPILib Tools/OutlineViewer {wpilibYear}", $"OutlineViewer {wpilibYear}", ""));
+                shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(wpilibHomePath, "tools", "sysid.exe"), $"{wpilibYear} WPILib Tools/SysId {wpilibYear}", $"SysId {wpilibYear}", ""));
+                shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(wpilibHomePath, "tools", "datalogtool.exe"), $"{wpilibYear} WPILib Tools/Data Log Tool {wpilibYear}", $"Data Log Tool {wpilibYear}", ""));
+                shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(wpilibHomePath, "tools", "wpical.exe"), $"{wpilibYear} WPILib Tools/WPIcal {wpilibYear}", $"WPIcal {wpilibYear}", ""));
 
-            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(wpilibHomePath, "tools", "glass.exe"), $"Programs/{wpilibYear} WPILib Tools/Glass {wpilibYear}", $"Glass {wpilibYear}", ""));
-            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(wpilibHomePath, "tools", "outlineviewer.exe"), $"Programs/{wpilibYear} WPILib Tools/OutlineViewer {wpilibYear}", $"OutlineViewer {wpilibYear}", ""));
-            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(wpilibHomePath, "tools", "sysid.exe"), $"Programs/{wpilibYear} WPILib Tools/SysId {wpilibYear}", $"SysId {wpilibYear}", ""));
-            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(wpilibHomePath, "tools", "datalogtool.exe"), $"Programs/{wpilibYear} WPILib Tools/Data Log Tool {wpilibYear}", $"Data Log Tool {wpilibYear}", ""));
-            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(wpilibHomePath, "tools", "wpical.exe"), $"Programs/{wpilibYear} WPILib Tools/WPIcal {wpilibYear}", $"WPIcal {wpilibYear}", ""));
-            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(wpilibHomePath, "advantagescope", "AdvantageScope (WPILib).exe"), $"Programs/{wpilibYear} WPILib Tools/AdvantageScope (WPILib) {wpilibYear}", $"AdvantageScope (WPILib) {wpilibYear}", ""));
-            shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(wpilibHomePath, "elastic", "elastic_dashboard.exe"), $"Programs/{wpilibYear} WPILib Tools/Elastic (WPILib) {wpilibYear}", $"Elastic (WPILib) {wpilibYear}", ""));
+                shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(wpilibHomePath, "tools", "glass.exe"), $"Programs/{wpilibYear} WPILib Tools/Glass {wpilibYear}", $"Glass {wpilibYear}", ""));
+                shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(wpilibHomePath, "tools", "outlineviewer.exe"), $"Programs/{wpilibYear} WPILib Tools/OutlineViewer {wpilibYear}", $"OutlineViewer {wpilibYear}", ""));
+                shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(wpilibHomePath, "tools", "sysid.exe"), $"Programs/{wpilibYear} WPILib Tools/SysId {wpilibYear}", $"SysId {wpilibYear}", ""));
+                shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(wpilibHomePath, "tools", "datalogtool.exe"), $"Programs/{wpilibYear} WPILib Tools/Data Log Tool {wpilibYear}", $"Data Log Tool {wpilibYear}", ""));
+                shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(wpilibHomePath, "tools", "wpical.exe"), $"Programs/{wpilibYear} WPILib Tools/WPIcal {wpilibYear}", $"WPIcal {wpilibYear}", ""));
+            }
 
-            if (toInstallProvider.Model.InstallEverything)
+            if (selection.InstallAdvantageScope)
+            {
+                shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(wpilibHomePath, "advantagescope", "AdvantageScope (WPILib).exe"), $"{wpilibYear} WPILib Tools/AdvantageScope (WPILib) {wpilibYear}", $"AdvantageScope (WPILib) {wpilibYear}", ""));
+                shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(wpilibHomePath, "advantagescope", "AdvantageScope (WPILib).exe"), $"Programs/{wpilibYear} WPILib Tools/AdvantageScope (WPILib) {wpilibYear}", $"AdvantageScope (WPILib) {wpilibYear}", ""));
+            }
+
+            if (selection.InstallElastic)
+            {
+                shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(wpilibHomePath, "elastic", "elastic_dashboard.exe"), $"{wpilibYear} WPILib Tools/Elastic (WPILib) {wpilibYear}", $"Elastic (WPILib) {wpilibYear}", ""));
+                shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(wpilibHomePath, "elastic", "elastic_dashboard.exe"), $"Programs/{wpilibYear} WPILib Tools/Elastic (WPILib) {wpilibYear}", $"Elastic (WPILib) {wpilibYear}", ""));
+            }
+
+            if (selection.NeedsDocumentation)
             {
                 shortcutData.DesktopShortcuts.Add(new ShortcutInfo(Path.Join(wpilibHomePath, "documentation", "frc-docs", "index.html"), $"{wpilibYear} WPILib Documentation", $"{wpilibYear} WPILib Documentation", wpilibIconLocation));
                 shortcutData.StartMenuShortcuts.Add(new ShortcutInfo(Path.Join(wpilibHomePath, "documentation", "frc-docs", "index.html"), $"Programs/{wpilibYear} WPILib Documentation", $"{wpilibYear} WPILib Documentation", wpilibIconLocation));
@@ -165,8 +178,9 @@ namespace WPILibInstaller.Services
             var desktopFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Desktop", $@"WPILib VS Code {wpilibYear}.desktop");
             var desktopName = VsCodeInstallationService.LinuxDesktopName(wpilibYear);
             var launcherFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local/share/applications", $@"{desktopName}.desktop");
-            if (vsInstallProvider.Model.InstallingVsCode
-                || (vsInstallProvider.Model.AlreadyInstalled && !File.Exists(launcherFile)))
+            if (toInstallProvider.Model.UsesVsCode
+                && (vsInstallProvider.Model.InstallingVsCode
+                    || (vsInstallProvider.Model.AlreadyInstalled && !File.Exists(launcherFile))))
             {
                 string contents = $@"#!/usr/bin/env xdg-open
 [Desktop Entry]
@@ -210,15 +224,27 @@ StartupWMClass={desktopName}
             }
 
             var installDir = configurationProvider.InstallDirectory;
-            await CreateLinuxShortcutIfInstalled("AdvantageScope (WPILib)", $"{installDir}/advantagescope/advantagescope-wpilib", wpilibYear, "AdvantageScope (WPILib)", "advantagescope.png", token);
-            await CreateLinuxShortcutIfInstalled("Elastic (WPILib)", $"{installDir}/elastic/elastic_dashboard", wpilibYear, "elastic_dashboard", "elastic.png", token);
-            await CreateLinuxShortcutIfInstalled("Glass", "glass", wpilibYear, "Glass - DISCONNECTED", "glass.png", token);
-            await CreateLinuxShortcutIfInstalled("OutlineViewer", "outlineviewer", wpilibYear, "OutlineViewer - DISCONNECTED", "outlineviewer.png", token);
-            await CreateLinuxShortcutIfInstalled("DataLogTool", "datalogtool", wpilibYear, "Datalog Tool", "datalogtool.png", token);
-            await CreateLinuxShortcutIfInstalled("SysId", "sysid", wpilibYear, "System Identification", "sysid.png", token);
-            await CreateLinuxShortcutIfInstalled("WPIcal", "wpical", wpilibYear, "WPIcal", "wpical.png", token);
+            var selection = toInstallProvider.Model;
+            if (selection.InstallWPILibTools)
+            {
+                await CreateLinuxShortcutIfInstalled("Glass", "glass", wpilibYear, "Glass - DISCONNECTED", "glass.png", token);
+                await CreateLinuxShortcutIfInstalled("OutlineViewer", "outlineviewer", wpilibYear, "OutlineViewer - DISCONNECTED", "outlineviewer.png", token);
+                await CreateLinuxShortcutIfInstalled("DataLogTool", "datalogtool", wpilibYear, "Datalog Tool", "datalogtool.png", token);
+                await CreateLinuxShortcutIfInstalled("SysId", "sysid", wpilibYear, "System Identification", "sysid.png", token);
+                await CreateLinuxShortcutIfInstalled("WPIcal", "wpical", wpilibYear, "WPIcal", "wpical.png", token);
+            }
 
-            if (toInstallProvider.Model.InstallEverything)
+            if (selection.InstallAdvantageScope)
+            {
+                await CreateLinuxShortcutIfInstalled("AdvantageScope (WPILib)", $"{installDir}/advantagescope/advantagescope-wpilib", wpilibYear, "AdvantageScope (WPILib)", "advantagescope.png", token);
+            }
+
+            if (selection.InstallElastic)
+            {
+                await CreateLinuxShortcutIfInstalled("Elastic (WPILib)", $"{installDir}/elastic/elastic_dashboard", wpilibYear, "elastic_dashboard", "elastic.png", token);
+            }
+
+            if (toInstallProvider.Model.NeedsDocumentation)
             {
                 var docsPath = Path.Combine(installDir, "documentation", "frc-docs", "index.html");
                 await CreateLinuxShortcut("WPILib Documentation", $"xdg-open \"{docsPath}\"", wpilibYear, "WPILib Documentation", "wpilib-icon-256.png", token);

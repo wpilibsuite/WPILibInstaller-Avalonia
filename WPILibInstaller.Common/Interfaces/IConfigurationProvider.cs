@@ -9,6 +9,8 @@ namespace WPILibInstaller.Interfaces
 
         IArchiveExtractor ZipArchive { get; }
 
+        string? ArtifactsFile { get; }
+
         UpgradeConfig UpgradeConfig { get; }
         FullConfig FullConfig { get; }
 

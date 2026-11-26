@@ -154,6 +154,7 @@ namespace WPILibInstaller.ViewModels
 
             var fileStream = File.OpenRead(file);
             ZipArchive = ArchiveUtils.OpenArchive(fileStream);
+            ArtifactsFile = file;
 
             return true;
         }
@@ -203,6 +204,8 @@ namespace WPILibInstaller.ViewModels
         }
 
         public IArchiveExtractor ZipArchive { get; private set; } = null!;
+
+        public string? ArtifactsFile { get; private set; }
 
         public UpgradeConfig UpgradeConfig { get; private set; } = null!;
 

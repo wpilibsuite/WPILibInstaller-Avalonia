@@ -15,6 +15,8 @@ namespace WPILibInstaller.CLI
 
         public IArchiveExtractor ZipArchive { get; private set; } = null!;
 
+        public string? ArtifactsFile { get; private set; }
+
         public UpgradeConfig UpgradeConfig { get; private set; } = null!;
 
         public FullConfig FullConfig { get; private set; } = null!;
@@ -35,7 +37,7 @@ namespace WPILibInstaller.CLI
 
         InstallSelectionModel IToInstallProvider.Model => Model;
 
-        public async Task<int> RunInstallAsync(bool allUsers, string installMode = "all", string? resourcesFileArgument = null, string? artifactsFileArgument = null, string? vsCodeArchiveArgument = null, bool force = false)
+        public async Task<int> RunInstallAsync(bool allUsers, string? resourcesFileArgument = null, string? artifactsFileArgument = null, string? vsCodeArchiveArgument = null, bool force = false, InstallSelectionModel? selection = null)
         {
             try
             {
@@ -43,20 +45,16 @@ namespace WPILibInstaller.CLI
                 Console.WriteLine("============================");
                 Console.WriteLine();
 
-                if (installMode != "all" && installMode != "tools")
-                {
-                    Console.Error.WriteLine($"Error: Invalid install mode '{installMode}'. Valid options are 'all' or 'tools'.");
-                    return 1;
-                }
+                selection ??= new InstallSelectionModel();
 
-                if (vsCodeArchiveArgument != null && installMode != "all")
+                if (vsCodeArchiveArgument != null && !selection.UsesVsCode)
                 {
-                    Console.Error.WriteLine("Error: --vscode can only be used with --install-mode all.");
+                    Console.Error.WriteLine("Error: --vscode requires a component that installs VS Code (Java, C++, or Python).");
                     return 1;
                 }
 
                 string? vsCodeArchiveFile = null;
-                if (installMode == "all" &&
+                if (selection.UsesVsCode &&
                     !TryNormalizeFileArgument(vsCodeArchiveArgument, "VS Code archive", out vsCodeArchiveFile, out var vsCodeArchiveError))
                 {
                     Console.Error.WriteLine($"Error: {vsCodeArchiveError}");
@@ -82,12 +80,27 @@ namespace WPILibInstaller.CLI
                 }
 
                 InstallDirectory = ComputeInstallDirectory();
-                Model.InstallEverything = installMode == "all";
-                Model.InstallTools = !Model.InstallEverything;
+                Model.InstallJava = selection.InstallJava;
+                Model.InstallCpp = selection.InstallCpp;
+                Model.InstallPython = selection.InstallPython;
+                Model.InstallLabView = selection.InstallLabView;
+                Model.InstallWPILibTools = selection.InstallWPILibTools;
+                Model.InstallElastic = selection.InstallElastic;
+                Model.InstallAdvantageScope = selection.InstallAdvantageScope;
                 Model.InstallAsAdmin = allUsers;
 
                 Console.WriteLine($"Installing to: {InstallDirectory}");
-                Console.WriteLine($"Install mode: {installMode}");
+                Console.WriteLine("Components: " + string.Join(", ", GetSelectedComponents()));
+                if (Model.InstallPython)
+                {
+                    Console.Error.WriteLine("Warning: Python support is coming soon and is not fully implemented.");
+                }
+
+                if (Model.InstallLabView)
+                {
+                    Console.Error.WriteLine("Warning: LabVIEW add-on support is coming soon and is not fully implemented.");
+                }
+
                 if (vsCodeArchiveFile != null)
                 {
                     Console.WriteLine($"VS Code archive: {Path.GetFileName(vsCodeArchiveFile)}");
@@ -102,14 +115,14 @@ namespace WPILibInstaller.CLI
 
                 using CancellationTokenSource cancellation = new();
 
-                if (Model.InstallEverything)
+                if (Model.UsesVsCode)
                 {
                     await DownloadAndPrepareVsCodeAsync(vsCodeArchiveFile, cancellation.Token);
                 }
 
                 var archiveService = new ArchiveExtractionService(this);
                 var toolService = new ToolInstallationService(this);
-                var vsCodeService = new VsCodeInstallationService(this, this);
+                var vsCodeService = new VsCodeInstallationService(this, this, this);
                 var shortcutService = new ShortcutService(this, this, this);
 
                 var progress = new Progress<InstallProgress>(p =>
@@ -120,48 +133,70 @@ namespace WPILibInstaller.CLI
                     }
                 });
 
-                Console.WriteLine("Stopping Gradle daemons...");
-                await toolService.StopGradleDaemons(progress, cancellation.Token);
+                bool anyLanguage = Model.InstallJava || Model.InstallCpp;
+                var steps = new List<(string Label, Func<Task> Run)>();
 
-                if (Model.InstallEverything)
+                void Add(string label, Func<Task> run) => steps.Add((label, run));
+
+                if (anyLanguage)
                 {
-                    Console.WriteLine("[1/9] Extracting archive...");
-                    await archiveService.ExtractArchive(cancellation.Token, null, progress);
-
-                    Console.WriteLine("[2/9] Setting up Gradle...");
-                    await toolService.RunGradleSetup(progress);
-
-                    Console.WriteLine("[3/9] Setting up tools...");
-                    await toolService.RunToolSetup(progress);
-
-                    Console.WriteLine("[4/9] Setting up C++...");
-                    await toolService.RunCppSetup(progress);
-
-                    Console.WriteLine("[5/9] Fixing Maven metadata...");
-                    await toolService.RunMavenMetaDataFixer(progress);
-
-                    Console.WriteLine("[6/9] Installing VS Code...");
-                    await vsCodeService.RunVsCodeSetup(cancellation.Token, progress);
-
-                    Console.WriteLine("[7/9] Configuring VS Code settings...");
-                    await vsCodeService.ConfigureVsCodeSettings();
-
-                    Console.WriteLine("[8/9] Installing VS Code extensions...");
-                    await vsCodeService.RunVsCodeExtensionsSetup(progress);
-
-                    Console.WriteLine("[9/9] Creating shortcuts...");
-                    await shortcutService.RunShortcutCreator(cancellation.Token);
+                    Add("Stopping Gradle daemons", () => toolService.StopGradleDaemons(progress, cancellation.Token));
                 }
-                else
+
+                if (anyLanguage)
                 {
-                    Console.WriteLine("[1/3] Extracting JDK and tools...");
-                    await archiveService.ExtractJDKAndTools(cancellation.Token, progress);
+                    Add("Extracting archive", () => archiveService.ExtractArchive(cancellation.Token, null, progress));
+                }
+                else if (Model.AnyToolsSelected)
+                {
+                    Add("Extracting selected tools", () => archiveService.ExtractSelectedTools(
+                        Model.InstallWPILibTools,
+                        Model.InstallElastic,
+                        Model.InstallAdvantageScope,
+                        cancellation.Token,
+                        progress));
+                }
 
-                    Console.WriteLine("[2/3] Setting up tools...");
-                    await toolService.RunToolSetup(progress);
+                if (Model.InstallJava || Model.InstallCpp)
+                {
+                    Add("Setting up Gradle", () => toolService.RunGradleSetup(progress));
+                }
 
-                    Console.WriteLine("[3/3] Creating shortcuts...");
-                    await shortcutService.RunShortcutCreator(cancellation.Token);
+                if (Model.AnyToolsSelected)
+                {
+                    Add("Setting up tools", () => toolService.RunToolSetup(
+                        Model.InstallWPILibTools,
+                        Model.InstallElastic,
+                        Model.InstallAdvantageScope,
+                        progress));
+                }
+
+                if (Model.InstallCpp)
+                {
+                    Add("Setting up C++", () => toolService.RunCppSetup(progress));
+                }
+
+                if (Model.InstallJava || Model.InstallCpp)
+                {
+                    Add("Fixing Maven metadata", () => toolService.RunMavenMetaDataFixer(progress));
+                }
+
+                if (Model.UsesVsCode)
+                {
+                    Add("Installing VS Code", () => vsCodeService.RunVsCodeSetup(cancellation.Token, progress));
+                    Add("Configuring VS Code settings", () => vsCodeService.ConfigureVsCodeSettings());
+                    Add("Installing VS Code extensions", () => vsCodeService.RunVsCodeExtensionsSetup(progress));
+                }
+
+                if (Model.HasAnySelection)
+                {
+                    Add("Creating shortcuts", () => shortcutService.RunShortcutCreator(cancellation.Token));
+                }
+
+                for (int i = 0; i < steps.Count; i++)
+                {
+                    Console.WriteLine($"[{i + 1}/{steps.Count}] {steps[i].Label}...");
+                    await steps[i].Run();
                 }
 
                 Console.WriteLine();
@@ -208,6 +243,7 @@ namespace WPILibInstaller.CLI
 
             artifactsStream = File.OpenRead(artifactsPath);
             ZipArchive = ArchiveUtils.OpenArchive(artifactsStream);
+            ArtifactsFile = artifactsPath;
         }
 
         private static string GetResourcesRootDirectory()
@@ -321,6 +357,44 @@ namespace WPILibInstaller.CLI
         private string ComputeInstallDirectory()
         {
             return InstallerResources.GetDefaultInstallDirectory(UpgradeConfig);
+        }
+
+        private IEnumerable<string> GetSelectedComponents()
+        {
+            if (Model.InstallJava)
+            {
+                yield return "Java";
+            }
+
+            if (Model.InstallCpp)
+            {
+                yield return "C++";
+            }
+
+            if (Model.InstallPython)
+            {
+                yield return "Python";
+            }
+
+            if (Model.InstallLabView)
+            {
+                yield return "LabVIEW Add-ons";
+            }
+
+            if (Model.InstallWPILibTools)
+            {
+                yield return "WPILib Tools";
+            }
+
+            if (Model.InstallElastic)
+            {
+                yield return "Elastic";
+            }
+
+            if (Model.InstallAdvantageScope)
+            {
+                yield return "AdvantageScope";
+            }
         }
 
         private static bool ConfirmInstall()
