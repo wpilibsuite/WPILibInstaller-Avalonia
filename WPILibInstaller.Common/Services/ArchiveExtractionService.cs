@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using WPILibInstaller.Interfaces;
 using WPILibInstaller.Models;
+using WPILibInstaller.Utils;
 
 namespace WPILibInstaller.Services
 {
@@ -17,43 +18,10 @@ namespace WPILibInstaller.Services
 
         public Task ExtractSelectedTools(bool wpilibTools, bool elastic, bool advantageScope, CancellationToken token, IProgress<InstallProgress>? progress = null)
         {
-            var toolsFolder = configurationProvider.UpgradeConfig.Tools.Folder;
-            var updater = configurationProvider.UpgradeConfig.Tools.UpdaterExe;
-
-            var filter = new List<string>
-            {
-                // Tool-only installs need the shortcut creator, the small config files,
-                // tools.json, and ToolsUpdater. They do not need the Gradle ZIP that also
-                // lives in installUtils, so extract those files explicitly instead of the
-                // whole folder.
-                "installUtils/upgradeConfig.json",
-                "installUtils/fullConfig.json",
-                "installUtils/jdkConfig.json",
-                "installUtils/vscodeConfig.json",
-                "installUtils/WPILibShortcutCreator.exe",
-                "icons",
-                toolsFolder + "/tools.json",
-                toolsFolder + "/" + updater,
-            };
-
-            if (wpilibTools)
-            {
-                // The WPILib tools (Glass, SysId, etc.) are Java applications.
-                filter.Add(configurationProvider.JdkConfig.Folder + "/");
-                filter.Add(toolsFolder + "/");
-            }
-
-            if (elastic)
-            {
-                filter.Add(configurationProvider.ElasticConfig.Folder + "/");
-            }
-
-            if (advantageScope)
-            {
-                filter.Add(configurationProvider.AdvantageScopeConfig.Folder + "/");
-            }
-
-            return ExtractArchive(token, [.. filter], progress);
+            // Tool-only installs extract the shared shortcut/config files, tools.json, and
+            // ToolsUpdater explicitly so the Gradle ZIP in installUtils is left behind.
+            var paths = StandaloneInstallPaths.From(configurationProvider);
+            return ExtractArchive(token, paths.GetExtractionFilter(wpilibTools, elastic, advantageScope), progress);
         }
 
         public async Task ExtractArchive(CancellationToken token, string[]? filter = null, IProgress<InstallProgress>? progress = null)

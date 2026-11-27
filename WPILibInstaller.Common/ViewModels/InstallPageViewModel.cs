@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using WPILibInstaller.Interfaces;
 using WPILibInstaller.Models;
+using WPILibInstaller.Services;
 
 namespace WPILibInstaller.ViewModels
 {
@@ -98,66 +99,14 @@ namespace WPILibInstaller.ViewModels
             {
                 var progress = CreateProgressReporter();
                 var selection = toInstallProvider.Model;
-                var steps = new List<(string Label, Func<Task> Run)>();
-
-                void Add(string label, Func<Task> run) => steps.Add((label, run));
-
-                bool anyLanguage = selection.InstallJava || selection.InstallCpp;
-
-                if (anyLanguage)
-                {
-                    Add("Stopping Gradle daemons", () => toolInstallationService.StopGradleDaemons(progress, token));
-                }
-
-                if (anyLanguage)
-                {
-                    Add("Extracting", () => archiveExtractionService.ExtractArchive(token, null, progress));
-                }
-                else if (selection.AnyToolsSelected)
-                {
-                    Add("Extracting selected tools", () => archiveExtractionService.ExtractSelectedTools(
-                        selection.InstallWPILibTools,
-                        selection.InstallElastic,
-                        selection.InstallAdvantageScope,
-                        token,
-                        progress));
-                }
-
-                if (selection.InstallJava || selection.InstallCpp)
-                {
-                    Add("Installing Gradle", () => toolInstallationService.RunGradleSetup(progress));
-                }
-
-                if (selection.AnyToolsSelected)
-                {
-                    Add("Installing Tools", () => toolInstallationService.RunToolSetup(
-                        selection.InstallWPILibTools,
-                        selection.InstallElastic,
-                        selection.InstallAdvantageScope,
-                        progress));
-                }
-
-                if (selection.InstallCpp)
-                {
-                    Add("Installing CPP", () => toolInstallationService.RunCppSetup(progress));
-                }
-
-                if (selection.InstallJava || selection.InstallCpp)
-                {
-                    Add("Fixing Maven", () => toolInstallationService.RunMavenMetaDataFixer(progress));
-                }
-
-                if (selection.UsesVsCode)
-                {
-                    Add("Installing VS Code", () => vsCodeInstallationService.RunVsCodeSetup(token, progress));
-                    Add("Configuring VS Code", () => vsCodeInstallationService.ConfigureVsCodeSettings());
-                    Add("Installing VS Code Extensions", () => vsCodeInstallationService.RunVsCodeExtensionsSetup(progress));
-                }
-
-                if (selection.HasAnySelection)
-                {
-                    Add("Creating Shortcuts", () => shortcutService.RunShortcutCreator(token));
-                }
+                var steps = InstallStepBuilder.Build(
+                    selection,
+                    archiveExtractionService,
+                    vsCodeInstallationService,
+                    toolInstallationService,
+                    shortcutService,
+                    token,
+                    progress);
 
                 for (int i = 0; i < steps.Count; i++)
                 {
@@ -166,7 +115,7 @@ namespace WPILibInstaller.ViewModels
                         break;
                     }
 
-                    SetOverallProgress(i * 100 / steps.Count, steps[i].Label);
+                    SetOverallProgress(i * 100 / steps.Count, GetStepLabel(steps[i].Kind));
                     await steps[i].Run();
                 }
 
@@ -179,6 +128,25 @@ namespace WPILibInstaller.ViewModels
             {
                 // Ignore, as we just want to continue.
             }
+        }
+
+        private static string GetStepLabel(InstallStepKind kind)
+        {
+            return kind switch
+            {
+                InstallStepKind.StopGradleDaemons => "Stopping Gradle daemons",
+                InstallStepKind.ExtractArchive => "Extracting",
+                InstallStepKind.ExtractSelectedTools => "Extracting selected tools",
+                InstallStepKind.GradleSetup => "Installing Gradle",
+                InstallStepKind.ToolSetup => "Installing Tools",
+                InstallStepKind.CppSetup => "Installing CPP",
+                InstallStepKind.MavenFixer => "Fixing Maven",
+                InstallStepKind.VsCodeSetup => "Installing VS Code",
+                InstallStepKind.VsCodeSettings => "Configuring VS Code",
+                InstallStepKind.VsCodeExtensions => "Installing VS Code Extensions",
+                InstallStepKind.Shortcuts => "Creating Shortcuts",
+                _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null),
+            };
         }
 
         private async Task RunInstall()

@@ -130,7 +130,7 @@ namespace WPILibInstaller.Services
                 return;
             }
 
-            bool javaTooling = selection.InstallJava || selection.InstallCpp;
+            bool javaTooling = selection.AnyLanguage;
 
             var dataPath = await SetVsCodePortableMode();
 
@@ -305,7 +305,7 @@ namespace WPILibInstaller.Services
             }
 
             // C++ projects also use the Java extension set, so C++ installs both.
-            if (selection.InstallJava || selection.InstallCpp)
+            if (selection.AnyLanguage)
             {
                 var javaExtensions = config.JavaExtensions ?? config.ThirdPartyExtensions ?? [];
                 AddExtensions(javaExtensions);

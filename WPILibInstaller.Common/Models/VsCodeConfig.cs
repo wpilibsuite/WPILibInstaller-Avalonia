@@ -1,6 +1,7 @@
 ﻿#nullable disable
 
 using System.Text.Json.Serialization;
+using WPILibInstaller.Utils;
 
 namespace WPILibInstaller.Models
 {
@@ -60,5 +61,18 @@ namespace WPILibInstaller.Models
         public Extension[] CppExtensions { get; set; }
         [JsonPropertyName("pythonExtensions")]
         public Extension[] PythonExtensions { get; set; }
+
+        public (long Downloaded, long Extracted) GetSize(Platform platform)
+        {
+            return platform switch
+            {
+                Platform.Win64 => (VsCodeWindowsSize, VsCodeWindowsExtractedSize),
+                Platform.WinArm64 => (VsCodeWindowsArm64Size, VsCodeWindowsArm64ExtractedSize),
+                Platform.Linux64 => (VsCodeLinuxSize, VsCodeLinuxExtractedSize),
+                Platform.LinuxArm64 => (VsCodeLinuxArm64Size, VsCodeLinuxArm64ExtractedSize),
+                Platform.Mac64 or Platform.MacArm64 => (VsCodeMacSize, VsCodeMacExtractedSize),
+                _ => (0, 0),
+            };
+        }
     }
 }

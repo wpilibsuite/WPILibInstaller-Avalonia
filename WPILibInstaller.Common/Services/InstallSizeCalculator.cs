@@ -18,8 +18,6 @@ namespace WPILibInstaller.Services
         private const string CppDocumentationPrefix = DocumentationPrefix + "cpp/";
         private const string PythonDocumentationPrefix = DocumentationPrefix + "python/";
         private const string VsCodeExtensionsPrefix = "vsCodeExtensions/";
-        private const string InstallUtilsPrefix = "installUtils/";
-        private const string IconsPrefix = "icons/";
 
         private readonly IConfigurationProvider configurationProvider;
         private Task<ArchiveInstallSizes?>? sizesTask;
@@ -44,40 +42,40 @@ namespace WPILibInstaller.Services
                 return 0;
             }
 
-            bool anyLanguage = selection.InstallJava || selection.InstallCpp;
+            bool anyLanguage = selection.AnyLanguage;
             long total = anyLanguage
-                ? sizes.Common
-                : selection.AnyToolsSelected ? sizes.StandaloneCommon : 0;
+                ? sizes[SizeCategory.Common]
+                : selection.AnyToolsSelected ? sizes[SizeCategory.StandaloneCommon] : 0;
 
             if (anyLanguage)
             {
                 // Java/C++ installs extract the whole artifact archive, so every shared
                 // bundle (JDK, tools, dashboards, docs, Maven) lands in the install root.
-                total += sizes.Total - sizes.Common;
+                total += sizes.Total - sizes[SizeCategory.Common];
 
                 // RunGradleSetup copies the Gradle ZIP from installUtils into each configured
                 // Gradle user-home location. The source ZIP is already counted in Common.
-                total += sizes.GradleZip * GetGradleCopyCount();
+                total += sizes[SizeCategory.GradleZip] * GetGradleCopyCount();
             }
             else if (selection.AnyToolsSelected)
             {
                 // Standalone tool installs extract only the shared shortcut/config files and
                 // ToolsUpdater; the Gradle ZIP and documentation are not extracted.
-                total += sizes.ToolSupport;
+                total += sizes[SizeCategory.ToolSupport];
 
                 if (selection.InstallWPILibTools)
                 {
-                    total += sizes.Jdk + sizes.WpilibTools;
+                    total += sizes[SizeCategory.Jdk] + sizes[SizeCategory.WpilibTools];
                 }
 
                 if (selection.InstallElastic)
                 {
-                    total += sizes.Elastic;
+                    total += sizes[SizeCategory.Elastic];
                 }
 
                 if (selection.InstallAdvantageScope)
                 {
-                    total += sizes.AdvantageScope;
+                    total += sizes[SizeCategory.AdvantageScope];
                 }
             }
 
@@ -85,17 +83,17 @@ namespace WPILibInstaller.Services
             {
                 // ToolsUpdater leaves the source archives in place and writes an additional
                 // copy or extracted tree into tools/.
-                total += sizes.JavaToolInstalled + sizes.CppToolInstalled;
+                total += sizes[SizeCategory.JavaToolInstalled] + sizes[SizeCategory.CppToolInstalled];
             }
 
             if (selection.InstallElastic)
             {
-                total += sizes.ElasticInstalled;
+                total += sizes[SizeCategory.ElasticInstalled];
             }
 
             if (selection.InstallAdvantageScope)
             {
-                total += sizes.AdvantageScopeInstalled;
+                total += sizes[SizeCategory.AdvantageScopeInstalled];
             }
 
             if (selection.UsesVsCode)
@@ -103,21 +101,21 @@ namespace WPILibInstaller.Services
                 // VS Code is downloaded separately, and VS Code extracts each VSIX into its
                 // portable data directory in addition to leaving the source VSIX in place.
                 total += GetVsCodeInstalledSize();
-                total += sizes.WpilibExtensionInstalled;
+                total += sizes[SizeCategory.WpilibExtensionInstalled];
 
-                if (selection.InstallJava || selection.InstallCpp)
+                if (anyLanguage)
                 {
-                    total += sizes.JavaExtensionsInstalled;
+                    total += sizes[SizeCategory.JavaExtensionInstalled];
                 }
 
                 if (selection.InstallCpp)
                 {
-                    total += sizes.CppExtensionsInstalled;
+                    total += sizes[SizeCategory.CppExtensionInstalled];
                 }
 
                 if (selection.InstallPython)
                 {
-                    total += sizes.PythonExtensionsInstalled;
+                    total += sizes[SizeCategory.PythonExtensionInstalled];
                 }
             }
 
@@ -184,7 +182,7 @@ namespace WPILibInstaller.Services
                         continue;
                     }
 
-                    var entryName = NormalizeEntryName(extractor.EntryKey);
+                    var entryName = ArchivePathUtils.NormalizeEntryName(extractor.EntryKey);
                     sizes.Add(entryName, extractor.EntrySize);
 
                     try
@@ -192,12 +190,12 @@ namespace WPILibInstaller.Services
                         await AddNestedSizesAsync(extractor, entryName, sizes).ConfigureAwait(false);
                     }
                     catch (Exception ex) when (ex is IOException
-                                                  or UnauthorizedAccessException
-                                                  or InvalidDataException
-                                                  or NotSupportedException
-                                                  or ArgumentException
-                                                  or ObjectDisposedException
-                                                  or InvalidOperationException)
+                                                   or UnauthorizedAccessException
+                                                   or InvalidDataException
+                                                   or NotSupportedException
+                                                   or ArgumentException
+                                                   or ObjectDisposedException
+                                                   or InvalidOperationException)
                     {
                         // A nested archive is optional information for the estimate.
                     }
@@ -238,23 +236,23 @@ namespace WPILibInstaller.Services
                     long extractedSize = await GetZipExtractedSizeAsync(
                         extractor.OpenEntryStream(),
                         ToolPlatformPrefix()).ConfigureAwait(false);
-                    sizes.AddCppToolInstalled(extractedSize);
+                    sizes.Add(SizeCategory.CppToolInstalled, extractedSize);
                 }
                 else
                 {
                     // Java tools are copied out of tools/artifacts as-is.
-                    sizes.AddJavaToolInstalled(extractor.EntrySize);
+                    sizes.Add(SizeCategory.JavaToolInstalled, extractor.EntrySize);
                 }
             }
             else if (sizes.IsElasticArchive(entryName) && entryName.EndsWith(".tar.gz", StringComparison.OrdinalIgnoreCase))
             {
                 long extractedSize = await GetTarGzExtractedSizeAsync(extractor.OpenEntryStream()).ConfigureAwait(false);
-                sizes.AddElasticInstalled(extractedSize);
+                sizes.Add(SizeCategory.ElasticInstalled, extractedSize);
             }
             else if (sizes.IsAdvantageScopeArchive(entryName) && entryName.EndsWith(".tar.gz", StringComparison.OrdinalIgnoreCase))
             {
                 long extractedSize = await GetTarGzExtractedSizeAsync(extractor.OpenEntryStream()).ConfigureAwait(false);
-                sizes.AddAdvantageScopeInstalled(extractedSize);
+                sizes.Add(SizeCategory.AdvantageScopeInstalled, extractedSize);
             }
         }
 
@@ -275,7 +273,7 @@ namespace WPILibInstaller.Services
                         continue;
                     }
 
-                    var entryName = NormalizeEntryName(entry.FullName);
+                    var entryName = ArchivePathUtils.NormalizeEntryName(entry.FullName);
                     if (entryPrefix == null
                         || entryName.StartsWith(entryPrefix, StringComparison.OrdinalIgnoreCase))
                     {
@@ -309,35 +307,7 @@ namespace WPILibInstaller.Services
 
         private long GetVsCodeInstalledSize()
         {
-            var config = configurationProvider.VsCodeConfig;
-            long downloadedSize = 0;
-            long extractedSize = 0;
-
-            switch (PlatformUtils.CurrentPlatform)
-            {
-                case Platform.Win64:
-                    downloadedSize = config.VsCodeWindowsSize;
-                    extractedSize = config.VsCodeWindowsExtractedSize;
-                    break;
-                case Platform.WinArm64:
-                    downloadedSize = config.VsCodeWindowsArm64Size;
-                    extractedSize = config.VsCodeWindowsArm64ExtractedSize;
-                    break;
-                case Platform.Linux64:
-                    downloadedSize = config.VsCodeLinuxSize;
-                    extractedSize = config.VsCodeLinuxExtractedSize;
-                    break;
-                case Platform.LinuxArm64:
-                    downloadedSize = config.VsCodeLinuxArm64Size;
-                    extractedSize = config.VsCodeLinuxArm64ExtractedSize;
-                    break;
-                case Platform.Mac64:
-                case Platform.MacArm64:
-                    downloadedSize = config.VsCodeMacSize;
-                    extractedSize = config.VsCodeMacExtractedSize;
-                    break;
-            }
-
+            var (downloadedSize, extractedSize) = configurationProvider.VsCodeConfig.GetSize(PlatformUtils.CurrentPlatform);
             if (extractedSize > 0)
             {
                 return extractedSize;
@@ -371,11 +341,6 @@ namespace WPILibInstaller.Services
             };
         }
 
-        private static string NormalizeEntryName(string entryName)
-        {
-            return entryName.Replace('\\', '/').TrimStart('.', '/');
-        }
-
         private enum ExtensionBucket
         {
             Wpilib,
@@ -384,178 +349,151 @@ namespace WPILibInstaller.Services
             Python,
         }
 
+        private enum SizeCategory
+        {
+            Common,
+            StandaloneCommon,
+            Jdk,
+            WpilibTools,
+            ToolSupport,
+            Maven,
+            CppToolchain,
+            JavaDocumentation,
+            CppDocumentation,
+            PythonDocumentation,
+            Elastic,
+            AdvantageScope,
+            GradleZip,
+            JavaToolInstalled,
+            CppToolInstalled,
+            ElasticInstalled,
+            AdvantageScopeInstalled,
+            WpilibExtensionArchive,
+            JavaExtensionArchive,
+            CppExtensionArchive,
+            PythonExtensionArchive,
+            WpilibExtensionInstalled,
+            JavaExtensionInstalled,
+            CppExtensionInstalled,
+            PythonExtensionInstalled,
+        }
+
         private sealed class ArchiveInstallSizes
         {
-            private readonly string jdkPrefix;
-            private readonly string toolsPrefix;
-            private readonly string toolsJsonPath;
-            private readonly string toolsUpdaterPath;
-            private readonly string toolsArtifactsPrefix;
+            private static readonly SizeCategory[] ArchiveCategories =
+            [
+                SizeCategory.Common,
+                SizeCategory.Jdk,
+                SizeCategory.WpilibTools,
+                SizeCategory.ToolSupport,
+                SizeCategory.Maven,
+                SizeCategory.CppToolchain,
+                SizeCategory.JavaDocumentation,
+                SizeCategory.CppDocumentation,
+                SizeCategory.PythonDocumentation,
+                SizeCategory.Elastic,
+                SizeCategory.AdvantageScope,
+                SizeCategory.WpilibExtensionArchive,
+                SizeCategory.JavaExtensionArchive,
+                SizeCategory.CppExtensionArchive,
+                SizeCategory.PythonExtensionArchive,
+            ];
+
+            private readonly StandaloneInstallPaths standalonePaths;
             private readonly string mavenPrefix;
             private readonly string cppToolchainPrefix;
-            private readonly string elasticPrefix;
-            private readonly string advantageScopePrefix;
-            private readonly string? gradleZipFileName;
             private readonly Dictionary<string, ExtensionBucket> extensionFiles = new(StringComparer.OrdinalIgnoreCase);
+            private readonly Dictionary<SizeCategory, long> sizes = [];
 
             public ArchiveInstallSizes(IConfigurationProvider configurationProvider)
             {
-                jdkPrefix = FolderPrefix(configurationProvider.JdkConfig?.Folder);
-                toolsPrefix = FolderPrefix(configurationProvider.UpgradeConfig?.Tools?.Folder);
-                mavenPrefix = FolderPrefix(configurationProvider.UpgradeConfig?.Maven?.Folder);
-                cppToolchainPrefix = FolderPrefix(configurationProvider.FullConfig?.CppToolchain?.Directory);
-                elasticPrefix = FolderPrefix(configurationProvider.ElasticConfig?.Folder);
-                advantageScopePrefix = FolderPrefix(configurationProvider.AdvantageScopeConfig?.Folder);
-
-                var toolsConfig = configurationProvider.UpgradeConfig?.Tools;
-                var toolsFolder = toolsConfig?.Folder;
-                toolsJsonPath = toolsPrefix + "tools.json";
-                toolsUpdaterPath = string.IsNullOrWhiteSpace(toolsConfig?.UpdaterExe)
-                    ? "!/"
-                    : toolsPrefix + toolsConfig.UpdaterExe;
-                toolsArtifactsPrefix = string.IsNullOrWhiteSpace(toolsFolder)
-                    ? "!/"
-                    : FolderPrefix(toolsFolder + "/artifacts");
-
-                gradleZipFileName = configurationProvider.FullConfig?.Gradle?.ZipName;
+                standalonePaths = StandaloneInstallPaths.From(configurationProvider);
+                mavenPrefix = ArchivePathUtils.FolderPrefix(configurationProvider.UpgradeConfig?.Maven?.Folder);
+                cppToolchainPrefix = ArchivePathUtils.FolderPrefix(configurationProvider.FullConfig?.CppToolchain?.Directory);
 
                 var vsCodeConfig = configurationProvider.VsCodeConfig;
-                if (vsCodeConfig != null)
+                RegisterExtension(vsCodeConfig.WPILibExtension, ExtensionBucket.Wpilib);
+                RegisterExtensions(vsCodeConfig.JavaExtensions, ExtensionBucket.Java);
+                RegisterExtensions(vsCodeConfig.CppExtensions, ExtensionBucket.Cpp);
+                RegisterExtensions(vsCodeConfig.PythonExtensions, ExtensionBucket.Python);
+                if (vsCodeConfig.JavaExtensions is not { Length: > 0 })
                 {
-                    RegisterExtension(vsCodeConfig.WPILibExtension, ExtensionBucket.Wpilib);
-                    RegisterExtensions(vsCodeConfig.JavaExtensions, ExtensionBucket.Java);
-                    RegisterExtensions(vsCodeConfig.CppExtensions, ExtensionBucket.Cpp);
-                    RegisterExtensions(vsCodeConfig.PythonExtensions, ExtensionBucket.Python);
-                    if (vsCodeConfig.JavaExtensions is not { Length: > 0 })
-                    {
-                        // Older config files only contain the combined extension list.
-                        RegisterExtensions(vsCodeConfig.ThirdPartyExtensions, ExtensionBucket.Java);
-                    }
+                    // Older config files only contain the combined extension list.
+                    RegisterExtensions(vsCodeConfig.ThirdPartyExtensions, ExtensionBucket.Java);
                 }
             }
 
-            public long Common { get; private set; }
+            public long this[SizeCategory category] => sizes.TryGetValue(category, out var value) ? value : 0;
 
-            public long StandaloneCommon { get; private set; }
+            public long Total
+            {
+                get
+                {
+                    long total = 0;
+                    foreach (var category in ArchiveCategories)
+                    {
+                        total += this[category];
+                    }
 
-            public long Jdk { get; private set; }
-
-            public long WpilibTools { get; private set; }
-
-            public long ToolSupport { get; private set; }
-
-            public long Maven { get; private set; }
-
-            public long CppToolchain { get; private set; }
-
-            public long JavaDocumentation { get; private set; }
-
-            public long CppDocumentation { get; private set; }
-
-            public long PythonDocumentation { get; private set; }
-
-            public long Elastic { get; private set; }
-
-            public long AdvantageScope { get; private set; }
-
-            public long GradleZip { get; private set; }
-
-            public long JavaToolInstalled { get; private set; }
-
-            public long CppToolInstalled { get; private set; }
-
-            public long ElasticInstalled { get; private set; }
-
-            public long AdvantageScopeInstalled { get; private set; }
-
-            public long WpilibExtension { get; private set; }
-
-            public long JavaExtensions { get; private set; }
-
-            public long CppExtensions { get; private set; }
-
-            public long PythonExtensions { get; private set; }
-
-            public long WpilibExtensionInstalled { get; private set; }
-
-            public long JavaExtensionsInstalled { get; private set; }
-
-            public long CppExtensionsInstalled { get; private set; }
-
-            public long PythonExtensionsInstalled { get; private set; }
-
-            public long Total => Common
-                                 + Jdk
-                                 + WpilibTools
-                                 + ToolSupport
-                                 + Maven
-                                 + CppToolchain
-                                 + JavaDocumentation
-                                 + CppDocumentation
-                                 + PythonDocumentation
-                                 + Elastic
-                                 + AdvantageScope
-                                 + WpilibExtension
-                                 + JavaExtensions
-                                 + CppExtensions
-                                 + PythonExtensions;
+                    return total;
+                }
+            }
 
             public void Add(string entryName, long size)
             {
-                bool isGradleZip = string.Equals(Path.GetFileName(entryName), gradleZipFileName, StringComparison.OrdinalIgnoreCase)
-                                   && Matches(entryName, InstallUtilsPrefix);
+                bool isGradleZip = standalonePaths.IsGradleZip(entryName);
                 if (isGradleZip)
                 {
-                    GradleZip = size;
+                    Set(SizeCategory.GradleZip, size);
                 }
 
-                if (Matches(entryName, jdkPrefix))
+                if (ArchivePathUtils.Matches(entryName, standalonePaths.JdkPrefix))
                 {
-                    Jdk += size;
+                    Add(SizeCategory.Jdk, size);
                 }
-                else if (Matches(entryName, toolsJsonPath) || Matches(entryName, toolsUpdaterPath))
+                else if (ArchivePathUtils.Matches(entryName, standalonePaths.ToolsJsonPath)
+                         || ArchivePathUtils.Matches(entryName, standalonePaths.ToolsUpdaterPath))
                 {
-                    ToolSupport += size;
+                    Add(SizeCategory.ToolSupport, size);
                 }
-                else if (Matches(entryName, toolsPrefix))
+                else if (ArchivePathUtils.Matches(entryName, standalonePaths.ToolsPrefix))
                 {
-                    WpilibTools += size;
+                    Add(SizeCategory.WpilibTools, size);
                 }
-                else if (Matches(entryName, mavenPrefix))
+                else if (ArchivePathUtils.Matches(entryName, mavenPrefix))
                 {
-                    Maven += size;
+                    Add(SizeCategory.Maven, size);
                 }
-                else if (Matches(entryName, cppToolchainPrefix))
+                else if (ArchivePathUtils.Matches(entryName, cppToolchainPrefix))
                 {
-                    CppToolchain += size;
+                    Add(SizeCategory.CppToolchain, size);
                 }
-                else if (Matches(entryName, elasticPrefix))
+                else if (ArchivePathUtils.Matches(entryName, standalonePaths.ElasticPrefix))
                 {
-                    Elastic += size;
+                    Add(SizeCategory.Elastic, size);
                 }
-                else if (Matches(entryName, advantageScopePrefix))
+                else if (ArchivePathUtils.Matches(entryName, standalonePaths.AdvantageScopePrefix))
                 {
-                    AdvantageScope += size;
+                    Add(SizeCategory.AdvantageScope, size);
                 }
-                else if (Matches(entryName, DocumentationPrefix))
+                else if (ArchivePathUtils.Matches(entryName, DocumentationPrefix))
                 {
                     AddDocumentation(entryName, size);
                 }
-                else if (Matches(entryName, VsCodeExtensionsPrefix))
+                else if (ArchivePathUtils.Matches(entryName, VsCodeExtensionsPrefix))
                 {
                     AddExtension(entryName, size);
                 }
                 else
                 {
-                    Common += size;
+                    Add(SizeCategory.Common, size);
 
-                    // These are the only unclassified files extracted by standalone tool
-                    // installs. Everything else in Common (docs, Gradle ZIP, miscellaneous
-                    // launcher files) is only written by full Java/C++ installs.
-                    if (Matches(entryName, IconsPrefix)
-                        || (Matches(entryName, InstallUtilsPrefix) && !isGradleZip))
+                    // Standalone installs only extract this subset of Common. Everything else
+                    // here (docs, Gradle ZIP, miscellaneous launcher files) is written by
+                    // full Java/C++ installs.
+                    if (standalonePaths.IsStandaloneCommon(entryName))
                     {
-                        StandaloneCommon += size;
+                        Add(SizeCategory.StandaloneCommon, size);
                     }
                 }
             }
@@ -567,109 +505,88 @@ namespace WPILibInstaller.Services
 
             public bool IsToolArtifact(string entryName)
             {
-                return Matches(entryName, toolsArtifactsPrefix);
+                return ArchivePathUtils.Matches(entryName, standalonePaths.ToolsArtifactsPrefix);
             }
 
             public bool IsElasticArchive(string entryName)
             {
-                return Matches(entryName, elasticPrefix);
+                return ArchivePathUtils.Matches(entryName, standalonePaths.ElasticPrefix);
             }
 
             public bool IsAdvantageScopeArchive(string entryName)
             {
-                return Matches(entryName, advantageScopePrefix);
+                return ArchivePathUtils.Matches(entryName, standalonePaths.AdvantageScopePrefix);
             }
 
             public void AddExtensionInstalled(ExtensionBucket bucket, long size)
             {
-                switch (bucket)
+                Add(InstalledCategory(bucket), size);
+            }
+
+            public void Add(SizeCategory category, long size)
+            {
+                sizes[category] = this[category] + size;
+            }
+
+            private void Set(SizeCategory category, long size)
+            {
+                sizes[category] = size;
+            }
+
+            private static SizeCategory ArchiveCategory(ExtensionBucket bucket)
+            {
+                return bucket switch
                 {
-                    case ExtensionBucket.Wpilib:
-                        WpilibExtensionInstalled += size;
-                        break;
-                    case ExtensionBucket.Java:
-                        JavaExtensionsInstalled += size;
-                        break;
-                    case ExtensionBucket.Cpp:
-                        CppExtensionsInstalled += size;
-                        break;
-                    case ExtensionBucket.Python:
-                        PythonExtensionsInstalled += size;
-                        break;
-                }
+                    ExtensionBucket.Wpilib => SizeCategory.WpilibExtensionArchive,
+                    ExtensionBucket.Java => SizeCategory.JavaExtensionArchive,
+                    ExtensionBucket.Cpp => SizeCategory.CppExtensionArchive,
+                    ExtensionBucket.Python => SizeCategory.PythonExtensionArchive,
+                    _ => SizeCategory.JavaExtensionArchive,
+                };
             }
 
-            public void AddJavaToolInstalled(long size)
+            private static SizeCategory InstalledCategory(ExtensionBucket bucket)
             {
-                JavaToolInstalled += size;
-            }
-
-            public void AddCppToolInstalled(long size)
-            {
-                CppToolInstalled += size;
-            }
-
-            public void AddElasticInstalled(long size)
-            {
-                ElasticInstalled += size;
-            }
-
-            public void AddAdvantageScopeInstalled(long size)
-            {
-                AdvantageScopeInstalled += size;
+                return bucket switch
+                {
+                    ExtensionBucket.Wpilib => SizeCategory.WpilibExtensionInstalled,
+                    ExtensionBucket.Java => SizeCategory.JavaExtensionInstalled,
+                    ExtensionBucket.Cpp => SizeCategory.CppExtensionInstalled,
+                    ExtensionBucket.Python => SizeCategory.PythonExtensionInstalled,
+                    _ => SizeCategory.JavaExtensionInstalled,
+                };
             }
 
             private void AddDocumentation(string entryName, long size)
             {
-                if (Matches(entryName, JavaDocumentationPrefix))
+                if (ArchivePathUtils.Matches(entryName, JavaDocumentationPrefix))
                 {
-                    JavaDocumentation += size;
+                    Add(SizeCategory.JavaDocumentation, size);
                 }
-                else if (Matches(entryName, CppDocumentationPrefix))
+                else if (ArchivePathUtils.Matches(entryName, CppDocumentationPrefix))
                 {
-                    CppDocumentation += size;
+                    Add(SizeCategory.CppDocumentation, size);
                 }
-                else if (Matches(entryName, PythonDocumentationPrefix))
+                else if (ArchivePathUtils.Matches(entryName, PythonDocumentationPrefix))
                 {
-                    PythonDocumentation += size;
+                    Add(SizeCategory.PythonDocumentation, size);
                 }
                 else
                 {
-                    Common += size;
+                    Add(SizeCategory.Common, size);
                 }
             }
 
             private void AddExtension(string entryName, long size)
             {
                 var fileName = Path.GetFileName(entryName);
-                if (extensionFiles.TryGetValue(fileName, out var bucket))
-                {
-                    AddExtensionArchive(bucket, size);
-                    return;
-                }
+                var bucket = extensionFiles.TryGetValue(fileName, out var knownBucket)
+                    ? knownBucket
+                    : ExtensionBucket.Java;
 
                 // Old installers shipped a combined extension list; count anything unknown
                 // as a Java extension so the estimate still includes it.
-                AddExtensionArchive(ExtensionBucket.Java, size);
-            }
-
-            private void AddExtensionArchive(ExtensionBucket bucket, long size)
-            {
-                switch (bucket)
-                {
-                    case ExtensionBucket.Wpilib:
-                        WpilibExtension += size;
-                        break;
-                    case ExtensionBucket.Java:
-                        JavaExtensions += size;
-                        break;
-                    case ExtensionBucket.Cpp:
-                        CppExtensions += size;
-                        break;
-                    case ExtensionBucket.Python:
-                        PythonExtensions += size;
-                        break;
-                }
+                Add(ArchiveCategory(bucket), size);
             }
 
             private void RegisterExtensions(Extension[]? extensions, ExtensionBucket bucket)
@@ -688,22 +605,6 @@ namespace WPILibInstaller.Services
                 }
 
                 extensionFiles[Path.GetFileName(extension.Vsix)] = bucket;
-            }
-
-            private static string FolderPrefix(string? folder)
-            {
-                if (string.IsNullOrWhiteSpace(folder))
-                {
-                    // A prefix that cannot match any real archive entry.
-                    return "!/";
-                }
-
-                return NormalizeEntryName(folder).TrimEnd('/') + "/";
-            }
-
-            private static bool Matches(string entryName, string prefix)
-            {
-                return prefix.Length > 0 && entryName.StartsWith(prefix, StringComparison.OrdinalIgnoreCase);
             }
         }
     }

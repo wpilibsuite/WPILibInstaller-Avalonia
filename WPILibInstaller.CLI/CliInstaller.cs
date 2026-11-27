@@ -80,13 +80,7 @@ namespace WPILibInstaller.CLI
                 }
 
                 InstallDirectory = ComputeInstallDirectory();
-                Model.InstallJava = selection.InstallJava;
-                Model.InstallCpp = selection.InstallCpp;
-                Model.InstallPython = selection.InstallPython;
-                Model.InstallLabView = selection.InstallLabView;
-                Model.InstallWPILibTools = selection.InstallWPILibTools;
-                Model.InstallElastic = selection.InstallElastic;
-                Model.InstallAdvantageScope = selection.InstallAdvantageScope;
+                Model.CopyFrom(selection);
                 Model.InstallAsAdmin = allUsers;
 
                 Console.WriteLine($"Installing to: {InstallDirectory}");
@@ -133,69 +127,18 @@ namespace WPILibInstaller.CLI
                     }
                 });
 
-                bool anyLanguage = Model.InstallJava || Model.InstallCpp;
-                var steps = new List<(string Label, Func<Task> Run)>();
-
-                void Add(string label, Func<Task> run) => steps.Add((label, run));
-
-                if (anyLanguage)
-                {
-                    Add("Stopping Gradle daemons", () => toolService.StopGradleDaemons(progress, cancellation.Token));
-                }
-
-                if (anyLanguage)
-                {
-                    Add("Extracting archive", () => archiveService.ExtractArchive(cancellation.Token, null, progress));
-                }
-                else if (Model.AnyToolsSelected)
-                {
-                    Add("Extracting selected tools", () => archiveService.ExtractSelectedTools(
-                        Model.InstallWPILibTools,
-                        Model.InstallElastic,
-                        Model.InstallAdvantageScope,
-                        cancellation.Token,
-                        progress));
-                }
-
-                if (Model.InstallJava || Model.InstallCpp)
-                {
-                    Add("Setting up Gradle", () => toolService.RunGradleSetup(progress));
-                }
-
-                if (Model.AnyToolsSelected)
-                {
-                    Add("Setting up tools", () => toolService.RunToolSetup(
-                        Model.InstallWPILibTools,
-                        Model.InstallElastic,
-                        Model.InstallAdvantageScope,
-                        progress));
-                }
-
-                if (Model.InstallCpp)
-                {
-                    Add("Setting up C++", () => toolService.RunCppSetup(progress));
-                }
-
-                if (Model.InstallJava || Model.InstallCpp)
-                {
-                    Add("Fixing Maven metadata", () => toolService.RunMavenMetaDataFixer(progress));
-                }
-
-                if (Model.UsesVsCode)
-                {
-                    Add("Installing VS Code", () => vsCodeService.RunVsCodeSetup(cancellation.Token, progress));
-                    Add("Configuring VS Code settings", () => vsCodeService.ConfigureVsCodeSettings());
-                    Add("Installing VS Code extensions", () => vsCodeService.RunVsCodeExtensionsSetup(progress));
-                }
-
-                if (Model.HasAnySelection)
-                {
-                    Add("Creating shortcuts", () => shortcutService.RunShortcutCreator(cancellation.Token));
-                }
+                var steps = InstallStepBuilder.Build(
+                    Model,
+                    archiveService,
+                    vsCodeService,
+                    toolService,
+                    shortcutService,
+                    cancellation.Token,
+                    progress);
 
                 for (int i = 0; i < steps.Count; i++)
                 {
-                    Console.WriteLine($"[{i + 1}/{steps.Count}] {steps[i].Label}...");
+                    Console.WriteLine($"[{i + 1}/{steps.Count}] {GetStepLabel(steps[i].Kind)}...");
                     await steps[i].Run();
                 }
 
@@ -213,6 +156,25 @@ namespace WPILibInstaller.CLI
                 Console.Error.WriteLine($"Installation failed: {ex.Message}");
                 return 1;
             }
+        }
+
+        private static string GetStepLabel(InstallStepKind kind)
+        {
+            return kind switch
+            {
+                InstallStepKind.StopGradleDaemons => "Stopping Gradle daemons",
+                InstallStepKind.ExtractArchive => "Extracting archive",
+                InstallStepKind.ExtractSelectedTools => "Extracting selected tools",
+                InstallStepKind.GradleSetup => "Setting up Gradle",
+                InstallStepKind.ToolSetup => "Setting up tools",
+                InstallStepKind.CppSetup => "Setting up C++",
+                InstallStepKind.MavenFixer => "Fixing Maven metadata",
+                InstallStepKind.VsCodeSetup => "Installing VS Code",
+                InstallStepKind.VsCodeSettings => "Configuring VS Code settings",
+                InstallStepKind.VsCodeExtensions => "Installing VS Code extensions",
+                InstallStepKind.Shortcuts => "Creating shortcuts",
+                _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null),
+            };
         }
 
         public async ValueTask DisposeAsync()

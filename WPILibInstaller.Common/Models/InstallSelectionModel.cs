@@ -2,15 +2,17 @@
 
 namespace WPILibInstaller.Models
 {
-    public partial class InstallSelectionModel : ObservableObject
+    public partial class InstallSelectionModel : ObservableObject, IInstallSelectionValues
     {
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(AnyLanguage))]
         [NotifyPropertyChangedFor(nameof(UsesVsCode))]
         [NotifyPropertyChangedFor(nameof(NeedsDocumentation))]
         [NotifyPropertyChangedFor(nameof(HasAnySelection))]
         private bool installJava = true;
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(AnyLanguage))]
         [NotifyPropertyChangedFor(nameof(UsesVsCode))]
         [NotifyPropertyChangedFor(nameof(NeedsDocumentation))]
         [NotifyPropertyChangedFor(nameof(HasAnySelection))]
@@ -44,12 +46,19 @@ namespace WPILibInstaller.Models
 
         public bool InstallAsAdmin { get; set; }
 
-        public bool UsesVsCode => InstallJava || InstallCpp || InstallPython;
+        public bool AnyLanguage => InstallJava || InstallCpp;
+
+        public bool UsesVsCode => AnyLanguage || InstallPython;
 
         public bool NeedsDocumentation => UsesVsCode || InstallLabView;
 
         public bool AnyToolsSelected => InstallWPILibTools || InstallElastic || InstallAdvantageScope;
 
-        public bool HasAnySelection => InstallJava || InstallCpp || InstallPython || InstallLabView || AnyToolsSelected;
+        public bool HasAnySelection => AnyLanguage || InstallPython || InstallLabView || AnyToolsSelected;
+
+        public void CopyFrom(IInstallSelectionValues source)
+        {
+            InstallSelectionValues.Copy(source, this);
+        }
     }
 }
