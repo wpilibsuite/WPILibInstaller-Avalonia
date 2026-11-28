@@ -128,7 +128,10 @@ namespace WPILibInstaller.ViewModels
                 return;
             }
 
-            await SelectResourceFilesWithFile(file);
+            if (await SelectResourceFilesWithFile(file))
+            {
+                await TrySelectCompanionFile(file);
+            }
         }
 
         private async Task<bool> SelectSupportFilesWithFile(string file)
@@ -142,6 +145,8 @@ namespace WPILibInstaller.ViewModels
                 // Make sure they match.
                 if (!await InstallerResources.MacArtifactsChecksumMatchesAsync(file, AppContext.BaseDirectory))
                 {
+                    MissingSupportFiles = true;
+                    MissingHash = false;
                     viewModelResolver.ResolveMainWindow().HandleException(new InvalidDataException("The artifacts file was damaged.\nThis is either caused by a bad download,\nor on macOS you originally download the wrong dmg\nand its still mounted. Make sure to eject\nall dmg's and try again (And maybe reboot)."));
                     return false;
                 }
@@ -158,6 +163,62 @@ namespace WPILibInstaller.ViewModels
             return true;
         }
 
+        private async Task TrySelectCompanionFile(string selectedFile)
+        {
+            var companionFile = FindCompanionFile(selectedFile);
+            if (companionFile == null)
+            {
+                return;
+            }
+
+            if (MissingResourceFiles && companionFile.EndsWith("-resources.zip", StringComparison.OrdinalIgnoreCase))
+            {
+                await SelectResourceFilesWithFile(companionFile);
+            }
+            else if (MissingSupportFiles &&
+                     (companionFile.EndsWith("-artifacts.zip", StringComparison.OrdinalIgnoreCase) ||
+                      companionFile.EndsWith("-artifacts.tar.gz", StringComparison.OrdinalIgnoreCase)))
+            {
+                await SelectSupportFilesWithFile(companionFile);
+            }
+        }
+
+        private static string? FindCompanionFile(string selectedFile)
+        {
+            var directory = Path.GetDirectoryName(selectedFile);
+            var fileName = Path.GetFileName(selectedFile);
+            if (string.IsNullOrEmpty(directory) || string.IsNullOrEmpty(fileName))
+            {
+                return null;
+            }
+
+            string? companionName = null;
+            const string resourcesSuffix = "-resources.zip";
+            if (fileName.EndsWith(resourcesSuffix, StringComparison.OrdinalIgnoreCase))
+            {
+                companionName = fileName[..^resourcesSuffix.Length] + "-artifacts." + InstallerResources.ArtifactsFileExtension();
+            }
+            else
+            {
+                foreach (var artifactSuffix in new[] { "-artifacts.zip", "-artifacts.tar.gz" })
+                {
+                    if (fileName.EndsWith(artifactSuffix, StringComparison.OrdinalIgnoreCase))
+                    {
+                        companionName = fileName[..^artifactSuffix.Length] + "-resources.zip";
+                        break;
+                    }
+                }
+            }
+
+            if (companionName == null)
+            {
+                return null;
+            }
+
+            var companionPath = Path.Combine(directory, companionName);
+            return File.Exists(companionPath) ? companionPath : null;
+        }
+
         [RelayCommand]
         public async Task SelectSupportFiles()
         {
@@ -168,7 +229,10 @@ namespace WPILibInstaller.ViewModels
                 return;
             }
 
-            await SelectSupportFilesWithFile(file);
+            if (await SelectSupportFilesWithFile(file))
+            {
+                await TrySelectCompanionFile(file);
+            }
         }
 
         public VsCodeModel VsCodeModel
