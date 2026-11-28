@@ -587,12 +587,10 @@ def macCreateImageTask = tasks.register('createMacImage', Task) {
         }
 
         // Notarize the application.
-        if (project.hasProperty("notarization-username") && project.hasProperty("notarization-teamid") && project.hasProperty("notarization-password")) {
-            println "Received an App Store Connect username and password -- notarizing the application..."
-            notarize(file("$buildDir/outputs/WPILibInstaller.app"), "WPILibInstaller-${pubVersion}",
-                    project.property("notarization-username") as String,
-                    project.property("notarization-teamid") as String,
-                    project.property("notarization-password") as String)
+        if (project.hasProperty("notarization-profile")) {
+            println "Received a notarytool keychain profile -- notarizing the application..."
+            notarize(file("$buildDir/outputs/WPILibInstaller.app"),
+                    project.property("notarization-profile") as String)
         }
 
         // Create disk image.

@@ -46,13 +46,13 @@ namespace WPILibInstaller.ViewModels
         [RelayCommand]
         public static void OpenKnownIssues()
         {
-            OpenBrowser("https://docs.wpilib.org/en/2027/docs/yearly-overview/known-issues.html");
+            OpenBrowser("https://docs.wpilib.org/en/latest/docs/yearly-overview/known-issues.html");
         }
 
         [RelayCommand]
         public static void OpenBetaDocs()
         {
-            OpenBrowser("https://docs.wpilib.org/en/2027");
+            OpenBrowser("https://docs.wpilib.org/en/latest");
         }
 
         [RelayCommand]
