@@ -9,7 +9,7 @@ plugins {
 
 deploy {
     targets {
-        systemcore(getTargetTypeClass('SystemCore')) {
+        systemcore(getTargetTypeClass('Systemcore')) {
             team = 0
             debug = false
 
