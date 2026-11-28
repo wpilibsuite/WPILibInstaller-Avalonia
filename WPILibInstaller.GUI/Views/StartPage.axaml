@@ -34,7 +34,7 @@
                 HorizontalContentAlignment="Center"
                 Command="{Binding SelectSupportFilesCommand}"
                 IsVisible="{Binding MissingSupportFiles}"/>
-        <Button Margin="0,10,0,0" Content="Select Resourcs File (-resources)"
+        <Button Margin="0,10,0,0" Content="Select Resources File (-resources)"
                 Height="45"
                 HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Center"

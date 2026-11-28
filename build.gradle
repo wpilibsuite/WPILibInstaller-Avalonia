@@ -348,7 +348,7 @@ def dotnetShortcutCreatorTask = tasks.register('createShortcutCreator', Exec) {
 }
 
 def generateFullResourcesTask = tasks.register('generateFullResources', project.ext.archiveType) {
-    archiveBaseName = 'WPILib_' + buildClassifier + '-' + pubVersion + '-artifacts'
+    archiveBaseName = 'WPILibInstaller_' + buildClassifier + '-' + pubVersion + '-artifacts'
 
     destinationDirectory = file("$buildDir/outputs")
 
@@ -513,7 +513,7 @@ def signResourcesTask = tasks.register('signResources', Exec) {
     dependsOn copyInstallerFiles
     workingDir = "$buildDir/outputs"
 
-    def file = 'WPILib_' + buildClassifier + '-' + pubVersion + '-artifacts' + '.tar.gz'
+    def file = 'WPILibInstaller_' + buildClassifier + '-' + pubVersion + '-artifacts' + '.tar.gz'
     commandLine 'sh', '-c', "shasum -a 256 $file | cut -d \" \" -f 1 > WPILibInstaller.app/Contents/MacOS/checksum.txt"
 }
 
