@@ -138,5 +138,49 @@ namespace WPILibInstaller.Utils
                 return false;
             }
         }
+
+        // Runs an executable with administrator rights and waits for it, asking the user to allow it
+        // unless this process already has them: UAC on Windows, the administrator password prompt on
+        // macOS, and pkexec on Linux. Returns whether it ran and succeeded.
+        public static async Task<bool> RunElevated(string path, params string[] args)
+        {
+            ProcessStartInfo startInfo;
+            if (Environment.IsPrivilegedProcess)
+            {
+                startInfo = new(path, args);
+            }
+            else if (OperatingSystem.IsWindows())
+            {
+                startInfo = new(path, string.Join(' ', args.Select(QuoteWindows))) { UseShellExecute = true, Verb = "runas" };
+            }
+            else if (OperatingSystem.IsMacOS())
+            {
+                var command = string.Join(' ', args.Prepend(path).Select(QuoteShell));
+                startInfo = new("/usr/bin/osascript", ["-e", $"do shell script {QuoteAppleScript(command)} with administrator privileges"]);
+            }
+            else
+            {
+                startInfo = new("pkexec", args.Prepend(path));
+            }
+
+            try
+            {
+                using var process = Process.Start(startInfo);
+                await process!.WaitForExitAsync();
+                return process.ExitCode == 0;
+            }
+            catch (System.ComponentModel.Win32Exception)
+            {
+                // The user declined, or there's no way to ask (no pkexec)
+                return false;
+            }
+        }
+
+        private static string QuoteWindows(string arg) => arg.Contains(' ', StringComparison.Ordinal) ? $"\"{arg}\"" : arg;
+
+        private static string QuoteShell(string arg) => "'" + arg.Replace("'", "'\\''", StringComparison.Ordinal) + "'";
+
+        private static string QuoteAppleScript(string text) =>
+            "\"" + text.Replace("\\", "\\\\", StringComparison.Ordinal).Replace("\"", "\\\"", StringComparison.Ordinal) + "\"";
     }
 }

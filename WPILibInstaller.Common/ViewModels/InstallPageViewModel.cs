@@ -117,6 +117,13 @@ namespace WPILibInstaller.ViewModels
                         break;
                     }
 
+                    SetOverallProgress(60, "Installing LabVIEW Add-ons");
+                    await toolInstallationService.RunLabVIEWSetup(progress);
+                    if (token.IsCancellationRequested)
+                    {
+                        break;
+                    }
+
                     SetOverallProgress(75, "Creating Shortcuts");
                     await shortcutService.RunShortcutCreator(token);
                 }
@@ -158,6 +165,13 @@ namespace WPILibInstaller.ViewModels
 
                     SetOverallProgress(30, "Installing Tools");
                     await toolInstallationService.RunToolSetup(progress);
+                    if (token.IsCancellationRequested)
+                    {
+                        break;
+                    }
+
+                    SetOverallProgress(35, "Installing LabVIEW Add-ons");
+                    await toolInstallationService.RunLabVIEWSetup(progress);
                     if (token.IsCancellationRequested)
                     {
                         break;

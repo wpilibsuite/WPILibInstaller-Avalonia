@@ -1,0 +1,81 @@
+apply from: 'scripts/versions.gradle'
+
+// The LabVIEW add-ons for WPILib (https://github.com/ni/wpilib-labview). Each release is tagged
+// with the WPILib version it's built against and uses the same file names, one per platform.
+def baseUrl = "https://github.com/ni/wpilib-labview/releases/download/$labviewGitTag/"
+
+def fileNames = [
+  windows: 'wpilib-labview-win-x64.zip',
+  windowsArm64: 'wpilib-labview-win-arm64.zip',
+  mac: 'wpilib-labview-mac-universal.tar.gz',
+  linux: 'wpilib-labview-linux-x64.zip',
+  linuxArm64: 'wpilib-labview-linux-arm64.zip',
+]
+
+apply plugin: 'de.undercouch.download'
+
+def downloadTasks = fileNames.collectEntries { platform, fileName ->
+  [(platform): tasks.register("downloadLabVIEW${platform.capitalize()}", Download) {
+    src baseUrl + fileName
+    dest "$buildDir/downloads/$fileName"
+    overwrite true
+  }]
+}
+
+def labviewPlatform = { ->
+  if (project.hasProperty('linuxBuild')) {
+    return 'linux'
+  } else if (project.hasProperty('linuxBuildArm64')) {
+    return 'linuxArm64'
+  } else if (project.hasProperty('macBuild') || project.hasProperty('macBuildArm64')) {
+    return 'mac' // one universal archive for Intel and Apple silicon
+  } else if (project.hasProperty('windowsBuildArm64')) {
+    return 'windowsArm64'
+  } else {
+    return 'windows'
+  }
+}
+
+def labviewConfigFile = file("$buildDir/labviewConfig.json")
+
+def labviewConfigFileTask = tasks.register('labviewConfigFile') {
+  it.outputs.file labviewConfigFile
+
+  doLast {
+    def config = [:]
+    config['folder'] = 'labview'
+
+    def gbuilder = getGsonBuilder()
+
+    gbuilder.setPrettyPrinting()
+    def json = gbuilder.create().toJson(config)
+
+    labviewConfigFile.parentFile.mkdirs()
+
+    labviewConfigFile.text = json
+  }
+}
+
+ext.labviewConfigFileSetup = { AbstractArchiveTask zip->
+  zip.dependsOn labviewConfigFileTask
+  zip.inputs.file labviewConfigFile
+
+  zip.from(labviewConfigFile) {
+    rename { 'labviewConfig.json' }
+  }
+}
+
+ext.labviewZipSetup = { AbstractArchiveTask zip->
+  def downloadTask = downloadTasks[labviewPlatform()]
+  zip.dependsOn downloadTask
+
+  zip.inputs.files downloadTask.get().outputFiles
+
+  // The archives hold LabVIEW add-ons, not an app bundle, so the macOS one can be extracted here
+  // too. At install time, ToolsUpdater copies labview/lvaddons into LabVIEW's add-ons folder.
+  def archive = downloadTask.get().outputFiles.first()
+  zip.from(archive.name.endsWith('.zip') ? project.zipTree(archive) : project.tarTree(archive)) {
+    into '/labview'
+    includeEmptyDirs = false
+  }
+}

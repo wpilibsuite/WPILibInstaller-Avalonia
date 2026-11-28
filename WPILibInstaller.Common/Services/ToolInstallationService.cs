@@ -155,5 +155,38 @@ namespace WPILibInstaller.Services
                     configurationProvider.UpgradeConfig.Maven.MetaDataFixerJar),
                 20000);
         }
+
+        // Installs the LabVIEW add-ons extracted into the install folder into LabVIEW's add-ons folder.
+        // That's a system folder, so ToolsUpdater does it with administrator rights; only if LabVIEW is
+        // installed, so nobody else gets asked for them.
+        public async Task RunLabVIEWSetup(IProgress<InstallProgress>? progress = null)
+        {
+            var addons = Path.Combine(configurationProvider.InstallDirectory, configurationProvider.LabVIEWConfig.Folder, "lvaddons");
+            if (!Directory.Exists(addons))
+            {
+                return;
+            }
+
+            if (!LabVIEWUtils.IsLabVIEWInstalled())
+            {
+                progress?.Report(new InstallProgress(100, "LabVIEW isn't installed; skipping the LabVIEW add-ons"));
+                return;
+            }
+
+            progress?.Report(new InstallProgress(50, "Installing the LabVIEW add-ons"));
+            var updater = Path.Combine(
+                configurationProvider.InstallDirectory,
+                configurationProvider.UpgradeConfig.Tools.Folder,
+                configurationProvider.UpgradeConfig.Tools.UpdaterExe);
+            if (OperatingSystem.IsWindows())
+            {
+                updater += ".exe";
+            }
+
+            if (!await ProcessExecutionUtils.RunElevated(updater, "--install-labview"))
+            {
+                progress?.Report(new InstallProgress(100, $"Couldn't install the LabVIEW add-ons. To install them later, run \"{updater} --install-labview\" as an administrator."));
+            }
+        }
     }
 }

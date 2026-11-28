@@ -23,6 +23,7 @@ namespace WPILibInstaller.Services
                 configurationProvider.UpgradeConfig.Tools.Folder + "/",
                 configurationProvider.AdvantageScopeConfig.Folder + "/",
                 configurationProvider.ElasticConfig.Folder + "/",
+                configurationProvider.LabVIEWConfig.Folder + "/",
                 "installUtils/",
                 "icons",
             }, progress);
@@ -45,6 +46,18 @@ namespace WPILibInstaller.Services
                     }
 
                     throw new InvalidOperationException(message);
+                }
+            }
+
+            // The LabVIEW add-ons are copied from this folder into LabVIEW's add-ons folder, so files an
+            // earlier version had mustn't linger in it
+            var labviewFolder = configurationProvider.LabVIEWConfig.Folder;
+            if (!string.IsNullOrEmpty(labviewFolder) && (filter == null || filter.Contains(labviewFolder + "/")))
+            {
+                var labviewPath = Path.Combine(configurationProvider.InstallDirectory, labviewFolder);
+                if (Directory.Exists(labviewPath))
+                {
+                    Directory.Delete(labviewPath, recursive: true);
                 }
             }
 

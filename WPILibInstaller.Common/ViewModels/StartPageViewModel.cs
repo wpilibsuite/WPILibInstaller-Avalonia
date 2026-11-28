@@ -93,6 +93,7 @@ namespace WPILibInstaller.ViewModels
             JdkConfig = configuration.JdkConfig;
             AdvantageScopeConfig = configuration.AdvantageScopeConfig;
             ElasticConfig = configuration.ElasticConfig;
+            LabVIEWConfig = configuration.LabVIEWConfig;
             FullConfig = configuration.FullConfig;
             UpgradeConfig = configuration.UpgradeConfig;
 
@@ -213,6 +214,8 @@ namespace WPILibInstaller.ViewModels
         public AdvantageScopeConfig AdvantageScopeConfig { get; private set; } = null!;
 
         public ElasticConfig ElasticConfig { get; private set; } = null!;
+
+        public LabVIEWConfig LabVIEWConfig { get; private set; } = null!;
 
         public VsCodeConfig VsCodeConfig { get; private set; } = null!;
 
