@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using WPILibInstaller.Interfaces;
 using WPILibInstaller.Models;
+using WPILibInstaller.Utils;
 
 namespace WPILibInstaller.Services
 {
@@ -15,17 +16,12 @@ namespace WPILibInstaller.Services
             this.programWindow = programWindow;
         }
 
-        public Task ExtractJDKAndTools(CancellationToken token, IProgress<InstallProgress>? progress = null)
+        public Task ExtractSelectedTools(bool wpilibTools, bool elastic, bool advantageScope, CancellationToken token, IProgress<InstallProgress>? progress = null)
         {
-            return ExtractArchive(token, new[]
-            {
-                configurationProvider.JdkConfig.Folder + "/",
-                configurationProvider.UpgradeConfig.Tools.Folder + "/",
-                configurationProvider.AdvantageScopeConfig.Folder + "/",
-                configurationProvider.ElasticConfig.Folder + "/",
-                "installUtils/",
-                "icons",
-            }, progress);
+            // Tool-only installs extract the shared shortcut/config files, tools.json, and
+            // ToolsUpdater explicitly so the Gradle ZIP in installUtils is left behind.
+            var paths = StandaloneInstallPaths.From(configurationProvider);
+            return ExtractArchive(token, paths.GetExtractionFilter(wpilibTools, elastic, advantageScope), progress);
         }
 
         public async Task ExtractArchive(CancellationToken token, string[]? filter = null, IProgress<InstallProgress>? progress = null)

@@ -12,13 +12,16 @@ namespace WPILibInstaller.Services
     {
         private readonly IConfigurationProvider configurationProvider;
         private readonly IVsCodeInstallLocationProvider vsInstallProvider;
+        private readonly IToInstallProvider toInstallProvider;
 
         public VsCodeInstallationService(
             IConfigurationProvider configurationProvider,
-            IVsCodeInstallLocationProvider vsInstallProvider)
+            IVsCodeInstallLocationProvider vsInstallProvider,
+            IToInstallProvider toInstallProvider)
         {
             this.configurationProvider = configurationProvider;
             this.vsInstallProvider = vsInstallProvider;
+            this.toInstallProvider = toInstallProvider;
         }
 
         public async Task RunVsCodeSetup(CancellationToken token, IProgress<InstallProgress>? progress = null)
@@ -121,10 +124,13 @@ namespace WPILibInstaller.Services
 
         public async Task ConfigureVsCodeSettings()
         {
-            if (!vsInstallProvider.Model.InstallExtensions)
+            var selection = toInstallProvider.Model;
+            if (!selection.UsesVsCode || !vsInstallProvider.Model.InstallExtensions)
             {
                 return;
             }
+
+            bool javaTooling = selection.AnyLanguage;
 
             var dataPath = await SetVsCodePortableMode();
 
@@ -156,67 +162,79 @@ namespace WPILibInstaller.Services
                 settingsJson = JsonNode.Parse(await File.ReadAllTextAsync(settingsFile))?.AsObject() ?? new JsonObject();
             }
 
-            SetIfNotSet("java.jdt.ls.java.home", Path.Combine(homePath, "jdk"), settingsJson);
+            if (javaTooling)
+            {
+                SetIfNotSet("java.jdt.ls.java.home", Path.Combine(homePath, "jdk"), settingsJson);
+            }
+
             SetIfNotSetIgnoreSync("extensions.autoUpdate", false, settingsJson);
             SetIfNotSetIgnoreSync("extensions.autoCheckUpdates", false, settingsJson);
             SetIfNotSetIgnoreSync("extensions.ignoreRecommendations", true, settingsJson);
             SetIfNotSetIgnoreSync("extensions.showRecommendationsOnlyOnDemand", true, settingsJson);
             SetIfNotSetIgnoreSync("update.mode", "none", settingsJson);
             SetIfNotSetIgnoreSync("update.showReleaseNotes", false, settingsJson);
-            SetIfNotSetIgnoreSync("java.completion.matchCase", "off", settingsJson);
+            if (javaTooling)
+            {
+                SetIfNotSetIgnoreSync("java.completion.matchCase", "off", settingsJson);
+            }
+
             SetIfNotSetIgnoreSync("workbench.secondarySideBar.defaultVisibility", "hidden", settingsJson);
             SetIfNotSetIgnoreSync("security.workspace.trust.startupPrompt", "once", settingsJson);
 
-            string os;
-            string pathSeparator;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (javaTooling)
             {
-                os = "windows";
-                pathSeparator = ";";
-            }
-            else if (OperatingSystem.IsMacOS())
-            {
-                os = "osx";
-                pathSeparator = ":";
-            }
-            else
-            {
-                os = "linux";
-                pathSeparator = ":";
-            }
-
-            if (!settingsJson.ContainsKey("terminal.integrated.env." + os))
-            {
-                JsonObject terminalProps = new()
+                string os;
+                string pathSeparator;
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    ["JAVA_HOME"] = Path.Combine(homePath, "jdk"),
-                    ["PATH"] = Path.Combine(homePath, "jdk", "bin") + pathSeparator + "${env:PATH}",
-                };
-
-                settingsJson["terminal.integrated.env." + os] = terminalProps;
-            }
-            else
-            {
-                JsonNode? terminalEnv = settingsJson["terminal.integrated.env." + os]!;
-                terminalEnv["JAVA_HOME"] = Path.Combine(homePath, "jdk");
-                JsonNode? path = terminalEnv["PATH"];
-                if (path == null)
+                    os = "windows";
+                    pathSeparator = ";";
+                }
+                else if (OperatingSystem.IsMacOS())
                 {
-                    terminalEnv["PATH"] = Path.Combine(homePath, "jdk", "bin") + pathSeparator + "${env:PATH}";
+                    os = "osx";
+                    pathSeparator = ":";
                 }
                 else
                 {
-                    var binPath = Path.Combine(homePath, "jdk", "bin");
-                    if (!path.ToString().Contains(binPath, StringComparison.Ordinal))
+                    os = "linux";
+                    pathSeparator = ":";
+                }
+
+                if (!settingsJson.ContainsKey("terminal.integrated.env." + os))
+                {
+                    JsonObject terminalProps = new()
                     {
-                        path = binPath + pathSeparator + path;
-                        terminalEnv["PATH"] = path.ToString();
+                        ["JAVA_HOME"] = Path.Combine(homePath, "jdk"),
+                        ["PATH"] = Path.Combine(homePath, "jdk", "bin") + pathSeparator + "${env:PATH}",
+                    };
+
+                    settingsJson["terminal.integrated.env." + os] = terminalProps;
+                }
+                else
+                {
+                    JsonNode? terminalEnv = settingsJson["terminal.integrated.env." + os]!;
+                    terminalEnv["JAVA_HOME"] = Path.Combine(homePath, "jdk");
+                    JsonNode? path = terminalEnv["PATH"];
+                    if (path == null)
+                    {
+                        terminalEnv["PATH"] = Path.Combine(homePath, "jdk", "bin") + pathSeparator + "${env:PATH}";
+                    }
+                    else
+                    {
+                        var binPath = Path.Combine(homePath, "jdk", "bin");
+                        if (!path.ToString().Contains(binPath, StringComparison.Ordinal))
+                        {
+                            path = binPath + pathSeparator + path;
+                            terminalEnv["PATH"] = path.ToString();
+                        }
                     }
                 }
+
+                IgnoreSync("terminal.integrated.env." + os, settingsJson);
+                ConfigureJavaRuntime(homePath, settingsJson);
             }
 
-            IgnoreSync("terminal.integrated.env." + os, settingsJson);
-            ConfigureJavaRuntime(homePath, settingsJson);
             IgnoreExtensionSync(settingsJson);
 
             SetIfNotSetIgnoreSync("update.enableWindowsBackgroundUpdates", false, settingsJson);
@@ -228,7 +246,8 @@ namespace WPILibInstaller.Services
 
         public async Task RunVsCodeExtensionsSetup(IProgress<InstallProgress>? progress = null)
         {
-            if (!vsInstallProvider.Model.InstallExtensions)
+            var selection = toInstallProvider.Model;
+            if (!selection.UsesVsCode || !vsInstallProvider.Model.InstallExtensions)
             {
                 return;
             }
@@ -264,18 +283,44 @@ namespace WPILibInstaller.Services
                 }
             });
 
+            var config = configurationProvider.VsCodeConfig;
             var availableToInstall = new List<(Extension extension, WPIVersion version, int sortOrder)>
             {
-                (configurationProvider.VsCodeConfig.WPILibExtension,
-                    new WPIVersion(configurationProvider.VsCodeConfig.WPILibExtension.Version), int.MaxValue),
+                (config.WPILibExtension,
+                    new WPIVersion(config.WPILibExtension.Version), int.MaxValue),
             };
 
-            for (int i = 0; i < configurationProvider.VsCodeConfig.ThirdPartyExtensions.Length; i++)
+            int sortOrder = 0;
+            void AddExtensions(Extension[]? extensions)
             {
-                availableToInstall.Add((
-                    configurationProvider.VsCodeConfig.ThirdPartyExtensions[i],
-                    new WPIVersion(configurationProvider.VsCodeConfig.ThirdPartyExtensions[i].Version),
-                    i));
+                if (extensions == null)
+                {
+                    return;
+                }
+
+                foreach (var extension in extensions)
+                {
+                    availableToInstall.Add((extension, new WPIVersion(extension.Version), sortOrder++));
+                }
+            }
+
+            // C++ projects also use the Java extension set, so C++ installs both.
+            if (selection.AnyLanguage)
+            {
+                var javaExtensions = config.JavaExtensions ?? config.ThirdPartyExtensions ?? [];
+                AddExtensions(javaExtensions);
+            }
+
+            if (selection.InstallCpp)
+            {
+                AddExtensions(config.CppExtensions);
+            }
+
+            // Reserved for the Python work in progress. The list is currently empty,
+            // but the hook is in place so Python extensions install once available.
+            if (selection.InstallPython)
+            {
+                AddExtensions(config.PythonExtensions);
             }
 
             var maybeUpdates = availableToInstall.Where(x => versions.Select(y => y.name).Contains(x.extension.Name, StringComparer.Ordinal)).ToList();

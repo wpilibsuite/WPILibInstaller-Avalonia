@@ -8,7 +8,7 @@ namespace WPILibInstaller.Interfaces
 
         Task RunGradleSetup(IProgress<InstallProgress>? progress = null);
 
-        Task RunToolSetup(IProgress<InstallProgress>? progress = null);
+        Task RunToolSetup(bool wpilibTools, bool elastic, bool advantageScope, IProgress<InstallProgress>? progress = null);
 
         Task RunCppSetup(IProgress<InstallProgress>? progress = null);
 

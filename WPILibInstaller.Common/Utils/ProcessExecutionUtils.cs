@@ -4,7 +4,7 @@ namespace WPILibInstaller.Utils
 {
     public static class ProcessExecutionUtils
     {
-        public static async Task<bool> RunExecutable(string path, int timeoutMs, CancellationToken token = default)
+        public static async Task<bool> RunExecutable(string path, int timeoutMs, CancellationToken token = default, params string[] args)
         {
             if (OperatingSystem.IsWindows())
             {
@@ -15,6 +15,11 @@ namespace WPILibInstaller.Utils
             using CancellationTokenSource linkedSource = CancellationTokenSource.CreateLinkedTokenSource(token, timeoutSource.Token);
 
             ProcessStartInfo startInfo = new(path);
+            foreach (string arg in args)
+            {
+                startInfo.ArgumentList.Add(arg);
+            }
+
             using var process = Process.Start(startInfo);
 
             try
